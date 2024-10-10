@@ -1,7 +1,9 @@
 # Datasets
-data/UCR-time-series-anomaly-archive
+data/*
+!data/README.rst
 !data/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt
 !data/UCR-time-series-anomaly-archive/002_UCR_Anomaly_DISTORTED2sddb40_35000_56600_56900.txt
+
 
 # Results
 *.csv
