@@ -10,13 +10,9 @@ class UCRLoader(LazyDataLoader):
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:
     '\*_start_stop.txt'.
-
-    Parameters
-    ----------
-    path: str
-        Path to a single UCR data set.
     """
-    def load(self) -> DataSet:
+
+    def _load(self) -> DataSet:
         # Load time series
         X = np.loadtxt(self.path)
 

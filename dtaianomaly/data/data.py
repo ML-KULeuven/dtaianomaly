@@ -38,6 +38,14 @@ class LazyDataLoader(PrettyPrintable):
     ----------
     path: str
         Path to the relevant data set.
+    do_caching: bool, default=False
+        Whether to cache the loaded data or not
+
+    Attributes
+    ----------
+    cache_ : DataSet
+        Cached version of the loaded data set. Only available if ``do_caching==True``
+        and the data has been loaded before.
 
     Raises
     ------
@@ -45,22 +53,35 @@ class LazyDataLoader(PrettyPrintable):
         If the given path does not point to an existing file or directory.
     """
     path: str
+    do_caching: bool
+    cache_: DataSet
 
-    def __init__(self, path: Union[str, Path]) -> None:
+    def __init__(self, path: Union[str, Path], do_caching: bool = False):
         if not (Path(path).is_file() or Path(path).is_dir()):
             raise FileNotFoundError(f'No such file or directory: {path}')
         self.path = str(path)
+        self.do_caching = do_caching
 
-    @abc.abstractmethod
     def load(self) -> DataSet:
         """
-        Load the dataset.
+        Load the dataset. If ``do_caching==True``, the loaded will be saved in the
+        cache if no cache is available yet, and the cached data will be returned.
 
         Returns
         -------
         data_set: DataSet
             The loaded dataset.
         """
+        if self.do_caching:
+            if not hasattr(self, 'cache_'):
+                self.cache_ = self._load()
+            return self.cache_
+        else:
+            return self._load()
+
+    @abc.abstractmethod
+    def _load(self) -> DataSet:
+        """ Abstract method to effectively load the data. """
 
 
 def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader]) -> List[LazyDataLoader]:

@@ -1,5 +1,6 @@
 # Dtaianomaly for Time Series Anomaly Detection
 
+[![Documentation Status](https://readthedocs.org/projects/dtaianomaly/badge/?version=stable)](https://dtaianomaly.readthedocs.io/en/stable/?badge=stable)
 [![PyPi Version](https://img.shields.io/pypi/v/dtaianomaly.svg)](https://pypi.org/project/dtaianomaly/)
 [![Downloads](https://static.pepy.tech/badge/dtaianomaly)](https://pepy.tech/project/dtaianomaly)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/dtaianomaly)](https://pypi.python.org/pypi/dtaianomaly/)

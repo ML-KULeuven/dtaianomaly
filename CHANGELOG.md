@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- When executing a workflow, and an error occurs. The errors will be written to 
+  an error file. This file contains in which phase the error occurred and the 
+  entire traceback of the error. Additionally, the error file contains the code
+  to reproduce the specific error. In fact, the error file can be run as any 
+  python script. 
+
 ### Changed
+
+- Added the option to cache data in ``LazyDataLoader`` via parameter ``do_caching``. 
+  The ``load`` function in ``LazyDataLoader`` is adjusted to either load the data and
+  potentially cache the data, or return a cached version of the data. As a consequence, 
+  the children of ``LazyDataLoader`` must implement the ``_load`` method (instead of 
+  the ``load()`` method), which will effectively load the data, independent of any cache. 
 
 ### Fixed
 

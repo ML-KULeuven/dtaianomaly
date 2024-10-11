@@ -1,10 +1,10 @@
-from functools import partial
+
 import multiprocessing
 import time
 import tracemalloc
-from typing import Dict, List, Union
-
 import pandas as pd
+from typing import Dict, List, Union
+from functools import partial
 
 from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.evaluation import Metric, BinaryMetric
@@ -14,6 +14,7 @@ from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.pipeline import EvaluationPipeline
 
 from dtaianomaly.workflow.utils import build_pipelines, convert_to_proba_metrics, convert_to_list
+from dtaianomaly.workflow.error_logging import log_error
 
 
 class Workflow:
@@ -22,7 +23,10 @@ class Workflow:
 
     Run all combinations of ``dataloaders``, ``preprocessors``, ``detectors``,
     and ``metrics``. The metrics requiring a thresholding operation are
-    combined with every element of ``thresholds``.
+    combined with every element of ``thresholds``. If an error occurs in any
+    execution of an anomaly detector or loading of data, then the error will
+    be written to an error file, which is an executable Python file to reproduce
+    the error.
 
     Parameters
     ----------
@@ -60,12 +64,16 @@ class Workflow:
         Whether or not memory usage of each run is reported. While this
         might give additional insights into the models, their runtime
         will be higher due to additional internal bookkeeping.
+
+    error_log_path: str, default='./error_logs'
+        The path in which the error logs should be saved.
     """
     dataloaders: List[LazyDataLoader]
     pipelines: List[EvaluationPipeline]
     provided_preprocessors: bool
     n_jobs: int
     trace_memory: bool
+    error_log_path: str
     
     def __init__(self,
                  dataloaders: Union[LazyDataLoader, List[LazyDataLoader]],
@@ -74,7 +82,8 @@ class Workflow:
                  preprocessors: Union[Preprocessor, List[Preprocessor]] = None,
                  thresholds: Union[Thresholding, List[Thresholding]] = None,
                  n_jobs: int = 1,
-                 trace_memory: bool = False):
+                 trace_memory: bool = False,
+                 error_log_path: str = './error_logs'):
 
         # Make sure the inputs are lists.
         dataloaders = convert_to_list(dataloaders)
@@ -113,6 +122,7 @@ class Workflow:
         self.dataloaders = dataloaders
         self.n_jobs = n_jobs
         self.trace_memory = trace_memory
+        self.error_log_path = error_log_path
 
     def run(self) -> pd.DataFrame:
         """
@@ -137,9 +147,9 @@ class Workflow:
 
         # Execute the jobs
         if self.n_jobs == 1:
-            result = [_single_job(*job, trace_memory=self.trace_memory) for job in unit_jobs]
+            result = [_single_job(*job, trace_memory=self.trace_memory, error_log_path=self.error_log_path) for job in unit_jobs]
         else:
-            single_run_function = partial(_single_job, trace_memory=self.trace_memory)
+            single_run_function = partial(_single_job, trace_memory=self.trace_memory, error_log_path=self.error_log_path)
             with multiprocessing.Pool(processes=self.n_jobs) as pool:
                 result = pool.starmap(single_run_function, unit_jobs)
 
@@ -160,7 +170,7 @@ class Workflow:
         return results_df
 
 
-def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool) -> Dict[str, Union[str, float]]:
+def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool, error_log_path: str) -> Dict[str, Union[str, float]]:
 
     # Initialize the results, and by default everything went wrong ('Error')
     results = {'Dataset': str(dataloader)}
@@ -172,8 +182,8 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     # Try to load the data set, if this fails, return the results
     try:
         dataset = dataloader.load()
-    except Exception as e:
-        print(e)
+    except Exception as exception:
+        results['Error file'] = log_error(error_log_path, exception, dataloader)
         return results
 
     # We can already save the used preprocessor and detector
@@ -188,8 +198,8 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     start = time.time()
     try:
         results.update(pipeline.run(X=dataset.x, y=dataset.y))
-    except Exception as e:
-        print(e)
+    except Exception as exception:
+        results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline)
     stop = time.time()
 
     # Save the runtime

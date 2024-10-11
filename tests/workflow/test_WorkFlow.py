@@ -145,10 +145,7 @@ class TestWorkflowInitialization:
 
 class DummyDataLoader(LazyDataLoader):
 
-    def __init__(self, path: str):
-        super().__init__(path)
-
-    def load(self) -> DataSet:
+    def _load(self) -> DataSet:
         X, y = demonstration_time_series()
         return DataSet(X, y)
 
@@ -273,7 +270,7 @@ class TestWorkflowSuccess:
 
 class DummyDataLoaderError(LazyDataLoader):
 
-    def load(self) -> DataSet:
+    def _load(self) -> DataSet:
         raise Exception('Dummy exception')
 
 
@@ -309,10 +306,11 @@ class TestWorkflowFail:
             preprocessors=[Identity(), ZNormalizer()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
-            trace_memory=True
+            trace_memory=True,
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (8, 10)
+        assert results.shape == (8, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Dataset'].value_counts()[f"DummyDataLoaderError(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
@@ -322,7 +320,8 @@ class TestWorkflowFail:
         assert 'Peak Memory [MB]' in results.columns
         assert (results == 'Error').any().sum() == 9
         assert (results == 'Error').any(axis=1).sum() == 4
-        assert not results.isna().any().any()
+        assert 'Error file' in results.columns
+        assert results['Error file'].isna().sum() == 4
 
     def test_failed_to_preprocess(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -335,10 +334,11 @@ class TestWorkflowFail:
             preprocessors=[PreprocessorError(), ZNormalizer()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
-            trace_memory=True
+            trace_memory=True,
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 10)
+        assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
@@ -347,7 +347,8 @@ class TestWorkflowFail:
         assert 'Peak Memory [MB]' in results.columns
         assert (results == 'Error').any().sum() == 5
         assert (results == 'Error').any(axis=1).sum() == 2
-        assert not results.isna().any().any()
+        assert 'Error file' in results.columns
+        assert results['Error file'].isna().sum() == 2
 
     def test_failed_to_fit_model(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -360,10 +361,11 @@ class TestWorkflowFail:
             preprocessors=[Identity(), ZNormalizer()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
-            trace_memory=True
+            trace_memory=True,
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 10)
+        assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
@@ -372,7 +374,8 @@ class TestWorkflowFail:
         assert 'Peak Memory [MB]' in results.columns
         assert (results == 'Error').any().sum() == 5
         assert (results == 'Error').any(axis=1).sum() == 2
-        assert not results.isna().any().any()
+        assert 'Error file' in results.columns
+        assert results['Error file'].isna().sum() == 2
 
     def test_failed_to_preprocess_and_to_fit_model(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -385,10 +388,11 @@ class TestWorkflowFail:
             preprocessors=[PreprocessorError(), ZNormalizer()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
-            trace_memory=True
+            trace_memory=True,
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 10)
+        assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
@@ -397,4 +401,5 @@ class TestWorkflowFail:
         assert 'Peak Memory [MB]' in results.columns
         assert (results == 'Error').any().sum() == 5
         assert (results == 'Error').any(axis=1).sum() == 3
-        assert not results.isna().any().any()
+        assert 'Error file' in results.columns
+        assert results['Error file'].isna().sum() == 1

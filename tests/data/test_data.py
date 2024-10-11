@@ -1,12 +1,13 @@
 
 import numpy as np
 import pytest
+import time
 from dtaianomaly.data import LazyDataLoader, DataSet, from_directory
 
 
 class DummyLoader(LazyDataLoader):
 
-    def load(self) -> DataSet:
+    def _load(self) -> DataSet:
         return DataSet(x=np.array([]), y=np.array([]))
 
 
@@ -27,6 +28,47 @@ class TestLazyDataLoader:
 
     def test_str(self, tmp_path):
         assert str(DummyLoader(tmp_path)) == f"DummyLoader(path='{tmp_path}')"
+
+
+class CostlyDummyLoader(LazyDataLoader):
+    NB_SECONDS_SLEEP = 1.5
+
+    def _load(self) -> DataSet:
+        time.sleep(self.NB_SECONDS_SLEEP)
+        return DataSet(x=np.array([]), y=np.array([]))
+
+
+class TestCaching:
+
+    def test_caching(self):
+        loader = CostlyDummyLoader(path='.', do_caching=True)
+        assert not hasattr(loader, 'cache_')
+
+        # First load takes a long time
+        start = time.time()
+        loader.load()
+        assert time.time() - start >= loader.NB_SECONDS_SLEEP
+        assert hasattr(loader, 'cache_')
+
+        # Second load is fast
+        start = time.time()
+        loader.load()
+        assert time.time() - start < loader.NB_SECONDS_SLEEP
+
+    def test_no_caching(self):
+        loader = CostlyDummyLoader(path='.', do_caching=False)
+        assert not hasattr(loader, 'cache_')
+
+        # First load takes a long time
+        start = time.time()
+        loader.load()
+        assert time.time() - start >= loader.NB_SECONDS_SLEEP
+        assert not hasattr(loader, 'cache_')
+
+        # Second load is also slow
+        start = time.time()
+        loader.load()
+        assert time.time() - start >= loader.NB_SECONDS_SLEEP
 
 
 class TestFromDirectory:

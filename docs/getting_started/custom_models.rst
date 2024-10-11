@@ -66,11 +66,14 @@ Custom data loader
 Some dataloaders are provided within ``dtaianomaly``, but often we want to detect anomalies
 in our own data. Typically, for such custom data, there is no dataloader available within
 ``dtaianomaly``. To address this, you can implement a new dataloader by extending the
-:py:class:`~dtaianomaly.data.LazyDataLoader`, along with the :py:func:`~dtaianomaly.data.LazyDataLoader.load`
+:py:class:`~dtaianomaly.data.LazyDataLoader`, along with the :py:func:`~dtaianomaly.data.LazyDataLoader._load`
 method. Upon initialization of the custom data loader, a ``path`` parameter is required,
-which points to the location of the data. The :py:func:`~dtaianomaly.data.LazyDataLoader.load`
-function will then effectively load this dataset and return a :py:class:`~dtaianomaly.data.DataSet`
-object, which combines the data ``X`` and ground truth labels ``y``.
+which points to the location of the data. Optionally, you can pass a ``do_caching`` parameter
+to prevent reading big files multiple times. The :py:func:`~dtaianomaly.data.LazyDataLoader._load`
+function will effectively load this dataset and return a :py:class:`~dtaianomaly.data.DataSet`
+object, which combines the data ``X`` and ground truth labels ``y``. The :py:func:`~dtaianomaly.data.LazyDataLoader.load`
+function will either load the data or return a cached version of the data, depending on the
+``do_caching`` property.
 
 Implementing a custom dataloader is especially useful for quantitatively evaluating the anomaly
 detectors on your own data, as you can pass the loader to a :py:class:`~dtaianomaly.workflow.Workflow`
@@ -82,7 +85,7 @@ and easily analyze multiple detectors simultaneously.
 
     class SimpleDataLoader(LazyDataLoader):
 
-        def load(self)-> DataSet:
+        def _load(self)-> DataSet:
             """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
             df = pd.read_clipboard(self.path)
             return DataSet(x=df['X'].values, y=df['y'].values)

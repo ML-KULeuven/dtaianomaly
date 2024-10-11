@@ -11,7 +11,8 @@ DETECTORS_WITHOUT_FITTING = [anomaly_detection.MatrixProfileDetector]
 
 @pytest.fixture(params=[
     anomaly_detection.IsolationForest(15),
-    anomaly_detection.LocalOutlierFactor(15),
+    anomaly_detection.LocalOutlierFactor(15, novelty=False),
+    anomaly_detection.LocalOutlierFactor(15, novelty=True),
     anomaly_detection.MatrixProfileDetector(15),
     pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
 ])

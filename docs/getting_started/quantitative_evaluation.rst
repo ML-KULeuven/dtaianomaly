@@ -1,7 +1,7 @@
 Quantitative evaluation with a workflow
 =======================================
 
-It is crucial to qualitatively the performance of anomaly detectors
+It is crucial to qualitatively evaluate the performance of anomaly detectors
 to know their capabilities. For this, ``dtaianomaly`` offers the :py:class:`~dtaianomaly.workflow.Workflow`:
 detect anomalies in a large set of time series using various detectors, and to measure
 their performance using multiple evaluation criteria. The :py:class:`~dtaianomaly.workflow.Workflow`
@@ -92,6 +92,7 @@ method, which returns a dataframe with the results.
         n_jobs=4
     )
     results = workflow.run()
+
 
 
 .. _with-config:
