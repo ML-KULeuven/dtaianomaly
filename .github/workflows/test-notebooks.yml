@@ -33,10 +33,9 @@ jobs:
       - name: Install dtaianomaly
         run: pip install .
 
-
       # Test the notebooks
       - name: Execute Notebooks
         run: |
           for notebook in $(find ./notebooks -name "*.ipynb"); do
-            jupyter nbconvert --to notebook --execute --inplace $notebook
+            jupyter nbconvert --to notebook --execute $notebook
           done
