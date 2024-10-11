@@ -29,9 +29,10 @@ jobs:
           pip install -r requirements-dev.txt
           pip install nbconvert jupyter
 
-      # Set PYTHONPATH to include the 'src' folder
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/dtaianomaly" >> $GITHUB_ENV
+      # Install dtaianomaly locally
+      - name: Install dtaianomaly
+        run: pip install .
+
 
       # Test the notebooks
       - name: Execute Notebooks
