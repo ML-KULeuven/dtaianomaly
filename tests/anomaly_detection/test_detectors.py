@@ -6,10 +6,18 @@ from sklearn.exceptions import NotFittedError
 from dtaianomaly import anomaly_detection, pipeline, preprocessing, utils
 
 
-DETECTORS_WITHOUT_FITTING = [anomaly_detection.MatrixProfileDetector]
+DETECTORS_WITHOUT_FITTING = [
+    anomaly_detection.baselines.AlwaysNormal,
+    anomaly_detection.baselines.AlwaysAnomalous,
+    anomaly_detection.baselines.RandomDetector,
+    anomaly_detection.MatrixProfileDetector
+]
 
 
 @pytest.fixture(params=[
+    anomaly_detection.baselines.AlwaysNormal(),
+    anomaly_detection.baselines.AlwaysAnomalous(),
+    anomaly_detection.baselines.RandomDetector(seed=42),
     anomaly_detection.IsolationForest(15),
     anomaly_detection.LocalOutlierFactor(15, novelty=False),
     anomaly_detection.LocalOutlierFactor(15, novelty=True),

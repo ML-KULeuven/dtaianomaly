@@ -68,11 +68,11 @@ class LocalOutlierFactor(BaseDetector):
         self.window_size = window_size
         self.stride = stride
         self.kwargs = kwargs
-        SklearnLocalOutlierFactor(**kwargs)  # Try initialization to check the parameters)
+        SklearnLocalOutlierFactor(**kwargs)  # Try initialization to check the parameters
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'LocalOutlierFactor':
         """
-        Fit this detector to the given data. Will be called automatically by `decision_function`.
+        Fit this detector to the given data.
 
         Parameters
         ----------

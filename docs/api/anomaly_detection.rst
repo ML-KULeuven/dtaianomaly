@@ -35,6 +35,7 @@ Implemented anomaly detectors
 .. toctree::
    :maxdepth: 1
 
+   anomaly_detection_algorithms/baselines
    anomaly_detection_algorithms/isolation_forest
    anomaly_detection_algorithms/local_outlier_factor
    anomaly_detection_algorithms/matrix_profile_detector
@@ -45,6 +46,7 @@ BaseDetector
 
 .. autoclass:: dtaianomaly.anomaly_detection.BaseDetector
    :members:
+
 
 Utilities
 ---------

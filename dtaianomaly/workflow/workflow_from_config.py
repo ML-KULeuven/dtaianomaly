@@ -230,7 +230,20 @@ def detector_entry(entry):
     detector_type = entry['type']
     entry_without_type = {key: value for key, value in entry.items() if key != 'type'}
 
-    if detector_type == 'MatrixProfileDetector':
+    if detector_type == 'AlwaysNormal':
+        if len(entry_without_type) > 0:
+            raise TypeError(f'Too many parameters given for entry: {entry}')
+        return anomaly_detection.baselines.AlwaysNormal()
+
+    elif detector_type == 'AlwaysAnomalous':
+        if len(entry_without_type) > 0:
+            raise TypeError(f'Too many parameters given for entry: {entry}')
+        return anomaly_detection.baselines.AlwaysAnomalous()
+
+    elif detector_type == 'RandomDetector':
+        return anomaly_detection.baselines.RandomDetector(**entry_without_type)
+
+    elif detector_type == 'MatrixProfileDetector':
         return anomaly_detection.MatrixProfileDetector(**entry_without_type)
 
     elif detector_type == 'IsolationForest':

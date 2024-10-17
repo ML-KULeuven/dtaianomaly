@@ -78,6 +78,10 @@ class BaseDetector(PrettyPrintable):
         ------
         ValueError
             If `scores` is not a valid array.
+        ValueError
+            If the prediction scores from 'decision_function' are constant, but not
+            in the interval [0, 1], because these values can not unambiguously be
+            transformed to an anomaly probability.
         """
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
@@ -87,13 +91,13 @@ class BaseDetector(PrettyPrintable):
         min_score = np.nanmin(raw_scores)
         max_score = np.nanmax(raw_scores)
         if min_score == max_score:
-            return np.zeros(shape=(X.shape[0]))
+            if not (0.0 <= min_score <= 1.0):
+                raise ValueError('The predicted anomaly scores are constant, but not in the interval [0, 1]. '
+                                 'It is not clear how to transform these unambiguously to anomaly-probabilities!')
+            return raw_scores
+
         else:
             return (raw_scores - min_score) / (max_score - min_score)
-
-    # @abc.abstractmethod
-    # def __str__(self) -> str:
-    #     """ Return a string representation of this anomaly detector. """
 
     def save(self, path: Union[str, Path]) -> None:
         """

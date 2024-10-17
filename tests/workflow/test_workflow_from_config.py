@@ -301,6 +301,10 @@ class TestInterpretPreprocessors:
     (metric_entry, evaluation.AreaUnderROC, {}),
     (metric_entry, evaluation.AreaUnderPR, {}),
     # Detectors
+    (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
+    (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),
+    (detector_entry, anomaly_detection.baselines.RandomDetector, {}),
+    (detector_entry, anomaly_detection.baselines.RandomDetector, {'seed': 42}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 15}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 25, 'stride': 5}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 35, 'n_estimators': 100}),

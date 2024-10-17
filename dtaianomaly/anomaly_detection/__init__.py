@@ -12,6 +12,7 @@ for more information regarding detecting anomalies using ``dtaianomaly``.
 from .BaseDetector import BaseDetector, load_detector
 from .windowing_utils import sliding_window, reverse_sliding_window
 
+from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
 from .IsolationForest import IsolationForest
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
@@ -21,6 +22,9 @@ __all__ = [
     'load_detector',
     'sliding_window',
     'reverse_sliding_window',
+    'AlwaysNormal',
+    'AlwaysAnomalous',
+    'RandomDetector',
     'MatrixProfileDetector',
     'IsolationForest',
     'LocalOutlierFactor'
