@@ -312,6 +312,7 @@ class TestInterpretPreprocessors:
     (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 25, 'stride': 5}),
     (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 35, 'n_neighbors': 4}),
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15}),
+    (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15, 'novelty': True}),
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 25, 'normalize': True, 'p': 1.5, 'k': 5}),
     # Preprocessors
     (preprocessing_entry, preprocessing.Identity, {}),

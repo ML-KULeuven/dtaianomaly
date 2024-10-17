@@ -21,7 +21,8 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.IsolationForest(15),
     anomaly_detection.LocalOutlierFactor(15, novelty=False),
     anomaly_detection.LocalOutlierFactor(15, novelty=True),
-    anomaly_detection.MatrixProfileDetector(15),
+    anomaly_detection.MatrixProfileDetector(15, novelty=False),
+    anomaly_detection.MatrixProfileDetector(15, novelty=True),
     pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
 ])
 def detector(request):

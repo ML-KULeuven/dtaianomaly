@@ -1,7 +1,8 @@
-from typing import Optional
 
 import numpy as np
 import stumpy
+from typing import Optional
+from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
@@ -31,6 +32,16 @@ class MatrixProfileDetector(BaseDetector):
     k : int, default=1
         The k-th nearest neighbor to use for computing the sequence distance 
         in the matrix profile.
+    novelty: bool, default=False
+        If novelty detection should be performed, i.e., detect anomalies in regard
+        to the train time series. If False, the matrix profile equals a self-join,
+        otherwise the matrix profile will be computed by comparing the subsequences
+        in the test data to the subsequences in the train data.
+
+    Attributes
+    ----------
+    X_reference_ : np.ndarray of shape (n_samples, n_attributes)
+        The reference time series. Only available if ``novelty=True``
 
     Notes
     -----
@@ -58,12 +69,15 @@ class MatrixProfileDetector(BaseDetector):
     normalize: bool
     p: float
     k: int
+    novelty: bool
+    X_reference_: np.ndarray
 
     def __init__(self,
                  window_size: int,
                  normalize: bool = True,
                  p: float = 2.0,
-                 k: int = 1) -> None:
+                 k: int = 1,
+                 novelty: bool = False) -> None:
         super().__init__()
 
         if not isinstance(window_size, int) or isinstance(window_size, bool):
@@ -84,15 +98,20 @@ class MatrixProfileDetector(BaseDetector):
         if k < 1:
             raise ValueError("`k` should be strictly positive")
 
+        if not isinstance(novelty, bool):
+            raise TypeError("'novelty' should be a boolean")
+
         self.window_size = window_size
         self.normalize = normalize
         self.p = p
         self.k = k
+        self.novelty = novelty
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'MatrixProfileDetector':
         """
         Fit this detector to the given data. Function is only present for
-        consistency. Does not do anything.
+        consistency. Only saves the given data as a numpy array if
+        ``novelty=True``.
 
         Parameters
         ----------
@@ -106,6 +125,8 @@ class MatrixProfileDetector(BaseDetector):
         self: MatrixProfileDetector
             Returns the instance itself
         """
+        if self.novelty:
+            self.X_reference_ = np.asarray(X)
         return self
 
     def decision_function(self, X: np.ndarray) -> np.ndarray:
@@ -126,19 +147,44 @@ class MatrixProfileDetector(BaseDetector):
         ------
         ValueError
             If `X` is not a valid array.
+        NotFittedError
+            If novelty detection must be performed (``novelty=True``), but this
+            detector has not been fitted yet.
+        ValueError
+            If novelty detection must be performed (``novelty=True``), but the reference
+            data ``X_reference_`` has a different number of attributes than the given
+            data ``X``.
         """
         if not utils.is_valid_array_like(X):
             raise ValueError(f"Input must be numerical array-like")
 
+        # Make sure X is a numpy array
         X = np.asarray(X)
+
+        if self.novelty:
+            if not hasattr(self, 'X_reference_'):
+                raise NotFittedError('Call the fit function before making predictions!')
+            nb_attributes_test = 1 if len(X.shape) == 1 else X.shape[1]
+            nb_attributes_reference = 1 if len(self.X_reference_.shape) == 1 else self.X_reference_.shape[1]
+            if nb_attributes_reference != nb_attributes_test:
+                raise ValueError(f"Trying to detect anomalies with Matrix Profile using ``novelty=True``, but the number of attributes "
+                                 f"in the reference data is different from the number of attributes in the test data: "
+                                 f"({nb_attributes_reference} != {nb_attributes_test})!")
+
         # Stumpy assumes arrays of shape [C T], where C is the number of "channels"
         # and T the number of time samples
 
         # This function works for multivariate and univariate signals
         if len(X.shape) == 1 or X.shape[1] == 1:
-            matrix_profile = stumpy.stump(X.squeeze(), m=self.window_size, normalize=self.normalize, p=self.p, k=self.k)[:, self.k - 1]  # Needed if k>1?
+            T_B = None if not self.novelty else self.X_reference_.squeeze()
+            matrix_profile = stumpy.stump(X.squeeze(), T_B=T_B, m=self.window_size, normalize=self.normalize, p=self.p, k=self.k)[:, self.k - 1]  # Needed if k>1?
         else:
-            matrix_profiles, _ = stumpy.mstump(X.transpose(), m=self.window_size, discords=True, normalize=self.normalize, p=self.p)
+            if self.novelty:
+                matrix_profiles = np.full(shape=(X.shape[0] - self.window_size + 1, X.shape[1]), fill_value=np.nan)
+                for attribute in range(X.shape[1]):
+                    matrix_profiles[:, attribute] = stumpy.stump(X[:, attribute], T_B=self.X_reference_[:, attribute], m=self.window_size, normalize=self.normalize, p=self.p, k=self.k)[:, self.k - 1]
+            else:
+                matrix_profiles, _ = stumpy.mstump(X.transpose(), m=self.window_size, discords=True, normalize=self.normalize, p=self.p)
             matrix_profile = np.sum(matrix_profiles, axis=0)
 
         return reverse_sliding_window(matrix_profile, self.window_size, 1, X.shape[0])
