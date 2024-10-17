@@ -59,7 +59,6 @@ class IsolationForest(BaseDetector):
     stride: int
     kwargs: dict
     detector_: SklearnIsolationForest
-    is_fitted: bool
 
     def __init__(self, window_size: int, stride: int = 1, **kwargs):
         super().__init__()
