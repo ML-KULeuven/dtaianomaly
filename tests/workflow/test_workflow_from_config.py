@@ -314,6 +314,8 @@ class TestInterpretPreprocessors:
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15}),
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15, 'novelty': True}),
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 25, 'normalize': True, 'p': 1.5, 'k': 5}),
+    (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 15}),
+    (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 25, 'neighborhood_size_after': 5}),
     # Preprocessors
     (preprocessing_entry, preprocessing.Identity, {}),
     (preprocessing_entry, preprocessing.ChainedPreprocessor, {
@@ -375,6 +377,7 @@ class TestInterpretEntries:
     (detector_entry, anomaly_detection.IsolationForest),
     (detector_entry, anomaly_detection.LocalOutlierFactor),
     (detector_entry, anomaly_detection.MatrixProfileDetector),
+    (detector_entry, anomaly_detection.MedianMethod),
     # Preprocessors
     (preprocessing_entry, preprocessing.ChainedPreprocessor),
     (preprocessing_entry, preprocessing.MovingAverage),

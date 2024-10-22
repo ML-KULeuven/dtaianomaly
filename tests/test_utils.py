@@ -90,4 +90,4 @@ class TestIsUnivariate:
         assert not is_univariate([[0, 0], [1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
 
     def test_univariate_list(self, univariate_time_series):
-        assert not is_univariate([i for i in univariate_time_series])
+        assert is_univariate([i for i in univariate_time_series])

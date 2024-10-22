@@ -252,6 +252,9 @@ def detector_entry(entry):
     elif detector_type == 'LocalOutlierFactor':
         return anomaly_detection.LocalOutlierFactor(**entry_without_type)
 
+    elif detector_type == 'MedianMethod':
+        return anomaly_detection.MedianMethod(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 
