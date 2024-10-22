@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  doctes:
+  doctest:
     runs-on: ubuntu-latest
 
     steps:
