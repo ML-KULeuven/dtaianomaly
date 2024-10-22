@@ -27,9 +27,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          pip install nbconvert jupyter
 
-      # Test the notebooks
+      # Change the directory to the docs directory.
+      - name: Go to docs
+        run: |
+          cd docs
+
+      # Do the doctest
       - name: Doctest
         run: |
-          docs\make.bat doctest
+          cd docs
+          make doctest

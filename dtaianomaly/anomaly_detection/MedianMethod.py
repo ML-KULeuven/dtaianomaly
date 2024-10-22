@@ -38,8 +38,8 @@ class MedianMethod(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> median_method = MedianMethod(10).fit(x)
     >>> median_method.decision_function(x)
-    array([  6.50737908,   5.27528647,   4.4776438 , ...,  -9.87619191,
-           -10.7800343 , -10.32244805])
+    array([1.1851476 , 0.68191703, 1.05125284, ..., 0.81373386, 1.86097851,
+           0.05852008])
 
     References
     ----------
