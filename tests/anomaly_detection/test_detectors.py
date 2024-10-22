@@ -10,7 +10,12 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.baselines.AlwaysNormal,
     anomaly_detection.baselines.AlwaysAnomalous,
     anomaly_detection.baselines.RandomDetector,
-    anomaly_detection.MatrixProfileDetector
+    anomaly_detection.MatrixProfileDetector,
+    anomaly_detection.MedianMethod
+]
+
+DETECTORS_NOT_MULTIVARIATE = [
+    anomaly_detection.MedianMethod
 ]
 
 
@@ -23,6 +28,8 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.LocalOutlierFactor(15, novelty=True),
     anomaly_detection.MatrixProfileDetector(15, novelty=False),
     anomaly_detection.MatrixProfileDetector(15, novelty=True),
+    anomaly_detection.MedianMethod(15),
+    anomaly_detection.MedianMethod(15, 10),
     pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
 ])
 def detector(request):
@@ -69,17 +76,26 @@ class TestAnomalyDetectors:
         decision_function = detector.decision_function(reshaped_univariate_time_series)
 
     def test_multivariate(self, detector, multivariate_time_series):
-        detector.fit(multivariate_time_series)
-        decision_function = detector.decision_function(multivariate_time_series)
-        assert decision_function.shape[0] == multivariate_time_series.shape[0]
+        if type(detector) in DETECTORS_NOT_MULTIVARIATE:
+            if type(detector) not in DETECTORS_WITHOUT_FITTING:
+                with pytest.raises(ValueError):
+                    detector.fit(multivariate_time_series)
+            else:
+                with pytest.raises(ValueError):
+                    detector.decision_function(multivariate_time_series)
+        else:
+            detector.fit(multivariate_time_series)
+            decision_function = detector.decision_function(multivariate_time_series)
+            assert decision_function.shape[0] == multivariate_time_series.shape[0]
 
     def test_is_valid_array_like_univariate(self, detector, univariate_time_series):
         X_ = detector.fit(univariate_time_series).decision_function(univariate_time_series)
         assert utils.is_valid_array_like(X_)
 
     def test_is_valid_array_like_multivariate(self, detector, multivariate_time_series):
-        X_ = detector.fit(multivariate_time_series).decision_function(multivariate_time_series)
-        assert utils.is_valid_array_like(X_)
+        if type(detector) not in DETECTORS_NOT_MULTIVARIATE:
+            X_ = detector.fit(multivariate_time_series).decision_function(multivariate_time_series)
+            assert utils.is_valid_array_like(X_)
 
     def test_fit_predict_on_different_time_series(self, detector, univariate_time_series):
         # 66% train-test split

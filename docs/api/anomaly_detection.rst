@@ -39,6 +39,7 @@ Implemented anomaly detectors
    anomaly_detection_algorithms/isolation_forest
    anomaly_detection_algorithms/local_outlier_factor
    anomaly_detection_algorithms/matrix_profile_detector
+   anomaly_detection_algorithms/median_method
 
 
 BaseDetector

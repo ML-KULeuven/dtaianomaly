@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 
 
-def is_valid_list(value, target_type):
+def is_valid_list(value, target_type) -> bool:
     """
     Check if the given list is a valid, with each instance being a member
     of the given type.
@@ -24,7 +24,7 @@ def is_valid_list(value, target_type):
     return isinstance(value, list) and all(isinstance(item, target_type) for item in value)
 
 
-def is_valid_array_like(array):
+def is_valid_array_like(array) -> bool:
     """
     Check if input is "array-like". Within ``dtaianomaly``, this is
     either a numpy array of numerical values or a python sequence of
@@ -58,3 +58,26 @@ def is_valid_array_like(array):
 
     # Default case
     return False
+
+
+def is_univariate(X: np.ndarray) -> bool:
+    """
+    Checks if the given array equals a univariate time series.
+
+    Parameters
+    ----------
+    X: array-like of shape (n_samples, n_attributes)
+        The time series data to check if it is multivariate.
+
+    Returns
+    -------
+    is_univariate: bool
+        True if and only if the given time series has only one dimension,
+        or if the second dimension of the time series is of size 1.
+    """
+    X = np.array(X)
+    if len(X.shape) == 1:
+        return True
+
+    else:
+        return X.shape[1] == 1

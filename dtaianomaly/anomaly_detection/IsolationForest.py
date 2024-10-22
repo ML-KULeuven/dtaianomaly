@@ -62,6 +62,17 @@ class IsolationForest(BaseDetector):
 
     def __init__(self, window_size: int, stride: int = 1, **kwargs):
         super().__init__()
+
+        if not isinstance(window_size, int) or isinstance(window_size, bool):
+            raise TypeError("`window_size` should be an integer")
+        if window_size < 1:
+            raise ValueError("`window_size` should be strictly positive")
+
+        if not isinstance(stride, int) or isinstance(stride, bool):
+            raise TypeError("`stride` should be an integer")
+        if stride < 1:
+            raise ValueError("`stride` should be strictly positive")
+
         self.window_size = window_size
         self.stride = stride
         self.kwargs = kwargs

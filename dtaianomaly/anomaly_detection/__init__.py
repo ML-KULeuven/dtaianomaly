@@ -16,6 +16,7 @@ from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
 from .IsolationForest import IsolationForest
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
+from .MedianMethod import MedianMethod
 
 __all__ = [
     'BaseDetector',
@@ -27,5 +28,6 @@ __all__ = [
     'RandomDetector',
     'MatrixProfileDetector',
     'IsolationForest',
-    'LocalOutlierFactor'
+    'LocalOutlierFactor',
+    'MedianMethod'
 ]

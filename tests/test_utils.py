@@ -1,7 +1,8 @@
 
 import numpy as np
 from typing import Any
-from dtaianomaly.utils import is_valid_list, is_valid_array_like
+
+from dtaianomaly.utils import is_valid_list, is_valid_array_like, is_univariate
 
 
 class TestIsValidList:
@@ -70,6 +71,23 @@ class TestIsValidArrayLike:
         assert not is_valid_array_like(True)
 
 
+class TestIsUnivariate:
 
+    def test_multivariate(self, multivariate_time_series):
+        assert not is_univariate(multivariate_time_series)
 
+    def test_univariate_1_dimension(self, univariate_time_series):
+        univariate_time_series = univariate_time_series.squeeze()
+        assert len(univariate_time_series.shape) == 1
+        assert is_univariate(univariate_time_series)
 
+    def test_univariate_2_dimensions(self, univariate_time_series):
+        univariate_time_series = univariate_time_series.reshape(univariate_time_series.shape[0], 1)
+        assert len(univariate_time_series.shape) == 2
+        assert is_univariate(univariate_time_series)
+
+    def test_multivariate_list(self):
+        assert not is_univariate([[0, 0], [1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+
+    def test_univariate_list(self, univariate_time_series):
+        assert not is_univariate([i for i in univariate_time_series])
