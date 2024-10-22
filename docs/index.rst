@@ -11,7 +11,7 @@ time series.
 .. doctest::
 
     >>> 1 + 2
-    4
+    3
 
 The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`_.
 
