@@ -22,6 +22,12 @@ The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`
 
 .. toctree::
    :maxdepth: 1
+   :caption: Additional information
+
+   additional_information/contributing
+
+.. toctree::
+   :maxdepth: 1
    :caption: Documentation
 
    api/anomaly_detection
