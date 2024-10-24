@@ -12,6 +12,7 @@ from .ZNormalizer import ZNormalizer
 from .MovingAverage import MovingAverage
 from .ExponentialMovingAverage import ExponentialMovingAverage
 from .UnderSampler import SamplingRateUnderSampler, NbSamplesUnderSampler
+from .Differencing import Differencing
 
 __all__ = [
     'Preprocessor',
@@ -23,5 +24,6 @@ __all__ = [
     'MovingAverage',
     'ExponentialMovingAverage',
     'SamplingRateUnderSampler',
-    'NbSamplesUnderSampler'
+    'NbSamplesUnderSampler',
+    'Differencing'
 ]

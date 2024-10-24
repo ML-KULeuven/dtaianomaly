@@ -306,6 +306,9 @@ def preprocessing_entry(entry):
     elif processing_type == 'SamplingRateUnderSampler':
         return preprocessing.SamplingRateUnderSampler(**entry_without_type)
 
+    elif processing_type == 'Differencing':
+        return preprocessing.Differencing(**entry_without_type)
+
     elif processing_type == 'ChainedPreprocessor':
         if len(entry_without_type) != 1:
             raise TypeError(f'ChainedPreprocessor must have base_preprocessors as key: {entry}')

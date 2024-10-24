@@ -12,7 +12,8 @@ from dtaianomaly import preprocessing, utils
     preprocessing.MovingAverage(window_size=15),
     preprocessing.NbSamplesUnderSampler(nb_samples=150),
     preprocessing.SamplingRateUnderSampler(sampling_rate=5),
-    preprocessing.ZNormalizer()
+    preprocessing.ZNormalizer(),
+    preprocessing.Differencing(1)
 ])
 def preprocessor(request):
     return copy.deepcopy(request.param)

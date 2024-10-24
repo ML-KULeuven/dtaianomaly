@@ -330,6 +330,7 @@ class TestInterpretPreprocessors:
     (preprocessing_entry, preprocessing.ExponentialMovingAverage, {"alpha": 0.8}),
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler, {'nb_samples': 250}),
     (preprocessing_entry, preprocessing.SamplingRateUnderSampler, {'sampling_rate': 5}),
+    (preprocessing_entry, preprocessing.Differencing, {'order': 1}),
 ])
 class TestInterpretEntries:
 
@@ -384,6 +385,7 @@ class TestInterpretEntries:
     (preprocessing_entry, preprocessing.ExponentialMovingAverage),
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler),
     (preprocessing_entry, preprocessing.SamplingRateUnderSampler),
+    (preprocessing_entry, preprocessing.Differencing),
 ])
 class TestEntriesWithObligatedParameters:
 

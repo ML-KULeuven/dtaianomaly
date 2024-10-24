@@ -26,8 +26,8 @@ class Differencing(Preprocessor):
     order: int
     window_size: int
 
-    def __init__(self, order: int, window_size: int):
-        super().__init__(self)
+    def __init__(self, order: int, window_size: int = 1):
+        super().__init__()
 
         if not isinstance(order, int) or isinstance(order, bool):
             raise TypeError("`order` should be an integer")
@@ -46,4 +46,8 @@ class Differencing(Preprocessor):
         return self
 
     def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        return np.diff(X, n=self.order, prepend=[X[0] for _ in range(self.order)]), y
+        X_ = X
+        for _ in range(self.order):
+            concat = np.concatenate([X_[:self.window_size], X_])
+            X_ = concat[self.window_size:] - concat[:-self.window_size]
+        return X_, y
