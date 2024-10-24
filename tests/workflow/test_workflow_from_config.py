@@ -331,6 +331,7 @@ class TestInterpretPreprocessors:
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler, {'nb_samples': 250}),
     (preprocessing_entry, preprocessing.SamplingRateUnderSampler, {'sampling_rate': 5}),
     (preprocessing_entry, preprocessing.Differencing, {'order': 1}),
+    (preprocessing_entry, preprocessing.PiecewiseAggregateApproximation, {'n': 32}),
 ])
 class TestInterpretEntries:
 

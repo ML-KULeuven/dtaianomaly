@@ -13,7 +13,8 @@ from dtaianomaly import preprocessing, utils
     preprocessing.NbSamplesUnderSampler(nb_samples=150),
     preprocessing.SamplingRateUnderSampler(sampling_rate=5),
     preprocessing.ZNormalizer(),
-    preprocessing.Differencing(1)
+    preprocessing.Differencing(order=1),
+    preprocessing.PiecewiseAggregateApproximation(n=32)
 ])
 def preprocessor(request):
     return copy.deepcopy(request.param)
