@@ -62,6 +62,7 @@ This makes sure that the new component has been fully integrated in ``dtaianomal
     <input type="checkbox">
 
 **Implement the component**
+
 |   |check_box| Have you added a ``.py`` to the correct module, named identical to the component you implemented?
 |   |check_box| Does the file contain a class named as the methodology, which inherits from the correct base class?
 |   |check_box| Does the class documentation contain an explanation of the methodology?
@@ -76,6 +77,7 @@ This makes sure that the new component has been fully integrated in ``dtaianomal
 |   |check_box| Can you load the component via :py:func:`~dtaianomaly.workflow.interpret_config``?
 
 **Test the component**
+
 |   |check_box| Have you added a new file ``test_<class>.py`` in the correct directory under ``tests/``?
 |   |check_box| Is a test coverage of at least 95% reached?
 |   |check_box| *[Only applicable for anomaly detectors]* Has the method been included in the tests in ``tests/anomaly_detection/test_detectors.py``?
@@ -85,9 +87,11 @@ This makes sure that the new component has been fully integrated in ``dtaianomal
 |   |check_box| Do all tests still succeed?
 
 **Document the component**
+
 |   |check_box| Has the documentation been updated?
 |   |check_box| *[Only applicable for anomaly detectors]* Is a separate file for the anomaly detector created in ``docs/api/anomaly_detection_algorithms/`` with the same name as the anomaly detector, and has the file been included to the index in ``docs/api/anomaly_detection``?
 |   |check_box| Does the documentation build correctly?
 
 **Adding data**
+
 |   |check_box| Did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
