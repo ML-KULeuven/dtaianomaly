@@ -15,7 +15,9 @@ All notable changes to this project will be documented in this file.
 - Added option ``novelty`` to ``MatrixProfileDetector``, which will compute the
   matrix profile in regard to the train data, if ``novelty=True``. By default, 
   the matrix profile is computed based on a self-join of the test data. 
-- Implemented ``MedianMethod`` anomaly detector. 
+- Implemented ``MedianMethod`` anomaly detector.
+- Implemented ``Differencing`` preprocessor.
+- Implemented ``PiecewiseAggregateApproximation`` preprocessor.
 
 ### Changed
 
@@ -27,6 +29,11 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- ``utils.is_valid_array_like()`` could not handle multivariate lists. This functionality
+  has now been added, and the tests are extended accordingly.
+- Preprocessors can now take lists as input, which are automatically converted to a numpy
+  array by the ``fit()`` and ``transform()`` method in ``Preprocessor``.
+  
 
 ## [0.2.1] - 2024-10-08
 
