@@ -366,7 +366,7 @@ class TestInterpretEntries:
     def test_no_type(self, entry_function, object_type, entry):
         with pytest.raises(KeyError):
             entry_function(entry)
-
+            
 
 @pytest.mark.parametrize("entry_function,object_type", [
     (threshold_entry, thresholding.FixedCutoff),

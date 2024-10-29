@@ -52,12 +52,16 @@ class PiecewiseAggregateApproximation(Preprocessor):
         return self
 
     def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        return paa(X, self.n), (y if y is None else paa(y, self.n))
+        if X.shape[0] <= self.n:
+            return X, y
+
+        X_ = paa(X, self.n)
+        if y is None:
+            return X_, y
+        else:
+            return X_, np.where(paa(y, self.n) < 0.5, 0, 1)
 
 
-def paa(X: np.ndarray, n: int) -> np.ndarray:
-    y = np.empty(shape=n) if utils.is_univariate(X) else np.empty(shape=(n, X.shape[1]))
-    indices = np.linspace(0, X.shape[0], n+1, dtype=int, endpoint=True)
-    for i, (s, e) in enumerate(zip(indices, indices[1:])):
-        y[i] = np.mean(X[s:e], axis=0)
-    return y
+def paa(x: np.ndarray, n: int) -> np.ndarray:
+    indices = np.linspace(0, x.shape[0], n + 1, dtype=int, endpoint=True)
+    return np.array([np.mean(x[s:e], axis=0) for s, e in zip(indices, indices[1:])])
