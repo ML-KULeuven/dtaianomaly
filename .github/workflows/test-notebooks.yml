@@ -45,4 +45,4 @@ jobs:
       # Test the notebooks
       - name: Execute Anomaly detection notebook
         run:
-          jupyter nbconvert --to notebook --execute ${{ matrix.notebook }}
+          jupyter nbconvert --to notebook --execute notebooks/${{ matrix.notebook }}
