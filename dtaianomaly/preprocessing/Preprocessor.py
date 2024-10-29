@@ -29,8 +29,11 @@ def check_preprocessing_inputs(X: np.ndarray, y: Optional[np.ndarray] = None) ->
         raise ValueError('`X` is not a valid array')
     if y is not None and not utils.is_valid_array_like(y):
         raise ValueError('`y` is not  valid array')
-    if y is not None and X.shape[0] != y.shape[0]:
-        raise ValueError('`X` and `y` have a different number of samples')
+    if y is not None:
+        X = np.asarray(X)
+        y = np.asarray(y)
+        if X.shape[0] != y.shape[0]:
+            raise ValueError('`X` and `y` have a different number of samples')
 
 
 class Preprocessor(PrettyPrintable):
@@ -56,7 +59,7 @@ class Preprocessor(PrettyPrintable):
             Returns the fitted instance self.
         """
         check_preprocessing_inputs(X, y)
-        return self._fit(X, y)
+        return self._fit(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
     def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
@@ -83,7 +86,7 @@ class Preprocessor(PrettyPrintable):
             then None will be returned as well.
         """
         check_preprocessing_inputs(X, y)
-        return self._transform(X, y)
+        return self._transform(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
     def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
@@ -111,8 +114,7 @@ class Preprocessor(PrettyPrintable):
             The transformed ground truth. If no ground truth was provided (`y=None`),
             then None will be returned as well.
         """
-        check_preprocessing_inputs(X, y)
-        return self._fit(X, y)._transform(X, y)
+        return self.fit(X, y).transform(X, y)
 
 
 class Identity(Preprocessor):

@@ -7,13 +7,19 @@ from dtaianomaly.preprocessing import Identity, MinMaxScaler, ZNormalizer, Movin
 
 class TestCheckPreprocessingInputs:
 
-    def test_valid_(self, univariate_time_series):
+    def test_valid_univariate(self, univariate_time_series):
         y = np.random.default_rng().choice([0, 1], size=univariate_time_series.shape[0], replace=True)
         check_preprocessing_inputs(univariate_time_series, y)
 
     def test_valid_multivariate(self, multivariate_time_series):
         y = np.random.default_rng().choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
         check_preprocessing_inputs(multivariate_time_series, y)
+
+    def test_valid_univariate_list(self):
+        check_preprocessing_inputs([1, 2, 3, 4, 5], [0, 1, 0, 1, 0])
+
+    def test_valid_mutlivariate_list(self):
+        check_preprocessing_inputs([[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]], [0, 1, 0, 1, 0])
 
     def test_invalid_x(self):
         with pytest.raises(ValueError):
