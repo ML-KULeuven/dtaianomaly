@@ -15,9 +15,7 @@ The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`
    :caption: Getting started
 
    getting_started/installation
-   getting_started/anomaly_detection
-   getting_started/custom_models
-   getting_started/quantitative_evaluation
+   getting_started/examples
    getting_started/data
 
 .. toctree::

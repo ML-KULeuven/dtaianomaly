@@ -34,12 +34,9 @@ Implemented anomaly detectors
 
 .. toctree::
    :maxdepth: 1
+   :glob:
 
-   anomaly_detection_algorithms/baselines
-   anomaly_detection_algorithms/isolation_forest
-   anomaly_detection_algorithms/local_outlier_factor
-   anomaly_detection_algorithms/matrix_profile_detector
-   anomaly_detection_algorithms/median_method
+   anomaly_detection_algorithms/*
 
 
 BaseDetector

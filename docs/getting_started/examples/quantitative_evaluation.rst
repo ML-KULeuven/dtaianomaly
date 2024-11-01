@@ -1,3 +1,5 @@
+:orphan:
+
 Quantitative evaluation with a workflow
 =======================================
 
@@ -135,7 +137,7 @@ or a list of entries (if multiple components are requested).
 
 Below, we show a simplified version of the configuration in `Config.json`_.
 
-.. literalinclude:: ../../notebooks/Config.json
+.. literalinclude:: ../../../notebooks/Config.json
    :language: json
    :tab-width: 4
 
