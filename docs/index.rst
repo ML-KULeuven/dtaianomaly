@@ -13,26 +13,20 @@ The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
+   :glob:
 
-   getting_started/installation
-   getting_started/examples
-   getting_started/data
+   getting_started/*
 
 .. toctree::
    :maxdepth: 1
    :caption: Additional information
+   :glob:
 
-   additional_information/contributing
+   additional_information/*
 
 .. toctree::
    :maxdepth: 1
    :caption: Documentation
+   :glob:
 
-   api/anomaly_detection
-   api/data
-   api/preprocessing
-   api/thresholding
-   api/evaluation
-   api/pipeline
-   api/workflow
-   api/visualization
+   api/*
