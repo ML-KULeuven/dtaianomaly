@@ -10,9 +10,9 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  unit-test:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:

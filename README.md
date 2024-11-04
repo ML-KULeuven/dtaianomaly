@@ -56,7 +56,7 @@ detector.fit(X_)
 decision_scores = detector.decision_function(X_)
 anomaly_probabilities = detector.predict_proba(X_)
 ```
-![Demonstration-time-series-detected-anomalies.svg](notebooks%2FDemonstration-time-series-detected-anomalies.svg)
+![Demonstration-time-series-detected-anomalies.svg](https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Demonstration-time-series-detected-anomalies.svg?raw=true)
 
 ## Contribute
 

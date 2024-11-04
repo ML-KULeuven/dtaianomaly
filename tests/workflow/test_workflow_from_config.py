@@ -330,6 +330,8 @@ class TestInterpretPreprocessors:
     (preprocessing_entry, preprocessing.ExponentialMovingAverage, {"alpha": 0.8}),
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler, {'nb_samples': 250}),
     (preprocessing_entry, preprocessing.SamplingRateUnderSampler, {'sampling_rate': 5}),
+    (preprocessing_entry, preprocessing.Differencing, {'order': 1}),
+    (preprocessing_entry, preprocessing.PiecewiseAggregateApproximation, {'n': 32}),
 ])
 class TestInterpretEntries:
 
@@ -364,7 +366,7 @@ class TestInterpretEntries:
     def test_no_type(self, entry_function, object_type, entry):
         with pytest.raises(KeyError):
             entry_function(entry)
-
+            
 
 @pytest.mark.parametrize("entry_function,object_type", [
     (threshold_entry, thresholding.FixedCutoff),
@@ -384,6 +386,7 @@ class TestInterpretEntries:
     (preprocessing_entry, preprocessing.ExponentialMovingAverage),
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler),
     (preprocessing_entry, preprocessing.SamplingRateUnderSampler),
+    (preprocessing_entry, preprocessing.Differencing),
 ])
 class TestEntriesWithObligatedParameters:
 

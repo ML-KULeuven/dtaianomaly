@@ -17,3 +17,5 @@ Preprocessing module
 .. autoclass:: dtaianomaly.preprocessing.ExponentialMovingAverage
 .. autoclass:: dtaianomaly.preprocessing.SamplingRateUnderSampler
 .. autoclass:: dtaianomaly.preprocessing.NbSamplesUnderSampler
+.. autoclass:: dtaianomaly.preprocessing.Differencing
+.. autoclass:: dtaianomaly.preprocessing.PiecewiseAggregateApproximation

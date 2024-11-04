@@ -11,6 +11,12 @@ be detected in time series using ``dtaianomaly``.
     Some of the code has not been added to this webpage for clarity reasons. The full
     code can be found in the `anomaly detection notebook <https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Anomaly-detection.ipynb>`_.
 
+.. note::
+    Below example illustrates how to detect anomalies in a simple demonstration time
+    series. It is also possible to use ``dtaianomaly`` in industrial datasets, as is
+    shown in the `industrial anomaly detection notebook <https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Industrial-anomaly-detection.ipynb>`_.
+
+
 Load the data
 -------------
 

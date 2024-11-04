@@ -8,6 +8,18 @@ Latest
 
 Added
 ^^^^^
+
+Changed
+^^^^^^^
+
+Fixed
+^^^^^
+
+[0.2.2] - 2024-10-30
+--------------------
+
+Added
+^^^^^
 - When executing a workflow, and an error occurs. The errors will be written to
   an error file. This file contains in which phase the error occurred and the
   entire traceback of the error. Additionally, the error file contains the code
@@ -19,6 +31,8 @@ Added
   matrix profile in regard to the train data, if ``novelty=True``. By default,
   the matrix profile is computed based on a self-join of the test data.
 - Implemented ``MedianMethod`` anomaly detector.
+- Implemented ``Differencing`` preprocessor.
+- Implemented ``PiecewiseAggregateApproximation`` preprocessor.
 
 Changed
 ^^^^^^^
@@ -30,6 +44,10 @@ Changed
 
 Fixed
 ^^^^^
+- ``utils.is_valid_array_like()`` could not handle multivariate lists. This functionality
+  has now been added, and the tests are extended accordingly.
+- Preprocessors can now take lists as input, which are automatically converted to a numpy
+  array by the ``fit()`` and ``transform()`` method in ``Preprocessor``.
 
 [0.2.1] - 2024-10-08
 --------------------
