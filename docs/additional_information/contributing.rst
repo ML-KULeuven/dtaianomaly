@@ -152,6 +152,7 @@ remote fork via:
 .. rubric:: Checklist
 
 | |check_box| Add the resolution to the issue.
+| |check_box| Add your update to the changelog
 | |check_box| Check if all tests still run successfully.
 | |check_box| Check if the documentation still generates successfully.
 | |check_box| Commit your changes to your fork.
