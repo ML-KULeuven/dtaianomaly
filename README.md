@@ -58,10 +58,12 @@ anomaly_probabilities = detector.predict_proba(X_)
 ```
 ![Demonstration-time-series-detected-anomalies.svg](notebooks%2FDemonstration-time-series-detected-anomalies.svg)
 
-## Contact
+## Contribute
 
-Feel free to email to [louis.carpentier@kuleuven.be](mailto:louis.carpentier@kuleuven.be) if 
-there are any questions, remarks, ideas, ...
+The goal of ``dtaianomaly`` is to be community-driven. All types of contributions
+are welcome. This includes code, but also bug reports, improvements to the documentation,
+additional tests and more. Check out [the documentation](https://dtaianomaly.readthedocs.io/en/stable/additional_information/contributing.html)
+to find more information about how you can contribute!
 
 ## License
 

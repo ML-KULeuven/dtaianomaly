@@ -7,9 +7,7 @@ Contributing to dtaianomaly
 
 The goal of ``dtaianomaly`` is to be community-driven. All types of contributions
 are welcome. This includes code, but also bug reports, improvements to the documentation,
-additional tests and more. All contributions to ``dtaianomaly`` are welcome. Below we
-give an overview of how to contribute to ``dtaianomaly``.
-
+additional tests and more. Below we give an overview of how to contribute to ``dtaianomaly``.
 
 Reporting issues
 ----------------
@@ -18,7 +16,6 @@ We use `GitHub Issues <https://github.com/ML-KULeuven/dtaianomaly/issues>`_
 to track bugs and feature requests. Feel free to open a new issue if you found a
 bug or wish to see a new feature in ``dtaianomaly``. Please verify that the issue is
 not already addressed by another issue or pull request before submitting a new issue.
-
 
 Resolving issues
 ----------------
