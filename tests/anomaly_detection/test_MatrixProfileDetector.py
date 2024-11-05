@@ -7,9 +7,9 @@ from dtaianomaly.anomaly_detection import MatrixProfileDetector
 class TestMatrixProfileDetector:
 
     def test_initialize_non_int_window_size(self):
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             MatrixProfileDetector(window_size=True)
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             MatrixProfileDetector(window_size='a string')
         MatrixProfileDetector(5)  # Doesn't raise an error
 
@@ -17,6 +17,12 @@ class TestMatrixProfileDetector:
         with pytest.raises(ValueError):
             MatrixProfileDetector(window_size=0)
         MatrixProfileDetector(5)  # Doesn't raise an error
+
+    def test_valid_window_size(self):
+        MatrixProfileDetector(1)
+        MatrixProfileDetector(10)
+        MatrixProfileDetector(100)
+        MatrixProfileDetector('fft')
 
     def test_initialize_non_bool_normalize(self):
         with pytest.raises(TypeError):
@@ -68,7 +74,8 @@ class TestMatrixProfileDetector:
 
     def test_not_fitted_no_novelty(self, univariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=False)
-        detector.decision_function(univariate_time_series)  # No error
+        detector.fit(univariate_time_series)
+        detector.decision_function(univariate_time_series)
 
     def test_not_fitted_novelty(self, univariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=True)

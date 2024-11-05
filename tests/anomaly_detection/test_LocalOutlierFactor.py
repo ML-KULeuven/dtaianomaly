@@ -3,7 +3,7 @@ import pytest
 from dtaianomaly.anomaly_detection import LocalOutlierFactor
 
 
-class TestIsolationForest:
+class TestLocalOutlierFactor:
 
     def test_initialize(self):
         detector = LocalOutlierFactor(15, n_neighbors=42)
@@ -18,11 +18,14 @@ class TestIsolationForest:
         LocalOutlierFactor(15)  # Doesn't raise an error with int
 
     def test_initialize_float_window_size(self):
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             LocalOutlierFactor(window_size=5.5)
 
+    def test_initialize_valid_string_window_size(self):
+        LocalOutlierFactor(window_size='fft')
+
     def test_initialize_string_window_size(self):
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             LocalOutlierFactor(window_size='15')
 
     def test_initialize_too_small_stride(self):

@@ -1,11 +1,11 @@
 
 import numpy as np
-from typing import Optional
+from typing import Optional, Union
 from sklearn.ensemble import IsolationForest as SklearnIsolationForest
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
-from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window
+from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 from dtaianomaly import utils
 
 
@@ -20,8 +20,9 @@ class IsolationForest(BaseDetector):
 
     Parameters
     ----------
-    window_size: int
-        The window size to use for extracting sliding windows from the time series.
+    window_size: int or str
+        The window size to use for extracting sliding windows from the time series. This
+        value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
     **kwargs
@@ -29,6 +30,8 @@ class IsolationForest(BaseDetector):
 
     Attributes
     ----------
+    window_size_: int
+        The effectively used window size for this anomaly detector
     detector_ : SklearnIsolationForest
         An Isolation Forest detector of Sklearn. Only available upon fitting
 
@@ -55,18 +58,16 @@ class IsolationForest(BaseDetector):
        2008 Eighth IEEE International Conference on Data Mining, Pisa, Italy, 2008,
        pp. 413-422, doi: `10.1109/ICDM.2008.17 <https://doi.org/10.1109/ICDM.2008.17>`_.
     """
-    window_size: int
+    window_size: Union[int, str]
     stride: int
     kwargs: dict
+    window_size_: int
     detector_: SklearnIsolationForest
 
-    def __init__(self, window_size: int, stride: int = 1, **kwargs):
+    def __init__(self, window_size: Union[int, str], stride: int = 1, **kwargs):
         super().__init__()
 
-        if not isinstance(window_size, int) or isinstance(window_size, bool):
-            raise TypeError("`window_size` should be an integer")
-        if window_size < 1:
-            raise ValueError("`window_size` should be strictly positive")
+        check_is_valid_window_size(window_size)
 
         if not isinstance(stride, int) or isinstance(stride, bool):
             raise TypeError("`stride` should be an integer")
@@ -78,7 +79,7 @@ class IsolationForest(BaseDetector):
         self.kwargs = kwargs
         SklearnIsolationForest(**kwargs)  # Try initialization to check the parameters
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'IsolationForest':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'IsolationForest':
         """
         Fit this detector to the given data.
 
@@ -88,6 +89,8 @@ class IsolationForest(BaseDetector):
             Input time series.
         y: ignored
             Not used, present for API consistency by convention.
+        kwargs:
+            Additional parameters to be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
 
         Returns
         -------
@@ -102,11 +105,10 @@ class IsolationForest(BaseDetector):
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
 
-        self.detector_ = SklearnIsolationForest(**self.kwargs)
-
         X = np.asarray(X)
-        windows = sliding_window(X, self.window_size, self.stride)
-        self.detector_.fit(windows)
+        self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        self.detector_ = SklearnIsolationForest(**self.kwargs)
+        self.detector_.fit(sliding_window(X, self.window_size_, self.stride))
 
         return self
 
@@ -134,12 +136,11 @@ class IsolationForest(BaseDetector):
         """
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
-        if not hasattr(self, 'detector_'):
+        if not hasattr(self, 'detector_') or not hasattr(self, 'window_size_'):
             raise NotFittedError('Call the fit function before making predictions!')
 
         X = np.asarray(X)
-        windows = sliding_window(X, self.window_size, self.stride)
-        per_window_anomaly_scores = -self.detector_.score_samples(windows)
-        anomaly_scores = reverse_sliding_window(per_window_anomaly_scores, self.window_size, self.stride, X.shape[0])
+        per_window_anomaly_scores = -self.detector_.score_samples(sliding_window(X, self.window_size_, self.stride))
+        anomaly_scores = reverse_sliding_window(per_window_anomaly_scores, self.window_size_, self.stride, X.shape[0])
 
         return anomaly_scores

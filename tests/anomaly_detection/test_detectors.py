@@ -10,7 +10,6 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.baselines.AlwaysNormal,
     anomaly_detection.baselines.AlwaysAnomalous,
     anomaly_detection.baselines.RandomDetector,
-    anomaly_detection.MatrixProfileDetector,
     anomaly_detection.MedianMethod
 ]
 
@@ -104,3 +103,17 @@ class TestAnomalyDetectors:
         detector.fit(X_train)
         decision_function = detector.predict_proba(X_test)
         assert decision_function.shape[0] == X_test.shape[0]
+
+
+@pytest.mark.parametrize('detector_class,additional_args', [
+    (anomaly_detection.IsolationForest, {}),
+    (anomaly_detection.LocalOutlierFactor, {}),
+    (anomaly_detection.MatrixProfileDetector, {}),
+])
+@pytest.mark.parametrize('window_size', [15, 'fft'])
+class TestAnomalyDetectorsAutomaticWindowSize:
+
+    def test(self, detector_class, window_size, additional_args, univariate_time_series):
+        detector_object = detector_class(window_size=window_size, **additional_args)
+        detector_object.fit(univariate_time_series)
+        detector_object.decision_function(univariate_time_series)

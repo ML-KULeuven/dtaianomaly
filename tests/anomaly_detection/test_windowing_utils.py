@@ -1,7 +1,9 @@
 
 import pytest
 import numpy as np
-from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window
+from dtaianomaly import utils
+from dtaianomaly.data import demonstration_time_series
+from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 
 class TestSlidingWindow:
@@ -221,3 +223,67 @@ class TestReverseSlidingWindow:
         assert reverse_windows[12] == 4  # [4]
         assert reverse_windows[13] == 4  # [4]
         assert reverse_windows[14] == 4  # [4]
+
+
+class TestCheckIsValidWindowSize:
+
+    def test_valid_integer(self):
+        for i in range(1, 100):
+            check_is_valid_window_size(i)
+
+    @pytest.mark.parametrize('window_size', ['fft'])
+    def test_valid_string(self, window_size):
+        check_is_valid_window_size(window_size)
+
+    def test_invalid_integer(self):
+        for i in [-10, -1, 0]:
+            with pytest.raises(ValueError):
+                check_is_valid_window_size(i)
+
+    def test_invalid_string(self):
+        with pytest.raises(ValueError):
+            check_is_valid_window_size('something_invalid')
+
+    def test_invalid_float(self):
+        with pytest.raises(ValueError):
+            check_is_valid_window_size(1.0)
+
+    def test_invalid_bool(self):
+        with pytest.raises(ValueError):
+            check_is_valid_window_size(True)
+        with pytest.raises(ValueError):
+            check_is_valid_window_size(False)
+
+
+class TestComputeWindowSize:
+
+    def test_integer(self):
+        for i in range(1, 100):
+            assert i == compute_window_size(np.array([1, 2, 3]), i)
+
+    @pytest.mark.parametrize('window_size', [1, 'fft'])
+    def test_invalid_x(self, window_size):
+        check_is_valid_window_size(window_size)
+        assert not utils.is_valid_array_like([1, 2, 3, 4, '5'])
+        with pytest.raises(ValueError):
+            compute_window_size([1, 2, 3, 4, '5'], window_size)
+
+    def test_multivariate_integer(self, multivariate_time_series):
+        assert 16 == compute_window_size(multivariate_time_series, 16)
+
+    def test_multivariate_non_integer(self, multivariate_time_series):
+        with pytest.raises(ValueError):
+            compute_window_size(multivariate_time_series, 'fft')
+
+    @pytest.mark.parametrize('window_size_, window_size', [
+        ('fft', 1400 / (25 / 2))
+    ])
+    def test_demonstration_time_series(self, window_size_, window_size):
+        X, _ = demonstration_time_series()
+        assert compute_window_size(X, window_size_) == pytest.approx(window_size, abs=10)
+
+    @pytest.mark.parametrize('nb_periods', [5, 10])
+    def test_fft_simple(self, nb_periods):
+        X = np.sin(np.linspace(0, nb_periods * 2 * np.pi, 5000))
+        window_size = compute_window_size(X, window_size='fft')
+        assert window_size == 5000/nb_periods

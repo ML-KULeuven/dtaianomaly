@@ -10,7 +10,7 @@ for more information regarding detecting anomalies using ``dtaianomaly``.
 """
 
 from .BaseDetector import BaseDetector, load_detector
-from .windowing_utils import sliding_window, reverse_sliding_window
+from .windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
 from .IsolationForest import IsolationForest
@@ -21,11 +21,16 @@ from .MedianMethod import MedianMethod
 __all__ = [
     'BaseDetector',
     'load_detector',
+
     'sliding_window',
     'reverse_sliding_window',
+    'check_is_valid_window_size',
+    'compute_window_size',
+
     'AlwaysNormal',
     'AlwaysAnomalous',
     'RandomDetector',
+
     'MatrixProfileDetector',
     'IsolationForest',
     'LocalOutlierFactor',
