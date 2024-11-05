@@ -1,6 +1,8 @@
 
 import math
+import scipy
 import numpy as np
+from statsmodels.tsa.stattools import acf
 from typing import Union
 from dtaianomaly import utils
 
@@ -92,7 +94,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
     is not valid, a ValueError will be raised. Valid window sizes include:
 
     - a strictly positive integer
-    - a string from the set {``'fft'``}
+    - a string from the set {``'fft'``, ``'acf'``}
 
     Parameters
     ----------
@@ -110,7 +112,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
         if window_size <= 0:
             raise ValueError('An integer window size should be strictly positive.')
 
-    elif window_size not in ['fft']:
+    elif window_size not in ['fft', 'acf']:
         raise ValueError(f"Invalid window_size given: '{window_size}'.")
 
 
@@ -132,14 +134,15 @@ def compute_window_size(
 
         - ``int``: Simply return the given window size.
         - ``'fft'``: Compute the window size by selecting the dominant Fourier frequency.
+        - ``'acf'``: Compute the window size as the leg with the highest autocorrelation.
 
     lower_bound: int, default=10
         The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'``.
+        equals ``'fft'`` or ``'acf'``.
 
     upper_bound: int, default=1000
         The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'``
+        equals ``'fft'`` or ``'acf'``.
 
     Returns
     -------
@@ -170,14 +173,18 @@ def compute_window_size(
     elif window_size == 'fft':
         return _dominant_fourier_frequency(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
-    else:
+    # Use the acf to compute a window size
+    elif window_size == 'acf':
+        return _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
+
+    else:  # Should not be reached
         raise ValueError(f"Invalid window_size given: '{window_size}'.")
 
 
-def _dominant_fourier_frequency(time_series: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000) -> int:
+def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000) -> int:
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L10
-    fourier = np.fft.fft(time_series)
-    freq = np.fft.fftfreq(time_series.shape[0], 1)
+    fourier = np.fft.fft(X)
+    freq = np.fft.fftfreq(X.shape[0], 1)
 
     magnitudes = []
     window_sizes = []
@@ -192,3 +199,17 @@ def _dominant_fourier_frequency(time_series: np.ndarray, lower_bound: int = 10, 
                 magnitudes.append(mag)
 
     return window_sizes[np.argmax(magnitudes)]
+
+
+def _highest_autocorrelation(X: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000):
+    # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L29
+    acf_values = acf(X, fft=True, nlags=int(X.shape[0]/2))
+
+    peaks, _ = scipy.signal.find_peaks(acf_values)
+    peaks = peaks[np.logical_and(peaks >= lower_bound, peaks < upper_bound)]
+    corrs = acf_values[peaks]
+
+    if peaks.shape[0] == 0:
+        return -1
+
+    return peaks[np.argmax(corrs)]

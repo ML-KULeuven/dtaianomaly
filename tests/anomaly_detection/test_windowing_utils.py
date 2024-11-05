@@ -231,7 +231,7 @@ class TestCheckIsValidWindowSize:
         for i in range(1, 100):
             check_is_valid_window_size(i)
 
-    @pytest.mark.parametrize('window_size', ['fft'])
+    @pytest.mark.parametrize('window_size', ['fft', 'acf'])
     def test_valid_string(self, window_size):
         check_is_valid_window_size(window_size)
 
@@ -261,7 +261,7 @@ class TestComputeWindowSize:
         for i in range(1, 100):
             assert i == compute_window_size(np.array([1, 2, 3]), i)
 
-    @pytest.mark.parametrize('window_size', [1, 'fft'])
+    @pytest.mark.parametrize('window_size', [1, 'fft', 'acf'])
     def test_invalid_x(self, window_size):
         check_is_valid_window_size(window_size)
         assert not utils.is_valid_array_like([1, 2, 3, 4, '5'])
@@ -275,15 +275,16 @@ class TestComputeWindowSize:
         with pytest.raises(ValueError):
             compute_window_size(multivariate_time_series, 'fft')
 
-    @pytest.mark.parametrize('window_size_, window_size', [
-        ('fft', 1400 / (25 / 2))
-    ])
-    def test_demonstration_time_series(self, window_size_, window_size):
+    @pytest.mark.parametrize('window_size', ['fft', 'acf'])
+    def test_demonstration_time_series(self, window_size):
         X, _ = demonstration_time_series()
-        assert compute_window_size(X, window_size_) == pytest.approx(window_size, abs=10)
+        assert compute_window_size(X, window_size) == pytest.approx(1400 / (25 / 2), abs=10)
 
     @pytest.mark.parametrize('nb_periods', [5, 10])
     def test_fft_simple(self, nb_periods):
         X = np.sin(np.linspace(0, nb_periods * 2 * np.pi, 5000))
         window_size = compute_window_size(X, window_size='fft')
         assert window_size == 5000/nb_periods
+
+    def test_acf_simple(self):
+        assert 0
