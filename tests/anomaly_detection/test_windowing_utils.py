@@ -292,6 +292,7 @@ class TestComputeWindowSize:
         rng = np.random.default_rng(42)
         period = rng.uniform(size=period_size)
         X = np.tile(period, nb_periods)
+
         # Check if X is correctly formatted
         assert X.shape == (period_size * nb_periods,)
         assert np.array_equal(X[:period_size], period)
