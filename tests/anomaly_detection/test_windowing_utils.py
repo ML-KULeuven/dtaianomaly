@@ -261,7 +261,7 @@ class TestComputeWindowSize:
         for i in range(1, 100):
             assert i == compute_window_size(np.array([1, 2, 3]), i)
 
-    @pytest.mark.parametrize('window_size', [1, 'fft', 'acf'])
+    @pytest.mark.parametrize('window_size', [1, 'fft', 'acf', 'suss'])
     def test_invalid_x(self, window_size):
         check_is_valid_window_size(window_size)
         assert not utils.is_valid_array_like([1, 2, 3, 4, '5'])
@@ -275,10 +275,15 @@ class TestComputeWindowSize:
         with pytest.raises(ValueError):
             compute_window_size(multivariate_time_series, 'fft')
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf'])
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'suss'])
     def test_demonstration_time_series(self, window_size):
         X, _ = demonstration_time_series()
-        assert compute_window_size(X, window_size) == pytest.approx(1400 / (25 / 2), abs=10)
+        assert compute_window_size(X, window_size, threshold=0.95) == pytest.approx(1400 / (25 / 2), abs=10)
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'suss'])
+    def test_no_window_size(self, window_size):
+        flat = np.ones(shape=1000)
+        assert compute_window_size(flat, window_size) == -1
 
     @pytest.mark.parametrize('nb_periods', [5, 10])
     def test_fft_simple(self, nb_periods):
@@ -299,3 +304,7 @@ class TestComputeWindowSize:
 
         window_size = compute_window_size(X, window_size='acf')
         assert window_size == period_size
+
+    def test_suss_exact_threshold(self):
+        X, _ = demonstration_time_series()
+        assert compute_window_size(X, 'suss', threshold=0.9437091537824681) == 104

@@ -173,8 +173,6 @@ class MatrixProfileDetector(BaseDetector):
         if not hasattr(self, 'window_size_'):
             raise NotFittedError('Call the fit function before making predictions!')
         if self.novelty:
-            if not hasattr(self, 'X_reference_'):
-                raise NotFittedError('Call the fit function before making predictions!')
             nb_attributes_test = 1 if len(X.shape) == 1 else X.shape[1]
             nb_attributes_reference = 1 if len(self.X_reference_.shape) == 1 else self.X_reference_.shape[1]
             if nb_attributes_reference != nb_attributes_test:

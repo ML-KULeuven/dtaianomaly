@@ -94,7 +94,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
     is not valid, a ValueError will be raised. Valid window sizes include:
 
     - a strictly positive integer
-    - a string from the set {``'fft'``, ``'acf'``}
+    - a string from the set {``'fft'``, ``'acf'``, ``'suss'``}
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
         if window_size <= 0:
             raise ValueError('An integer window size should be strictly positive.')
 
-    elif window_size not in ['fft', 'acf']:
+    elif window_size not in ['fft', 'acf', 'suss']:
         raise ValueError(f"Invalid window_size given: '{window_size}'.")
 
 
@@ -120,7 +120,8 @@ def compute_window_size(
         X: np.ndarray,
         window_size: Union[int, str],
         lower_bound: int = 10,
-        upper_bound: int = 1000) -> int:
+        upper_bound: int = 1000,
+        threshold: float = 0.89) -> int:
     """
     Compute the window size of the given time series [ermshaus2023window]_.
 
@@ -135,14 +136,18 @@ def compute_window_size(
         - ``int``: Simply return the given window size.
         - ``'fft'``: Compute the window size by selecting the dominant Fourier frequency.
         - ``'acf'``: Compute the window size as the leg with the highest autocorrelation.
+        - ``'suss'``: Computes the window size using the Summary Statistics Subsequence method [ermshaus2023clasp]_.
 
     lower_bound: int, default=10
         The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'`` or ``'acf'``.
+        equals ``'fft'``, ``'acf'`` or ``'suss'``.
 
     upper_bound: int, default=1000
         The lower bound on the automatically computed window size. Only used if ``window_size``
         equals ``'fft'`` or ``'acf'``.
+
+    threshold: float, default=0.89
+        The threshold on which the
 
     Returns
     -------
@@ -155,6 +160,10 @@ def compute_window_size(
        size selection in unsupervised time series analytics: A review and benchmark."
        International Workshop on Advanced Analytics and Learning on Temporal Data.
        Springer, Cham, 2023, doi: `10.1007/978-3-031-24378-3_6 <https://doi.org/10.1007/978-3-031-24378-3_6>`_
+
+    .. [ermshaus2023clasp] Ermshaus, Arik, Patrick Schäfer, and Ulf Leser. "ClaSP:
+       parameter-free time series segmentation." Data Mining and Knowledge Discovery
+       37.3 (2023): 1262-1300, doi: `10.1007/s10618-023-00923-x <https://doi.org/10.1007/s10618-023-00923-x>`_
     """
     # Check the input
     check_is_valid_window_size(window_size)
@@ -177,11 +186,12 @@ def compute_window_size(
     elif window_size == 'acf':
         return _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
-    else:  # Should not be reached
-        raise ValueError(f"Invalid window_size given: '{window_size}'.")
+    # Use SUSS to compute a window size
+    elif window_size == 'suss':
+        return _suss(X, lower_bound=lower_bound, threshold=threshold)
 
 
-def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000) -> int:
+def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L10
     fourier = np.fft.fft(X)
     freq = np.fft.fftfreq(X.shape[0], 1)
@@ -198,10 +208,13 @@ def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int = 10, upper_boun
                 window_sizes.append(window_size)
                 magnitudes.append(mag)
 
+    if len(window_sizes) == 0:
+        return -1
+
     return window_sizes[np.argmax(magnitudes)]
 
 
-def _highest_autocorrelation(X: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000):
+def _highest_autocorrelation(X: np.ndarray, lower_bound: int, upper_bound: int):
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L29
     acf_values = acf(X, fft=True, nlags=int(X.shape[0]/2))
 
@@ -213,3 +226,67 @@ def _highest_autocorrelation(X: np.ndarray, lower_bound: int = 10, upper_bound: 
         return -1
 
     return peaks[np.argmax(corrs)]
+
+
+def _suss(X: np.ndarray, lower_bound: int, threshold: float) -> int:
+    # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/suss.py#L25
+    # Implementation has been changed to remove pandas dependencies (in `suss_score`)
+
+    def suss_score(time_series, w):
+
+        # Compute the statistics in each window
+        windows = np.lib.stride_tricks.sliding_window_view(time_series, w)
+        local_stats = np.array([
+            windows.mean(axis=1) - global_mean,
+            windows.std(axis=1) - global_std,
+            (windows.max(axis=1) - windows.min(axis=1)) - global_min_max
+        ])
+
+        # Compute Euclidean distance between local and global stats
+        stats_diff = np.sqrt(np.sum(np.square(local_stats), axis=0)) / np.sqrt(w)
+        return np.mean(stats_diff)
+
+    if X.max() > X.min():
+        X = (X - X.min()) / (X.max() - X.min())
+
+    global_mean = np.mean(X)
+    global_std = np.std(X)
+    global_min_max = np.max(X) - np.min(X)
+
+    max_suss_score = suss_score(X, 1)
+    min_suss_score = suss_score(X, X.shape[0]-1)
+    if min_suss_score == max_suss_score:
+        return -1
+
+    # exponential search (to find window size interval)
+    exp = 0
+    while True:
+        window_size = 2 ** exp
+
+        if window_size < lower_bound:
+            exp += 1
+            continue
+
+        score = 1 - (suss_score(X, window_size) - min_suss_score) / (max_suss_score - min_suss_score)
+
+        if score > threshold:
+            break
+
+        exp += 1
+
+    lbound, ubound = max(lower_bound, 2 ** (exp - 1)), min(2 ** exp + 1, X.shape[0]-1)
+
+    # binary search (to find window size in interval)
+    while lbound <= ubound:
+        window_size = int((lbound + ubound) / 2)
+        score = 1 - (suss_score(X, window_size) - min_suss_score) / (max_suss_score - min_suss_score)
+
+        if score < threshold:
+            lbound = window_size+1
+        elif score > threshold:
+            ubound = window_size-1
+        else:
+            lbound = window_size
+            break
+
+    return 2 * lbound
