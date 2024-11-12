@@ -244,8 +244,8 @@ BaseDetector
 | |check_box| Does the file contain a class named as the anomaly detector, which inherits :py:class:`~dtaianomaly.anomaly_detection.BaseDetector`?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.anomaly_detection.BaseDetector.fit()` method?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()` method?
 | |check_box| Did you add the anomaly detector in ``__all__`` of the ``dtaianomaly/anomaly_detection/__init__.py`` file?
 | |check_box| Can you load the anomaly detector via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``detector_entry()`` function)?
 
@@ -274,7 +274,7 @@ LazyDataLoader
 | |check_box| Does the file contain a class named as the data loader, which inherits :py:class:`~dtaianomaly.data.LazyDataLoader`?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.data.LazyDataLoader._load()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.data.LazyDataLoader._load()` method?
 | |check_box| Did you add the data loader in ``__all__`` of the ``dtaianomaly/data/__init__.py`` file?
 | |check_box| Can you load the data loader via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``data_entry()`` function)?
 
@@ -302,8 +302,8 @@ Preprocessor
 | |check_box| Does the file contain a class named as the preprocessor, which inherits :py:class:`~dtaianomaly.preprocessing.Preprocessor`?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.preprocessing.Preprocessor._fit()` method?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.preprocessing.Preprocessor._transform()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._fit()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._transform()` method?
 | |check_box| Did you add the preprocessor in ``__all__`` of the ``dtaianomaly/preprocessing/__init__.py`` file?
 | |check_box| Can you load the preprocessor via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``preprocessor_entry()`` function)?
 
@@ -331,7 +331,7 @@ Thresholding
 | |check_box| Does the file contain a class named as the thresholder, which inherits :py:class:`~dtaianomaly.thresholding.Thresholder`?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.thresholding.Thresholder.threshold()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.thresholding.Thresholder.threshold()` method?
 | |check_box| Did you add the thresholder in ``__all__`` of the ``dtaianomaly/thresholding/__init__.py`` file?
 | |check_box| Can you load the thresholder via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the `threshold_entry()`` function)?
 
@@ -358,7 +358,7 @@ Evaluation Metric
 | |check_box| Does the file contain a class named as the evaluation metric, which inherits :py:class:`~dtaianomaly.evaluation.BinaryMetric` or :py:class:`~dtaianomaly.evaluation.ProbaMetric`, depending on if the metric accepts binary anomaly labels or continuous anomaly probabilities?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:dtaianomaly:`~dtaianomaly.evaluation.Metric.compute()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.evaluation.Metric.compute()` method?
 | |check_box| Did you add the metric in ``__all__`` of the ``dtaianomaly/evaluation/__init__.py`` file?
 | |check_box| Can you load the metric via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the `metric_entry()`` function)?
 

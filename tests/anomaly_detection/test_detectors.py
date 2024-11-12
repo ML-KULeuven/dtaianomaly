@@ -110,7 +110,7 @@ class TestAnomalyDetectors:
     (anomaly_detection.LocalOutlierFactor, {}),
     (anomaly_detection.MatrixProfileDetector, {}),
 ])
-@pytest.mark.parametrize('window_size', [15, 'fft', 'acf', 'suss'])
+@pytest.mark.parametrize('window_size', [15, 'fft', 'acf', 'mwf', 'suss'])
 class TestAnomalyDetectorsAutomaticWindowSize:
 
     def test(self, detector_class, window_size, additional_args, univariate_time_series):

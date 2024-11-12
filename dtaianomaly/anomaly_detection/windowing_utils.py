@@ -94,7 +94,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
     is not valid, a ValueError will be raised. Valid window sizes include:
 
     - a strictly positive integer
-    - a string from the set {``'fft'``, ``'acf'``, ``'suss'``}
+    - a string from the set {``'fft'``, ``'acf'``, ``'mwf'``, ``'suss'``}
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
         if window_size <= 0:
             raise ValueError('An integer window size should be strictly positive.')
 
-    elif window_size not in ['fft', 'acf', 'suss']:
+    elif window_size not in ['fft', 'acf', 'mwf', 'suss']:
         raise ValueError(f"Invalid window_size given: '{window_size}'.")
 
 
@@ -136,18 +136,19 @@ def compute_window_size(
         - ``int``: Simply return the given window size.
         - ``'fft'``: Compute the window size by selecting the dominant Fourier frequency.
         - ``'acf'``: Compute the window size as the leg with the highest autocorrelation.
+        - ``'mwf'``: Computes the window size using the Multi-Window-Finder method [shima2021multi]_.
         - ``'suss'``: Computes the window size using the Summary Statistics Subsequence method [ermshaus2023clasp]_.
 
     lower_bound: int, default=10
         The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'``, ``'acf'`` or ``'suss'``.
+        equals ``'fft'``, ``'acf'``, ``'mwf'`` or ``'suss'``.
 
     upper_bound: int, default=1000
         The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'`` or ``'acf'``.
+        equals ``'fft'``, ``'acf'``, or ``'mwf'``.
 
     threshold: float, default=0.89
-        The threshold on which the
+        The threshold for selecting the optimal window size using ``'suss'``.
 
     Returns
     -------
@@ -160,6 +161,9 @@ def compute_window_size(
        size selection in unsupervised time series analytics: A review and benchmark."
        International Workshop on Advanced Analytics and Learning on Temporal Data.
        Springer, Cham, 2023, doi: `10.1007/978-3-031-24378-3_6 <https://doi.org/10.1007/978-3-031-24378-3_6>`_
+
+    .. [shima2021multi] Imani, Shima, and Eamonn Keogh. "Multi-window-finder: domain
+       agnostic window size for time series data." Proceedings of the MileTS 21 (2021).
 
     .. [ermshaus2023clasp] Ermshaus, Arik, Patrick Schäfer, and Ulf Leser. "ClaSP:
        parameter-free time series segmentation." Data Mining and Knowledge Discovery
@@ -185,6 +189,9 @@ def compute_window_size(
     # Use the acf to compute a window size
     elif window_size == 'acf':
         return _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
+
+    elif window_size == 'mwf':
+        return _mwf(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     # Use SUSS to compute a window size
     elif window_size == 'suss':
@@ -228,11 +235,42 @@ def _highest_autocorrelation(X: np.ndarray, lower_bound: int, upper_bound: int):
     return peaks[np.argmax(corrs)]
 
 
+def _mwf(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
+    # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/mwf.py#L16
+
+    def moving_mean(time_series: np.ndarray, w: int):
+        moving_avg = np.cumsum(time_series, dtype=float)
+        moving_avg[w:] = moving_avg[w:] - moving_avg[:-w]
+        return moving_avg[w - 1:] / w
+
+    all_averages = []
+    window_sizes = list(range(lower_bound, upper_bound))
+
+    for window_size in window_sizes:
+        all_averages.append(np.array(moving_mean(X, window_size)))
+
+    moving_average_residuals = []
+    for i in range(len(window_sizes)):
+        moving_avg = all_averages[i][:len(all_averages[-1])]
+        moving_avg_residual = np.log(abs(moving_avg - moving_avg.mean()).sum())
+        moving_average_residuals.append(moving_avg_residual)
+
+    b = (np.diff(np.sign(np.diff(moving_average_residuals))) > 0).nonzero()[0] + 1  # local min
+
+    if len(b) == 0:
+        return -1
+    if len(b) < 3:
+        return window_sizes[b[0]]
+
+    w = np.mean([window_sizes[b[i]] / (i + 1) for i in range(3)])
+    return int(w)
+
+
 def _suss(X: np.ndarray, lower_bound: int, threshold: float) -> int:
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/suss.py#L25
     # Implementation has been changed to remove pandas dependencies (in `suss_score`)
 
-    def suss_score(time_series, w):
+    def suss_score(time_series: np.ndarray, w: int):
 
         # Compute the statistics in each window
         windows = np.lib.stride_tricks.sliding_window_view(time_series, w)
