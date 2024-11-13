@@ -13,26 +13,32 @@ from .BaseDetector import BaseDetector, load_detector
 from .windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
+from ._PyOD import PyODAnomalyDetector
 from .IsolationForest import IsolationForest
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
 
 __all__ = [
+    # Base
     'BaseDetector',
     'load_detector',
 
+    # Sliding window
     'sliding_window',
     'reverse_sliding_window',
     'check_is_valid_window_size',
     'compute_window_size',
 
+    # Baselines
     'AlwaysNormal',
     'AlwaysAnomalous',
     'RandomDetector',
 
-    'MatrixProfileDetector',
+    # Detectors
     'IsolationForest',
     'LocalOutlierFactor',
-    'MedianMethod'
+    'MatrixProfileDetector',
+    'MedianMethod',
+    'PyODAnomalyDetector'
 ]
