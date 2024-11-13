@@ -30,8 +30,8 @@ class IsolationForest(PyODAnomalyDetector):
     ----------
     window_size_: int
         The effectively used window size for this anomaly detector
-    pyod_detector_ : SklearnIsolationForest
-        An Isolation Forest detector of Sklearn. Only available upon fitting
+    pyod_detector_ : IForest
+        An Isolation Forest detector of PyOD
 
     Examples
     --------

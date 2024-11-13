@@ -10,10 +10,12 @@ Added
 ^^^^^
 - Added option to automatically compute the window size for various anomaly detectors
   using Fourier Transform, Autocorrelation, Multi-Window Finder, or Summary Statistics Subsequence.
+- Implemented ``KNearestNeighbor`` anomaly detector.
 
 Changed
 ^^^^^^^
 - Updated documentation to contain changelog and contributing information
+- Rely on PyOD for non-time series anomaly detectors (instead of scikit-learn before)
 
 Fixed
 ^^^^^

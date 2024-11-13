@@ -308,6 +308,9 @@ class TestInterpretPreprocessors:
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 15}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 25, 'stride': 5}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 35, 'n_estimators': 100}),
+    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 15}),
+    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 25, 'stride': 100}),
+    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 35, 'n_neighbors': 8}),
     (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 15}),
     (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 25, 'stride': 5}),
     (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 35, 'n_neighbors': 4}),
@@ -377,6 +380,7 @@ class TestInterpretEntries:
     # Metrics
     # Detectors
     (detector_entry, anomaly_detection.IsolationForest),
+    (detector_entry, anomaly_detection.KNearestNeighbors),
     (detector_entry, anomaly_detection.LocalOutlierFactor),
     (detector_entry, anomaly_detection.MatrixProfileDetector),
     (detector_entry, anomaly_detection.MedianMethod),

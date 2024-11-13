@@ -255,6 +255,9 @@ def detector_entry(entry):
     elif detector_type == 'MedianMethod':
         return anomaly_detection.MedianMethod(**entry_without_type)
 
+    elif detector_type == 'KNearestNeighbors':
+        return anomaly_detection.KNearestNeighbors(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 

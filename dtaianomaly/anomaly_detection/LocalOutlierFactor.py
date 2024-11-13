@@ -32,8 +32,8 @@ class LocalOutlierFactor(PyODAnomalyDetector):
     ----------
     window_size_: int
         The effectively used window size for this anomaly detector
-    pyod_detector_ : SklearnLocalOutlierFactor
-        A LOF-detector of Sklearn. Only available upon fitting
+    pyod_detector_ : LOF
+        A LOF-detector of PyOD
 
     Examples
     --------
