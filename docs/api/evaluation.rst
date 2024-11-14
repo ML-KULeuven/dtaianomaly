@@ -17,3 +17,4 @@ Evaluation module
 .. autoclass:: dtaianomaly.evaluation.PointAdjustedFBeta
 .. autoclass:: dtaianomaly.evaluation.AreaUnderPR
 .. autoclass:: dtaianomaly.evaluation.AreaUnderROC
+.. autoclass:: dtaianomaly.evaluation.BestThresholdMetric

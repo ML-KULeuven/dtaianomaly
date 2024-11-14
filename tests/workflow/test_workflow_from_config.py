@@ -210,6 +210,29 @@ class TestInterpretMetrics:
         assert isinstance(metrics[0], evaluation.Precision)
         assert isinstance(metrics[1], evaluation.Recall)
 
+    def test_threshold_metric_no_thresholder(self):
+        with pytest.raises(ValueError):
+            metric_entry({
+                'type': 'ThresholdMetric',
+                'no_thresholder': {'type': 'FixedCutoff'},
+                'metric': {"type": "Precision"}
+            })
+
+    def test_threshold_metric_no_metric(self):
+        with pytest.raises(ValueError):
+            metric_entry({
+                'type': 'ThresholdMetric',
+                'thresholder': {'type': 'FixedCutoff'},
+                'no_metric': {"type": "Precision"}
+            })
+
+    def test_best_threshold_metric_no_metric(self):
+        with pytest.raises(ValueError):
+            metric_entry({
+                'type': 'BestThresholdMetric',
+                'no_metric': {"type": "Precision"}
+            })
+
 
 class TestInterpretDetectors:
 
@@ -304,6 +327,13 @@ class TestInterpretPreprocessors:
     (metric_entry, evaluation.PointAdjustedRecall, {}),
     (metric_entry, evaluation.PointAdjustedFBeta, {}),
     (metric_entry, evaluation.PointAdjustedFBeta, {'beta': 2.0}),
+    (metric_entry, evaluation.ThresholdMetric, {
+        'thresholder': {"type": "FixedCutoff", 'cutoff': 0.9},
+        'metric': {"type": "Precision"}
+    }),
+    (metric_entry, evaluation.BestThresholdMetric, {
+        'metric': {"type": "Precision"}
+    }),
     # Detectors
     (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
     (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),
@@ -348,7 +378,7 @@ class TestInterpretEntries:
         read_object = entry_function(entry_copy)
         assert isinstance(read_object, object_type)
         for key, value in entry.items():
-            if key == 'base_preprocessors':
+            if key in ['base_preprocessors', 'metric', 'thresholder']:
                 pass  # Simply assume it is correct, because test would become so difficult that errors can sneak in
             elif hasattr(read_object, key):
                 assert getattr(read_object, key) == value
@@ -382,6 +412,8 @@ class TestInterpretEntries:
     # Dataloaders
     (data_entry, data.UCRLoader),
     # Metrics
+    (metric_entry, evaluation.ThresholdMetric),
+    (metric_entry, evaluation.BestThresholdMetric),
     # Detectors
     (detector_entry, anomaly_detection.IsolationForest),
     (detector_entry, anomaly_detection.KNearestNeighbors),

@@ -72,7 +72,7 @@ class ThresholdMetric(ProbaMetric):
         Instance of the desired `Metric` class
     """
     thresholder: Thresholding
-    binary_metric: BinaryMetric
+    metric: BinaryMetric
 
     def __init__(self, thresholder: Thresholding, metric: BinaryMetric) -> None:
         if not isinstance(thresholder, Thresholding):

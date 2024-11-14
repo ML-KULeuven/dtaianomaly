@@ -2,7 +2,8 @@
 import pytest
 import numpy as np
 
-from dtaianomaly.evaluation.point_adjusted_binary_metric import point_adjust, PointAdjustedPrecision, PointAdjustedRecall, PointAdjustedFBeta
+from dtaianomaly.evaluation.point_adjusted_binary_metrics import point_adjust, PointAdjustedPrecision, PointAdjustedRecall, PointAdjustedFBeta, PointAdjusted
+from dtaianomaly.evaluation.simple_proba_metrics import AreaUnderROC
 
 
 class TestPointAdjusted:
@@ -27,6 +28,14 @@ class TestPointAdjusted:
 
 
 class TestPointAdjustedPrecision:
+
+    def test_string_metric(self):
+        with pytest.raises(TypeError):
+            PointAdjusted('Precision()')
+
+    def test_proba_metric(self):
+        with pytest.raises(TypeError):
+            PointAdjusted(AreaUnderROC())
 
     def test(self):
         y_true = np.array([1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1])

@@ -12,6 +12,8 @@ Added
   using Fourier Transform, Autocorrelation, Multi-Window Finder, or Summary Statistics Subsequence.
 - Implemented ``KNearestNeighbor`` anomaly detector.
 - Implemented point-adjusted precision, recall and FBeta.
+- Implemented ``BestThresholdMetric``, a ``ProbaMetric`` which computes the best value for
+  a ``BinaryMetric`` over all thresholds.
 
 Changed
 ^^^^^^^

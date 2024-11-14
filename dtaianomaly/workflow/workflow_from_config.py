@@ -220,6 +220,22 @@ def metric_entry(entry):
     elif metric_type == 'PointAdjustedFBeta':
         return evaluation.PointAdjustedFBeta(**entry_without_type)
 
+    elif metric_type == 'ThresholdMetric':
+        if len(entry_without_type) != 2:
+            raise TypeError(f'BestThresholdMetric must have thresholder and metric as key: {entry}')
+        if 'thresholder' not in entry:
+            raise ValueError(f'BestThresholdMetric must have thresholder as key: {entry}')
+        if 'metric' not in entry:
+            raise ValueError(f'BestThresholdMetric must have metric as key: {entry}')
+        return evaluation.ThresholdMetric(thresholder=threshold_entry(entry['thresholder']), metric=metric_entry(entry['metric']))
+
+    elif metric_type == 'BestThresholdMetric':
+        if len(entry_without_type) != 1:
+            raise TypeError(f'BestThresholdMetric must have metric as key: {entry}')
+        if 'metric' not in entry:
+            raise ValueError(f'BestThresholdMetric must have metric as key: {entry}')
+        return evaluation.BestThresholdMetric(metric=metric_entry(entry['metric']))
+
     else:
         raise ValueError(f'Invalid metric entry: {entry}')
 
