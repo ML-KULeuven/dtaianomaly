@@ -11,6 +11,7 @@ Added
 - Added option to automatically compute the window size for various anomaly detectors
   using Fourier Transform, Autocorrelation, Multi-Window Finder, or Summary Statistics Subsequence.
 - Implemented ``KNearestNeighbor`` anomaly detector.
+- Implemented point-adjusted precision, recall and FBeta.
 
 Changed
 ^^^^^^^

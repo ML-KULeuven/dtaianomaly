@@ -25,6 +25,7 @@ class Thresholding(PrettyPrintable):
             1 indicates anomalous.
         """
 
+
 class FixedCutoff(Thresholding):
     """
     Thresholding based on a fixed cut-off.

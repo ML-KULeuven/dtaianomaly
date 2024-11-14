@@ -13,9 +13,10 @@ The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
-   :glob:
 
-   getting_started/*
+   getting_started/installation
+   getting_started/examples
+   getting_started/data
 
 .. toctree::
    :maxdepth: 1

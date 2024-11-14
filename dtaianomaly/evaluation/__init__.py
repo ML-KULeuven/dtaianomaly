@@ -12,6 +12,7 @@ a :py:class:`~dtaianomaly.workflow.Worfklow`.
 from .metrics import Metric, BinaryMetric, ProbaMetric, ThresholdMetric
 from .simple_binary_metrics import Precision, Recall, FBeta
 from .simple_proba_metrics import AreaUnderROC, AreaUnderPR
+from .point_adjusted_binary_metric import PointAdjustedPrecision, PointAdjustedRecall, PointAdjustedFBeta
 
 __all__ = [
     'Metric',
@@ -22,5 +23,8 @@ __all__ = [
     'Recall',
     'FBeta',
     'AreaUnderPR',
-    'AreaUnderROC'
+    'AreaUnderROC',
+    'PointAdjustedPrecision',
+    'PointAdjustedRecall',
+    'PointAdjustedFBeta'
 ]

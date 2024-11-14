@@ -300,6 +300,10 @@ class TestInterpretPreprocessors:
     (metric_entry, evaluation.FBeta, {'beta': 2.0}),
     (metric_entry, evaluation.AreaUnderROC, {}),
     (metric_entry, evaluation.AreaUnderPR, {}),
+    (metric_entry, evaluation.PointAdjustedPrecision, {}),
+    (metric_entry, evaluation.PointAdjustedRecall, {}),
+    (metric_entry, evaluation.PointAdjustedFBeta, {}),
+    (metric_entry, evaluation.PointAdjustedFBeta, {'beta': 2.0}),
     # Detectors
     (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
     (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),

@@ -207,6 +207,19 @@ def metric_entry(entry):
             raise TypeError(f'Too many parameters given for entry: {entry}')
         return evaluation.AreaUnderPR()
 
+    elif metric_type == 'PointAdjustedPrecision':
+        if len(entry_without_type) > 0:
+            raise TypeError(f'Too many parameters given for entry: {entry}')
+        return evaluation.PointAdjustedPrecision()
+
+    elif metric_type == 'PointAdjustedRecall':
+        if len(entry_without_type) > 0:
+            raise TypeError(f'Too many parameters given for entry: {entry}')
+        return evaluation.PointAdjustedRecall()
+
+    elif metric_type == 'PointAdjustedFBeta':
+        return evaluation.PointAdjustedFBeta(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid metric entry: {entry}')
 

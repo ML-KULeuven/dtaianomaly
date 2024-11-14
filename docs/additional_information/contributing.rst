@@ -358,9 +358,9 @@ Evaluation Metric
 | |check_box| Does the file contain a class named as the evaluation metric, which inherits :py:class:`~dtaianomaly.evaluation.BinaryMetric` or :py:class:`~dtaianomaly.evaluation.ProbaMetric`, depending on if the metric accepts binary anomaly labels or continuous anomaly probabilities?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.evaluation.Metric.compute()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.evaluation.Metric._compute()` method?
 | |check_box| Did you add the metric in ``__all__`` of the ``dtaianomaly/evaluation/__init__.py`` file?
-| |check_box| Can you load the metric via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the `metric_entry()`` function)?
+| |check_box| Can you load the metric via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the `metric_entry()`` function)?
 
 .. rubric:: Test the evaluation metric
 
