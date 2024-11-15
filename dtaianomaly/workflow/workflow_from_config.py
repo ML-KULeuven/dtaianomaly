@@ -287,6 +287,9 @@ def detector_entry(entry):
     elif detector_type == 'KNearestNeighbors':
         return anomaly_detection.KNearestNeighbors(**entry_without_type)
 
+    elif detector_type == 'HistogramBasedOutlierScore':
+        return anomaly_detection.HistogramBasedOutlierScore(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 

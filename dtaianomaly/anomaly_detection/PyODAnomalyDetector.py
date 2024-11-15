@@ -11,7 +11,7 @@ from dtaianomaly import utils
 
 class PyODAnomalyDetector(BaseDetector, abc.ABC):
     """
-    Anomaly detection based on the PyOD library.
+    Abstract class for anomaly detection based on the PyOD library.
 
     PyOD [zhao2019pyod]_ is a Python library for detecting anomalies in multivariate
     data. The anomaly detectors in PyOD typically deal with tabular data, which assumes

@@ -13,7 +13,8 @@ from .BaseDetector import BaseDetector, load_detector
 from .windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
-from ._PyOD import PyODAnomalyDetector
+from .PyODAnomalyDetector import PyODAnomalyDetector
+from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
 from .IsolationForest import IsolationForest
 from .KNearestNeighbors import KNearestNeighbors
 from .LocalOutlierFactor import LocalOutlierFactor
@@ -37,6 +38,7 @@ __all__ = [
     'RandomDetector',
 
     # Detectors
+    'HistogramBasedOutlierScore',
     'IsolationForest',
     'KNearestNeighbors',
     'LocalOutlierFactor',

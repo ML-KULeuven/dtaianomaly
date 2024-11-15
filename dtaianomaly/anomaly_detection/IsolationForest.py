@@ -1,6 +1,6 @@
 
 from pyod.models.iforest import IForest
-from dtaianomaly.anomaly_detection._PyOD import PyODAnomalyDetector
+from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
 class IsolationForest(PyODAnomalyDetector):

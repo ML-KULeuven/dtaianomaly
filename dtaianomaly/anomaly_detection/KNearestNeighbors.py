@@ -1,7 +1,7 @@
 
 
 from pyod.models.knn import KNN
-from dtaianomaly.anomaly_detection._PyOD import PyODAnomalyDetector
+from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
 class KNearestNeighbors(PyODAnomalyDetector):

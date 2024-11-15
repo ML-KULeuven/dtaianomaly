@@ -2,4 +2,5 @@
 ==========================
 
 .. autoclass:: dtaianomaly.anomaly_detection.KNearestNeighbors
+   :inherited-members:
    :members:

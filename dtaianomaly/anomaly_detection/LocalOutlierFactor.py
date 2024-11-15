@@ -1,6 +1,6 @@
 
 from pyod.models.lof import LOF
-from dtaianomaly.anomaly_detection._PyOD import PyODAnomalyDetector
+from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
 class LocalOutlierFactor(PyODAnomalyDetector):
