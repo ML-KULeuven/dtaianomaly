@@ -7,6 +7,7 @@ Data module
     :members:
 
 .. autoclass:: dtaianomaly.data.DataSet
+    :members:
 
 Synthetic data
 --------------
