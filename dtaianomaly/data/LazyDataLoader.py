@@ -1,26 +1,10 @@
 import abc
 import os
-import numpy as np
 from pathlib import Path
-from typing import NamedTuple, List, Type, Union
+from typing import List, Type, Union
 
+from dtaianomaly.data.DataSet import DataSet
 from dtaianomaly.PrettyPrintable import PrettyPrintable
-
-
-class DataSet(NamedTuple):
-    """
-    A class for time series anomaly detection data sets. These
-    consist of the raw data itself and the ground truth labels.
-
-    Parameters
-    ----------
-    x: array-like of shape (n_samples, n_features)
-        The time series.
-    y: array-like of shape (n_samples)
-        The ground truth anomaly labels.
-    """
-    x: np.ndarray
-    y: np.ndarray
 
 
 class LazyDataLoader(PrettyPrintable):

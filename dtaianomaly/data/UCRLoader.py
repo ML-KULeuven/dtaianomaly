@@ -1,6 +1,7 @@
 
 import numpy as np
-from dtaianomaly.data.data import LazyDataLoader, DataSet
+from dtaianomaly.data.DataSet import DataSet
+from dtaianomaly.data.LazyDataLoader import LazyDataLoader
 
 
 class UCRLoader(LazyDataLoader):
