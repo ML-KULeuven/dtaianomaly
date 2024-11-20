@@ -1,6 +1,6 @@
 
 from dtaianomaly.anomaly_detection import IsolationForest, LocalOutlierFactor
-from dtaianomaly.evaluation import AreaUnderROC, Precision, Recall, ThresholdMetric
+from dtaianomaly.evaluation import AreaUnderROC, Precision, ThresholdMetric
 from dtaianomaly.thresholding import FixedCutoff, ContaminationRate
 from dtaianomaly.preprocessing import Identity, ZNormalizer, ChainedPreprocessor
 from dtaianomaly.workflow.utils import build_pipelines, convert_to_proba_metrics, convert_to_list

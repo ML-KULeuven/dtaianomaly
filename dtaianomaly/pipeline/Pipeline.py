@@ -36,7 +36,7 @@ class Pipeline(BaseDetector):
             raise TypeError("preprocessor expects a Preprocessor object or list of Preprocessors")
         if not isinstance(detector, BaseDetector):
             raise TypeError("detector expects a BaseDetector object")
-        super().__init__()        
+        super().__init__(detector.supervision)
         
         if isinstance(preprocessor, list):
             self.preprocessor = ChainedPreprocessor(preprocessor)

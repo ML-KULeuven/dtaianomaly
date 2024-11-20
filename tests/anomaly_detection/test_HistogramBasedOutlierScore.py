@@ -1,8 +1,12 @@
 
-from dtaianomaly.anomaly_detection import HistogramBasedOutlierScore
+from dtaianomaly.anomaly_detection import HistogramBasedOutlierScore, Supervision
 
 
 class TestHistogramBasedOutlierScore:
+
+    def test_supervision(self):
+        detector = HistogramBasedOutlierScore(1)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_str(self):
         assert str(HistogramBasedOutlierScore(5)) == "HistogramBasedOutlierScore(window_size=5)"

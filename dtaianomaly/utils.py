@@ -75,7 +75,7 @@ def is_univariate(X: np.ndarray) -> bool:
     Parameters
     ----------
     X: array-like of shape (n_samples, n_attributes)
-        The time series data to check if it is multivariate.
+        The time series data to check if it is univariate.
 
     Returns
     -------
@@ -83,9 +83,25 @@ def is_univariate(X: np.ndarray) -> bool:
         True if and only if the given time series has only one dimension,
         or if the second dimension of the time series is of size 1.
     """
+    return get_dimension(X) == 1
+
+
+def get_dimension(X: np.ndarray) -> int:
+    """
+    Get the dimension of the given array.
+
+    Parameters
+    ----------
+    X: array-like of shape (n_samples, n_attributes)
+        The time series data to get the dimension from
+
+    Returns
+    -------
+    n_attributes: int
+        The number of attributes in the given time series.
+    """
     X = np.array(X)
     if len(X.shape) == 1:
-        return True
-
+        return 1
     else:
-        return X.shape[1] == 1
+        return X.shape[1]

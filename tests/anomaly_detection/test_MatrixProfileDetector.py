@@ -1,10 +1,14 @@
 
 import pytest
 from sklearn.exceptions import NotFittedError
-from dtaianomaly.anomaly_detection import MatrixProfileDetector
+from dtaianomaly.anomaly_detection import MatrixProfileDetector, Supervision
 
 
 class TestMatrixProfileDetector:
+
+    def test_supervision(self):
+        detector = MatrixProfileDetector(1)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_initialize_non_int_window_size(self):
         with pytest.raises(ValueError):

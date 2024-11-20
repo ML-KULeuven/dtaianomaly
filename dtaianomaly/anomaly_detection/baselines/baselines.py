@@ -2,7 +2,7 @@
 import numpy as np
 from typing import Optional
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
 
 class AlwaysNormal(BaseDetector):
@@ -11,6 +11,9 @@ class AlwaysNormal(BaseDetector):
     This detector should only be used for sanity-check, and not to effectively
     detect anomalies in time series data.
     """
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'AlwaysNormal':
         """
@@ -60,6 +63,9 @@ class AlwaysAnomalous(BaseDetector):
     This detector should only be used for sanity-check, and not to effectively
     detect anomalies in time series data.
     """
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'AlwaysAnomalous':
         """
@@ -117,6 +123,7 @@ class RandomDetector(BaseDetector):
     seed: Optional[int]
 
     def __init__(self, seed: Optional[int] = None):
+        super().__init__(Supervision.UNSUPERVISED)
         self.seed = seed
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'RandomDetector':

@@ -3,11 +3,14 @@ import os
 import pytest
 import numpy as np
 
-from dtaianomaly.anomaly_detection import BaseDetector, load_detector, baselines
+from dtaianomaly.anomaly_detection import BaseDetector, load_detector, baselines, Supervision
 from dtaianomaly import utils
 
 
 class InvalidConstantDecisionFunctionForPredictProba(BaseDetector):
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
 
     def fit(self, X, y=None):
         return self

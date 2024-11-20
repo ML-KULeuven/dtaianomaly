@@ -4,7 +4,7 @@ import numpy as np
 from typing import Optional, Union
 from sklearn.exceptions import NotFittedError
 from pyod.models.base import BaseDetector as PyODBaseDetector
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 from dtaianomaly import utils
 
@@ -49,6 +49,8 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
     pyod_detector_: PyODBaseDetector
 
     def __init__(self, window_size: Union[str, int], stride: int = 1, **kwargs):
+        super().__init__(Supervision.UNSUPERVISED)
+
         check_is_valid_window_size(window_size)
 
         if not isinstance(stride, int) or isinstance(stride, bool):

@@ -1,13 +1,12 @@
 
 import pytest
-import numpy as np
 
 from dtaianomaly.workflow import Workflow
 from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_time_series
 from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
 from dtaianomaly.preprocessing import Identity, ZNormalizer, Preprocessor
-from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector
+from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision
 
 
 class TestWorkflowInitialization:
@@ -284,6 +283,9 @@ class PreprocessorError(Preprocessor):
 
 
 class DetectorError(BaseDetector):
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
 
     def fit(self, X, y=None):
         return self

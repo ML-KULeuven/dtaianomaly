@@ -242,6 +242,7 @@ BaseDetector
 
 | |check_box| Have you added a ``.py`` in ``dtaianomaly/anomaly_detection`` named identical to the anomaly detector?
 | |check_box| Does the file contain a class named as the anomaly detector, which inherits :py:class:`~dtaianomaly.anomaly_detection.BaseDetector`?
+| |check_box| Does the constructor call ``super().__init__(Supervision)`` with the correct supervision type?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()` method?

@@ -1,8 +1,12 @@
 
-from dtaianomaly.anomaly_detection import KNearestNeighbors
+from dtaianomaly.anomaly_detection import KNearestNeighbors, Supervision
 
 
 class TestKNearestNeighbors:
+
+    def test_supervision(self):
+        detector = KNearestNeighbors(1)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_str(self):
         assert str(KNearestNeighbors(5)) == "KNearestNeighbors(window_size=5)"

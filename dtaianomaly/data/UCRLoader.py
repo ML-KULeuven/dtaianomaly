@@ -28,4 +28,4 @@ class UCRLoader(LazyDataLoader):
         y = np.zeros(shape=X.shape, dtype=np.int8)
         y[onset:offset] = 1
 
-        return DataSet(x=X, y=y)
+        return DataSet(X_test=X, y_test=y)

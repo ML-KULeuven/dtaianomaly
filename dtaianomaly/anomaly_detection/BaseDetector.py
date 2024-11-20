@@ -1,12 +1,27 @@
 import abc
 import os.path
 import pickle
+import enum
 import numpy as np
 from pathlib import Path
 from typing import Optional, Union
 
 from dtaianomaly import utils
 from dtaianomaly.PrettyPrintable import PrettyPrintable
+
+
+class Supervision(enum.Enum):
+    """
+    An enum for the different supervision types for anomaly detectors.
+    Valid supervision types are:
+
+    - ``Unsupervised``: the anomaly detector does not need any labels or training data.
+    - ``Semi-supervised``: The anomaly detector requires *normal* training data, but no training labels.
+    - ``Supervised``: The anomaly detector requires both training data and training labels. The training data may contain anomalies.
+    """
+    UNSUPERVISED = 1
+    SEMI_SUPERVISED = 2
+    SUPERVISED = 3
 
 
 class BaseDetector(PrettyPrintable):
@@ -17,7 +32,18 @@ class BaseDetector(PrettyPrintable):
     specific anomaly detectors. User-defined detectors
     can be used throughout the ``dtaianomaly`` by extending
     this base class.
+
+    Parameters
+    ----------
+    supervision: Supervision
+        The type of supervision this anomaly detector requires.
     """
+    supervision: Supervision
+
+    def __init__(self, supervision: Supervision):
+        if not isinstance(supervision, Supervision):
+            raise TypeError("'supervision' should be a valid 'Supervision' type!")
+        self.supervision = supervision
 
     @abc.abstractmethod
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'BaseDetector':

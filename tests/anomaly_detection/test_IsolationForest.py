@@ -1,8 +1,12 @@
 
-from dtaianomaly.anomaly_detection import IsolationForest
+from dtaianomaly.anomaly_detection import IsolationForest, Supervision
 
 
 class TestIsolationForest:
+
+    def test_supervision(self):
+        detector = IsolationForest(1)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_str(self):
         assert str(IsolationForest(5)) == "IsolationForest(window_size=5)"

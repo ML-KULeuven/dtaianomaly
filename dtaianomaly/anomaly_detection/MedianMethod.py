@@ -3,7 +3,7 @@ import numpy as np
 from typing import Optional
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
 
 class MedianMethod(BaseDetector):
@@ -51,7 +51,7 @@ class MedianMethod(BaseDetector):
     neighborhood_size_after: Optional[int]
 
     def __init__(self, neighborhood_size_before: int, neighborhood_size_after: Optional[int] = None):
-        super().__init__()
+        super().__init__(Supervision.UNSUPERVISED)
 
         if not isinstance(neighborhood_size_before, int) or isinstance(neighborhood_size_before, bool):
             raise TypeError("`neighborhood_size_before` should be an integer")

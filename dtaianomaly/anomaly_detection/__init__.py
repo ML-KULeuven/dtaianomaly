@@ -9,7 +9,7 @@ We refer to the `documentation <https://dtaianomaly.readthedocs.io/en/stable/get
 for more information regarding detecting anomalies using ``dtaianomaly``.
 """
 
-from .BaseDetector import BaseDetector, load_detector
+from .BaseDetector import BaseDetector, Supervision, load_detector
 from .windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
@@ -24,6 +24,7 @@ from .MedianMethod import MedianMethod
 __all__ = [
     # Base
     'BaseDetector',
+    'Supervision',
     'load_detector',
 
     # Sliding window

@@ -1,8 +1,12 @@
 
-from dtaianomaly.anomaly_detection import LocalOutlierFactor
+from dtaianomaly.anomaly_detection import LocalOutlierFactor, Supervision
 
 
 class TestLocalOutlierFactor:
+
+    def test_supervision(self):
+        detector = LocalOutlierFactor(1)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_str(self):
         assert str(LocalOutlierFactor(5)) == "LocalOutlierFactor(window_size=5)"

@@ -1,8 +1,9 @@
 
+import pytest
 import numpy as np
 from typing import Any
 
-from dtaianomaly.utils import is_valid_list, is_valid_array_like, is_univariate
+from dtaianomaly.utils import is_valid_list, is_valid_array_like, is_univariate, get_dimension
 
 
 class TestIsValidList:
@@ -100,6 +101,9 @@ class TestIsValidArrayLike:
     def test_invalid_bool(self):
         assert not is_valid_array_like(True)
 
+    def test_invalid_none(self):
+        assert not is_valid_array_like(None)
+
     def test_invalid_multivariate_list_type(self):
         assert not is_valid_array_like([[1, 10], [2, 20], [3, 30], [4, 40], [5, '50']])
 
@@ -136,3 +140,17 @@ class TestIsUnivariate:
 
     def test_univariate_list(self, univariate_time_series):
         assert is_univariate([i for i in univariate_time_series])
+
+
+class TestGetDimension:
+
+    def test_single_dimension(self):
+        rng = np.random.default_rng(42)
+        X = np.random.uniform(size=1000)
+        assert get_dimension(X) == 1
+
+    @pytest.mark.parametrize('dimension', [1, 2, 3, 5, 10])
+    def test_dimension(self, dimension):
+        rng = np.random.default_rng(42)
+        X = np.random.uniform(size=(1000, dimension))
+        assert get_dimension(X) == dimension

@@ -1,10 +1,14 @@
 
 import pytest
 import numpy as np
-from dtaianomaly.anomaly_detection import MedianMethod
+from dtaianomaly.anomaly_detection import MedianMethod, Supervision
 
 
 class TestMedianMethod:
+
+    def test_supervision(self):
+        detector = MedianMethod(15)
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_initialize(self):
         detector = MedianMethod(neighborhood_size_before=15, neighborhood_size_after=10)

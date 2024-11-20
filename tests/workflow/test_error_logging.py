@@ -6,7 +6,7 @@ import subprocess
 import pathlib
 
 from dtaianomaly.data import LazyDataLoader, DataSet, demonstration_time_series
-from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest
+from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
 from dtaianomaly.preprocessing import Preprocessor, Identity, ChainedPreprocessor
 from dtaianomaly.pipeline import Pipeline
 from dtaianomaly.evaluation import AreaUnderROC
@@ -40,6 +40,9 @@ class ErrorPreprocessor(Preprocessor):
 
 
 class ErrorAnomalyDetector(BaseDetector):
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
 
     def fit(self, X, y=None):
         return self

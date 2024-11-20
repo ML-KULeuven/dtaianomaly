@@ -90,7 +90,7 @@ and easily analyze multiple detectors simultaneously.
         def _load(self)-> DataSet:
             """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
             df = pd.read_clipboard(self.path)
-            return DataSet(x=df['X'].values, y=df['y'].values)
+            return DataSet(df['X'].values, df['y'].values)
 
 .. _custom-preprocessor:
 

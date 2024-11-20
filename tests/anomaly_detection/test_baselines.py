@@ -1,9 +1,13 @@
 
 import numpy as np
-from dtaianomaly.anomaly_detection import baselines
+from dtaianomaly.anomaly_detection import baselines, Supervision
 
 
 class TestAlwaysNormal:
+
+    def test_supervision(self):
+        detector = baselines.AlwaysNormal()
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_univariate(self, univariate_time_series):
         detector = baselines.AlwaysNormal()
@@ -29,6 +33,10 @@ class TestAlwaysNormal:
 
 class TestAlwaysAnomalous:
 
+    def test_supervision(self):
+        detector = baselines.AlwaysAnomalous()
+        assert detector.supervision == Supervision.UNSUPERVISED
+
     def test_univariate(self, univariate_time_series):
         detector = baselines.AlwaysAnomalous()
         y_pred = detector.fit(univariate_time_series).decision_function(univariate_time_series)
@@ -52,6 +60,10 @@ class TestAlwaysAnomalous:
 
 
 class TestRandomDetector:
+
+    def test_supervision(self):
+        detector = baselines.RandomDetector()
+        assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_univariate(self, univariate_time_series):
         detector = baselines.RandomDetector()

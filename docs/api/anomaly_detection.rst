@@ -54,6 +54,8 @@ BaseDetector
 .. autoclass:: dtaianomaly.anomaly_detection.BaseDetector
    :members:
 
+.. autoclass:: dtaianomaly.anomaly_detection.Supervision
+
 
 Utilities
 ---------

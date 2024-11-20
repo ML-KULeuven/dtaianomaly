@@ -8,7 +8,7 @@ from dtaianomaly.data import LazyDataLoader, DataSet, from_directory
 class DummyLoader(LazyDataLoader):
 
     def _load(self) -> DataSet:
-        return DataSet(x=np.array([]), y=np.array([]))
+        return DataSet(X_test=np.random.uniform(size=(1000, 3)), y_test=np.random.choice([0, 1], p=[0.95, 0.05], size=1000, replace=True))
 
 
 class TestLazyDataLoader:
@@ -30,12 +30,12 @@ class TestLazyDataLoader:
         assert str(DummyLoader(tmp_path)) == f"DummyLoader(path='{tmp_path}')"
 
 
-class CostlyDummyLoader(LazyDataLoader):
+class CostlyDummyLoader(DummyLoader):
     NB_SECONDS_SLEEP = 1.5
 
     def _load(self) -> DataSet:
         time.sleep(self.NB_SECONDS_SLEEP)
-        return DataSet(x=np.array([]), y=np.array([]))
+        return super()._load()
 
 
 class TestCaching:

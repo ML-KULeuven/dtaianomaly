@@ -5,7 +5,7 @@ from typing import Optional, Union
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 
@@ -82,7 +82,7 @@ class MatrixProfileDetector(BaseDetector):
                  p: float = 2.0,
                  k: int = 1,
                  novelty: bool = False) -> None:
-        super().__init__()
+        super().__init__(Supervision.UNSUPERVISED)
 
         check_is_valid_window_size(window_size)
 
