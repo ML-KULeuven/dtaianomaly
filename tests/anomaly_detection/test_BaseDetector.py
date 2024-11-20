@@ -19,7 +19,25 @@ class InvalidConstantDecisionFunctionForPredictProba(BaseDetector):
         return np.ones(X.shape[0]) * 50
 
 
+class NoDefinedSupervisionDetector(BaseDetector):
+
+    def fit(self, X, y=None):
+        return self
+
+    def decision_function(self, X: np.ndarray) -> np.ndarray:
+        return np.ones(X.shape[0])
+
+
 class TestBaseDetector:
+
+    @pytest.mark.parametrize('supervision', Supervision)
+    def test_valid_supervision(self, supervision):
+        detector = NoDefinedSupervisionDetector(supervision)
+        assert detector.supervision == supervision
+
+    def test_invalid_supervision(self):
+        with pytest.raises(TypeError):
+            NoDefinedSupervisionDetector('supervision.SUPERVISED')
 
     def test_proba(self):
         data = np.random.standard_normal((50,))
