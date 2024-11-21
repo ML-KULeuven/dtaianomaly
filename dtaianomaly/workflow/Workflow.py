@@ -1,4 +1,3 @@
-
 import multiprocessing
 import time
 import tracemalloc
@@ -70,6 +69,13 @@ class Workflow:
 
     error_log_path: str, default='./error_logs'
         The path in which the error logs should be saved.
+
+    fit_unsupervised_on_test_data: bool, default=False
+        Whether to fit the unsupervised anomaly detectors on the test data.
+        If True, then the test data will be used to fit the detector and
+        to evaluate the detector. This is no issue, since unsupervised
+        detectors do not use labels and can deal with anomalies in the
+        training data.
     """
     dataloaders: List[LazyDataLoader]
     pipelines: List[EvaluationPipeline]
@@ -77,7 +83,8 @@ class Workflow:
     n_jobs: int
     trace_memory: bool
     error_log_path: str
-    
+    fit_unsupervised_on_test_data: bool
+
     def __init__(self,
                  dataloaders: Union[LazyDataLoader, List[LazyDataLoader]],
                  metrics: Union[Metric, List[Metric]],
@@ -86,7 +93,8 @@ class Workflow:
                  thresholds: Union[Thresholding, List[Thresholding]] = None,
                  n_jobs: int = 1,
                  trace_memory: bool = False,
-                 error_log_path: str = './error_logs'):
+                 error_log_path: str = './error_logs',
+                 fit_unsupervised_on_test_data: bool = False):
 
         # Make sure the inputs are lists.
         dataloaders = convert_to_list(dataloaders)
@@ -126,6 +134,7 @@ class Workflow:
         self.n_jobs = n_jobs
         self.trace_memory = trace_memory
         self.error_log_path = error_log_path
+        self.fit_unsupervised_on_test_data = fit_unsupervised_on_test_data
 
     def run(self) -> pd.DataFrame:
         """
@@ -150,9 +159,12 @@ class Workflow:
 
         # Execute the jobs
         if self.n_jobs == 1:
-            result = [_single_job(*job, trace_memory=self.trace_memory, error_log_path=self.error_log_path) for job in unit_jobs]
+            result = [
+                _single_job(*job, trace_memory=self.trace_memory, error_log_path=self.error_log_path, fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data)
+                for job in unit_jobs
+            ]
         else:
-            single_run_function = partial(_single_job, trace_memory=self.trace_memory, error_log_path=self.error_log_path)
+            single_run_function = partial(_single_job, trace_memory=self.trace_memory, error_log_path=self.error_log_path, fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data)
             with multiprocessing.Pool(processes=self.n_jobs) as pool:
                 result = pool.starmap(single_run_function, unit_jobs)
 
@@ -173,8 +185,7 @@ class Workflow:
         return results_df
 
 
-def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool, error_log_path: str) -> Dict[str, Union[str, float]]:
-
+def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool, error_log_path: str, fit_unsupervised_on_test_data: bool) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
     results = {'Dataset': str(dataloader)}
     for key in pipeline.metrics + ['Detector', 'Preprocessor', 'Runtime [s]']:
@@ -207,7 +218,7 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
         return results
 
     # Format X_train, y_train, X_test and y_test
-    X_test, y_test, X_train, y_train = _get_train_test_data(data_set, pipeline.pipeline)
+    X_test, y_test, X_train, y_train = _get_train_test_data(data_set, pipeline.pipeline, fit_unsupervised_on_test_data)
 
     # Start tracing the memory, if requested
     if trace_memory:
@@ -232,14 +243,14 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     # Save the memory if requested, and stop tracing
     if trace_memory:
         _, peak = tracemalloc.get_traced_memory()
-        results['Peak Memory [MB]'] = peak / 10**6
+        results['Peak Memory [MB]'] = peak / 10 ** 6
         tracemalloc.stop()
 
     # Return the results
     return results
 
 
-def _get_train_test_data(data_set: DataSet, detector: BaseDetector) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
     X_test = data_set.X_test
     y_test = data_set.y_test
     X_train = data_set.X_train
@@ -248,7 +259,11 @@ def _get_train_test_data(data_set: DataSet, detector: BaseDetector) -> (np.ndarr
     # If no train data is given but the detector is unsupervised, then use the test data for training
     # This is only ok if the detector is unsupervised, because no labels are used
     # If this happens, the train labels will be None anyway (otherwise data_set would be invalid)
-    if X_train is None and detector.supervision == Supervision.UNSUPERVISED:
+    if detector.supervision == Supervision.UNSUPERVISED and X_train is None:
         X_train = X_test
 
-    return X_test,  y_test, X_train, y_train
+    # If unsupervised detectors should fit on the test data.
+    if fit_unsupervised_on_test_data and detector.supervision == Supervision.UNSUPERVISED:
+        X_train = X_test
+
+    return X_test, y_test, X_train, y_train

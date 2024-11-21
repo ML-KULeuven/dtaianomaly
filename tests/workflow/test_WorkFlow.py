@@ -8,6 +8,7 @@ from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
 from dtaianomaly.preprocessing import Identity, ZNormalizer, Preprocessor
 from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision
+from dtaianomaly.workflow.Workflow import _get_train_test_data
 
 
 class TestWorkflowInitialization:
@@ -446,3 +447,70 @@ class TestWorkflowFail:
         assert np.any(results == expected_error_message, axis=0).sum() == 7
         assert np.any(results == expected_error_message, axis=1).sum().sum() == 2
         assert 'Error file' not in results.columns
+
+
+class DummyDetector(BaseDetector):
+
+    def __init__(self, supervision):
+        super().__init__(supervision)
+
+    def fit(self, X, y=None):
+        return self
+
+    def decision_function(self, X):
+        return np.zeros(X.shape[0])
+
+
+class TestGetTrainTestData:
+
+    def test_unsupervised_use_test_set_for_fit(self):
+        data_set = DataSet(
+            X_test=np.array([1, 2, 3, 4, 5, 6]),
+            y_test=np.array([1, 0, 0, 0, 1, 0]),
+            X_train=np.array([10, 20, 30, 40, 50])
+        )
+        detector = DummyDetector(Supervision.UNSUPERVISED)
+        X_test, y_test, X_train, y_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=True)
+        assert np.array_equal(data_set.X_test, X_test)
+        assert np.array_equal(data_set.y_test, y_test)
+        assert np.array_equal(data_set.X_test, X_train)
+        assert y_train is None
+
+    def test_unsupervised_do_not_use_test_set_for_fit(self):
+        data_set = DataSet(
+            X_test=np.array([1, 2, 3, 4, 5, 6]),
+            y_test=np.array([1, 0, 0, 0, 1, 0]),
+            X_train=np.array([10, 20, 30, 40, 50])
+        )
+        detector = DummyDetector(Supervision.UNSUPERVISED)
+        X_test, y_test, X_train, y_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=False)
+        assert np.array_equal(data_set.X_test, X_test)
+        assert np.array_equal(data_set.y_test, y_test)
+        assert np.array_equal(data_set.X_train, X_train)
+        assert y_train is None
+
+    def test_semi_supervised_use_test_set_for_fit(self):
+        data_set = DataSet(
+            X_test=np.array([1, 2, 3, 4, 5, 6]),
+            y_test=np.array([1, 0, 0, 0, 1, 0]),
+            X_train=np.array([10, 20, 30, 40, 50])
+        )
+        detector = DummyDetector(Supervision.SEMI_SUPERVISED)
+        X_test, y_test, X_train, y_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=True)
+        assert np.array_equal(data_set.X_test, X_test)
+        assert np.array_equal(data_set.y_test, y_test)
+        assert np.array_equal(data_set.X_train, X_train)
+        assert y_train is None
+
+    def test_semi_supervised_do_not_use_test_set_for_fit(self):
+        data_set = DataSet(
+            X_test=np.array([1, 2, 3, 4, 5, 6]),
+            y_test=np.array([1, 0, 0, 0, 1, 0]),
+            X_train=np.array([10, 20, 30, 40, 50])
+        )
+        detector = DummyDetector(Supervision.SEMI_SUPERVISED)
+        X_test, y_test, X_train, y_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=False)
+        assert np.array_equal(data_set.X_test, X_test)
+        assert np.array_equal(data_set.y_test, y_test)
+        assert np.array_equal(data_set.X_train, X_train)
+        assert y_train is None
