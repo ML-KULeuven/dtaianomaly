@@ -31,7 +31,7 @@ class NoDefinedSupervisionDetector(BaseDetector):
 class TestBaseDetector:
 
     @pytest.mark.parametrize('supervision', Supervision)
-    def test_valid_supervision(self, supervision):
+    def test_valid_supervision(self, supervision: Supervision):
         detector = NoDefinedSupervisionDetector(supervision)
         assert detector.supervision == supervision
 

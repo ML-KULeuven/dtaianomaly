@@ -10,22 +10,25 @@ class UCRLoader(LazyDataLoader):
 
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:
-    '\*_start_stop.txt'.
+    ``*_<train-test-split>_<start>_<stop>.txt``.
     """
 
     def _load(self) -> DataSet:
+
+        # Extract the meta-information from the name of the file
+        [*_, train_test_split, start_anomaly, end_anomaly] = self.path.rstrip('.txt').split('_')
+        train_test_split = int(train_test_split)
+        start_anomaly = int(start_anomaly)
+        end_anomaly = int(end_anomaly)
+
         # Load time series
         X = np.loadtxt(self.path)
+        X_train = X[:train_test_split]
+        X_test = X[train_test_split:]
 
-        # Load anomaly targets (0 is background, 1 is anomaly)
-        # UCR datasets specify the anomaly in dataset name
-        name = self.path.split('_')
-
-        onset = int(name[-2])
-        offset = int(''.join(filter(str.isdigit, name[-1])))
         # To ensure the file extensions gets ignored
+        y_test = np.zeros(shape=X_test.shape, dtype=int)
+        y_test[start_anomaly:end_anomaly] = 1
 
-        y = np.zeros(shape=X.shape, dtype=np.int8)
-        y[onset:offset] = 1
-
-        return DataSet(X_test=X, y_test=y)
+        # Return a DataSet object
+        return DataSet(X_test=X_test, y_test=y_test, X_train=X_train)
