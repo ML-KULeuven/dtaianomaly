@@ -42,16 +42,6 @@ class DataSet:
         self.X_train = X_train
         self.y_train = y_train
 
-    @property
-    def x(self) -> np.ndarray:
-        """ Temporary method to be compatible with existing code. """
-        return self.X_test
-
-    @property
-    def y(self) -> np.ndarray:
-        """ Temporary method to be compatible with existing code. """
-        return self.y_test
-
     @staticmethod
     def check_is_valid(
             X_test: np.ndarray,
