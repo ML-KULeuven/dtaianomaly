@@ -159,13 +159,12 @@ class TestErrorLogging:
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
-
     def test_log_no_exception(self, tmp_path_factory):
         error = Exception('Dummy')
         error_file = log_error(
             error_log_path=str(tmp_path_factory.mktemp('error-log')),
             exception=Exception('Dummy'),
-            data_loader=DemonstrationDataLoader(),
+            data_loader=DemonstrationDataLoaderWithTrainData(),
             pipeline=Pipeline(
                 preprocessor=Identity(),
                 detector=IsolationForest(15)
@@ -199,6 +198,7 @@ def error_file_results_in_error(error_file, error):
 
 def error_file_runs_successfully(error_file):
     output = _run_error_file(error_file)
+    print(output)
     return output.returncode == 0
 
 
@@ -211,6 +211,8 @@ def _run_error_file(error_file):
     # Add this file as import
     with open(error_file, 'r+') as file:
         content = file.read()
+        print()
+        print(content)
         file.seek(0, 0)
         file.write(f'from {pathlib.Path(__file__).stem} import *\n' + content)
 
