@@ -218,7 +218,7 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
         return results
 
     # Format X_train, y_train, X_test and y_test
-    X_test, y_test, X_train, y_train = _get_train_test_data(data_set, pipeline.pipeline, fit_unsupervised_on_test_data)
+    X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, pipeline.pipeline, fit_unsupervised_on_test_data)
 
     # Start tracing the memory, if requested
     if trace_memory:
@@ -234,7 +234,7 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
             y_train=y_train
         ))
     except Exception as exception:
-        results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline)
+        results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train)
     stop = time.time()
 
     # Save the runtime
@@ -250,20 +250,32 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     return results
 
 
-def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):
+    """
+    Separates the train and test data depending on the type of the anomaly
+    detector and whether the test data should be used for fitting in an
+    unsupervised detector.
+
+    Also returns a bool indicating if the train data is actually used for
+    fitting or not.
+    """
     X_test = data_set.X_test
     y_test = data_set.y_test
     X_train = data_set.X_train
     y_train = data_set.y_train
+
+    fit_on_X_train = True
 
     # If no train data is given but the detector is unsupervised, then use the test data for training
     # This is only ok if the detector is unsupervised, because no labels are used
     # If this happens, the train labels will be None anyway (otherwise data_set would be invalid)
     if detector.supervision == Supervision.UNSUPERVISED and X_train is None:
         X_train = X_test
+        fit_on_X_train = False
 
     # If unsupervised detectors should fit on the test data.
     if fit_unsupervised_on_test_data and detector.supervision == Supervision.UNSUPERVISED:
         X_train = X_test
+        fit_on_X_train = False
 
-    return X_test, y_test, X_train, y_train
+    return X_test, y_test, X_train, y_train, fit_on_X_train

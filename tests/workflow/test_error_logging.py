@@ -4,6 +4,7 @@ import sys
 import py_compile
 import subprocess
 import pathlib
+import numpy as np
 
 from dtaianomaly.data import LazyDataLoader, DataSet, demonstration_time_series
 from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
@@ -22,6 +23,16 @@ class DemonstrationDataLoader(LazyDataLoader):
     def _load(self) -> DataSet:
         X, y = demonstration_time_series()
         return DataSet(X, y)
+
+
+class DemonstrationDataLoaderWithTrainData(LazyDataLoader):
+
+    def __init__(self):
+        super().__init__('.')
+
+    def _load(self) -> DataSet:
+        X, y = demonstration_time_series()
+        return DataSet(X, y, X_train=np.zeros(shape=1000))
 
 
 class ErrorDataLoader(LazyDataLoader):
@@ -128,6 +139,26 @@ class TestErrorLogging:
         assert error_file_has_correct_syntax(error_file)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
+
+    def test_error_train_on_fit_data(self, tmp_path_factory):
+        workflow = Workflow(
+            dataloaders=DemonstrationDataLoaderWithTrainData(),
+            metrics=AreaUnderROC(),
+            preprocessors=Identity(),
+            detectors=ErrorAnomalyDetector(),
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
+        )
+        results = workflow.run()
+
+        assert results.shape == (1, 6)
+        assert 'Error file' in results.columns
+
+        error_file = results.loc[0, 'Error file']
+        error = Exception('An error occurred when detecting anomalies!')
+        assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_error(error_file, error)
+        assert error_file_results_in_error(error_file, error)
+
 
     def test_log_no_exception(self, tmp_path_factory):
         error = Exception('Dummy')

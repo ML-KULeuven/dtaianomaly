@@ -7,7 +7,7 @@ from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.pipeline import Pipeline
 
 
-def log_error(error_log_path: str, exception: Exception, data_loader: LazyDataLoader, pipeline: Pipeline = None) -> str:
+def log_error(error_log_path: str, exception: Exception, data_loader: LazyDataLoader, pipeline: Pipeline = None, fit_on_X_train: bool = True) -> str:
 
     # Ensure the directory exists
     os.makedirs(error_log_path, exist_ok=True)
@@ -71,6 +71,10 @@ def log_error(error_log_path: str, exception: Exception, data_loader: LazyDataLo
                              '    preprocessor=preprocessor,\n'
                              '    detector=detector\n'
                              ')\n')
-            error_file.write('y_pred = pipeline.fit(data.x, data.y).predict_proba(data.x)\n\n')
+            if fit_on_X_train:
+                train_data = 'X_train'
+            else:
+                train_data = 'X_test'
+            error_file.write(f'y_pred = pipeline.fit(data.{train_data}, data.y_train).predict_proba(data.X_test)\n\n')
 
     return os.path.abspath(file_path)
