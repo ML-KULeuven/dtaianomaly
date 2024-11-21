@@ -2,16 +2,19 @@
 import multiprocessing
 import time
 import tracemalloc
+
+import numpy as np
 import pandas as pd
 from typing import Dict, List, Union
 from functools import partial
 
-from dtaianomaly.data import LazyDataLoader
-from dtaianomaly.evaluation import Metric, BinaryMetric
-from dtaianomaly.thresholding import Thresholding
-from dtaianomaly.preprocessing import Preprocessor, Identity
-from dtaianomaly.anomaly_detection import BaseDetector
-from dtaianomaly.pipeline import EvaluationPipeline
+from dtaianomaly.data.LazyDataLoader import LazyDataLoader
+from dtaianomaly.data.DataSet import DataSet
+from dtaianomaly.evaluation.metrics import Metric, BinaryMetric
+from dtaianomaly.thresholding.thresholding import Thresholding
+from dtaianomaly.preprocessing.Preprocessor import Preprocessor, Identity
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
+from dtaianomaly.pipeline.EvaluationPipeline import EvaluationPipeline
 
 from dtaianomaly.workflow.utils import build_pipelines, convert_to_proba_metrics, convert_to_list
 from dtaianomaly.workflow.error_logging import log_error
@@ -181,7 +184,7 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
 
     # Try to load the data set, if this fails, return the results
     try:
-        dataset = dataloader.load()
+        data_set = dataloader.load()
     except Exception as exception:
         results['Error file'] = log_error(error_log_path, exception, dataloader)
         return results
@@ -190,6 +193,22 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     results['Preprocessor'] = str(pipeline.pipeline.preprocessor)
     results['Detector'] = str(pipeline.pipeline.detector)
 
+    # Check if the dataset and the anomaly detector are compatible
+    if not data_set.is_compatible(pipeline.pipeline):
+        # error_message = f'Not compatible: detector with supervision {pipeline.pipeline.supervision} ' \
+        #                 f'for data set with compatible supervision {[str(s) for s in data_set.compatible_supervision()]}'
+        error_message = f'Not compatible: detector with supervision {pipeline.pipeline.supervision} ' \
+                        f'for data set with compatible supervision ['
+        error_message += ', '.join([str(s) for s in data_set.compatible_supervision()])
+        error_message += ']'
+        for key, value in results.items():
+            if value == 'Error':
+                results[key] = error_message
+        return results
+
+    # Format X_train, y_train, X_test and y_test
+    X_test, y_test, X_train, y_train = _get_train_test_data(data_set, pipeline.pipeline)
+
     # Start tracing the memory, if requested
     if trace_memory:
         tracemalloc.start()
@@ -197,7 +216,12 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     # Evaluate the pipeline, and measure the time
     start = time.time()
     try:
-        results.update(pipeline.run(X=dataset.x, y=dataset.y))
+        results.update(pipeline.run(
+            X_test=X_test,
+            y_test=y_test,
+            X_train=X_train,
+            y_train=y_train
+        ))
     except Exception as exception:
         results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline)
     stop = time.time()
@@ -213,3 +237,18 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
 
     # Return the results
     return results
+
+
+def _get_train_test_data(data_set: DataSet, detector: BaseDetector) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+    X_test = data_set.X_test
+    y_test = data_set.y_test
+    X_train = data_set.X_train
+    y_train = data_set.y_train
+
+    # If no train data is given but the detector is unsupervised, then use the test data for training
+    # This is only ok if the detector is unsupervised, because no labels are used
+    # If this happens, the train labels will be None anyway (otherwise data_set would be invalid)
+    if X_train is None and detector.supervision == Supervision.UNSUPERVISED:
+        X_train = X_test
+
+    return X_test,  y_test, X_train, y_train

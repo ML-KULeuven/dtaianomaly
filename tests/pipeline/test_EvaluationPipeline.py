@@ -38,25 +38,35 @@ class TestEvaluationPipeline:
         with pytest.raises(TypeError):
             EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), 'AreaUnderPR'])
 
-    def test_run_invalid_x(self):
+    def test_run_invalid_X_test(self):
         pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
         with pytest.raises(ValueError):
-            pipeline.run(['3', '5', '7'], np.array([0, 1, 0]))
+            pipeline.run(['3', '5', '7'], np.array([0, 1, 0]), np.array([1, 2, 3]), None)
 
-    def test_run_invalid_y(self, univariate_time_series):
+    def test_run_invalid_y_test(self, univariate_time_series):
         pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
         with pytest.raises(ValueError):
-            pipeline.run(np.array([3, 5, 7]), ['0', '1', '0'])
+            pipeline.run(np.array([3, 5, 7]), ['0', '1', '0'], np.array([1, 2, 3]), None)
 
-    def test_run_none_y(self, univariate_time_series):
+    def test_run_none_y_test(self, univariate_time_series):
         pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
         with pytest.raises(ValueError):
-            pipeline.run(np.array([3, 5, 7]), None)
+            pipeline.run(np.array([3, 5, 7]), None, np.array([1, 2, 3]), None)
+
+    def test_run_invalid_X_train(self):
+        pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
+        with pytest.raises(ValueError):
+            pipeline.run([3, 5, 7], np.array([0, 1, 0]), np.array(['1', '2', '3']), None)
+
+    def test_run_invalid_y_train(self, univariate_time_series):
+        pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
+        with pytest.raises(ValueError):
+            pipeline.run(np.array([3, 5, 7]), [0, 1, 0], np.array([1, 2, 3]), np.array(['0', '1', '0']))
 
     def test_run(self, univariate_time_series):
         pipeline = EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
         y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
-        results = pipeline.run(univariate_time_series, y)
+        results = pipeline.run(univariate_time_series, y, univariate_time_series, None)
         assert len(results) == 2
         assert 'AreaUnderROC()' in results
         assert 'AreaUnderPR()' in results
@@ -64,7 +74,7 @@ class TestEvaluationPipeline:
     def test_run_multivariate(self, multivariate_time_series):
         pipeline = EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
         y = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
-        results = pipeline.run(multivariate_time_series, y)
+        results = pipeline.run(multivariate_time_series, y, multivariate_time_series, y)
         assert len(results) == 2
         assert 'AreaUnderROC()' in results
         assert 'AreaUnderPR()' in results
@@ -72,7 +82,7 @@ class TestEvaluationPipeline:
     def test_shorter_y(self, univariate_time_series):
         pipeline = EvaluationPipeline(SamplingRateUnderSampler(5), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
         y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
-        results = pipeline.run(univariate_time_series, y)
+        results = pipeline.run(univariate_time_series, y, univariate_time_series, None)
         assert len(results) == 2
         assert 'AreaUnderROC()' in results
         assert 'AreaUnderPR()' in results
