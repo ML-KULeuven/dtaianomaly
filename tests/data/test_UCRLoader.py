@@ -5,7 +5,6 @@ import numpy as np
 from dtaianomaly.data import UCRLoader, from_directory
 
 UCR_DATA_PATH = 'data/UCR-time-series-anomaly-archive'
-UCR_DATA_PATH = '../data/UCR-time-series-anomaly-archive'
 UCR_DATA_SET = '001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt'
 
 data_available = pytest.mark.skipif(
