@@ -104,6 +104,45 @@ class TestCheckIsValid:
             DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, y_train=np.append(valid_y_train, 0))
 
 
+class TestCompatibleSupervision:
+
+    def test_unsupervised_all_data(self, valid_X_test, valid_y_test, valid_X_train, valid_y_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, y_train=valid_y_train)
+        assert Supervision.UNSUPERVISED in data_set.compatible_supervision()
+
+    def test_unsupervised_no_train_labels(self, valid_X_test, valid_y_test, valid_X_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train)
+        assert Supervision.UNSUPERVISED in data_set.compatible_supervision()
+
+    def test_unsupervised_no_train_data(self, valid_X_test, valid_y_test):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test)
+        assert Supervision.UNSUPERVISED in data_set.compatible_supervision()
+
+    def test_semi_supervised_all_data(self, valid_X_test, valid_y_test, valid_X_train, valid_y_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, y_train=valid_y_train)
+        assert Supervision.SEMI_SUPERVISED in data_set.compatible_supervision()
+
+    def test_semi_supervised_no_train_labels(self, valid_X_test, valid_y_test, valid_X_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train)
+        assert Supervision.SEMI_SUPERVISED in data_set.compatible_supervision()
+
+    def test_semi_supervised_no_train_data(self, valid_X_test, valid_y_test):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test)
+        assert Supervision.SEMI_SUPERVISED not in data_set.compatible_supervision()
+
+    def test_supervised_all_data(self, valid_X_test, valid_y_test, valid_X_train, valid_y_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, y_train=valid_y_train)
+        assert Supervision.SUPERVISED in data_set.compatible_supervision()
+
+    def test_supervised_no_train_labels(self, valid_X_test, valid_y_test, valid_X_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train)
+        assert Supervision.SUPERVISED not in data_set.compatible_supervision()
+
+    def test_supervised_no_train_data(self, valid_X_test, valid_y_test):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test)
+        assert Supervision.SUPERVISED not in data_set.compatible_supervision()
+
+
 class DummyDetector(BaseDetector):
 
     def __init__(self, supervision):

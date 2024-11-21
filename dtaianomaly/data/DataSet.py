@@ -1,6 +1,6 @@
 
 import numpy as np
-from typing import Optional
+from typing import Optional, List
 from dtaianomaly.utils import is_valid_array_like, is_univariate, get_dimension
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
@@ -151,6 +151,32 @@ class DataSet:
         except ValueError:
             return False
 
+    def compatible_supervision(self) -> List[Supervision]:
+        """
+        Get the compatible supervision types for this data set.
+
+        Returns
+        -------
+        compatible_types: list of Supervision
+            A list containing the compatible types for this dataset. The following
+            suprvision types can be compatible:
+
+            - ``Supervision.UNSUPERVISED``: Always compatible.
+            - ``Supervision.SEMI_SUPERVISED``: Compatible if and only if there
+              is some training data given (which is assumed to be normal).
+            - ``Supervision.SUPERVISED``: Only compatible if both training data
+              and training labels are provided.
+        """
+        # If there is no train data given at all, then only unsupervised detectors are compatible
+        if self.X_train is None and self.y_train is None:
+            return [Supervision.UNSUPERVISED]
+        # If train data is given but no train labels, then either unsupervised or semi-supervised detectors are compatible
+        elif self.X_train is not None and self.y_train is None:
+            return [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED]
+        # If the train data and train labels are given, then all detectors are compatible.
+        else:
+            return [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED, Supervision.SUPERVISED]
+
     def is_compatible(self, detector: BaseDetector) -> bool:
         """
         Checks if the given anomaly detector is compatible with this ``DataSet``.
@@ -173,16 +199,4 @@ class DataSet:
             - This ``DataSet`` contains training data and labels, then supervised,
               unsupervised and semi-supervised anomaly detectors are compatible.
         """
-        # If there is no train data given at all, then only unsupervised detectors are compatible
-        if self.X_train is None and self.y_train is None:
-            return detector.supervision in [Supervision.UNSUPERVISED]
-        # If train data is given but no train labels, then either unsupervised or semi-supervised detectors are compatible
-        elif self.X_train is not None and self.y_train is None:
-            return detector.supervision in [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED]
-        # If the train data and train labels are given, then all detectors are compatible.
-        else:
-            return detector.supervision in [
-                Supervision.UNSUPERVISED,
-                Supervision.SEMI_SUPERVISED,
-                Supervision.SUPERVISED
-            ]
+        return detector.supervision in self.compatible_supervision()
