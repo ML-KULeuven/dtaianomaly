@@ -14,11 +14,25 @@ Added
 - Implemented point-adjusted precision, recall and FBeta.
 - Implemented ``BestThresholdMetric``, a ``ProbaMetric`` which computes the best value for
   a ``BinaryMetric`` over all thresholds.
+- The property ``supervision`` to ``BaseDetector``, which indicates what type of supervision
+  the anomaly detector requires. Possible options are:
+
+  - ``Supervision.SUPERVISED``: the anomaly detector requires training data and labels
+  - ``Supervision.SEMI_SUPERVISED``: the anomaly detector requires training data, but no
+    training labels because the training data is assumed to be normal.
+  - ``Supervision.UNSUPERVISED``: the anomaly detector does not require any training data
+    or labels
+- Added the property ``__version__`` to ``dtaianomaly``, which can be accessed from code.
+- Included the used version of ``dtaianomaly`` when logging errors.
 
 Changed
 ^^^^^^^
 - Updated documentation to contain changelog and contributing information
 - Rely on PyOD for non-time series anomaly detectors (instead of scikit-learn before)
+- Separated training data and test data in ``DataSet``. This has also been integrated
+  within the ``Workflow`` to use the correct data. To this end, a new flag has been
+  added to the ``Workflow``, which decides if the training data or the test data
+  should be used for training *unsupervised* anomaly detectors.
 
 Fixed
 ^^^^^
