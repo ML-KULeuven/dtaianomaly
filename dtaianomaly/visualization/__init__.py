@@ -7,9 +7,10 @@ The functions within this module offer alternative manners to nicely plot the ti
 along with the ground truth or predicted anomalies.
 """
 
-from .visualization import plot_time_series_colored_by_score
+from .visualization import plot_time_series_colored_by_score, plot_time_series_anomalies
 
 __all__ = [
-    'plot_time_series_colored_by_score'
+    'plot_time_series_colored_by_score',
+    'plot_time_series_anomalies'
 ]
 

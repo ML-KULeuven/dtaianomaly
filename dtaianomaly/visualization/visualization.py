@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 def plot_time_series_colored_by_score(X: np.ndarray, y: np.ndarray, ax: plt.Axes = None, nb_colors: int = 100, **kwargs) -> plt.Figure:
     """
     Plots the given time series, and color it according to the given scores.
@@ -45,3 +44,64 @@ def plot_time_series_colored_by_score(X: np.ndarray, y: np.ndarray, ax: plt.Axes
         color = colormap(y_binned[i])
         ax.plot([i, i+1], X[[i, i+1]], c=color)
     return plt.gcf()
+
+def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.ndarray, ax: plt.Axes = None, threshold_min: float = None, threshold_max: float = None, **kwargs) -> plt.Figure:
+    """
+    Visualizes time series data with true and predicted anomalies, highlighting true positives (TP),
+    false positives (FP), and false negatives (FN).
+
+    Parameters
+    ----------
+    X: np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot
+    y_true: np.ndarray of shape (n_samples,)
+        Ground truth anomaly labels (binary values: 0 or 1).
+    y_pred: np.ndarray of shape (n_samples,)
+        Predicted anomaly labels (binary values: 0 or 1).
+    ax: plt.Axes, default=None
+        The axes onto which the plot should be made. If None, then a new
+        figure and axis will be created.
+    threshold_min: float, default=None
+        Minimum threshold to visualize if applicable.
+    threshold_max: float, default=None
+        Maximum threshold to visualize if applicable.
+    **kwargs:
+        Arguments to be passed to plt.Figure(), in case ``ax=None``.
+
+    Returns
+    -------
+    fig: plt.Figure
+        The figure containing the plotted data.
+    """
+
+    # Prepare the axis
+    if ax is None:
+        plt.figure(**kwargs)
+        ax = plt.gca()
+
+    real_anomaly = (y_true > threshold_max) | (y_true < threshold_min) if threshold_min is not None and threshold_max is not None else np.zeros_like(y_true, dtype=bool)
+    pred_anomaly = (y_pred > threshold_max) | (y_pred < threshold_min) if threshold_min is not None and threshold_max is not None else np.zeros_like(y_pred, dtype=bool)
+
+    # Identify TP, FP, FN
+    TP = (real_anomaly == 1) & (pred_anomaly == 1)
+    FP = (real_anomaly == 0) & (pred_anomaly == 1)
+    FN = (real_anomaly == 1) & (pred_anomaly == 0)
+
+    # Plot the time series
+    ax.plot(np.arange(len(X)), X, label='Time Series', color='blue', alpha=0.5)
+
+    # Scatter points for TP, FP, FN
+    ax.scatter(np.arange(len(X))[TP], X[TP], color='green', label='TP')
+    ax.scatter(np.arange(len(X))[FP], X[FP], color='red', label='FP')
+    ax.scatter(np.arange(len(X))[FN], X[FN], color='orange', label='FN')
+
+    # Customize the plot
+    ax.set_xlabel('Time', fontsize=12)
+    ax.set_ylabel('Real Values', fontsize=12)
+    ax.set_title('Time Series Anomaly Detection', fontsize=15)
+    ax.legend()
+    ax.grid()
+
+    return plt.gcf()
+
+
