@@ -27,8 +27,9 @@ class UCRLoader(LazyDataLoader):
         X_test = X[train_test_split:]
 
         # To ensure the file extensions gets ignored
-        y_test = np.zeros(shape=X_test.shape, dtype=int)
-        y_test[start_anomaly:end_anomaly] = 1
+        y = np.zeros(shape=X.shape[0], dtype=int)
+        y[start_anomaly:end_anomaly] = 1
+        y_test = y[train_test_split:]
 
         # Return a DataSet object
         return DataSet(X_test=X_test, y_test=y_test, X_train=X_train)

@@ -5,6 +5,7 @@ import numpy as np
 from dtaianomaly.data import UCRLoader, from_directory
 
 UCR_DATA_PATH = 'data/UCR-time-series-anomaly-archive'
+UCR_DATA_PATH = '../data/UCR-time-series-anomaly-archive'
 UCR_DATA_SET = '001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt'
 
 data_available = pytest.mark.skipif(
@@ -35,11 +36,11 @@ class TestUCRLoader:
 
     @data_available
     def test_contains_anomaly(self, loaded):
-        assert np.sum(loaded.y == 1) > 0
+        assert np.sum(loaded.y_test == 1) > 0
 
     @data_available
     def test_samples_match(self, loaded):
-        assert loaded.x.shape[0] == loaded.y.shape[0]
+        assert loaded.X_test.shape[0] == loaded.y_test.shape[0]
 
     def test_faulty_path(self):
         with pytest.raises(FileNotFoundError):
