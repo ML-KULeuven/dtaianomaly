@@ -33,6 +33,8 @@ Changed
   within the ``Workflow`` to use the correct data. To this end, a new flag has been
   added to the ``Workflow``, which decides if the training data or the test data
   should be used for training *unsupervised* anomaly detectors.
+- Detectors implementing ``PyODAnomalyDetector`` must implement an additional method
+  to declare the ``Supervision`` of that detector.
 
 Fixed
 ^^^^^
