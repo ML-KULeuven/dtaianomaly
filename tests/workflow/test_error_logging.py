@@ -6,6 +6,7 @@ import subprocess
 import pathlib
 import numpy as np
 
+import dtaianomaly
 from dtaianomaly.data import LazyDataLoader, DataSet, demonstration_time_series
 from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
 from dtaianomaly.preprocessing import Preprocessor, Identity, ChainedPreprocessor
@@ -80,6 +81,7 @@ class TestErrorLogging:
         error_file = results.loc[0, 'Error file']
         error = Exception('An error occurred when loading data!')
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
@@ -99,6 +101,7 @@ class TestErrorLogging:
         error_file = results.loc[0, 'Error file']
         error = Exception('An error occurred preprocessing data!')
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
@@ -118,6 +121,7 @@ class TestErrorLogging:
         error_file = results.loc[0, 'Error file']
         error = Exception('An error occurred preprocessing data!')
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
@@ -137,6 +141,7 @@ class TestErrorLogging:
         error_file = results.loc[0, 'Error file']
         error = Exception('An error occurred when detecting anomalies!')
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
@@ -156,6 +161,7 @@ class TestErrorLogging:
         error_file = results.loc[0, 'Error file']
         error = Exception('An error occurred when detecting anomalies!')
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
@@ -183,6 +189,14 @@ def error_file_has_correct_syntax(error_file):
         return False
 
 
+def error_file_contains_dtaianomaly_version(error_file, version):
+    with open(error_file, 'r') as file:
+        for line in file:
+            if f"dtaianomaly.__version__ == '{version}'" in line:
+                return True
+    return False
+
+
 def error_file_contains_error(error_file, error):
     with open(error_file, 'r') as file:
         for line in file:
@@ -198,7 +212,6 @@ def error_file_results_in_error(error_file, error):
 
 def error_file_runs_successfully(error_file):
     output = _run_error_file(error_file)
-    print(output)
     return output.returncode == 0
 
 
@@ -211,8 +224,6 @@ def _run_error_file(error_file):
     # Add this file as import
     with open(error_file, 'r+') as file:
         content = file.read()
-        print()
-        print(content)
         file.seek(0, 0)
         file.write(f'from {pathlib.Path(__file__).stem} import *\n' + content)
 

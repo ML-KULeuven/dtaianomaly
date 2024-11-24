@@ -49,7 +49,7 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
     pyod_detector_: PyODBaseDetector
 
     def __init__(self, window_size: Union[str, int], stride: int = 1, **kwargs):
-        super().__init__(Supervision.UNSUPERVISED)
+        super().__init__(self._supervision())
 
         check_is_valid_window_size(window_size)
 
@@ -78,6 +78,17 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
         Returns
         -------
         A PyOD anomaly detector with the given hyperparameters.
+        """
+
+    @abc.abstractmethod
+    def _supervision(self) -> Supervision:
+        """
+        Return the supervision of this anomaly detector.
+
+        Returns
+        -------
+        supervision: Supervision
+            The supervision of this PyOD anomaly detector.
         """
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'BaseDetector':

@@ -206,8 +206,6 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
 
     # Check if the dataset and the anomaly detector are compatible
     if not data_set.is_compatible(pipeline.pipeline):
-        # error_message = f'Not compatible: detector with supervision {pipeline.pipeline.supervision} ' \
-        #                 f'for data set with compatible supervision {[str(s) for s in data_set.compatible_supervision()]}'
         error_message = f'Not compatible: detector with supervision {pipeline.pipeline.supervision} ' \
                         f'for data set with compatible supervision ['
         error_message += ', '.join([str(s) for s in data_set.compatible_supervision()])

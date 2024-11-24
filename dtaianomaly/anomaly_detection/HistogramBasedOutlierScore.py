@@ -1,5 +1,6 @@
 
 from pyod.models.hbos import HBOS
+from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
@@ -56,3 +57,6 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
 
     def _initialize_detector(self, **kwargs) -> HBOS:
         return HBOS(**kwargs)
+
+    def _supervision(self):
+        return Supervision.UNSUPERVISED
