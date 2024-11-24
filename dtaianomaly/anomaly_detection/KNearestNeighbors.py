@@ -1,6 +1,6 @@
 
-
 from pyod.models.knn import KNN
+from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
@@ -57,3 +57,6 @@ class KNearestNeighbors(PyODAnomalyDetector):
 
     def _initialize_detector(self, **kwargs) -> KNN:
         return KNN(**kwargs)
+
+    def _supervision(self):
+        return Supervision.UNSUPERVISED

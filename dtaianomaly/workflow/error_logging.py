@@ -3,6 +3,7 @@ import os
 import datetime
 import traceback
 
+import dtaianomaly
 from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.pipeline import Pipeline
 
@@ -48,8 +49,14 @@ def log_error(error_log_path: str, exception: Exception, data_loader: LazyDataLo
         # Add an empty line below the error message
         error_file.write('\n\n')
 
+        # Add the current version of dtaianomaly
+        error_file.write('import dtaianomaly\n')
+        error_file.write(f"assert dtaianomaly.__version__ == '{dtaianomaly.__version__}'\n")
+
+        # Ad an empty line
+        error_file.write('\n')
+
         # Add the imports to the file
-        error_file.write('import numpy as np\n')
         error_file.write('from dtaianomaly.data import *\n')
         if pipeline is not None:
             error_file.write('from dtaianomaly.preprocessing import *\n')

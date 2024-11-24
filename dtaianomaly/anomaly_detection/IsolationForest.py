@@ -1,5 +1,6 @@
 
 from pyod.models.iforest import IForest
+from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
@@ -52,3 +53,6 @@ class IsolationForest(PyODAnomalyDetector):
 
     def _initialize_detector(self, **kwargs) -> IForest:
         return IForest(**kwargs)
+
+    def _supervision(self):
+        return Supervision.UNSUPERVISED

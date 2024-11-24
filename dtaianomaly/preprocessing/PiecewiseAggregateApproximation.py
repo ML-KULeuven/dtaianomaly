@@ -63,5 +63,4 @@ class PiecewiseAggregateApproximation(Preprocessor):
 
 def paa(x: np.ndarray, n: int) -> np.ndarray:
     indices = np.linspace(0, x.shape[0], n + 1, dtype=int, endpoint=True)
-    print(x, indices)
     return np.array([np.mean(x[s:e], axis=0) for s, e in zip(indices, indices[1:])])
