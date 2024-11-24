@@ -45,7 +45,7 @@ def plot_time_series_colored_by_score(X: np.ndarray, y: np.ndarray, ax: plt.Axes
         ax.plot([i, i+1], X[[i, i+1]], c=color)
     return plt.gcf()
 
-def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.ndarray, ax: plt.Axes = None, threshold_min: float = None, threshold_max: float = None, **kwargs) -> plt.Figure:
+def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.ndarray, ax: plt.Axes = None, **kwargs) -> plt.Figure:
     """
     Visualizes time series data with true and predicted anomalies, highlighting true positives (TP),
     false positives (FP), and false negatives (FN).
@@ -61,10 +61,6 @@ def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.nda
     ax: plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
-    threshold_min: float, default=None
-        Minimum threshold to visualize if applicable.
-    threshold_max: float, default=None
-        Maximum threshold to visualize if applicable.
     **kwargs:
         Arguments to be passed to plt.Figure(), in case ``ax=None``.
 
@@ -79,13 +75,10 @@ def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.nda
         plt.figure(**kwargs)
         ax = plt.gca()
 
-    real_anomaly = (y_true > threshold_max) | (y_true < threshold_min) if threshold_min is not None and threshold_max is not None else np.zeros_like(y_true, dtype=bool)
-    pred_anomaly = (y_pred > threshold_max) | (y_pred < threshold_min) if threshold_min is not None and threshold_max is not None else np.zeros_like(y_pred, dtype=bool)
-
     # Identify TP, FP, FN
-    TP = (real_anomaly == 1) & (pred_anomaly == 1)
-    FP = (real_anomaly == 0) & (pred_anomaly == 1)
-    FN = (real_anomaly == 1) & (pred_anomaly == 0)
+    TP = (y_true == 1) & (y_pred == 1)
+    FP = (y_true == 0) & (y_pred == 1)
+    FN = (y_true == 1) & (y_pred == 0)
 
     # Plot the time series
     ax.plot(np.arange(len(X)), X, label='Time Series', color='blue', alpha=0.5)
