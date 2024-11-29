@@ -163,22 +163,14 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
 # From https://github.com/dganguli/robust-pca
 class _RobustPCA:
 
-    def __init__(self, D, mu=None, lmbda=None):
+    def __init__(self, D):
         self.D = D
         self.S = np.zeros(self.D.shape)
         self.Y = np.zeros(self.D.shape)
 
-        if mu:
-            self.mu = mu
-        else:
-            self.mu = np.prod(self.D.shape) / (4 * np.linalg.norm(self.D, ord=1))
-
+        self.mu = np.prod(self.D.shape) / (4 * np.linalg.norm(self.D, ord=1))
         self.mu_inv = 1 / self.mu
-
-        if lmbda:
-            self.lmbda = lmbda
-        else:
-            self.lmbda = 1 / np.sqrt(np.max(self.D.shape))
+        self.lmbda = 1 / np.sqrt(np.max(self.D.shape))
 
     @staticmethod
     def frobenius_norm(M):
