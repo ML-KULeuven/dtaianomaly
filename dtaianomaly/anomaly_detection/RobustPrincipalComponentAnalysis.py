@@ -1,4 +1,4 @@
-""" This function is adapted from TSB-UAD """
+""" This function is adapted from TSB-AD """
 
 import numpy as np
 from typing import Optional, Union
