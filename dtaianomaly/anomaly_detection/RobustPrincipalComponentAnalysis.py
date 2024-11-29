@@ -81,6 +81,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         if max_iter < 1:
             raise ValueError("`max_iter`should be at least 1")
 
+        PCA(n_components=0.1, **kwargs)  # Check if PCA can be initialized
+
         self.window_size = window_size
         self.stride = stride
         self.max_iter = max_iter
