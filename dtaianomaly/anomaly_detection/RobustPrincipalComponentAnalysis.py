@@ -21,6 +21,15 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     component) of a data matrix even though a positive fraction of the entries are
     arbitrarly corrupted or anomalous (second component).
 
+    Warnings
+    --------
+    During testing, we found that there are some deviations in the predicted decision
+    scores, depending on if the method was run on windows or linux. The difference in
+    the absolute value is of around the order of 2%, but the general trend of the
+    anomaly scores remains consistent. The only randomness in this implementation of
+    Robust PCA is the PCA solver of scikit-learn, but even setting a random state
+    did not resolve the issue.
+
     Notes
     -----
     In most existing implementations, Robust PCA only takes one observation at a
