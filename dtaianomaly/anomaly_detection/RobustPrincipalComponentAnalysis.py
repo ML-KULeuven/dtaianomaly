@@ -54,10 +54,10 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import RobustPrincipalComponentAnalysis
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> rpca = RobustPrincipalComponentAnalysis(3).fit(x)
+    >>> rpca = RobustPrincipalComponentAnalysis(2).fit(x)
     >>> rpca.decision_function(x)
-    array([2.44254701, 2.60489796, 2.47430328, ..., 2.50056499, 2.24484946,
-           2.35176065])
+    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662,
+           1.2923824 ])
 
     References
     ----------
