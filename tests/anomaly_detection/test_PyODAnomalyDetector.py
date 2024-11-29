@@ -6,8 +6,11 @@ from dtaianomaly import anomaly_detection
 @pytest.mark.parametrize('detector_class,kwargs', [
     (anomaly_detection.HistogramBasedOutlierScore, {'n_bins': 'auto', 'alpha': 0.5}),
     (anomaly_detection.IsolationForest, {'n_estimators': 42, 'max_samples': 'auto'}),
+    (anomaly_detection.KernelPrincipalComponentAnalysis, {'kernel': 'poly', 'n_components': 0.5}),
     (anomaly_detection.KNearestNeighbors, {'n_neighbors': 42, 'metric': 'euclidean'}),
     (anomaly_detection.LocalOutlierFactor, {'n_neighbors': 3}),
+    (anomaly_detection.OneClassSupportVectorMachine, {'kernel': 'poly'}),
+    (anomaly_detection.PrincipalComponentAnalysis, {'n_components': 0.5}),
 ])
 class TestPyodAnomalyDetectorAdditionalArgs:
 
@@ -20,8 +23,11 @@ class TestPyodAnomalyDetectorAdditionalArgs:
 @pytest.mark.parametrize('detector_class', [
     anomaly_detection.HistogramBasedOutlierScore,
     anomaly_detection.IsolationForest,
+    anomaly_detection.KernelPrincipalComponentAnalysis,
     anomaly_detection.KNearestNeighbors,
     anomaly_detection.LocalOutlierFactor,
+    anomaly_detection.OneClassSupportVectorMachine,
+    anomaly_detection.PrincipalComponentAnalysis,
 ])
 class TestPyodAnomalyDetector:
 

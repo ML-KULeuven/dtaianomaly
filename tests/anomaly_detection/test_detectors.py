@@ -31,6 +31,7 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.MatrixProfileDetector(15, novelty=True),
     anomaly_detection.MedianMethod(15),
     anomaly_detection.MedianMethod(15, 10),
+    anomaly_detection.OneClassSupportVectorMachine(15),
     anomaly_detection.PrincipalComponentAnalysis(15),
     anomaly_detection.RobustPrincipalComponentAnalysis(15),
     anomaly_detection.RobustPrincipalComponentAnalysis(15, svd_solver='randomized'),
@@ -117,6 +118,7 @@ class TestAnomalyDetectors:
     (anomaly_detection.KNearestNeighbors, {}),
     (anomaly_detection.LocalOutlierFactor, {}),
     (anomaly_detection.MatrixProfileDetector, {}),
+    (anomaly_detection.OneClassSupportVectorMachine, {}),
     (anomaly_detection.PrincipalComponentAnalysis, {}),
     (anomaly_detection.RobustPrincipalComponentAnalysis, {}),
 ])

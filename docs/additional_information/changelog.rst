@@ -24,6 +24,10 @@ Added
     or labels
 - Added the property ``__version__`` to ``dtaianomaly``, which can be accessed from code.
 - Included the used version of ``dtaianomaly`` when logging errors.
+- Implemented ``PrincipalComponentAnalysis``, ``KernelPrincipalComponentAnalysis`` and
+  ``RobustPrincipalComponentAnalysis`` anomaly detectors.
+- Implemented ``HistogramBasedOutlierScore`` anomaly detector.
+- Implemented ``OneClassSupportVectorMachine`` anomaly detector.
 
 Changed
 ^^^^^^^
