@@ -299,6 +299,9 @@ def detector_entry(entry):
     elif detector_type == 'RobustPrincipalComponentAnalysis':
         return anomaly_detection.RobustPrincipalComponentAnalysis(**entry_without_type)
 
+    elif detector_type == 'OneClassSupportVectorMachine':
+        return anomaly_detection.OneClassSupportVectorMachine(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 
