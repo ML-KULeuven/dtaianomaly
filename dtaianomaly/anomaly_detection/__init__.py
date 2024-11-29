@@ -20,6 +20,7 @@ from .KNearestNeighbors import KNearestNeighbors
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
+from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
 
@@ -48,6 +49,7 @@ __all__ = [
     'LocalOutlierFactor',
     'MatrixProfileDetector',
     'MedianMethod',
+    'OneClassSupportVectorMachine',
     'PrincipalComponentAnalysis',
     'PyODAnomalyDetector',
     'RobustPrincipalComponentAnalysis'
