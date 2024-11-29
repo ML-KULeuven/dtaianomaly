@@ -39,6 +39,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         The stride, i.e., the step size for extracting sliding windows from the time series.
     max_iter: int, default=1000
         The maximum number of iterations allowed to optimize the low rank approximation.
+    kwargs:
+        Additional parameters to be passed PCA of Sklearn.
 
     Attributes
     ----------
@@ -52,10 +54,10 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import RobustPrincipalComponentAnalysis
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> rpca = RobustPrincipalComponentAnalysis(10).fit(x)
+    >>> rpca = RobustPrincipalComponentAnalysis(3).fit(x)
     >>> rpca.decision_function(x)
-    array([ 8.58992474,  8.08456392,  7.87608873, ..., 10.90673917,
-           10.84502622, 11.02089405])
+    array([2.44254701, 2.60489796, 2.47430328, ..., 2.50056499, 2.24484946,
+           2.35176065])
 
     References
     ----------
@@ -65,10 +67,11 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     window_size: Union[int, str]
     stride: int
     max_iter: int
+    kwargs: dict
     window_size_: int
     pca_: PCA
 
-    def __init__(self, window_size: Union[str, int], stride: int = 1, max_iter: int = 1000):
+    def __init__(self, window_size: Union[str, int], stride: int = 1, max_iter: int = 1000, **kwargs):
         super().__init__(Supervision.SEMI_SUPERVISED)
 
         check_is_valid_window_size(window_size)
@@ -81,6 +84,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         self.window_size = window_size
         self.stride = stride
         self.max_iter = max_iter
+        self.kwargs = kwargs
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'RobustPrincipalComponentAnalysis':
         """
@@ -118,7 +122,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         # Apply robust PCA
         robust_pca = _RobustPCA(sliding_windows)
         L, S = robust_pca.fit(max_iter=self.max_iter)
-        self.pca_ = PCA(n_components=L.shape[1])
+        self.pca_ = PCA(n_components=L.shape[1], **self.kwargs)
         self.pca_.fit(L)
         return self
 

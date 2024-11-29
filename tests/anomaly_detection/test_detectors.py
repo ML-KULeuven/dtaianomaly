@@ -33,6 +33,7 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.MedianMethod(15, 10),
     anomaly_detection.PrincipalComponentAnalysis(15),
     anomaly_detection.RobustPrincipalComponentAnalysis(15),
+    anomaly_detection.RobustPrincipalComponentAnalysis(15, svd_solver='randomized'),
     pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
 ])
 def detector(request):
