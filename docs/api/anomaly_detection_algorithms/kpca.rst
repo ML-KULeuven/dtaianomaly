@@ -1,6 +1,6 @@
-Kernel Principle Component Analysis
+Kernel Principal Component Analysis
 ===================================
 
-.. autoclass:: dtaianomaly.anomaly_detection.KernelPrincipleComponentAnalysis
+.. autoclass:: dtaianomaly.anomaly_detection.KernelPrincipalComponentAnalysis
    :inherited-members:
    :members:

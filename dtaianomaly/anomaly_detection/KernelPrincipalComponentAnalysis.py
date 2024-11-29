@@ -4,15 +4,15 @@ from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
-class KernelPrincipleComponentAnalysis(PyODAnomalyDetector):
+class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Kernel Principle Component Analysis (KPCA).
+    Anomaly detector based on the Kernel Principal Component Analysis (KPCA).
 
     Standard PCA maps the data to a lower dimensional space through linear
     projections. Deviations in this lower dimensional space are then
     considered to be anomalies. KPCA [hoffmann2007kernel]_ is a non-linear
     extension of PCA, which maps the data into a new kernel space, from
-    which the principle components are learned.
+    which the principal components are learned.
 
     Notes
     -----
@@ -37,10 +37,10 @@ class KernelPrincipleComponentAnalysis(PyODAnomalyDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import KernelPrincipleComponentAnalysis
+    >>> from dtaianomaly.anomaly_detection import KernelPrincipalComponentAnalysis
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> kpca = KernelPrincipleComponentAnalysis(10, n_components=2).fit(x)
+    >>> kpca = KernelPrincipalComponentAnalysis(10, n_components=2).fit(x)
     >>> kpca.decision_function(x)
     array([0.03151377, 0.03697829, 0.04415575, ..., 0.03345565, 0.0330048 ,
            0.03089501])

@@ -15,13 +15,13 @@ from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
 from .PyODAnomalyDetector import PyODAnomalyDetector
 from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
 from .IsolationForest import IsolationForest
-from .KernelPrincipleComponentAnalysis import KernelPrincipleComponentAnalysis
+from .KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
 from .KNearestNeighbors import KNearestNeighbors
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
-from .PrincipleComponentAnalysis import PrincipleComponentAnalysis
-from .RobustPrincipleComponentAnalysis import RobustPrincipleComponentAnalysis
+from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
+from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
 
 __all__ = [
     # Base
@@ -43,12 +43,12 @@ __all__ = [
     # Detectors
     'HistogramBasedOutlierScore',
     'IsolationForest',
-    'KernelPrincipleComponentAnalysis',
+    'KernelPrincipalComponentAnalysis',
     'KNearestNeighbors',
     'LocalOutlierFactor',
     'MatrixProfileDetector',
     'MedianMethod',
-    'PrincipleComponentAnalysis',
+    'PrincipalComponentAnalysis',
     'PyODAnomalyDetector',
-    'RobustPrincipleComponentAnalysis'
+    'RobustPrincipalComponentAnalysis'
 ]

@@ -4,9 +4,9 @@ from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
 
-class PrincipleComponentAnalysis(PyODAnomalyDetector):
+class PrincipalComponentAnalysis(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Principle Component Analysis (PCA).
+    Anomaly detector based on the Principal Component Analysis (PCA).
 
     PCA [Charu2015outlier]_ maps the data to a lower dimensional space
     through linear projections. The goal of these projections is to
@@ -38,10 +38,10 @@ class PrincipleComponentAnalysis(PyODAnomalyDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import PrincipleComponentAnalysis
+    >>> from dtaianomaly.anomaly_detection import PrincipalComponentAnalysis
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> pca = PrincipleComponentAnalysis(10).fit(x)
+    >>> pca = PrincipalComponentAnalysis(10).fit(x)
     >>> pca.decision_function(x)
     array([16286.63724327, 15951.05917741, 15613.5739773 , ...,
            18596.5273311 , 18496.96613747, 18483.47985554])

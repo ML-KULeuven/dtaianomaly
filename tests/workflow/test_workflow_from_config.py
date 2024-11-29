@@ -354,6 +354,12 @@ class TestInterpretPreprocessors:
     (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 25, 'normalize': True, 'p': 1.5, 'k': 5}),
     (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 15}),
     (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 25, 'neighborhood_size_after': 5}),
+    (detector_entry, anomaly_detection.PrincipalComponentAnalysis, {'window_size': 15}),
+    (detector_entry, anomaly_detection.PrincipalComponentAnalysis, {'window_size': 15, 'n_components': 0.5}),
+    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis, {'window_size': 15}),
+    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis, {'window_size': 15, 'n_components': 0.5}),
+    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis, {'window_size': 15}),
+    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis, {'window_size': 15, 'max_iter': 100}),
     # Preprocessors
     (preprocessing_entry, preprocessing.Identity, {}),
     (preprocessing_entry, preprocessing.ChainedPreprocessor, {
@@ -418,10 +424,13 @@ class TestInterpretEntries:
     # Detectors
     (detector_entry, anomaly_detection.HistogramBasedOutlierScore),
     (detector_entry, anomaly_detection.IsolationForest),
+    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis),
     (detector_entry, anomaly_detection.KNearestNeighbors),
     (detector_entry, anomaly_detection.LocalOutlierFactor),
     (detector_entry, anomaly_detection.MatrixProfileDetector),
     (detector_entry, anomaly_detection.MedianMethod),
+    (detector_entry, anomaly_detection.PrincipalComponentAnalysis),
+    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis),
     # Preprocessors
     (preprocessing_entry, preprocessing.ChainedPreprocessor),
     (preprocessing_entry, preprocessing.MovingAverage),

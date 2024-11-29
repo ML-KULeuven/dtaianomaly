@@ -24,15 +24,15 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.baselines.RandomDetector(seed=42),
     anomaly_detection.HistogramBasedOutlierScore(1),
     anomaly_detection.IsolationForest(15),
-    anomaly_detection.KernelPrincipleComponentAnalysis(15),
+    anomaly_detection.KernelPrincipalComponentAnalysis(15),
     anomaly_detection.KNearestNeighbors(15),
     anomaly_detection.LocalOutlierFactor(15),
     anomaly_detection.MatrixProfileDetector(15, novelty=False),
     anomaly_detection.MatrixProfileDetector(15, novelty=True),
     anomaly_detection.MedianMethod(15),
     anomaly_detection.MedianMethod(15, 10),
-    anomaly_detection.PrincipleComponentAnalysis(15),
-    anomaly_detection.RobustPrincipleComponentAnalysis(),
+    anomaly_detection.PrincipalComponentAnalysis(15),
+    anomaly_detection.RobustPrincipalComponentAnalysis(15),
     pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
 ])
 def detector(request):
@@ -112,11 +112,12 @@ class TestAnomalyDetectors:
 @pytest.mark.parametrize('detector_class,additional_args', [
     (anomaly_detection.HistogramBasedOutlierScore, {}),
     (anomaly_detection.IsolationForest, {}),
-    (anomaly_detection.KernelPrincipleComponentAnalysis, {}),
+    (anomaly_detection.KernelPrincipalComponentAnalysis, {}),
     (anomaly_detection.KNearestNeighbors, {}),
     (anomaly_detection.LocalOutlierFactor, {}),
     (anomaly_detection.MatrixProfileDetector, {}),
-    (anomaly_detection.PrincipleComponentAnalysis, {}),
+    (anomaly_detection.PrincipalComponentAnalysis, {}),
+    (anomaly_detection.RobustPrincipalComponentAnalysis, {}),
 ])
 @pytest.mark.parametrize('window_size', [15, 'fft', 'acf', 'mwf', 'suss'])
 class TestAnomalyDetectorsAutomaticWindowSize:

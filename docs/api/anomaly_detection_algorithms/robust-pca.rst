@@ -1,6 +1,6 @@
-Robust Principle Component Analysis
+Robust Principal Component Analysis
 ===================================
 
-.. autoclass:: dtaianomaly.anomaly_detection.RobustPrincipleComponentAnalysis
+.. autoclass:: dtaianomaly.anomaly_detection.RobustPrincipalComponentAnalysis
    :inherited-members:
    :members:
