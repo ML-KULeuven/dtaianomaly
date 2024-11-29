@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from dtaianomaly.visualization import plot_time_series_colored_by_score, plot_time_series_anomalies
-
+import pytest
 
 class TestPlotTimeSeriesColoredByScore:
 
@@ -35,11 +35,8 @@ class TestPlotTimeSeriesColoredByScore:
         def test_multivariate(self, multivariate_time_series):
             y_true = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
             y_pred = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
-            try:
-                fig = plot_time_series_anomalies(multivariate_time_series, y_true, y_pred)
-                assert False, "Expected a ValueError for multivariate input"
-            except ValueError:
-                pass
+            with pytest.raises(ValueError):
+                plot_time_series_anomalies(multivariate_time_series, y_true, y_pred)
 
         def test_given_axis(self, univariate_time_series):
             fig = plt.figure()
@@ -64,3 +61,9 @@ class TestPlotTimeSeriesColoredByScore:
             assert len(scatter_dots[0].get_offsets()) == TP.sum(), "Mismatch in TP count"
             assert len(scatter_dots[1].get_offsets()) == FP.sum(), "Mismatch in FP count"
             assert len(scatter_dots[2].get_offsets()) == FN.sum(), "Mismatch in FN count"
+
+        def test_non_binary_y_pred(self, univariate_time_series):
+            y_true = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+            y_pred = np.random.uniform(0, 1, size=univariate_time_series.shape[0])
+            with pytest.raises(ValueError, match="The predicted anomaly scores must be binary."):
+                plot_time_series_anomalies(univariate_time_series, y_true, y_pred)

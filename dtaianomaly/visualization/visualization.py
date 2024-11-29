@@ -75,6 +75,10 @@ def plot_time_series_anomalies(X: np.ndarray, y_true: np.ndarray, y_pred: np.nda
         plt.figure(**kwargs)
         ax = plt.gca()
 
+    # Check if all predicted values are binary.
+    if not np.all(np.isin(y_pred, [0, 1])):
+        raise ValueError('The predicted anomaly scores must be binary.')
+
     # Identify TP, FP, FN
     TP = (y_true == 1) & (y_pred == 1)
     FP = (y_true == 0) & (y_pred == 1)
