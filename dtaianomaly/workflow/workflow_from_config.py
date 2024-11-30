@@ -290,6 +290,18 @@ def detector_entry(entry):
     elif detector_type == 'HistogramBasedOutlierScore':
         return anomaly_detection.HistogramBasedOutlierScore(**entry_without_type)
 
+    elif detector_type == 'PrincipalComponentAnalysis':
+        return anomaly_detection.PrincipalComponentAnalysis(**entry_without_type)
+
+    elif detector_type == 'KernelPrincipalComponentAnalysis':
+        return anomaly_detection.KernelPrincipalComponentAnalysis(**entry_without_type)
+
+    elif detector_type == 'RobustPrincipalComponentAnalysis':
+        return anomaly_detection.RobustPrincipalComponentAnalysis(**entry_without_type)
+
+    elif detector_type == 'OneClassSupportVectorMachine':
+        return anomaly_detection.OneClassSupportVectorMachine(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 

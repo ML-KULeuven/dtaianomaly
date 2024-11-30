@@ -25,6 +25,10 @@ Added
 - Added the property ``__version__`` to ``dtaianomaly``, which can be accessed from code.
 - Included the used version of ``dtaianomaly`` when logging errors.
 - Added the ``plot_time_series_anomalies`` function to visualize time series data with real and predicted anomalies, highlighting TP, FP, and FN cases.
+- Implemented ``PrincipalComponentAnalysis``, ``KernelPrincipalComponentAnalysis`` and
+  ``RobustPrincipalComponentAnalysis`` anomaly detectors.
+- Implemented ``HistogramBasedOutlierScore`` anomaly detector.
+- Implemented ``OneClassSupportVectorMachine`` anomaly detector.
 
 Changed
 ^^^^^^^
