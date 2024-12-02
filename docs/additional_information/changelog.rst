@@ -29,6 +29,7 @@ Added
   ``RobustPrincipalComponentAnalysis`` anomaly detectors.
 - Implemented ``HistogramBasedOutlierScore`` anomaly detector.
 - Implemented ``OneClassSupportVectorMachine`` anomaly detector.
+- Implemented methods to visualize time series and anomalies: ``plot_demarcated_anomalies``, ``plot_with_zoom``, and ``plot_anomaly_scores``.
 
 Changed
 ^^^^^^^

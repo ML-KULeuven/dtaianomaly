@@ -36,10 +36,16 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'numpydoc'
+    'numpydoc',
+    'matplotlib.sphinxext.plot_directive'
 ]
 
 numpydoc_show_class_members = False
+
+# Default settings for matplotlib.sphinxext.plot_directive
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
