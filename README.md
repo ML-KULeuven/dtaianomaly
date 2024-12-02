@@ -67,7 +67,7 @@ to find more information about how you can contribute!
 
 ## License
 
-    Copyright (c) 2023 KU Leuven, DTAI Research Group
+    Copyright (c) 2023-2025 KU Leuven, DTAI Research Group
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

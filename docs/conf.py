@@ -15,7 +15,7 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'dtaianomaly'
-copyright = '2023, DTAI'
+copyright = '2023-2025, DTAI'
 author = 'Louis Carpentier \\and Nick Seeuws'
 
 with open('../pyproject.toml', 'r') as f:
