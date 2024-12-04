@@ -339,6 +339,7 @@ class TestInterpretPreprocessors:
     (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),
     (detector_entry, anomaly_detection.baselines.RandomDetector, {}),
     (detector_entry, anomaly_detection.baselines.RandomDetector, {'seed': 42}),
+    (detector_entry, anomaly_detection.ClusterBasedLocalOutlierFactor, {'window_size': 10}),
     (detector_entry, anomaly_detection.HistogramBasedOutlierScore, {'window_size': 1}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 15}),
     (detector_entry, anomaly_detection.IsolationForest, {'window_size': 25, 'stride': 5}),
@@ -424,6 +425,7 @@ class TestInterpretEntries:
     (metric_entry, evaluation.ThresholdMetric),
     (metric_entry, evaluation.BestThresholdMetric),
     # Detectors
+    (detector_entry, anomaly_detection.ClusterBasedLocalOutlierFactor),
     (detector_entry, anomaly_detection.HistogramBasedOutlierScore),
     (detector_entry, anomaly_detection.IsolationForest),
     (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis),

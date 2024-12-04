@@ -13,6 +13,7 @@ from .windowing_utils import sliding_window, reverse_sliding_window, check_is_va
 
 from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
 from .PyODAnomalyDetector import PyODAnomalyDetector
+from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
 from .IsolationForest import IsolationForest
 from .KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
@@ -42,6 +43,7 @@ __all__ = [
     'RandomDetector',
 
     # Detectors
+    'ClusterBasedLocalOutlierFactor',
     'HistogramBasedOutlierScore',
     'IsolationForest',
     'KernelPrincipalComponentAnalysis',
