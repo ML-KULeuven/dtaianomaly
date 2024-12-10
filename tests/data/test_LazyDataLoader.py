@@ -91,3 +91,15 @@ class TestFromDirectory:
         assert len(data_loaders) == len(paths)
         for data_loader in data_loaders:
             assert data_loader.path in paths
+
+    @pytest.mark.parametrize('do_caching', [True, False])
+    def test_kwargs(self, tmp_path, do_caching):
+        paths = [str(tmp_path / f'file-{i}') for i in range(5)]
+        for path in paths:
+            open(path, 'a').close()  # Make the file
+        data_loaders = from_directory(tmp_path, DummyLoader, do_caching=do_caching)
+
+        assert len(data_loaders) == len(paths)
+        for data_loader in data_loaders:
+            assert data_loader.path in paths
+            assert data_loader.do_caching == do_caching

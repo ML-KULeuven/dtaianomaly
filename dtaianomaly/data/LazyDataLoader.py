@@ -68,7 +68,7 @@ class LazyDataLoader(PrettyPrintable):
         """ Abstract method to effectively load the data. """
 
 
-def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader]) -> List[LazyDataLoader]:
+def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader], **kwargs) -> List[LazyDataLoader]:
     """
     Construct a `LazyDataLoader` instance for every file in the given `directory`
 
@@ -79,6 +79,8 @@ def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader]
     dataloader: LazyDataLoader **object**
         Class object of the data loader, called for constructing
         each data loader instance
+    **kwargs:
+        Additional arguments to be passed to the dataloader
 
     Returns
     -------
@@ -98,4 +100,4 @@ def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader]
         os.path.join(directory, f) for f in os.listdir(directory)
         if os.path.isfile(os.path.join(directory, f)) or os.path.isdir(os.path.join(directory, f))
     ]
-    return [dataloader(file) for file in all_files]
+    return [dataloader(file, **kwargs) for file in all_files]
