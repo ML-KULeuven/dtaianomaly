@@ -32,6 +32,8 @@ class Metric(PrettyPrintable):
             When inputs are not numeric "array-like"s
         ValueError
             If shapes of `y_true` and `y_pred` are not of identical shape
+        ValueError
+            If `y_true` is non-binary.
         """
         if not utils.is_valid_array_like(y_true):
             raise ValueError("Input 'y_true' should be numeric array-like")
@@ -41,6 +43,8 @@ class Metric(PrettyPrintable):
         y_pred = np.asarray(y_pred)
         if not y_true.shape == y_pred.shape:
             raise ValueError("Inputs should have identical shape")
+        if not np.all(np.isin(y_true, [0, 1])):
+            raise ValueError('The predicted anomaly scores must be binary!')
         return self._compute(y_true, y_pred)
 
     @abc.abstractmethod
@@ -54,6 +58,38 @@ class ProbaMetric(Metric, abc.ABC):
 
 class BinaryMetric(Metric, abc.ABC):
     """ A metric that takes as input binary anomaly labels. """
+
+    def compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """
+        Computes the performance score.
+
+        Parameters
+        ----------
+        y_true: array-like of shape (n_samples)
+            Ground-truth labels.
+        y_pred: array-like of shape (n_samples)
+            Predicted anomaly scores.
+
+        Returns
+        -------
+        score: float
+            The alignment score of the given ground truth and
+            prediction, according to this score.
+
+        Raises
+        ------
+        ValueError
+            When inputs are not numeric "array-like"s
+        ValueError
+            If shapes of `y_true` and `y_pred` are not of identical shape
+        ValueError
+            If `y_true` is non-binary.
+        ValueError
+            If `y_pred` is non-binary.
+        """
+        if not np.all(np.isin(y_pred, [0, 1])):
+            raise ValueError('The predicted anomaly scores must be binary!')
+        return super().compute(y_true, y_pred)
 
 
 class ThresholdMetric(ProbaMetric):

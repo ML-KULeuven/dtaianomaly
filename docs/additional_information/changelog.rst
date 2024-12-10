@@ -15,6 +15,9 @@ Added
 
 Changed
 ^^^^^^^
+- Added ``kwargs`` parameters to ``data.read_from_directory()`` to pass additional
+  arguments to data loaders.
+- Added a check for ``BinaryMetric`` if the metric is actually binary or not.
 
 Fixed
 ^^^^^
