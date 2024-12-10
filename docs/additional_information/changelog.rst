@@ -9,6 +9,8 @@ Latest
 
 Added
 ^^^^^
+- Implemented ``ClusterBasedLocalOutlierFactor`` (CBLOF) anomaly detector.
+- Implemented ``KMeansAnomalyDetector`` anomaly detector.
 
 Changed
 ^^^^^^^

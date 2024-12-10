@@ -17,6 +17,7 @@ from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
 from .IsolationForest import IsolationForest
 from .KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
+from .KMeansAnomalyDetector import KMeansAnomalyDetector
 from .KNearestNeighbors import KNearestNeighbors
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
@@ -47,6 +48,7 @@ __all__ = [
     'HistogramBasedOutlierScore',
     'IsolationForest',
     'KernelPrincipalComponentAnalysis',
+    'KMeansAnomalyDetector',
     'KNearestNeighbors',
     'LocalOutlierFactor',
     'MatrixProfileDetector',
