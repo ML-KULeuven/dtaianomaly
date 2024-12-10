@@ -172,9 +172,9 @@ class Workflow:
         results_df = pd.DataFrame(result)
 
         # Reorder the columns
-        columns = ['Dataset', 'Detector', 'Preprocessor', 'Runtime [s]']
+        columns = ['Dataset', 'Detector', 'Preprocessor', 'Runtime Fit [s]', 'Runtime Predict [s]', 'Runtime [s]']
         if self.trace_memory:
-            columns.append('Peak Memory [MB]')
+            columns.extend(['Peak Memory Fit [MB]', 'Peak Memory Predict [MB]', 'Peak Memory [MB]'])
         results_df = results_df[columns + [x for x in results_df.columns if x not in columns]]
 
         # Drop the processors column, if none were provided.
@@ -188,10 +188,11 @@ class Workflow:
 def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool, error_log_path: str, fit_unsupervised_on_test_data: bool) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
     results = {'Dataset': str(dataloader)}
-    for key in pipeline.metrics + ['Detector', 'Preprocessor', 'Runtime [s]']:
+    for key in pipeline.metrics + ['Detector', 'Preprocessor', 'Runtime Fit [s]', 'Runtime Predict [s]', 'Runtime [s]']:
         results[str(key)] = 'Error'
     if trace_memory:
-        results['Peak Memory [MB]'] = 'Error'
+        for key in ['Peak Memory Fit [MB]', 'Peak Memory Predict [MB]', 'Peak Memory [MB]']:
+            results[key] = 'Error'
 
     # Try to load the data set, if this fails, return the results
     try:
@@ -218,34 +219,57 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
     # Format X_train, y_train, X_test and y_test
     X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, pipeline.pipeline, fit_unsupervised_on_test_data)
 
-    # Start tracing the memory, if requested
-    if trace_memory:
-        tracemalloc.start()
-
-    # Evaluate the pipeline, and measure the time
-    start = time.time()
+    # Run the anomaly detector, and catch any exceptions
     try:
-        results.update(pipeline.run(
-            X_test=X_test,
-            y_test=y_test,
-            X_train=X_train,
-            y_train=y_train
-        ))
+        # Fitting
+        _start_tracing_memory(trace_memory)
+        start = _start_tracing_runtime()
+        pipeline.fit(X_train, y_train)
+        results['Runtime Fit [s]'] = _end_tracing_runtime(start)
+        _end_tracing_memory(trace_memory, results, 'Peak Memory Fit [MB]')
+
+        # Predicting
+        _start_tracing_memory(trace_memory)
+        start = _start_tracing_runtime()
+        y_pred = pipeline.predict(X_test)
+        results['Runtime Predict [s]'] = _end_tracing_runtime(start)
+        _end_tracing_memory(trace_memory, results, 'Peak Memory Predict [MB]')
+
+        # Scoring
+        y_test_ = pipeline.format_y_test(X_test, y_test)
+        results.update(pipeline.evaluate(y_test_, y_pred))
+
+        # Aggregate the used resources
+        results['Runtime [s]'] = results['Runtime Fit [s]'] + results['Runtime Predict [s]']
+        if trace_memory:
+            results['Peak Memory [MB]'] = max(results['Peak Memory Fit [MB]'], results['Peak Memory Predict [MB]'])
+
     except Exception as exception:
+        # Log the errors
         results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train)
-    stop = time.time()
-
-    # Save the runtime
-    results['Runtime [s]'] = stop - start
-
-    # Save the memory if requested, and stop tracing
-    if trace_memory:
-        _, peak = tracemalloc.get_traced_memory()
-        results['Peak Memory [MB]'] = peak / 10 ** 6
-        tracemalloc.stop()
 
     # Return the results
     return results
+
+
+def _start_tracing_runtime() -> float:
+    return time.time()
+
+
+def _end_tracing_runtime(start_time: float) -> float:
+    return time.time() - start_time
+
+
+def _start_tracing_memory(trace_memory: bool) -> None:
+    if trace_memory:
+        tracemalloc.start()
+
+
+def _end_tracing_memory(trace_memory: bool, results, key) -> None:
+    if trace_memory:
+        _, peak = tracemalloc.get_traced_memory()
+        results[key] = peak / 10 ** 6
+        tracemalloc.stop()
 
 
 def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):

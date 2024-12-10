@@ -75,7 +75,7 @@ class TestErrorLogging:
         )
         results = workflow.run()
 
-        assert results.shape == (1, 6)
+        assert results.shape == (1, 8)
         assert 'Error file' in results.columns
 
         error_file = results.loc[0, 'Error file']
@@ -95,7 +95,7 @@ class TestErrorLogging:
         )
         results = workflow.run()
 
-        assert results.shape == (1, 6)
+        assert results.shape == (1, 8)
         assert 'Error file' in results.columns
 
         error_file = results.loc[0, 'Error file']
@@ -115,7 +115,7 @@ class TestErrorLogging:
         )
         results = workflow.run()
 
-        assert results.shape == (1, 6)
+        assert results.shape == (1, 8)
         assert 'Error file' in results.columns
 
         error_file = results.loc[0, 'Error file']
@@ -135,7 +135,7 @@ class TestErrorLogging:
         )
         results = workflow.run()
 
-        assert results.shape == (1, 6)
+        assert results.shape == (1, 8)
         assert 'Error file' in results.columns
 
         error_file = results.loc[0, 'Error file']
@@ -155,7 +155,7 @@ class TestErrorLogging:
         )
         results = workflow.run()
 
-        assert results.shape == (1, 6)
+        assert results.shape == (1, 8)
         assert 'Error file' in results.columns
 
         error_file = results.loc[0, 'Error file']

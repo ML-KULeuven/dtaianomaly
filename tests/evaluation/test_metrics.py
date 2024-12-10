@@ -17,6 +17,12 @@ class TestMetrics:
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
+    def test_non_binary_y_true(self, metric):
+        y_true = [0.1, 0.9, 0.5, 0.3, 0.9, 0.1, 0.2, 0.2, 0.0]
+        y_pred = [0, 0, 1, 0, 1, 0, 1, 0, 1]
+        with pytest.raises(ValueError):
+            metric.compute(y_true, y_pred)
+
     def test_non_numeric_y_pred(self, metric):
         y_true = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         y_pred = ['yes', 'no', 'yes', 'no', 'yes', 'no', 'yes', 'no', 'yes']

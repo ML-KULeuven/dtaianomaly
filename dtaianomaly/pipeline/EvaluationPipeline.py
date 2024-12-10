@@ -39,7 +39,7 @@ class EvaluationPipeline:
 
     def run(self,
             X_test: np.ndarray,
-            y_test: np.ndarray,
+            y_test: np.array,
             X_train: np.ndarray,
             y_train: Optional[np.ndarray]) -> Dict[str, float]:
         """
@@ -55,9 +55,10 @@ class EvaluationPipeline:
             The ground truth anomaly labels of the test data.
         X_train: array-like of shape (n_samples_train, n_attributes)
             The train time series data.
-        y_train: array-like of shape (n_samples_train) or ``None``.
+        y_train: array-like of shape (n_samples) or ``None``.
             The ground truth anomaly labels of the train data. Note that, even
-            though ``y_train`` can be ``None``, it must be provided.
+            though ``y_train`` can be ``None``, it must be provided (i.e., there
+            is no default value).
 
         Returns
         -------
@@ -73,19 +74,83 @@ class EvaluationPipeline:
             raise ValueError("y_test is not a valid array-like!")
         if not is_valid_array_like(X_train):
             raise ValueError("X_train is not a valid array-like!")
-        if not (y_train is  None or is_valid_array_like(y_train)):
+        if not (y_train is None or is_valid_array_like(y_train)):
             raise ValueError("y_train is not a valid array-like!")
 
-        # Fit on the train data
+        self.fit(X_train, y_train)
+        y_pred = self.predict(X_test)
+        y_test_ = self.format_y_test(X_test, y_test)
+        return self.evaluate(y_test_, y_pred)
+
+    def fit(self, X_train: np.ndarray, y_train: Optional[np.array]) -> None:
+        """
+        Apply the fit stage of this evaluation pipeline.
+
+        Parameters
+        ----------
+        X_train: array-like of shape (n_samples, n_attributes)
+            The train time series data.
+        y_train: array-like of shape (n_samples) or ``None``.
+            The ground truth anomaly labels of the train data. Note that, even
+            though ``y_train`` can be ``None``, it must be provided (i.e., there
+            is no default value).
+        """
         self.pipeline.fit(X_train, y_train)
 
-        # Predict on the test data
-        y_pred = self.pipeline.predict_proba(X=X_test)
+    def predict(self, X_test: np.ndarray):
+        """
+        Apply the predict stage of the pipeline.
 
-        # Transform the test labels
+        Parameters
+        ----------
+        X_test: array-like of shape (n_samples, n_attributes)
+            The test time series data.
+
+        Returns
+        -------
+        y_pred: array-like of shape (n_samples)
+            The predicted anomaly scores.
+        """
+        return self.pipeline.predict_proba(X=X_test)
+
+    def format_y_test(self, X_test: np.ndarray, y_test: np.array) -> np.array:
+        """
+        Format the test labels using the preprocessor in this pipeline. This is
+        necessary if some preprocessors are used that undersample the data.
+
+        Parameters
+        ----------
+        X_test: array-like of shape (n_samples, n_attributes)
+            The test time series data.
+        y_test: array-like of shape (n_samples)
+            The ground truth anomaly labels of the test data.
+
+        Returns
+        -------
+        y_test_: array-like of shape (n_samples_)
+            The formatted ground truth labels.
+        """
         _, y_test_ = self.pipeline.preprocessor.transform(X_test, y_test)
+        return y_test_
 
-        # Compute the performances
+    def evaluate(self, y_test_: np.array, y_pred: np.array) -> Dict[str, float]:
+        """
+        Evaluate this pipeline by computing the evaluation scores.
+
+        Parameters
+        ----------
+        y_test_: array-like of shape (n_samples)
+            The formatted ground truth anomaly labels.
+        y_pred: array-like of shape (n_samples)
+            The predicted anomaly scores.
+
+        Returns
+        -------
+        performances: Dict[str, float]
+            The evaluation of the performance metrics. The keys are
+            string descriptors of the performance metrics, with values
+            the corresponding performance score.
+        """
         return {
             str(metric): metric.compute(y_true=y_test_, y_pred=y_pred)
             for metric in self.metrics

@@ -18,6 +18,10 @@ Changed
 - Added ``kwargs`` parameters to ``data.read_from_directory()`` to pass additional
   arguments to data loaders.
 - Added a check for ``BinaryMetric`` if the metric is actually binary or not.
+- Separated the resource requirements in the ´´Workflow`` across the fit and predict
+  stage of the anomaly detector. The aggregated resources are still returned as before.
+  For this, the ``EvaluationPipeline`` received several new functions which execute
+  each stage in an atomic manner.
 
 Fixed
 ^^^^^

@@ -167,12 +167,14 @@ class TestWorkflowSuccess:
             trace_memory=False
         )
         results = workflow.run()
-        assert results.shape == (4, 9)
+        assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' not in results.columns
+        assert 'Peak Memory Predict [MB]' not in results.columns
         assert 'Peak Memory [MB]' not in results.columns
         assert not np.any(results == 'Error')
         assert not results.isna().any().any()
@@ -180,7 +182,9 @@ class TestWorkflowSuccess:
         assert results.columns[0] == 'Dataset'
         assert results.columns[1] == 'Detector'
         assert results.columns[2] == 'Preprocessor'
-        assert results.columns[3] == 'Runtime [s]'
+        assert results.columns[3] == 'Runtime Fit [s]'
+        assert results.columns[4] == 'Runtime Predict [s]'
+        assert results.columns[5] == 'Runtime [s]'
 
     def test_parallel(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -196,12 +200,14 @@ class TestWorkflowSuccess:
             trace_memory=False
         )
         results = workflow.run()
-        assert results.shape == (4, 9)
+        assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' not in results.columns
+        assert 'Peak Memory Predict [MB]' not in results.columns
         assert 'Peak Memory [MB]' not in results.columns
         assert not np.any(results == 'Error')
         assert not results.isna().any().any()
@@ -209,7 +215,9 @@ class TestWorkflowSuccess:
         assert results.columns[0] == 'Dataset'
         assert results.columns[1] == 'Detector'
         assert results.columns[2] == 'Preprocessor'
-        assert results.columns[3] == 'Runtime [s]'
+        assert results.columns[3] == 'Runtime Fit [s]'
+        assert results.columns[4] == 'Runtime Predict [s]'
+        assert results.columns[5] == 'Runtime [s]'
 
     def test_trace_memory(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -225,12 +233,14 @@ class TestWorkflowSuccess:
             trace_memory=True
         )
         results = workflow.run()
-        assert results.shape == (4, 10)
+        assert results.shape == (4, 14)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
         assert not np.any(results == 'Error')
         assert not results.isna().any().any()
@@ -238,8 +248,12 @@ class TestWorkflowSuccess:
         assert results.columns[0] == 'Dataset'
         assert results.columns[1] == 'Detector'
         assert results.columns[2] == 'Preprocessor'
-        assert results.columns[3] == 'Runtime [s]'
-        assert results.columns[4] == 'Peak Memory [MB]'
+        assert results.columns[3] == 'Runtime Fit [s]'
+        assert results.columns[4] == 'Runtime Predict [s]'
+        assert results.columns[5] == 'Runtime [s]'
+        assert results.columns[6] == 'Peak Memory Fit [MB]'
+        assert results.columns[7] == 'Peak Memory Predict [MB]'
+        assert results.columns[8] == 'Peak Memory [MB]'
 
     def test_no_preprocessors(self, tmp_path_factory, univariate_time_series):
         path = str(tmp_path_factory.mktemp('some-path-1'))
@@ -254,18 +268,24 @@ class TestWorkflowSuccess:
             trace_memory=True
         )
         results = workflow.run()
-        assert results.shape == (2, 9)
+        assert results.shape == (2, 13)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 1
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 1
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
         assert not np.any(results == 'Error')
         assert not results.isna().any().any()
         # Check the order
         assert results.columns[0] == 'Dataset'
         assert results.columns[1] == 'Detector'
-        assert results.columns[2] == 'Runtime [s]'
-        assert results.columns[3] == 'Peak Memory [MB]'
+        assert results.columns[2] == 'Runtime Fit [s]'
+        assert results.columns[3] == 'Runtime Predict [s]'
+        assert results.columns[4] == 'Runtime [s]'
+        assert results.columns[5] == 'Peak Memory Fit [MB]'
+        assert results.columns[6] == 'Peak Memory Predict [MB]'
+        assert results.columns[7] == 'Peak Memory [MB]'
         assert 'Preprocessor' not in results.columns
 
 
@@ -326,15 +346,17 @@ class TestWorkflowFail:
             error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (8, 11)
+        assert results.shape == (8, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Dataset'].value_counts()[f"DummyDataLoaderError(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
-        assert np.any(results == 'Error', axis=0).sum() == 9
+        assert np.any(results == 'Error', axis=0).sum() == 13
         assert np.any(results == 'Error', axis=1).sum().sum() == 4
         assert 'Error file' in results.columns
         assert results['Error file'].isna().sum() == 4
@@ -354,14 +376,16 @@ class TestWorkflowFail:
             error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 11)
+        assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
-        assert np.any(results == 'Error', axis=0).sum() == 5
+        assert np.any(results == 'Error', axis=0).sum() == 11
         assert np.any(results == 'Error', axis=1).sum().sum() == 2
         assert 'Error file' in results.columns
         assert results['Error file'].isna().sum() == 2
@@ -381,14 +405,16 @@ class TestWorkflowFail:
             error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 11)
+        assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
-        assert np.any(results == 'Error', axis=0).sum() == 5
+        assert np.any(results == 'Error', axis=0).sum() == 9
         assert np.any(results == 'Error', axis=1).sum().sum() == 2
         assert 'Error file' in results.columns
         assert results['Error file'].isna().sum() == 2
@@ -408,14 +434,16 @@ class TestWorkflowFail:
             error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 11)
+        assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
-        assert np.any(results == 'Error', axis=0).sum() == 5
+        assert np.any(results == 'Error', axis=0).sum() == 11
         assert np.any(results == 'Error', axis=1).sum().sum() == 3
         assert 'Error file' in results.columns
         assert results['Error file'].isna().sum() == 1
@@ -435,16 +463,18 @@ class TestWorkflowFail:
             error_log_path=str(tmp_path_factory.mktemp('error-log'))
         )
         results = workflow.run()
-        assert results.shape == (4, 10)
+        assert results.shape == (4, 14)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
         assert results['Detector'].value_counts()['SupervisedDetector()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
         assert 'Peak Memory [MB]' in results.columns
         expected_error_message = f'Not compatible: detector with supervision Supervision.SUPERVISED ' \
                                  f'for data set with compatible supervision [Supervision.UNSUPERVISED]'
-        assert np.any(results == expected_error_message, axis=0).sum() == 7
+        assert np.any(results == expected_error_message, axis=0).sum() == 11
         assert np.any(results == expected_error_message, axis=1).sum().sum() == 2
         assert 'Error file' not in results.columns
 
