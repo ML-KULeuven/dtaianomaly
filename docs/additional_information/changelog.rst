@@ -11,6 +11,7 @@ Added
 ^^^^^
 - Implemented ``ClusterBasedLocalOutlierFactor`` (CBLOF) anomaly detector.
 - Implemented ``KMeansAnomalyDetector`` anomaly detector.
+- Implemented ``CopulaBasedOutlierDetector`` (COPOD) anomaly detector.
 
 Changed
 ^^^^^^^

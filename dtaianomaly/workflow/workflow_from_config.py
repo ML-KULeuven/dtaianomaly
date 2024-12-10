@@ -308,6 +308,9 @@ def detector_entry(entry):
     elif detector_type == 'KMeansAnomalyDetector':
         return anomaly_detection.KMeansAnomalyDetector(**entry_without_type)
 
+    elif detector_type == 'CopulaBasedOutlierDetector':
+        return anomaly_detection.CopulaBasedOutlierDetector(**entry_without_type)
+
     else:
         raise ValueError(f'Invalid detector entry: {entry}')
 

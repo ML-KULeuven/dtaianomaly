@@ -5,6 +5,7 @@ from dtaianomaly import anomaly_detection
 
 @pytest.mark.parametrize('detector_class,kwargs', [
     (anomaly_detection.ClusterBasedLocalOutlierFactor, {'n_clusters': 4, 'alpha': 0.75, 'beta': 5}),
+    # (anomaly_detection.CopulaBasedOutlierDetector, {}),  # Parameter-free
     (anomaly_detection.HistogramBasedOutlierScore, {'n_bins': 'auto', 'alpha': 0.5}),
     (anomaly_detection.IsolationForest, {'n_estimators': 42, 'max_samples': 'auto'}),
     (anomaly_detection.KernelPrincipalComponentAnalysis, {'kernel': 'poly', 'n_components': 0.5}),
@@ -23,6 +24,7 @@ class TestPyodAnomalyDetectorAdditionalArgs:
 
 @pytest.mark.parametrize('detector_class', [
     anomaly_detection.ClusterBasedLocalOutlierFactor,
+    anomaly_detection.CopulaBasedOutlierDetector,
     anomaly_detection.HistogramBasedOutlierScore,
     anomaly_detection.IsolationForest,
     anomaly_detection.KernelPrincipalComponentAnalysis,

@@ -23,6 +23,7 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.baselines.AlwaysAnomalous(),
     anomaly_detection.baselines.RandomDetector(seed=42),
     anomaly_detection.ClusterBasedLocalOutlierFactor(15),
+    anomaly_detection.CopulaBasedOutlierDetector(15),
     anomaly_detection.HistogramBasedOutlierScore(1),
     anomaly_detection.IsolationForest(15),
     anomaly_detection.KernelPrincipalComponentAnalysis(15),
@@ -115,6 +116,7 @@ class TestAnomalyDetectors:
 
 @pytest.mark.parametrize('detector_class,additional_args', [
     (anomaly_detection.ClusterBasedLocalOutlierFactor, {'n_clusters': 20}),
+    (anomaly_detection.CopulaBasedOutlierDetector, {}),
     (anomaly_detection.HistogramBasedOutlierScore, {}),
     (anomaly_detection.IsolationForest, {}),
     (anomaly_detection.KernelPrincipalComponentAnalysis, {}),
