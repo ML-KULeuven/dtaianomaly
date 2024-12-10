@@ -22,7 +22,7 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.baselines.AlwaysNormal(),
     anomaly_detection.baselines.AlwaysAnomalous(),
     anomaly_detection.baselines.RandomDetector(seed=42),
-    anomaly_detection.ClusterBasedLocalOutlierFactor(15),
+    anomaly_detection.ClusterBasedLocalOutlierFactor(15, n_clusters=20),
     anomaly_detection.CopulaBasedOutlierDetector(15),
     anomaly_detection.HistogramBasedOutlierScore(1),
     anomaly_detection.IsolationForest(15),
