@@ -1,4 +1,9 @@
-# Dtaianomaly for Time Series Anomaly Detection
+<p align="center">
+<img width="300" src="docs/logo/readme.svg" alt=""/>
+</p>
+
+<h1 align="center">dtaianomaly</h1>
+<h2 align="center">Time series anomaly detection</h2>
 
 [![Documentation Status](https://readthedocs.org/projects/dtaianomaly/badge/?version=stable)](https://dtaianomaly.readthedocs.io/en/stable/?badge=stable)
 [![PyPi Version](https://img.shields.io/pypi/v/dtaianomaly.svg)](https://pypi.org/project/dtaianomaly/)

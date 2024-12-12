@@ -127,7 +127,7 @@ class EvaluationPipeline:
 
         Returns
         -------
-        y_test_: array-like of shape (n_samples_)
+        y_test_: array-like of shape (n_samples\\_)
             The formatted ground truth labels.
         """
         _, y_test_ = self.pipeline.preprocessor.transform(X_test, y_test)

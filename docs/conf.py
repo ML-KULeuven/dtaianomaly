@@ -47,6 +47,13 @@ plot_include_source = True
 plot_html_show_source_link = False
 plot_html_show_formats = False
 
+# Logo
+html_favicon = 'logo/favicon.svg'
+html_logo = 'logo/html-logo.svg'
+html_theme_options = {
+    'logo_only': True
+}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
