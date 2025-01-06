@@ -6,9 +6,9 @@ from sklearn.exceptions import NotFittedError
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
 
 
-class ZNormalizer(Preprocessor):
+class StandardScaler(Preprocessor):
     """
-    Rescale to zero mean, unit variance.
+    Standard scale the data: rescale to zero mean, unit variance.
 
     Rescale to zero mean and unit variance. A mean value and standard
     deviation is computed on a training set, after which these values
@@ -46,7 +46,7 @@ class ZNormalizer(Preprocessor):
     def __init__(self, min_std: float = 1e-9):
         self.min_std = min_std
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'ZNormalizer':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'StandardScaler':
         if len(X.shape) == 1 or X.shape[1] == 1:
             # univariate case
             self.mean_ = np.array([np.nanmean(X)])

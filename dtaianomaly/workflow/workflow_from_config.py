@@ -345,10 +345,10 @@ def preprocessing_entry(entry):
             raise TypeError(f'Too many parameters given for entry: {entry}')
         return preprocessing.MinMaxScaler()
 
-    elif processing_type == 'ZNormalizer':
+    elif processing_type == 'StandardScaler':
         if len(entry_without_type) > 0:
             raise TypeError(f'Too many parameters given for entry: {entry}')
-        return preprocessing.ZNormalizer()
+        return preprocessing.StandardScaler()
 
     elif processing_type == 'MovingAverage':
         return preprocessing.MovingAverage(**entry_without_type)

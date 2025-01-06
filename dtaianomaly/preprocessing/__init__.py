@@ -8,7 +8,7 @@ Custom preprocessors can be implemented by extending the base :py:class:`~dtaian
 from .Preprocessor import Preprocessor, check_preprocessing_inputs, Identity
 from .ChainedPreprocessor import ChainedPreprocessor
 from .MinMaxScaler import MinMaxScaler
-from .ZNormalizer import ZNormalizer
+from .StandardScaler import StandardScaler
 from .MovingAverage import MovingAverage
 from .ExponentialMovingAverage import ExponentialMovingAverage
 from .UnderSampler import SamplingRateUnderSampler, NbSamplesUnderSampler
@@ -21,7 +21,7 @@ __all__ = [
     'Identity',
     'ChainedPreprocessor',
     'MinMaxScaler',
-    'ZNormalizer',
+    'StandardScaler',
     'MovingAverage',
     'ExponentialMovingAverage',
     'SamplingRateUnderSampler',

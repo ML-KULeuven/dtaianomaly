@@ -1,7 +1,7 @@
 
 import pytest
 
-from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, MinMaxScaler, ZNormalizer
+from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, MinMaxScaler, StandardScaler
 
 
 class TestChainedPreprocessor:
@@ -28,5 +28,5 @@ class TestChainedPreprocessor:
             ChainedPreprocessor()
 
     def test_str(self):
-        preprocessor = ChainedPreprocessor(Identity(), MinMaxScaler(), ZNormalizer())
-        assert str(preprocessor) == 'Identity()->MinMaxScaler()->ZNormalizer()'
+        preprocessor = ChainedPreprocessor(Identity(), MinMaxScaler(), StandardScaler())
+        assert str(preprocessor) == 'Identity()->MinMaxScaler()->StandardScaler()'

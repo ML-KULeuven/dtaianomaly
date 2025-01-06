@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.preprocessing import Identity, ZNormalizer, SamplingRateUnderSampler
+from dtaianomaly.preprocessing import Identity, StandardScaler, SamplingRateUnderSampler
 from dtaianomaly.anomaly_detection import IsolationForest
 from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
 
@@ -12,11 +12,11 @@ from dtaianomaly.pipeline import EvaluationPipeline
 class TestEvaluationPipeline:
 
     def test_initialization(self):
-        pipeline = EvaluationPipeline(ZNormalizer(), IsolationForest(15), AreaUnderPR())
+        pipeline = EvaluationPipeline(StandardScaler(), IsolationForest(15), AreaUnderPR())
         assert isinstance(pipeline.metrics, list)
 
     def test_list_of_metrics(self):
-        EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderPR(), AreaUnderROC()])
+        EvaluationPipeline(StandardScaler(), IsolationForest(15), [AreaUnderPR(), AreaUnderROC()])
 
     def test_no_preprocessors(self):
         with pytest.raises(ValueError):
@@ -28,15 +28,15 @@ class TestEvaluationPipeline:
 
     def test_invalid_list(self):
         with pytest.raises(TypeError):
-            EvaluationPipeline([ZNormalizer(), 'bonkers'], IsolationForest(15), AreaUnderPR())
+            EvaluationPipeline([StandardScaler(), 'bonkers'], IsolationForest(15), AreaUnderPR())
 
     def test_invalid_detector(self):
         with pytest.raises(TypeError):
-            EvaluationPipeline(ZNormalizer(), 'IsolationForest', AreaUnderPR())
+            EvaluationPipeline(StandardScaler(), 'IsolationForest', AreaUnderPR())
 
     def test_eval_invalid_metrics(self):
         with pytest.raises(TypeError):
-            EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), 'AreaUnderPR'])
+            EvaluationPipeline(StandardScaler(), IsolationForest(15), [AreaUnderROC(), 'AreaUnderPR'])
 
     def test_run_invalid_X_test(self):
         pipeline = EvaluationPipeline(Identity(), IsolationForest(15), AreaUnderROC())
@@ -64,7 +64,7 @@ class TestEvaluationPipeline:
             pipeline.run(np.array([3, 5, 7]), [0, 1, 0], np.array([1, 2, 3]), np.array(['0', '1', '0']))
 
     def test_run(self, univariate_time_series):
-        pipeline = EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
+        pipeline = EvaluationPipeline(StandardScaler(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
         y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
         results = pipeline.run(univariate_time_series, y, univariate_time_series, None)
         assert len(results) == 2
@@ -72,7 +72,7 @@ class TestEvaluationPipeline:
         assert 'AreaUnderPR()' in results
 
     def test_run_multivariate(self, multivariate_time_series):
-        pipeline = EvaluationPipeline(ZNormalizer(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
+        pipeline = EvaluationPipeline(StandardScaler(), IsolationForest(15), [AreaUnderROC(), AreaUnderPR()])
         y = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
         results = pipeline.run(multivariate_time_series, y, multivariate_time_series, y)
         assert len(results) == 2

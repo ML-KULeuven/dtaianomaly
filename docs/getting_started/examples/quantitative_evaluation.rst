@@ -45,9 +45,9 @@ is applied.
 
     preprocessors = [
         Identity(),
-        ZNormalizer(),
-        ChainedPreprocessor([MovingAverage(10), ZNormalizer()]),
-        ChainedPreprocessor([ExponentialMovingAverage(0.8), ZNormalizer()])
+        StandardScaler(),
+        ChainedPreprocessor([MovingAverage(10), StandardScaler()]),
+        ChainedPreprocessor([ExponentialMovingAverage(0.8), StandardScaler()])
     ]
 
 We will now initialize our anomaly detectors. Each anomaly detector will be combined with each
@@ -124,7 +124,7 @@ as follows:
     { 'type': <name-of-component>, 'optional-param': <value-optional-parameter>}
 
 The ``'type'`` equals the name of the component, for example ``'LocalOutlierFactor'``
-or ``'ZNormalizer'``. This string must exactly match the object name of the component
+or ``'StandardScaler'``. This string must exactly match the object name of the component
 you want to add to the workflow. In addition, it is possible to define hyperparameters
 of each component. For example for ``'LocalOutlierFactor'``, you must define a
 ``'window_size'``, but can optionally also define a ``'stride'``. An error will be

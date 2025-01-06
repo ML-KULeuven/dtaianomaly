@@ -6,7 +6,7 @@ from dtaianomaly.workflow import Workflow
 from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_time_series
 from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
-from dtaianomaly.preprocessing import Identity, ZNormalizer, Preprocessor
+from dtaianomaly.preprocessing import Identity, StandardScaler, Preprocessor
 from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision
 from dtaianomaly.workflow.Workflow import _get_train_test_data
 
@@ -21,7 +21,7 @@ class TestWorkflowInitialization:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True
@@ -35,7 +35,7 @@ class TestWorkflowInitialization:
                 dataloaders=[],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
                 thresholds=[TopN(10), FixedCutoff(0.5)],
-                preprocessors=[Identity(), ZNormalizer()],
+                preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=4,
                 trace_memory=True
@@ -50,7 +50,7 @@ class TestWorkflowInitialization:
                 ],
                 metrics=[],
                 thresholds=[TopN(10), FixedCutoff(0.5)],
-                preprocessors=[Identity(), ZNormalizer()],
+                preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=4,
                 trace_memory=True
@@ -65,7 +65,7 @@ class TestWorkflowInitialization:
                 ],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
                 thresholds=[TopN(10), FixedCutoff(0.5)],
-                preprocessors=[Identity(), ZNormalizer()],
+                preprocessors=[Identity(), StandardScaler()],
                 detectors=[],
                 n_jobs=4,
                 trace_memory=True
@@ -110,7 +110,7 @@ class TestWorkflowInitialization:
                     UCRLoader(path=str(tmp_path_factory.mktemp('some-path-2')))
                 ],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
-                preprocessors=[Identity(), ZNormalizer()],
+                preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=4,
                 trace_memory=True
@@ -123,7 +123,7 @@ class TestWorkflowInitialization:
                 UCRLoader(path=str(tmp_path_factory.mktemp('some-path-2')))
             ],
             metrics=[AreaUnderROC()],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True
@@ -137,7 +137,7 @@ class TestWorkflowInitialization:
                     UCRLoader(path=str(tmp_path_factory.mktemp('some-path-2')))
                 ],                metrics=[Precision(), Recall(), AreaUnderROC()],
                 thresholds=[TopN(10), FixedCutoff(0.5)],
-                preprocessors=[Identity(), ZNormalizer()],
+                preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=0,
                 trace_memory=True
@@ -161,7 +161,7 @@ class TestWorkflowSuccess:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
             trace_memory=False
@@ -170,7 +170,7 @@ class TestWorkflowSuccess:
         assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' not in results.columns
@@ -194,7 +194,7 @@ class TestWorkflowSuccess:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=False
@@ -203,7 +203,7 @@ class TestWorkflowSuccess:
         assert results.shape == (4, 11)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' not in results.columns
@@ -227,7 +227,7 @@ class TestWorkflowSuccess:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True
@@ -236,7 +236,7 @@ class TestWorkflowSuccess:
         assert results.shape == (4, 14)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -339,7 +339,7 @@ class TestWorkflowFail:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,
@@ -350,7 +350,7 @@ class TestWorkflowFail:
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Dataset'].value_counts()[f"DummyDataLoaderError(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -369,7 +369,7 @@ class TestWorkflowFail:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[PreprocessorError(), ZNormalizer()],
+            preprocessors=[PreprocessorError(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,
@@ -379,7 +379,7 @@ class TestWorkflowFail:
         assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -398,7 +398,7 @@ class TestWorkflowFail:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,
@@ -408,7 +408,7 @@ class TestWorkflowFail:
         assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -427,7 +427,7 @@ class TestWorkflowFail:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[PreprocessorError(), ZNormalizer()],
+            preprocessors=[PreprocessorError(), StandardScaler()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,
@@ -437,7 +437,7 @@ class TestWorkflowFail:
         assert results.shape == (4, 15)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -456,7 +456,7 @@ class TestWorkflowFail:
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[SupervisedDetector(), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,
@@ -466,7 +466,7 @@ class TestWorkflowFail:
         assert results.shape == (4, 14)
         assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
-        assert results['Preprocessor'].value_counts()['ZNormalizer()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['SupervisedDetector()'] == 2
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 2
         assert 'Peak Memory Fit [MB]' in results.columns

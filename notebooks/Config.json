@@ -20,14 +20,14 @@
 	],
 	"preprocessors": [
 		{"type": "Identity"},
-		{"type": "ZNormalizer"},
+		{"type": "StandardScaler"},
 		{"type": "ChainedPreprocessor", "base_preprocessors":  [
 			{"type": "MovingAverage", "window_size": 10},
-			{"type": "ZNormalizer"}
+			{"type": "StandardScaler"}
 		]},
 		{"type": "ChainedPreprocessor", "base_preprocessors":  [
 			{"type": "ExponentialMovingAverage", "alpha": 0.8},
-			{"type": "ZNormalizer"}
+			{"type": "StandardScaler"}
 		]}
 	],
 	"detectors": [

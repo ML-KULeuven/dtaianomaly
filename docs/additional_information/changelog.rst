@@ -25,6 +25,7 @@ Changed
 
 Fixed
 ^^^^^
+- Renamed ``ZNormalizer`` to ``StandardScaler``, to make it align with the Sklearn declaration.
 
 
 [0.2.3] - 2024-12-02

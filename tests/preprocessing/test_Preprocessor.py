@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import copy
 
-from dtaianomaly.preprocessing import Identity, MinMaxScaler, ZNormalizer, MovingAverage, ExponentialMovingAverage, ChainedPreprocessor, NbSamplesUnderSampler, SamplingRateUnderSampler, check_preprocessing_inputs
+from dtaianomaly.preprocessing import Identity, MinMaxScaler, StandardScaler, MovingAverage, ExponentialMovingAverage, ChainedPreprocessor, NbSamplesUnderSampler, SamplingRateUnderSampler, check_preprocessing_inputs
 
 
 class TestCheckPreprocessingInputs:
@@ -66,7 +66,7 @@ class TestCheckPreprocessingInputs:
 @pytest.mark.parametrize('preprocessor', [
     Identity(),
     MinMaxScaler(),
-    ZNormalizer(),
+    StandardScaler(),
     MovingAverage(5),
     ExponentialMovingAverage(0.5),
     NbSamplesUnderSampler(100),

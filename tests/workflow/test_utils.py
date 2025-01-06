@@ -2,7 +2,7 @@
 from dtaianomaly.anomaly_detection import IsolationForest, LocalOutlierFactor
 from dtaianomaly.evaluation import AreaUnderROC, Precision, ThresholdMetric
 from dtaianomaly.thresholding import FixedCutoff, ContaminationRate
-from dtaianomaly.preprocessing import Identity, ZNormalizer, ChainedPreprocessor
+from dtaianomaly.preprocessing import Identity, StandardScaler, ChainedPreprocessor
 from dtaianomaly.workflow.utils import build_pipelines, convert_to_proba_metrics, convert_to_list
 
 
@@ -18,7 +18,7 @@ class TestBuildPipelines:
 
     def test_multiple_preprocessors(self):
         pipelines = build_pipelines(
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[IsolationForest(15)],
             metrics=[AreaUnderROC()]
         )
@@ -42,7 +42,7 @@ class TestBuildPipelines:
 
     def test_combinations(self):
         pipelines = build_pipelines(
-            preprocessors=[Identity(), ZNormalizer()],
+            preprocessors=[Identity(), StandardScaler()],
             detectors=[IsolationForest(15), LocalOutlierFactor(15)],
             metrics=[AreaUnderROC(), ThresholdMetric(ContaminationRate(0.05), Precision())]
         )
@@ -50,7 +50,7 @@ class TestBuildPipelines:
 
     def test_list_of_list_of_preprocessors(self):
         pipelines = build_pipelines(
-            preprocessors=[Identity(), [ZNormalizer(), Identity()]],
+            preprocessors=[Identity(), [StandardScaler(), Identity()]],
             detectors=[IsolationForest(15), LocalOutlierFactor(15)],
             metrics=[AreaUnderROC(), ThresholdMetric(ContaminationRate(0.05), Precision())]
         )
