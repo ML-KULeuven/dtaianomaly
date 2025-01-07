@@ -37,7 +37,7 @@ class StandardScaler(Preprocessor):
     Raises
     ------
     NotFittedError
-        If the `transform` method is called before fitting this MinMaxScaler.
+        If the `transform` method is called before fitting this StandardScaler.
     """
     min_std: float
     mean_: np.array
@@ -62,7 +62,7 @@ class StandardScaler(Preprocessor):
         if not (hasattr(self, 'mean_') and hasattr(self, 'std_')):
             raise NotFittedError(f'Call `fit` before using transform on {str(self)}')
         if not ((len(X.shape) == 1 and self.mean_.shape[0] == 1) or X.shape[1] == self.mean_.shape[0]):
-            raise AttributeError(f'Trying to z-normalize a time series with {X.shape[0]} attributes while it was fitted on {self.min_.shape[0]} attributes!')
+            raise AttributeError(f'Trying to standard scale a time series with {X.shape[0]} attributes while it was fitted on {self.mean_.shape[0]} attributes!')
 
         # If the std of all attributes is 0, then no transformation happens
         if np.all((self.std_ < self.min_std)):

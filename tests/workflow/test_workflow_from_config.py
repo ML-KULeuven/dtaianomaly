@@ -376,6 +376,7 @@ class TestInterpretPreprocessors:
     }),
     (preprocessing_entry, preprocessing.MinMaxScaler, {}),
     (preprocessing_entry, preprocessing.StandardScaler, {}),
+    (preprocessing_entry, preprocessing.RobustScaler, {}),
     (preprocessing_entry, preprocessing.MovingAverage, {'window_size': 40}),
     (preprocessing_entry, preprocessing.ExponentialMovingAverage, {"alpha": 0.8}),
     (preprocessing_entry, preprocessing.NbSamplesUnderSampler, {'nb_samples': 250}),

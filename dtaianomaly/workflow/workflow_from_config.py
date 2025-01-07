@@ -368,6 +368,9 @@ def preprocessing_entry(entry):
     elif processing_type == 'PiecewiseAggregateApproximation':
         return preprocessing.PiecewiseAggregateApproximation(**entry_without_type)
 
+    elif processing_type == 'RobustScaler':
+        return preprocessing.RobustScaler(**entry_without_type)
+
     elif processing_type == 'ChainedPreprocessor':
         if len(entry_without_type) != 1:
             raise TypeError(f'ChainedPreprocessor must have base_preprocessors as key: {entry}')

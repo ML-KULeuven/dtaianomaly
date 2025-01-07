@@ -14,6 +14,7 @@ from dtaianomaly import preprocessing, utils
     preprocessing.NbSamplesUnderSampler(nb_samples=150),
     preprocessing.SamplingRateUnderSampler(sampling_rate=5),
     preprocessing.StandardScaler(),
+    preprocessing.RobustScaler(),
     preprocessing.Differencing(order=1),
     preprocessing.PiecewiseAggregateApproximation(n=32)
 ])
@@ -61,3 +62,34 @@ class TestPreprocessors:
         X_, y_ = preprocessor.fit_transform(X, ground_truth)
         assert utils.is_valid_array_like(X_)
         assert utils.is_valid_array_like(y_)
+
+    def test_invalid_input_fit(self, preprocessor):
+        with pytest.raises(ValueError):
+            preprocessor.fit(
+                np.array(['1', '2', '3', '4', '5']),
+                np.array([0, 0, 1, 0, 1])
+            )
+
+    def test_invalid_input_transform(self, preprocessor):
+        preprocessor.fit(
+            np.array([1, 2, 3, 4, 5]),
+            np.array([0, 0, 1, 0, 1])
+        )
+        with pytest.raises(ValueError):
+            preprocessor.transform(
+                np.array(['1', '2', '3', '4', '5']),
+                np.array([0, 0, 1, 0, 1])
+            )
+
+    def test_invalid_input_fit_transform(self, preprocessor):
+        with pytest.raises(ValueError):
+            preprocessor.fit_transform(
+                np.array(['1', '2', '3', '4', '5']),
+                np.array([0, 0, 1, 0, 1])
+            )
+
+    def test_fit_transform_different_time_series(self, preprocessor, univariate_time_series):
+        split = int(univariate_time_series.shape[0] / 2)
+        x_fit = univariate_time_series[:split]
+        x_transform = univariate_time_series[split:]
+        preprocessor.fit(x_fit).transform(x_transform)

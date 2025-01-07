@@ -14,6 +14,7 @@ from .ExponentialMovingAverage import ExponentialMovingAverage
 from .UnderSampler import SamplingRateUnderSampler, NbSamplesUnderSampler
 from .Differencing import Differencing
 from .PiecewiseAggregateApproximation import PiecewiseAggregateApproximation
+from .RobustScaler import RobustScaler
 
 __all__ = [
     'Preprocessor',
@@ -27,5 +28,6 @@ __all__ = [
     'SamplingRateUnderSampler',
     'NbSamplesUnderSampler',
     'Differencing',
-    'PiecewiseAggregateApproximation'
+    'PiecewiseAggregateApproximation',
+    'RobustScaler'
 ]
