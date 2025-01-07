@@ -1,6 +1,7 @@
 
 import pytest
 import numpy as np
+from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.preprocessing import RobustScaler
 
@@ -86,7 +87,6 @@ class TestRobustScaler:
 
         robust_scaler = RobustScaler()
         X_, _ = robust_scaler.fit_transform(X)
-        print(X_)
         assert np.array_equal(robust_scaler.center_, np.array([5., 150.]))
         assert np.array_equal(robust_scaler.scale_, np.array([5., 50.]))
         assert np.array_equal(X_, [[-1., -3.], [-0.8, -0.8], [-0.6, -0.6], [-0.4, -0.4], [-0.2, -0.2], [0., 0.], [0.2, 0.2], [0.4, 0.4], [0.6, 0.6], [0.8, 0.8], [1., 1.]])
@@ -100,6 +100,17 @@ class TestRobustScaler:
         multivariate_time_series[:, 0] = 987.6
         X_, _ = robust_scaler.fit_transform(multivariate_time_series)
         assert np.array_equal(multivariate_time_series[:, 0], X_[:, 0])
+
+    def test_transform_not_fitted(self, univariate_time_series):
+        robust_scaler = RobustScaler()
+        with pytest.raises(NotFittedError):
+            robust_scaler.transform(univariate_time_series)
+
+    def test_transform_different_dimension(self, univariate_time_series, multivariate_time_series):
+        robust_scaler = RobustScaler()
+        robust_scaler.fit(univariate_time_series)
+        with pytest.raises(AttributeError):
+            robust_scaler.transform(multivariate_time_series)
 
     def test_str(self):
         assert str(RobustScaler()) == 'RobustScaler()'
