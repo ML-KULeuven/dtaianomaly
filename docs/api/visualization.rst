@@ -62,6 +62,19 @@ Visualization module
    >>> fig = plot_anomaly_scores(X, y, y_pred, figsize=(10, 3), method_to_plot=plot_time_series_colored_by_score)
    >>> fig.suptitle("Example of 'plot_anomaly_scores'")  # doctest: +SKIP
 
+.. plot::
+   :context: close-figs
+
+   >>> from dtaianomaly.data import demonstration_time_series
+   >>> from dtaianomaly.visualization import plot_anomaly_scores, plot_time_series_colored_by_score
+   >>> from dtaianomaly.anomaly_detection import IsolationForest
+   >>> X, y = demonstration_time_series()
+   >>> detector = IsolationForest(window_size=100).fit(X)
+   >>> y_pred = detector.predict_proba(X)
+   >>> confidence = detector.predict_confidence(X)
+   >>> fig = plot_anomaly_scores(X, y, y_pred, confidence=confidence, figsize=(10, 3), method_to_plot=plot_time_series_colored_by_score)
+   >>> fig.suptitle("Example of 'plot_anomaly_scores' with confidence ranges")  # doctest: +SKIP
+
 
 .. autofunction:: dtaianomaly.visualization.plot_time_series_anomalies
 

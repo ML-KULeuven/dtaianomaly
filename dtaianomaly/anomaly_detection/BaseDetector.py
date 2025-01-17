@@ -179,7 +179,7 @@ class BaseDetector(PrettyPrintable):
         prob_func = np.vectorize(lambda x: (1 + x) / (2 + n))
         posterior_prob = prob_func(n_instances)  # Outlier probability according to ExCeeD
 
-        conf_func = np.vectorize(lambda p: 1 - scipy.stats.binom.cdf(int(n * contamination), n, p))
+        conf_func = np.vectorize(lambda p: 1 - scipy.stats.binom.cdf(n - int(n * contamination), n, p))
         exWise_conf = conf_func(posterior_prob)
         np.place(exWise_conf, prediction == 0, 1 - exWise_conf[prediction == 0])  # if the example is classified as normal, use 1 - confidence.
 
