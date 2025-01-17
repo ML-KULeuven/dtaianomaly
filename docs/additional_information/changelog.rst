@@ -23,6 +23,13 @@ Changed
   stage of the anomaly detector. The aggregated resources are still returned as before.
   For this, the ``EvaluationPipeline`` received several new functions which execute
   each stage in an atomic manner.
+- When failing to automatically compute a window size, the default behavior is to raise
+  a ``ValueError`` (compared to returning ``-1`` before). This makes it clear where the
+  something goes wrong, instead of propagating the faulty window size to for example the
+  ``sliding_window()`` function. Additionally, it is possible to set a default window size
+  in ``compute_window_size()``, which will be returned (if provided) instead of raising
+  an error to allow the system to continue.
+
 
 Fixed
 ^^^^^

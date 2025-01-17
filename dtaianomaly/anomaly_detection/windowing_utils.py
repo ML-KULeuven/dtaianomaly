@@ -121,7 +121,8 @@ def compute_window_size(
         window_size: Union[int, str],
         lower_bound: int = 10,
         upper_bound: int = 1000,
-        threshold: float = 0.89) -> int:
+        threshold: float = 0.89,
+        default_window_size: int = None) -> int:
     """
     Compute the window size of the given time series [ermshaus2023window]_.
 
@@ -150,6 +151,10 @@ def compute_window_size(
     threshold: float, default=0.89
         The threshold for selecting the optimal window size using ``'suss'``.
 
+    default_window_size: int, default=None
+        The default window size, in case an invalid automatic window size was computed.
+        By default, the value is set to None, which means that an error is thrown.
+
     Returns
     -------
     window_size_: int
@@ -174,29 +179,41 @@ def compute_window_size(
     if not utils.is_valid_array_like(X):
         raise ValueError("X must be a valid, numerical array-like")
 
+    # Initialize the variable
+    window_size_ = -1
+
     # If an int is given, then we can simply return the given window size
     if isinstance(window_size, int):
         return window_size
 
     # Check if the time series is univariate (error should not be raise if given window size is an integer)
-    if not utils.is_univariate(X):
+    elif not utils.is_univariate(X):
         raise ValueError('It only makes sens to compute the window size in univariate time series.')
 
     # Use the fft to compute a window size
     elif window_size == 'fft':
-        return _dominant_fourier_frequency(X, lower_bound=lower_bound, upper_bound=upper_bound)
+        print('REACHED')
+        window_size_ = _dominant_fourier_frequency(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     # Use the acf to compute a window size
     elif window_size == 'acf':
-        return _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
+        window_size_ = _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     elif window_size == 'mwf':
-        return _mwf(X, lower_bound=lower_bound, upper_bound=upper_bound)
+        window_size_ = _mwf(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     # Use SUSS to compute a window size
     elif window_size == 'suss':
-        return _suss(X, lower_bound=lower_bound, threshold=threshold)
+        window_size_ = _suss(X, lower_bound=lower_bound, threshold=threshold)
 
+    # Check if a valid window size was computed, and raise an error if necessary
+    if window_size_ == -1:
+        if default_window_size is None:
+            raise ValueError(f"Something went wrong when computing the window size using '{window_size}' on a time series with shape {X.shape}!")
+        else:
+            return default_window_size
+    else:
+        return window_size_
 
 def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L10

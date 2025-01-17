@@ -283,7 +283,13 @@ class TestComputeWindowSize:
     @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
     def test_no_window_size(self, window_size):
         flat = np.ones(shape=1000)
-        assert compute_window_size(flat, window_size) == -1
+        with pytest.raises(ValueError):
+            compute_window_size(flat, window_size)
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    def test_no_window_size_but_default_window_size(self, window_size):
+        flat = np.ones(shape=1000)
+        assert compute_window_size(flat, window_size, default_window_size=16) == 16
 
     @pytest.mark.parametrize('nb_periods', [5, 10])
     def test_fft_simple(self, nb_periods):
