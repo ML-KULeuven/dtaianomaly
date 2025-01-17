@@ -192,7 +192,6 @@ def compute_window_size(
 
     # Use the fft to compute a window size
     elif window_size == 'fft':
-        print('REACHED')
         window_size_ = _dominant_fourier_frequency(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     # Use the acf to compute a window size
