@@ -113,6 +113,11 @@ class TestAnomalyDetectors:
         decision_function = detector.predict_proba(X_test)
         assert decision_function.shape[0] == X_test.shape[0]
 
+    def test_predict_confidence(self, detector, univariate_time_series):
+        detector.fit(univariate_time_series)
+        confidence = detector.predict_confidence(univariate_time_series)
+        assert confidence.shape[0] == univariate_time_series.shape[0]
+
 
 @pytest.mark.parametrize('detector_class,additional_args', [
     (anomaly_detection.ClusterBasedLocalOutlierFactor, {'n_clusters': 20}),

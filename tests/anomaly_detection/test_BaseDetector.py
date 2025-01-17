@@ -94,3 +94,21 @@ class TestBaseDetector:
     def test_str(self):
         assert str(baselines.RandomDetector()) == 'RandomDetector()'
         assert str(baselines.AlwaysNormal()) == 'AlwaysNormal()'
+
+    def test_predict_confidence(self, univariate_time_series):
+        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3)]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):]
+
+        detector = baselines.RandomDetector().fit(X_train)
+        confidence = detector.predict_confidence(X_test, X_train)
+        assert confidence.shape[0] == X_test.shape[0]
+        assert len(confidence.shape) == 1
+
+    def test_predict_confidence_multivariate(self, multivariate_time_series):
+        X_train = multivariate_time_series[:int(multivariate_time_series.shape[0]*0.3), :]
+        X_test = multivariate_time_series[int(multivariate_time_series.shape[0]*0.3):, :]
+
+        detector = baselines.RandomDetector().fit(X_train)
+        confidence = detector.predict_confidence(X_test, X_train)
+        assert confidence.shape[0] == X_test.shape[0]
+        assert len(confidence.shape) == 1

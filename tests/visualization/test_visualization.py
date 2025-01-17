@@ -92,3 +92,18 @@ class TestPlotWithZoom:
         if obligated_y_pred:
             additional_args['y_pred'] = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
         visualization.plot_with_zoom(univariate_time_series, y, start_zoom=100, end_zoom=200, time_steps=time_steps, method_to_plot=plot_function, **additional_args)
+
+
+class TestPlotConfidence:
+
+    def test_univariate(self, univariate_time_series):
+        y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+        y_pred = np.random.uniform(size=univariate_time_series.shape[0])
+        confidence = np.random.normal(0, 0.05, size=univariate_time_series.shape[0])
+        visualization.plot_anomaly_scores(univariate_time_series, y, y_pred, confidence=confidence)
+
+    def test_multivariate(self, multivariate_time_series):
+        y = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
+        y_pred = np.random.uniform(size=multivariate_time_series.shape[0])
+        confidence = np.random.normal(0, 0.05, size=multivariate_time_series.shape[0])
+        visualization.plot_anomaly_scores(multivariate_time_series, y, y_pred, confidence=confidence)

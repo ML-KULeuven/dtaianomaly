@@ -268,6 +268,7 @@ def plot_with_zoom(
 def plot_anomaly_scores(
         X: np.array, y: np.array, y_pred: np.array,
         time_steps: np.array = None, method_to_plot=plot_demarcated_anomalies,
+        confidence: np.array = None,
         **kwargs) -> plt.Figure:
     """
     Plot the given data with the ground truth anomalies, and compare the
@@ -290,6 +291,8 @@ def plot_anomaly_scores(
         time series data), ``y`` (the anomaly labels``), ``time_steps``
         (the time steps at which there was an observation) and ``ax``
         (the axis on which the plot should be made).
+    confidence: np.array of shape (n_samples), default=None
+        The confidence of the anomaly scores.
     **kwargs:
         Arguments to be passed to plt.subplots().
 
@@ -310,7 +313,12 @@ def plot_anomaly_scores(
 
     # Plot the anomaly scores
     ax_pred.set_title('Predicted anomaly scores')
-    ax_pred.plot(time_steps, y_pred)
+    ax_pred.plot(time_steps, y_pred, label='Anomaly scores')
+
+    # Predict the confidence interval
+    if confidence is not None:
+        ax_pred.fill_between(time_steps, y_pred - (1-confidence), y_pred + (1-confidence), color='gray', alpha=0.5, label='Confidence range')
+        ax_pred.legend()
 
     # Return the figure
     return fig
