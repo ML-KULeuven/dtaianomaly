@@ -67,7 +67,7 @@ class MedianMethod(BaseDetector):
         self.neighborhood_size_before = neighborhood_size_before
         self.neighborhood_size_after = neighborhood_size_after
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'BaseDetector':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'BaseDetector':
         return self  # No fitting is required.
 
     def decision_function(self, X: np.ndarray) -> np.ndarray:

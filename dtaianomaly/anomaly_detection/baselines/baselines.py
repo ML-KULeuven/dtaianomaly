@@ -15,7 +15,7 @@ class AlwaysNormal(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'AlwaysNormal':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'AlwaysNormal':
         """
         Simply return this detector, because no fitting is required.
 
@@ -67,7 +67,7 @@ class AlwaysAnomalous(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'AlwaysAnomalous':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'AlwaysAnomalous':
         """
         Simply return this detector, because no fitting is required.
 
@@ -126,7 +126,7 @@ class RandomDetector(BaseDetector):
         super().__init__(Supervision.UNSUPERVISED)
         self.seed = seed
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'RandomDetector':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'RandomDetector':
         """
         Simply return this detector, because no fitting is required.
 

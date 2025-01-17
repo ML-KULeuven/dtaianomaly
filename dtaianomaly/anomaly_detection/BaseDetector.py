@@ -46,7 +46,7 @@ class BaseDetector(PrettyPrintable):
         self.supervision = supervision
 
     @abc.abstractmethod
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'BaseDetector':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'BaseDetector':
         """
         Abstract method, fit this detector to the given data.
 
