@@ -17,6 +17,20 @@ To install version ``X.Y.Z``, use the following command:
 
     pip install dtaianomaly==X.Y.Z
 
+Some dependencies are optional to ensure that ``dtaianomaly`` remains
+lightweight. Use the following command to install the set of optional
+dependencies ``X``:
+
+.. code-block:: bash
+
+    pip install dtaianomaly[X]
+
+Multiple sets of optional dependencies can be installed by separating
+them with a comma. Currently, following sets of optional dependencies
+are available:
+- ``dev``: dependencies regarding the development of ``dtaianomaly``,
+  including testing and creating the documentation.
+
 
 From GitHub
 -----------

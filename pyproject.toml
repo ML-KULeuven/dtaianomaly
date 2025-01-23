@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dynamic = ["dependencies"]
+dynamic = ["dependencies",  "optional-dependencies"]
 
 [project.readme]
 file = "README.md"
@@ -41,3 +41,7 @@ namespaces = false
 
 [tool.setuptools.dynamic.dependencies]
 file = ["requirements.txt"]
+
+[tool.setuptools.dynamic.optional-dependencies.dev]
+file = ["requirements-dev.txt"]
+
