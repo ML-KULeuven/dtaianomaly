@@ -81,13 +81,13 @@ Setup the environment
 Next, you can set up your environment to start working on the issue.
 For this, we highly recommend to `virtual environment <https://docs.python.org/3/library/venv.html>`_
 to isolate the dependencies. To install the dependencies of
-``dtaianomaly``, including the development dependencies,
+``dtaianomaly``, including all optional dependencies,
 navigate to the directory where you downloaded the code and
 run the following command:
 
 .. code-block:: bash
 
-     pip install --editable .[dev]
+     pip install --editable .[all]
 
 You should include the ``--editable`` flag to ensure that your
 changes to the code are actually reflected in the installed version.
