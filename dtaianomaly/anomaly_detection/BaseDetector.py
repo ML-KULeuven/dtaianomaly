@@ -127,7 +127,7 @@ class BaseDetector(PrettyPrintable):
         else:
             return (raw_scores - min_score) / (max_score - min_score)
 
-    def predict_confidence(self, X: np.ndarray, X_train: np.ndarray = None, contamination: float = 0.05):
+    def predict_confidence(self, X: np.ndarray, X_train: np.ndarray = None, contamination: float = 0.05, decision_scores_given: bool = False):
         """
         Predict the confidence of the anomaly scores on the test given test data.
 
@@ -148,6 +148,12 @@ class BaseDetector(PrettyPrintable):
         contamination: float, default=0.05
             The (estimated) contamination rate for the data, i.e., the expected
             percentage of anomalies.
+        decision_scores_given: bool, default=False
+            Whether the given ``X`` and ``X_train`` represent time series data
+            or decision scores. If ``decision_scores_given=False`` (default),
+            then the given arrays are interpreted as time series. Otherwise,
+            they are interpreted as decision scores, as computed by
+            ``decision_function()``.
 
         Returns
         -------
@@ -162,10 +168,23 @@ class BaseDetector(PrettyPrintable):
            Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2020.
            Springer, Cham, doi: `10.1007/978-3-030-67664-3_14 <https://doi.org/10.1007/978-3-030-67664-3_14>`_.
         """
+        # Set the decision scores
+        if decision_scores_given:
+            if len(X.shape) > 1:
+                raise ValueError("In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
+                                 "as X (decision_scores_given=True), but the shape of X does not correspond to the shape of decision"
+                                 f"scores: {X.shape}!")
+            if X_train is not None and len(X_train.shape) > 1:
+                raise ValueError("In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
+                                 "as X (decision_scores_given=True), but the shape of X_train does not correspond to the shape of decision"
+                                 f"scores: {X.shape}!")
+            decision_scores = X
+            decision_scores_train = X_train if X_train is not None else decision_scores
 
-        # Compute the decision scores
-        decision_scores = self.decision_function(X)
-        decision_scores_train = self.decision_function(X_train) if X_train is not None else decision_scores
+        else:
+            # Compute the decision scores
+            decision_scores = self.decision_function(X)
+            decision_scores_train = self.decision_function(X_train) if X_train is not None else decision_scores
 
         # Convert the decision scores to binary predictions
         prediction = ContaminationRate(contamination_rate=contamination).threshold(decision_scores)

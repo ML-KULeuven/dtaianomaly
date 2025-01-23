@@ -95,6 +95,9 @@ class TestBaseDetector:
         assert str(baselines.RandomDetector()) == 'RandomDetector()'
         assert str(baselines.AlwaysNormal()) == 'AlwaysNormal()'
 
+
+class TestConfidence:
+
     def test_predict_confidence(self, univariate_time_series):
         X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3)]
         X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):]
@@ -112,3 +115,60 @@ class TestBaseDetector:
         confidence = detector.predict_confidence(X_test, X_train)
         assert confidence.shape[0] == X_test.shape[0]
         assert len(confidence.shape) == 1
+
+    def test_predict_confidence_no_train_data(self, univariate_time_series):
+        detector = baselines.RandomDetector().fit(univariate_time_series)
+        confidence = detector.predict_confidence(univariate_time_series)
+        assert confidence.shape[0] == univariate_time_series.shape[0]
+        assert len(confidence.shape) == 1
+
+    def test_predict_confidence_decision_scores_given(self, univariate_time_series):
+        detector = baselines.RandomDetector(seed=42).fit(univariate_time_series)
+        decision_scores = detector.decision_function(univariate_time_series)
+        confidence = detector.predict_confidence(decision_scores, decision_scores_given=True)
+        assert confidence.shape[0] == univariate_time_series.shape[0]
+        assert len(confidence.shape) == 1
+
+        confidence_other = detector.predict_confidence(univariate_time_series)
+        assert np.array_equal(confidence, confidence_other)
+
+    def test_predict_confidence_decision_scores_train_and_test_given(self, univariate_time_series):
+        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3)]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):]
+        detector = baselines.RandomDetector(seed=42).fit(X_train)
+        decision_scores = detector.decision_function(X_test)
+        decision_scores_train = detector.decision_function(X_train)
+        confidence = detector.predict_confidence(decision_scores, decision_scores_train, decision_scores_given=True)
+        assert confidence.shape[0] == X_test.shape[0]
+        assert len(confidence.shape) == 1
+
+        confidence_other = detector.predict_confidence(X_test, X_train)
+        assert np.array_equal(confidence, confidence_other)
+
+    def test_predict_confidence_invalid_decision_scores_given(self, univariate_time_series):
+        univariate_time_series = univariate_time_series.reshape(-1, 1)  # To make sure it has two dimensions
+        assert len(univariate_time_series.shape) > 1
+
+        detector = baselines.RandomDetector().fit(univariate_time_series)
+        with pytest.raises(ValueError):
+            detector.predict_confidence(univariate_time_series, decision_scores_given=True)
+
+    def test_predict_confidence_invalid_decision_scores_train_given(self, univariate_time_series):
+        univariate_time_series = univariate_time_series.reshape(-1, 1)  # To make sure it has two dimensions
+        assert len(univariate_time_series.shape) > 1
+
+        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3), :]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):, :]
+
+        detector = baselines.RandomDetector().fit(X_train)
+        decision_scores = detector.decision_function(X_test)
+
+        with pytest.raises(ValueError):
+            detector.predict_confidence(decision_scores, X_train, decision_scores_given=True)
+
+    def test_repeatability(self, univariate_time_series):
+        detector = baselines.RandomDetector(seed=42).fit(univariate_time_series)
+        confidence1 = detector.predict_confidence(univariate_time_series)
+        confidence2 = detector.predict_confidence(univariate_time_series)
+        print((confidence1 != confidence2).sum())
+        assert np.array_equal(confidence1, confidence2)
