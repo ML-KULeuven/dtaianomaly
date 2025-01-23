@@ -16,6 +16,8 @@ Added
 - Added optional dependencies to ``dtaianomaly``, rather than having to install
   everything via different requirements files.
 - Added support for Python 3.13.
+- Implemented the ``predict_confidence()`` method in the ``BaseDetector``, which 
+  computes a confidence score for each prediction of the anomaly detector. 
 
 Changed
 ^^^^^^^
