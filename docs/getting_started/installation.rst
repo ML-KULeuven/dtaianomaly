@@ -11,6 +11,23 @@ Use the following command to install the latest version:
 
     pip install dtaianomaly
 
+Some dependencies are optional to ensure that ``dtaianomaly`` remains
+lightweight. Use the following command to install all optional
+dependencies:
+
+.. code-block:: bash
+
+    pip install dtaianomaly[all]
+
+It is also possible to only install a subset of the optional dependencies.
+You can install these by replacing 'all' with the corresponding name in the
+command above. To install multiple subsets, separate the names with a comma.
+Currently, following subsets are available:
+
+- ``tests``: Dependencies for running the tests.
+- ``docs``: Dependencies for generating the documentation.
+- ``notebooks``: Dependencies for using jupyter notebooks.
+
 To install version ``X.Y.Z``, use the following command:
 
 .. code-block:: bash

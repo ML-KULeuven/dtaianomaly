@@ -80,20 +80,17 @@ Setup the environment
 
 Next, you can set up your environment to start working on the issue.
 For this, we highly recommend to `virtual environment <https://docs.python.org/3/library/venv.html>`_
-to isolate the dependencies. To install the core-dependencies (e.g.,
-`Numpy <https://numpy.org/>`_) of``dtaianomaly``, run the following
-command:
+to isolate the dependencies. To install the dependencies of
+``dtaianomaly``, including all optional dependencies,
+navigate to the directory where you downloaded the code and
+run the following command:
 
 .. code-block:: bash
 
-     pip install -r requirements.txt
+     pip install --editable .[all]
 
-In addition, you should also install the development dependencies
-(e.g., `pytest <https://docs.pytest.org/en/stable/>`_) as follows:
-
-.. code-block:: bash
-
-     pip install -r requirements-dev.txt
+You should include the ``--editable`` flag to ensure that your
+changes to the code are actually reflected in the installed version.
 
 To check if the environment is correct, you verify if all tests
 succeed by running the following command (which also checks the
@@ -248,7 +245,7 @@ BaseDetector
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()` method?
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()` method?
 | |check_box| Did you add the anomaly detector in ``__all__`` of the ``dtaianomaly/anomaly_detection/__init__.py`` file?
-| |check_box| Can you load the anomaly detector via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``detector_entry()`` function)?
+| |check_box| Can you load the anomaly detector via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``detector_entry()`` function)?
 
 .. rubric:: Test the anomaly detector
 
@@ -277,7 +274,7 @@ LazyDataLoader
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.data.LazyDataLoader._load()` method?
 | |check_box| Did you add the data loader in ``__all__`` of the ``dtaianomaly/data/__init__.py`` file?
-| |check_box| Can you load the data loader via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``data_entry()`` function)?
+| |check_box| Can you load the data loader via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``data_entry()`` function)?
 
 .. rubric:: Test the data loader
 
@@ -306,7 +303,7 @@ Preprocessor
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._fit()` method?
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._transform()` method?
 | |check_box| Did you add the preprocessor in ``__all__`` of the ``dtaianomaly/preprocessing/__init__.py`` file?
-| |check_box| Can you load the preprocessor via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the ``preprocessor_entry()`` function)?
+| |check_box| Can you load the preprocessor via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``preprocessor_entry()`` function)?
 
 .. rubric:: Test the preprocessor
 
@@ -334,7 +331,7 @@ Thresholding
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
 | |check_box| Have you implemented the :py:func:`~dtaianomaly.thresholding.Thresholder.threshold()` method?
 | |check_box| Did you add the thresholder in ``__all__`` of the ``dtaianomaly/thresholding/__init__.py`` file?
-| |check_box| Can you load the thresholder via :py:func:`~dtaianomaly.workflow.interpret_config`` (specifically, in the `threshold_entry()`` function)?
+| |check_box| Can you load the thresholder via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the `threshold_entry()`` function)?
 
 .. rubric:: Test the thresholder
 

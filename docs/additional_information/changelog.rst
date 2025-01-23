@@ -13,6 +13,9 @@ Added
 - Implemented ``KMeansAnomalyDetector`` anomaly detector.
 - Implemented ``CopulaBasedOutlierDetector`` (COPOD) anomaly detector.
 - Implemented ``RobustScaler`` preprocessor.
+- Added optional dependencies to ``dtaianomaly``, rather than having to install
+  everything via different requirements files.
+- Added support for Python 3.13.
 
 Changed
 ^^^^^^^
