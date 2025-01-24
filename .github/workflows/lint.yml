@@ -32,7 +32,7 @@ jobs:
       - name: Install dtaianomaly
         run: |
           python -m pip install --upgrade pip
-          pip install .[docs]
+          pip install .[all]
           pip list
 
       # Apply isort
