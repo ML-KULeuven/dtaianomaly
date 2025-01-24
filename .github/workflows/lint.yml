@@ -40,5 +40,4 @@ jobs:
         uses: isort/isort-action@v1.1.1
         with:
           sortPaths: "dtaianomaly"
-          configuration: "--check-only --diff --profile black""
-
+          configuration: "--check-only --diff --profile black"
