@@ -10,9 +10,35 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: psf/black@stable
+
+      # Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'  # Only for one python version to save on resources
+
+      # Run black
+      - name: black
+        uses: psf/black@stable
         with:
           options: "--check --verbose"
           src: "./dtaianomaly"
           use_pyproject: true
+
+      # Install dtaianomaly (not required for black)
+      - name: Install dtaianomaly
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[docs]
+          pip list
+
+      # Apply isort
+      - name: isort
+        uses: isort/isort-action@v1
+        with:
+          sort-paths: "dtaianomaly"
+          configuration: "--check-only --diff"]
