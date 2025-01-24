@@ -1,5 +1,5 @@
 """
-This module contains functionality to detect anomalies. It can be imported 
+This module contains functionality to detect anomalies. It can be imported
 as follows:
 
 >>> from dtaianomaly import anomaly_detection
@@ -9,15 +9,7 @@ for more information regarding detecting anomalies using ``dtaianomaly``.
 """
 
 from .BaseDetector import BaseDetector, Supervision, load_detector
-from .windowing_utils import (
-    sliding_window,
-    reverse_sliding_window,
-    check_is_valid_window_size,
-    compute_window_size,
-)
-
-from .baselines import AlwaysNormal, AlwaysAnomalous, RandomDetector
-from .PyODAnomalyDetector import PyODAnomalyDetector
+from .baselines import AlwaysAnomalous, AlwaysNormal, RandomDetector
 from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
 from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
@@ -30,7 +22,14 @@ from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
 from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
+from .PyODAnomalyDetector import PyODAnomalyDetector
 from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
+from .windowing_utils import (
+    check_is_valid_window_size,
+    compute_window_size,
+    reverse_sliding_window,
+    sliding_window,
+)
 
 __all__ = [
     # Base

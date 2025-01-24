@@ -10,15 +10,15 @@ the latter predicted "scores" (more or less anomalous). This distinction is impo
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
 
-from .metrics import Metric, BinaryMetric, ProbaMetric, ThresholdMetric
-from .simple_binary_metrics import Precision, Recall, FBeta
-from .simple_proba_metrics import AreaUnderROC, AreaUnderPR
+from .BestThresholdMetric import BestThresholdMetric
+from .metrics import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
 from .point_adjusted_binary_metrics import (
+    PointAdjustedFBeta,
     PointAdjustedPrecision,
     PointAdjustedRecall,
-    PointAdjustedFBeta,
 )
-from .BestThresholdMetric import BestThresholdMetric
+from .simple_binary_metrics import FBeta, Precision, Recall
+from .simple_proba_metrics import AreaUnderPR, AreaUnderROC
 
 __all__ = [
     "Metric",

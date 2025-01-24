@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Optional, Tuple
+
+import numpy as np
+
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
 
 

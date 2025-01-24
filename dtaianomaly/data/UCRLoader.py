@@ -1,4 +1,5 @@
 import numpy as np
+
 from dtaianomaly.data.DataSet import DataSet
 from dtaianomaly.data.LazyDataLoader import LazyDataLoader
 

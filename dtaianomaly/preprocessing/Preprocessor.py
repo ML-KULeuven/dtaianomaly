@@ -1,6 +1,7 @@
 import abc
+from typing import Optional, Tuple
+
 import numpy as np
-from typing import Tuple, Optional
 
 from dtaianomaly import utils
 from dtaianomaly.PrettyPrintable import PrettyPrintable

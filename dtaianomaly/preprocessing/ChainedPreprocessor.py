@@ -1,5 +1,6 @@
-import numpy as np
 from typing import List, Optional, Tuple, Union
+
+import numpy as np
 
 from dtaianomaly import utils
 from dtaianomaly.preprocessing.Preprocessor import (

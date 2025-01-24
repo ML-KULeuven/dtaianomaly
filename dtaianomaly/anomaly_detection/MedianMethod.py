@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Optional
+
+import numpy as np
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision

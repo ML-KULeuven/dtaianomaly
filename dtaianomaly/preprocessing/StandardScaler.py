@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Optional, Tuple
+
+import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor

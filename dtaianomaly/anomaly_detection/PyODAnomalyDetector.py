@@ -1,16 +1,18 @@
 import abc
-import numpy as np
 from typing import Optional, Union
-from sklearn.exceptions import NotFittedError
+
+import numpy as np
 from pyod.models.base import BaseDetector as PyODBaseDetector
+from sklearn.exceptions import NotFittedError
+
+from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import (
-    sliding_window,
-    reverse_sliding_window,
     check_is_valid_window_size,
     compute_window_size,
+    reverse_sliding_window,
+    sliding_window,
 )
-from dtaianomaly import utils
 
 
 class PyODAnomalyDetector(BaseDetector, abc.ABC):

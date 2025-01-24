@@ -8,12 +8,12 @@ along with the ground truth or predicted anomalies.
 """
 
 from .visualization import (
-    plot_time_series_colored_by_score,
-    plot_time_series_anomalies,
-    plot_demarcated_anomalies,
-    plot_with_zoom,
-    plot_anomaly_scores,
     format_time_steps,
+    plot_anomaly_scores,
+    plot_demarcated_anomalies,
+    plot_time_series_anomalies,
+    plot_time_series_colored_by_score,
+    plot_with_zoom,
 )
 
 __all__ = [

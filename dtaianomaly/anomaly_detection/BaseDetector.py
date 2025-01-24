@@ -1,15 +1,16 @@
 import abc
+import enum
 import os.path
 import pickle
-import enum
-import numpy as np
-import scipy
 from pathlib import Path
 from typing import Optional, Union
 
-from dtaianomaly.thresholding.thresholding import ContaminationRate
+import numpy as np
+import scipy
+
 from dtaianomaly import utils
 from dtaianomaly.PrettyPrintable import PrettyPrintable
+from dtaianomaly.thresholding.thresholding import ContaminationRate
 
 
 class Supervision(enum.Enum):

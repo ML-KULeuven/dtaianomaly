@@ -1,8 +1,10 @@
 import math
-import scipy
-import numpy as np
-from statsmodels.tsa.stattools import acf
 from typing import Union
+
+import numpy as np
+import scipy
+from statsmodels.tsa.stattools import acf
+
 from dtaianomaly import utils
 
 

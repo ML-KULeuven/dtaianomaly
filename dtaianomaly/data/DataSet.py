@@ -1,7 +1,9 @@
+from typing import List, Optional
+
 import numpy as np
-from typing import Optional, List
-from dtaianomaly.utils import is_valid_array_like, is_univariate, get_dimension
+
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
+from dtaianomaly.utils import get_dimension, is_univariate, is_valid_array_like
 
 
 class DataSet:

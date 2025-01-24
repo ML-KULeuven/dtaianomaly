@@ -1,5 +1,6 @@
 import numpy as np
-from dtaianomaly.evaluation.metrics import ProbaMetric, BinaryMetric
+
+from dtaianomaly.evaluation.metrics import BinaryMetric, ProbaMetric
 
 
 class BestThresholdMetric(ProbaMetric):

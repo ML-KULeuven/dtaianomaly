@@ -1,9 +1,10 @@
-import numpy as np
 from typing import Optional, Tuple
+
+import numpy as np
 from sklearn.exceptions import NotFittedError
 
-from dtaianomaly.utils import get_dimension
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.utils import get_dimension
 
 
 class RobustScaler(Preprocessor):

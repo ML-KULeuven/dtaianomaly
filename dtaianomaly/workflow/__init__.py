@@ -29,6 +29,6 @@ for more information regarding the configuration and use of a Workflow.
 """
 
 from .Workflow import Workflow
-from .workflow_from_config import workflow_from_config, interpret_config
+from .workflow_from_config import interpret_config, workflow_from_config
 
 __all__ = ["Workflow", "workflow_from_config", "interpret_config"]

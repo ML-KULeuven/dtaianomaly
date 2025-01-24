@@ -1,9 +1,10 @@
 import abc
+
 import numpy as np
 
-from dtaianomaly.thresholding import Thresholding
 from dtaianomaly import utils
 from dtaianomaly.PrettyPrintable import PrettyPrintable
+from dtaianomaly.thresholding import Thresholding
 
 
 class Metric(PrettyPrintable):

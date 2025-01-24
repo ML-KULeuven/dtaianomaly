@@ -1,9 +1,10 @@
-import numpy as np
 from typing import List, Optional, Union
 
-from dtaianomaly.utils import is_valid_list
-from dtaianomaly.preprocessing import Preprocessor, ChainedPreprocessor
+import numpy as np
+
 from dtaianomaly.anomaly_detection import BaseDetector
+from dtaianomaly.preprocessing import ChainedPreprocessor, Preprocessor
+from dtaianomaly.utils import is_valid_list
 
 
 class Pipeline(BaseDetector):

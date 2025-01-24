@@ -1,26 +1,25 @@
 import multiprocessing
 import time
 import tracemalloc
+from functools import partial
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Union
-from functools import partial
 
-from dtaianomaly.data.LazyDataLoader import LazyDataLoader
-from dtaianomaly.data.DataSet import DataSet
-from dtaianomaly.evaluation.metrics import Metric, BinaryMetric
-from dtaianomaly.thresholding.thresholding import Thresholding
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor, Identity
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
+from dtaianomaly.data.DataSet import DataSet
+from dtaianomaly.data.LazyDataLoader import LazyDataLoader
+from dtaianomaly.evaluation.metrics import BinaryMetric, Metric
 from dtaianomaly.pipeline.EvaluationPipeline import EvaluationPipeline
-
+from dtaianomaly.preprocessing.Preprocessor import Identity, Preprocessor
+from dtaianomaly.thresholding.thresholding import Thresholding
+from dtaianomaly.workflow.error_logging import log_error
 from dtaianomaly.workflow.utils import (
     build_pipelines,
-    convert_to_proba_metrics,
     convert_to_list,
+    convert_to_proba_metrics,
 )
-from dtaianomaly.workflow.error_logging import log_error
 
 
 class Workflow:

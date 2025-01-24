@@ -1,11 +1,10 @@
-from typing import Dict, List, Union, TypeVar
+from typing import Dict, List, TypeVar, Union
 
-from dtaianomaly.evaluation import Metric, ProbaMetric, BinaryMetric, ThresholdMetric
-from dtaianomaly.thresholding import Thresholding
-from dtaianomaly.preprocessing import Preprocessor
 from dtaianomaly.anomaly_detection import BaseDetector
+from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
 from dtaianomaly.pipeline import EvaluationPipeline
-
+from dtaianomaly.preprocessing import Preprocessor
+from dtaianomaly.thresholding import Thresholding
 
 T = TypeVar("T")
 

@@ -1,9 +1,9 @@
-import os
 import json
+import os
 from itertools import chain
 
+from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
 from dtaianomaly.workflow import Workflow
-from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data
 
 
 def workflow_from_config(path: str, max_size: int = 1000000):

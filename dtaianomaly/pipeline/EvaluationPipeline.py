@@ -1,11 +1,12 @@
-import numpy as np
-from typing import List, Dict, Union, Optional
+from typing import Dict, List, Optional, Union
 
-from dtaianomaly.utils import is_valid_list, is_valid_array_like
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+import numpy as np
+
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
 from dtaianomaly.evaluation.metrics import ProbaMetric
 from dtaianomaly.pipeline.Pipeline import Pipeline
+from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.utils import is_valid_array_like, is_valid_list
 
 
 class EvaluationPipeline:

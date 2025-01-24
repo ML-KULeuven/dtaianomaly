@@ -1,7 +1,9 @@
 import abc
+
 import numpy as np
+
 from dtaianomaly.evaluation.metrics import BinaryMetric
-from dtaianomaly.evaluation.simple_binary_metrics import Precision, Recall, FBeta
+from dtaianomaly.evaluation.simple_binary_metrics import FBeta, Precision, Recall
 
 
 def point_adjust(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:

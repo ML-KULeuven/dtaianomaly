@@ -1,7 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import ConnectionPatch
 from typing import Optional
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import ConnectionPatch
+
 from dtaianomaly import utils
 
 

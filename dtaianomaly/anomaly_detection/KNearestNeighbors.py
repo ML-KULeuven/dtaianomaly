@@ -1,4 +1,5 @@
 from pyod.models.knn import KNN
+
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector
 
