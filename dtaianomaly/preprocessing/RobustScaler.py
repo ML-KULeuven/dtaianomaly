@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 from sklearn.exceptions import NotFittedError
@@ -51,6 +50,7 @@ class RobustScaler(Preprocessor):
     NotFittedError
         If the `transform` method is called before fitting this StandardScaler.
     """
+
     quantile_range: (float, float)
     center_: np.array
     scale_: np.array
@@ -59,20 +59,36 @@ class RobustScaler(Preprocessor):
         if not isinstance(quantile_range, tuple):
             raise TypeError("`quantile_range` should be tuple")
         if len(quantile_range) != 2:
-            raise ValueError("'quantile_range' should consist of exactly two values (length of 2)")
-        if not isinstance(quantile_range[0], (float, int)) or isinstance(quantile_range[0], bool):
-            raise TypeError("The first element `quantile_range` should be a float or int")
-        if not isinstance(quantile_range[1], (float, int)) or isinstance(quantile_range[1], bool):
-            raise TypeError("The second element `quantile_range` should be a float or int")
+            raise ValueError(
+                "'quantile_range' should consist of exactly two values (length of 2)"
+            )
+        if not isinstance(quantile_range[0], (float, int)) or isinstance(
+            quantile_range[0], bool
+        ):
+            raise TypeError(
+                "The first element `quantile_range` should be a float or int"
+            )
+        if not isinstance(quantile_range[1], (float, int)) or isinstance(
+            quantile_range[1], bool
+        ):
+            raise TypeError(
+                "The second element `quantile_range` should be a float or int"
+            )
         if quantile_range[0] < 0.0:
-            raise ValueError("the first element in 'quantile_range' must be at least 0.0")
+            raise ValueError(
+                "the first element in 'quantile_range' must be at least 0.0"
+            )
         if quantile_range[1] > 100.0:
-            raise ValueError("the second element in 'quantile_range' must be at most 100.0")
+            raise ValueError(
+                "the second element in 'quantile_range' must be at most 100.0"
+            )
         if not quantile_range[0] < quantile_range[1]:
-            raise ValueError("the first element in 'quantile_range' must be at smaller than the second element in 'quantile_range'")
+            raise ValueError(
+                "the first element in 'quantile_range' must be at smaller than the second element in 'quantile_range'"
+            )
         self.quantile_range = quantile_range
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'RobustScaler':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "RobustScaler":
         if get_dimension(X) == 1:
             # univariate case
             self.center_ = np.array([np.nanmedian(X)])
@@ -87,11 +103,18 @@ class RobustScaler(Preprocessor):
             self.scale_ = q_max - q_min
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if not (hasattr(self, 'center_') and hasattr(self, 'scale_')):
-            raise NotFittedError(f'Call `fit` before using transform on {str(self)}')
-        if not ((len(X.shape) == 1 and self.center_.shape[0] == 1) or X.shape[1] == self.center_.shape[0]):
-            raise AttributeError(f'Trying to robust scale a time series with {X.shape[0]} attributes while it was fitted on {self.center_.shape[0]} attributes!')
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        if not (hasattr(self, "center_") and hasattr(self, "scale_")):
+            raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
+        if not (
+            (len(X.shape) == 1 and self.center_.shape[0] == 1)
+            or X.shape[1] == self.center_.shape[0]
+        ):
+            raise AttributeError(
+                f"Trying to robust scale a time series with {X.shape[0]} attributes while it was fitted on {self.center_.shape[0]} attributes!"
+            )
 
         X_ = (X - self.center_) / self.scale_
         return np.where(np.isnan(X_), X, X_), y

@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -23,6 +22,7 @@ class Differencing(Preprocessor):
     window_size: int, default=1
         The decaying factor to be used in the exponential moving average.
     """
+
     order: int
     window_size: int
 
@@ -42,12 +42,14 @@ class Differencing(Preprocessor):
         self.order = order
         self.window_size = window_size
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         X_ = X
         for _ in range(self.order):
-            concat = np.concatenate([X_[:self.window_size], X_])
-            X_ = concat[self.window_size:] - concat[:-self.window_size]
+            concat = np.concatenate([X_[: self.window_size], X_])
+            X_ = concat[self.window_size :] - concat[: -self.window_size]
         return X_, y

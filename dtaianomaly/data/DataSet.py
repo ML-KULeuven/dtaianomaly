@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, List
 from dtaianomaly.utils import is_valid_array_like, is_univariate, get_dimension
@@ -26,16 +25,19 @@ class DataSet:
         either the train data should not be given either, or the train
         data is assumed to consist of only normal data.
     """
+
     X_test: np.ndarray
     y_test: np.ndarray
     X_train: np.ndarray = None
     y_train: np.ndarray = None
 
-    def __init__(self,
-                 X_test: np.ndarray,
-                 y_test: np.ndarray,
-                 X_train: np.ndarray = None,
-                 y_train: np.ndarray = None):
+    def __init__(
+        self,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
+        X_train: np.ndarray = None,
+        y_train: np.ndarray = None,
+    ):
         self.check_is_valid(X_test, y_test, X_train, y_train)
         self.X_test = X_test
         self.y_test = y_test
@@ -44,10 +46,11 @@ class DataSet:
 
     @staticmethod
     def check_is_valid(
-            X_test: np.ndarray,
-            y_test: np.ndarray,
-            X_train: Optional[np.ndarray],
-            y_train: Optional[np.ndarray]) -> None:
+        X_test: np.ndarray,
+        y_test: np.ndarray,
+        X_train: Optional[np.ndarray],
+        y_train: Optional[np.ndarray],
+    ) -> None:
         """
         Checks if the given elements refer o a valid ``DataSet``. If the elements
         would not give a valid ``DataSet``, then a ``ValueError`` is raised.
@@ -86,37 +89,49 @@ class DataSet:
         """
         # Check test data
         if not is_valid_array_like(X_test):
-            raise ValueError('The test data must be a valid array like!')
+            raise ValueError("The test data must be a valid array like!")
 
         # Check test labels
         if not is_valid_array_like(y_test):
-            raise ValueError('The test labels must be a valid array like!')
+            raise ValueError("The test labels must be a valid array like!")
         if not is_univariate(y_test):
-            raise ValueError('There can only be one label for each observation in the test data!')
+            raise ValueError(
+                "There can only be one label for each observation in the test data!"
+            )
         if not np.all(np.isin(y_test, [0, 1])):
-            raise ValueError('The test labels must be binary!')
+            raise ValueError("The test labels must be binary!")
         if not y_test.shape[0] == X_test.shape[0]:
-            raise ValueError('The test data and labels must consist of the same number of observations!')
+            raise ValueError(
+                "The test data and labels must consist of the same number of observations!"
+            )
 
         # Check the train data
         if X_train is not None:
             if not is_valid_array_like(X_train):
-                raise ValueError('The train data must be a valid array like!')
+                raise ValueError("The train data must be a valid array like!")
             if get_dimension(X_test) != get_dimension(X_train):
-                raise ValueError('The test and train data must consist of the same number of features!')
+                raise ValueError(
+                    "The test and train data must consist of the same number of features!"
+                )
 
         # Check the train data
         if y_train is not None:
             if X_train is None:
-                raise ValueError('There can not be any train labels if there is no train data!')
+                raise ValueError(
+                    "There can not be any train labels if there is no train data!"
+                )
             if not is_valid_array_like(y_train):
-                raise ValueError('The train labels must be a valid array like!')
+                raise ValueError("The train labels must be a valid array like!")
             if not is_univariate(y_train):
-                raise ValueError('There can only be one label for each observation in the train data!')
+                raise ValueError(
+                    "There can only be one label for each observation in the train data!"
+                )
             if not np.all(np.isin(y_train, [0, 1])):
-                raise ValueError('The test labels must be binary!')
+                raise ValueError("The test labels must be binary!")
             if not X_train.shape[0] == y_train.shape[0]:
-                raise ValueError('The train data and labels must consist of the same number of observations!')
+                raise ValueError(
+                    "The train data and labels must consist of the same number of observations!"
+                )
 
     def is_valid(self) -> bool:
         """
@@ -134,7 +149,7 @@ class DataSet:
                 X_test=self.X_test,
                 y_test=self.y_test,
                 X_train=self.X_train,
-                y_train=self.y_train
+                y_train=self.y_train,
             )
             return True
 
@@ -165,7 +180,11 @@ class DataSet:
             return [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED]
         # If the train data and train labels are given, then all detectors are compatible.
         else:
-            return [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED, Supervision.SUPERVISED]
+            return [
+                Supervision.UNSUPERVISED,
+                Supervision.SEMI_SUPERVISED,
+                Supervision.SUPERVISED,
+            ]
 
     def is_compatible(self, detector: BaseDetector) -> bool:
         """

@@ -1,4 +1,3 @@
-
 import numpy as np
 from sklearn import metrics
 
@@ -29,6 +28,7 @@ class Precision(BinaryMetric):
     are truly abnormal events. However, it does not measure how many
     anomalies were actually identified.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -60,6 +60,7 @@ class Recall(BinaryMetric):
     account for how many false positives (normal events incorrectly flagged
     as anomalies) were generated, which is handled by precision.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -101,12 +102,13 @@ class FBeta(BinaryMetric):
     Precision: Compute the Precision score.
     Recall: Compute the Recall score.
     """
+
     beta: float
 
     def __init__(self, beta: (float, int) = 1) -> None:
         if not isinstance(beta, (int, float)) or isinstance(beta, bool):
             raise TypeError("`beta` should be numeric")
-        if beta <= 0.:
+        if beta <= 0.0:
             raise ValueError("`beta` should be strictly positive")
 
         super().__init__()

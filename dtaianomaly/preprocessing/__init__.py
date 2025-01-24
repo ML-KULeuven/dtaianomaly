@@ -5,6 +5,7 @@ This module contains preprocessing functionality.
 
 Custom preprocessors can be implemented by extending the base :py:class:`~dtaianomaly.preprocessing.Preprocessor` class.
 """
+
 from .Preprocessor import Preprocessor, check_preprocessing_inputs, Identity
 from .ChainedPreprocessor import ChainedPreprocessor
 from .MinMaxScaler import MinMaxScaler
@@ -17,17 +18,17 @@ from .PiecewiseAggregateApproximation import PiecewiseAggregateApproximation
 from .RobustScaler import RobustScaler
 
 __all__ = [
-    'Preprocessor',
-    'check_preprocessing_inputs',
-    'Identity',
-    'ChainedPreprocessor',
-    'MinMaxScaler',
-    'StandardScaler',
-    'MovingAverage',
-    'ExponentialMovingAverage',
-    'SamplingRateUnderSampler',
-    'NbSamplesUnderSampler',
-    'Differencing',
-    'PiecewiseAggregateApproximation',
-    'RobustScaler'
+    "Preprocessor",
+    "check_preprocessing_inputs",
+    "Identity",
+    "ChainedPreprocessor",
+    "MinMaxScaler",
+    "StandardScaler",
+    "MovingAverage",
+    "ExponentialMovingAverage",
+    "SamplingRateUnderSampler",
+    "NbSamplesUnderSampler",
+    "Differencing",
+    "PiecewiseAggregateApproximation",
+    "RobustScaler",
 ]

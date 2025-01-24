@@ -1,4 +1,3 @@
-
 import abc
 import numpy as np
 from dtaianomaly.evaluation.metrics import BinaryMetric
@@ -76,6 +75,7 @@ class PointAdjustedPrecision(PointAdjusted):
     --------
     Precision: Compute the standard, not point-adjusted precision.
     """
+
     def __init__(self):
         super().__init__(Precision())
 
@@ -103,6 +103,7 @@ class PointAdjustedRecall(PointAdjusted):
     --------
     Recall: Compute the standard, not point-adjusted recall.
     """
+
     def __init__(self):
         super().__init__(Recall())
 
@@ -135,6 +136,7 @@ class PointAdjustedFBeta(PointAdjusted):
     --------
     FBeta: Compute the standard, not point-adjusted :math:`F_\\beta`.
     """
+
     def __init__(self, beta: (float, int) = 1):
         super().__init__(FBeta(beta))
 

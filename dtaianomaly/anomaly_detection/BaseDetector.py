@@ -21,6 +21,7 @@ class Supervision(enum.Enum):
     - ``Semi-supervised``: The anomaly detector requires *normal* training data, but no training labels.
     - ``Supervised``: The anomaly detector requires both training data and training labels. The training data may contain anomalies.
     """
+
     UNSUPERVISED = 1
     SEMI_SUPERVISED = 2
     SUPERVISED = 3
@@ -40,6 +41,7 @@ class BaseDetector(PrettyPrintable):
     supervision: Supervision
         The type of supervision this anomaly detector requires.
     """
+
     supervision: Supervision
 
     def __init__(self, supervision: Supervision):
@@ -48,7 +50,9 @@ class BaseDetector(PrettyPrintable):
         self.supervision = supervision
 
     @abc.abstractmethod
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'BaseDetector':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "BaseDetector":
         """
         Abstract method, fit this detector to the given data.
 
@@ -85,7 +89,7 @@ class BaseDetector(PrettyPrintable):
         """
         Predict anomaly probabilities
 
-        Estimate the probability of a sample of `X` being anomalous, 
+        Estimate the probability of a sample of `X` being anomalous,
         based on the anomaly scores obtained from `decision_function`
         by rescaling them to the range of [0, 1] via min-max scaling.
 
@@ -120,14 +124,22 @@ class BaseDetector(PrettyPrintable):
         max_score = np.nanmax(raw_scores)
         if min_score == max_score:
             if not (0.0 <= min_score <= 1.0):
-                raise ValueError('The predicted anomaly scores are constant, but not in the interval [0, 1]. '
-                                 'It is not clear how to transform these unambiguously to anomaly-probabilities!')
+                raise ValueError(
+                    "The predicted anomaly scores are constant, but not in the interval [0, 1]. "
+                    "It is not clear how to transform these unambiguously to anomaly-probabilities!"
+                )
             return raw_scores
 
         else:
             return (raw_scores - min_score) / (max_score - min_score)
 
-    def predict_confidence(self, X: np.ndarray, X_train: np.ndarray = None, contamination: float = 0.05, decision_scores_given: bool = False):
+    def predict_confidence(
+        self,
+        X: np.ndarray,
+        X_train: np.ndarray = None,
+        contamination: float = 0.05,
+        decision_scores_given: bool = False,
+    ):
         """
         Predict the confidence of the anomaly scores on the test given test data.
 
@@ -171,36 +183,54 @@ class BaseDetector(PrettyPrintable):
         # Set the decision scores
         if decision_scores_given:
             if len(X.shape) > 1:
-                raise ValueError("In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
-                                 "as X (decision_scores_given=True), but the shape of X does not correspond to the shape of decision"
-                                 f"scores: {X.shape}!")
+                raise ValueError(
+                    "In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
+                    "as X (decision_scores_given=True), but the shape of X does not correspond to the shape of decision"
+                    f"scores: {X.shape}!"
+                )
             if X_train is not None and len(X_train.shape) > 1:
-                raise ValueError("In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
-                                 "as X (decision_scores_given=True), but the shape of X_train does not correspond to the shape of decision"
-                                 f"scores: {X.shape}!")
+                raise ValueError(
+                    "In the 'predict_confidence()' method, it was indicated that the decision scores are provided "
+                    "as X (decision_scores_given=True), but the shape of X_train does not correspond to the shape of decision"
+                    f"scores: {X.shape}!"
+                )
             decision_scores = X
             decision_scores_train = X_train if X_train is not None else decision_scores
 
         else:
             # Compute the decision scores
             decision_scores = self.decision_function(X)
-            decision_scores_train = self.decision_function(X_train) if X_train is not None else decision_scores
+            decision_scores_train = (
+                self.decision_function(X_train)
+                if X_train is not None
+                else decision_scores
+            )
 
         # Convert the decision scores to binary predictions
-        prediction = ContaminationRate(contamination_rate=contamination).threshold(decision_scores)
+        prediction = ContaminationRate(contamination_rate=contamination).threshold(
+            decision_scores
+        )
 
         # Apply the ExCeed method (https://github.com/Lorenzo-Perini/Confidence_AD/blob/master/ExCeeD.py)
         n = decision_scores.shape[0]
 
-        count_instances = np.vectorize(lambda x: np.count_nonzero(decision_scores_train <= x))
+        count_instances = np.vectorize(
+            lambda x: np.count_nonzero(decision_scores_train <= x)
+        )
         n_instances = count_instances(decision_scores)
 
         prob_func = np.vectorize(lambda x: (1 + x) / (2 + n))
-        posterior_prob = prob_func(n_instances)  # Outlier probability according to ExCeeD
+        posterior_prob = prob_func(
+            n_instances
+        )  # Outlier probability according to ExCeeD
 
-        conf_func = np.vectorize(lambda p: 1 - scipy.stats.binom.cdf(n - int(n * contamination), n, p))
+        conf_func = np.vectorize(
+            lambda p: 1 - scipy.stats.binom.cdf(n - int(n * contamination), n, p)
+        )
         exWise_conf = conf_func(posterior_prob)
-        np.place(exWise_conf, prediction == 0, 1 - exWise_conf[prediction == 0])  # if the example is classified as normal, use 1 - confidence.
+        np.place(
+            exWise_conf, prediction == 0, 1 - exWise_conf[prediction == 0]
+        )  # if the example is classified as normal, use 1 - confidence.
 
         return exWise_conf
 
@@ -216,15 +246,15 @@ class BaseDetector(PrettyPrintable):
             Location where to store the detector.
         """
         # Add the '.dtai' extension
-        if Path(path).suffix != '.dtai':
-            path = f'{path}.dtai'
+        if Path(path).suffix != ".dtai":
+            path = f"{path}.dtai"
 
         # Create the subdirectory, if it doesn't exist
         if not os.path.exists(Path(path).parent):
             os.makedirs(Path(path).parent)
 
         # Effectively write the anomaly detector to disk
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(self, f)
 
 
@@ -244,6 +274,6 @@ def load_detector(path: Union[str, Path]) -> BaseDetector:
     detector: BaseDetector
         The loaded detector.
     """
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         detector = pickle.load(f)
     return detector

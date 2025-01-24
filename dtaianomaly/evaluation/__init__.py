@@ -9,24 +9,29 @@ Custom evaluation metrics can be implemented by extending :py:class:`~dtaianomal
 the latter predicted "scores" (more or less anomalous). This distinction is important for later use in
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
+
 from .metrics import Metric, BinaryMetric, ProbaMetric, ThresholdMetric
 from .simple_binary_metrics import Precision, Recall, FBeta
 from .simple_proba_metrics import AreaUnderROC, AreaUnderPR
-from .point_adjusted_binary_metrics import PointAdjustedPrecision, PointAdjustedRecall, PointAdjustedFBeta
+from .point_adjusted_binary_metrics import (
+    PointAdjustedPrecision,
+    PointAdjustedRecall,
+    PointAdjustedFBeta,
+)
 from .BestThresholdMetric import BestThresholdMetric
 
 __all__ = [
-    'Metric',
-    'BinaryMetric',
-    'ProbaMetric',
-    'ThresholdMetric',
-    'Precision',
-    'Recall',
-    'FBeta',
-    'AreaUnderPR',
-    'AreaUnderROC',
-    'PointAdjustedPrecision',
-    'PointAdjustedRecall',
-    'PointAdjustedFBeta',
-    'BestThresholdMetric'
+    "Metric",
+    "BinaryMetric",
+    "ProbaMetric",
+    "ThresholdMetric",
+    "Precision",
+    "Recall",
+    "FBeta",
+    "AreaUnderPR",
+    "AreaUnderROC",
+    "PointAdjustedPrecision",
+    "PointAdjustedRecall",
+    "PointAdjustedFBeta",
+    "BestThresholdMetric",
 ]

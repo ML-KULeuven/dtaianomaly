@@ -1,4 +1,3 @@
-
 from pyod.models.ocsvm import OCSVM
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetector

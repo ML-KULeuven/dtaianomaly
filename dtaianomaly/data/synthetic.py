@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -27,10 +26,11 @@ def demonstration_time_series() -> (np.ndarray, np.ndarray):
 
 
 def inject_anomalies(
-        time_series: np.ndarray,
-        nb_anomalies: int = 10,
-        min_anomaly_magnitude: float = 1.0,
-        max_anomaly_magnitude: float = 2.0) -> np.array:
+    time_series: np.ndarray,
+    nb_anomalies: int = 10,
+    min_anomaly_magnitude: float = 1.0,
+    max_anomaly_magnitude: float = 2.0,
+) -> np.array:
     """
     Inject random anomalies in the given time series. This method will
     only inject point anomalies by adding a random offset to some random
@@ -54,14 +54,22 @@ def inject_anomalies(
         Binary anomaly labels, with a one indicating that an anomaly has
         been injected in the time series.
     """
-    anomaly_indices = np.random.choice(time_series.shape[0], nb_anomalies, replace=False)
+    anomaly_indices = np.random.choice(
+        time_series.shape[0], nb_anomalies, replace=False
+    )
     if len(time_series.shape) == 1:
-        anomalies = np.random.uniform(min_anomaly_magnitude, max_anomaly_magnitude, size=nb_anomalies)
-        anomalies *= (np.random.randint(2, size=anomalies.shape) * 2 - 1)
+        anomalies = np.random.uniform(
+            min_anomaly_magnitude, max_anomaly_magnitude, size=nb_anomalies
+        )
+        anomalies *= np.random.randint(2, size=anomalies.shape) * 2 - 1
         time_series[anomaly_indices] += anomalies
     else:
-        anomalies = np.random.uniform(min_anomaly_magnitude, max_anomaly_magnitude, size=(nb_anomalies, time_series.shape[1]))
-        anomalies *= (np.random.randint(2, size=anomalies.shape) * 2 - 1)
+        anomalies = np.random.uniform(
+            min_anomaly_magnitude,
+            max_anomaly_magnitude,
+            size=(nb_anomalies, time_series.shape[1]),
+        )
+        anomalies *= np.random.randint(2, size=anomalies.shape) * 2 - 1
         time_series[anomaly_indices, :] += anomalies
     anomaly_labels = np.zeros(shape=time_series.shape[0])
     anomaly_labels[anomaly_indices] = 1
@@ -69,13 +77,14 @@ def inject_anomalies(
 
 
 def make_sine_wave(
-        nb_samples: int,
-        amplitude: float = 1.0,
-        frequency: float = 5.0,
-        phase: float = 0.0,
-        noise_level: float = 0.2,
-        seed: int = None,
-        **kwargs) -> (np.ndarray, np.ndarray):
+    nb_samples: int,
+    amplitude: float = 1.0,
+    frequency: float = 5.0,
+    phase: float = 0.0,
+    noise_level: float = 0.2,
+    seed: int = None,
+    **kwargs,
+) -> (np.ndarray, np.ndarray):
     """
     Generate a random sine wave and inject anomalies into it.
 

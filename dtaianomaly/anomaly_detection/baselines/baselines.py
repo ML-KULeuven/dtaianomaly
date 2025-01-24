@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional
 from dtaianomaly import utils
@@ -15,7 +14,9 @@ class AlwaysNormal(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'AlwaysNormal':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "AlwaysNormal":
         """
         Simply return this detector, because no fitting is required.
 
@@ -67,7 +68,9 @@ class AlwaysAnomalous(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'AlwaysAnomalous':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "AlwaysAnomalous":
         """
         Simply return this detector, because no fitting is required.
 
@@ -120,13 +123,16 @@ class RandomDetector(BaseDetector):
     seed: int, default=None
         The seed to use for generating anomaly scores. If None, no seed will be used.
     """
+
     seed: Optional[int]
 
     def __init__(self, seed: Optional[int] = None):
         super().__init__(Supervision.UNSUPERVISED)
         self.seed = seed
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'RandomDetector':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "RandomDetector":
         """
         Simply return this detector, because no fitting is required.
 

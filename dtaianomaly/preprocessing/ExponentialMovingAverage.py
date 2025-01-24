@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 
@@ -23,16 +22,25 @@ class ExponentialMovingAverage(Preprocessor):
     alpha: float
         The decaying factor to be used in the exponential moving average.
     """
+
     alpha: float
 
     def __init__(self, alpha: float) -> None:
         if not (0.0 < alpha < 1.0):
-            raise ValueError('Alpha must be in the open interval ]0, 1[')
+            raise ValueError("Alpha must be in the open interval ]0, 1[")
         self.alpha = alpha
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'ExponentialMovingAverage':
+    def _fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> "ExponentialMovingAverage":
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        X_ = np.frompyfunc(lambda a, b: self.alpha * a + (1 - self.alpha) * b, 2, 1).accumulate(X).astype(dtype=float)
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        X_ = (
+            np.frompyfunc(lambda a, b: self.alpha * a + (1 - self.alpha) * b, 2, 1)
+            .accumulate(X)
+            .astype(dtype=float)
+        )
         return X_, y

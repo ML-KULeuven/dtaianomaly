@@ -1,4 +1,3 @@
-
 import numpy as np
 from dtaianomaly.data.DataSet import DataSet
 from dtaianomaly.data.LazyDataLoader import LazyDataLoader
@@ -16,7 +15,9 @@ class UCRLoader(LazyDataLoader):
     def _load(self) -> DataSet:
 
         # Extract the meta-information from the name of the file
-        [*_, train_test_split, start_anomaly, end_anomaly] = self.path.rstrip('.txt').split('_')
+        [*_, train_test_split, start_anomaly, end_anomaly] = self.path.rstrip(
+            ".txt"
+        ).split("_")
         train_test_split = int(train_test_split)
         start_anomaly = int(start_anomaly)
         end_anomaly = int(end_anomaly)

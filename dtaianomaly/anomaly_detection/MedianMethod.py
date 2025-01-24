@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional
 
@@ -47,19 +46,28 @@ class MedianMethod(BaseDetector):
        detection for time series: an application to sensor data." Knowledge and Information
        Systems 11 (2007), 137-154, doi: `10.1007/s10115-006-0026-6 <https://doi.org/10.1007/s10115-006-0026-6>`_.
     """
+
     neighborhood_size_before: int
     neighborhood_size_after: Optional[int]
 
-    def __init__(self, neighborhood_size_before: int, neighborhood_size_after: Optional[int] = None):
+    def __init__(
+        self,
+        neighborhood_size_before: int,
+        neighborhood_size_after: Optional[int] = None,
+    ):
         super().__init__(Supervision.UNSUPERVISED)
 
-        if not isinstance(neighborhood_size_before, int) or isinstance(neighborhood_size_before, bool):
+        if not isinstance(neighborhood_size_before, int) or isinstance(
+            neighborhood_size_before, bool
+        ):
             raise TypeError("`neighborhood_size_before` should be an integer")
         if neighborhood_size_before < 1:
             raise ValueError("`neighborhood_size_before` should be strictly positive")
 
         if neighborhood_size_after is not None:
-            if not isinstance(neighborhood_size_after, int) or isinstance(neighborhood_size_after, bool):
+            if not isinstance(neighborhood_size_after, int) or isinstance(
+                neighborhood_size_after, bool
+            ):
                 raise TypeError("`neighborhood_size_after` should be an integer")
             if neighborhood_size_after < 0:
                 raise ValueError("`neighborhood_size_after` can not be negative!")
@@ -67,7 +75,9 @@ class MedianMethod(BaseDetector):
         self.neighborhood_size_before = neighborhood_size_before
         self.neighborhood_size_after = neighborhood_size_after
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'BaseDetector':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "BaseDetector":
         return self  # No fitting is required.
 
     def decision_function(self, X: np.ndarray) -> np.ndarray:
@@ -85,6 +95,17 @@ class MedianMethod(BaseDetector):
         else:
             neighborhood_size_after = self.neighborhood_size_after
 
-        X_padded = np.pad(X, (self.neighborhood_size_before, neighborhood_size_after), constant_values=(np.nan,))
-        neighborhoods = np.lib.stride_tricks.sliding_window_view(X_padded, window_shape=(self.neighborhood_size_before + neighborhood_size_after + 1))
-        return np.nan_to_num(np.abs(X - np.nanmean(neighborhoods, axis=1)) / np.nanstd(neighborhoods, axis=1), nan=0.0)
+        X_padded = np.pad(
+            X,
+            (self.neighborhood_size_before, neighborhood_size_after),
+            constant_values=(np.nan,),
+        )
+        neighborhoods = np.lib.stride_tricks.sliding_window_view(
+            X_padded,
+            window_shape=(self.neighborhood_size_before + neighborhood_size_after + 1),
+        )
+        return np.nan_to_num(
+            np.abs(X - np.nanmean(neighborhoods, axis=1))
+            / np.nanstd(neighborhoods, axis=1),
+            nan=0.0,
+        )

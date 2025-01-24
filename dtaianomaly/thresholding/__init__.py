@@ -9,11 +9,7 @@ to binary predictions (anomaly or not).
 
 Custom thresholders can be implemented by extending the base :py:class:`dtaianomaly.thresholding.Thresholding` class.
 """
+
 from .thresholding import Thresholding, FixedCutoff, ContaminationRate, TopN
 
-__all__ = [
-    'Thresholding',
-    'FixedCutoff',
-    'ContaminationRate',
-    'TopN'
-]
+__all__ = ["Thresholding", "FixedCutoff", "ContaminationRate", "TopN"]

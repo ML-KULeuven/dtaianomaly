@@ -1,4 +1,3 @@
-
 import numpy as np
 from dtaianomaly.evaluation.metrics import ProbaMetric, BinaryMetric
 
@@ -28,6 +27,7 @@ class BestThresholdMetric(ProbaMetric):
     threshold_: float
         The threshold resulting in the best performance.
     """
+
     metric: BinaryMetric
     max_nb_thresholds: int
     threshold_: float
@@ -35,10 +35,14 @@ class BestThresholdMetric(ProbaMetric):
     def __init__(self, metric: BinaryMetric, max_nb_thresholds: int = -1) -> None:
         if not isinstance(metric, BinaryMetric):
             raise TypeError(f"metric expects 'BinaryMetric', got {type(metric)}")
-        if not isinstance(max_nb_thresholds, int) or isinstance(max_nb_thresholds, bool):
+        if not isinstance(max_nb_thresholds, int) or isinstance(
+            max_nb_thresholds, bool
+        ):
             raise TypeError("`max_nb_thresholds` should be an integer")
         if max_nb_thresholds <= 0 and max_nb_thresholds != -1:
-            raise ValueError("`max_nb_thresholds` must be strictly positive or equal to -1!")
+            raise ValueError(
+                "`max_nb_thresholds` must be strictly positive or equal to -1!"
+            )
         self.metric = metric
         self.max_nb_thresholds = max_nb_thresholds
 
@@ -55,11 +59,16 @@ class BestThresholdMetric(ProbaMetric):
 
         # Select a subset of the thresholds, if requested and useful
         if 0 < self.max_nb_thresholds < thresholds.shape[0]:
-            selected_thresholds = np.linspace(0, thresholds.shape[0], self.max_nb_thresholds + 2, dtype=int)[1:-1]
+            selected_thresholds = np.linspace(
+                0, thresholds.shape[0], self.max_nb_thresholds + 2, dtype=int
+            )[1:-1]
             thresholds = thresholds[selected_thresholds]
 
         # Compute the score for each threshold
-        scores = [self.metric._compute(y_true, y_pred >= threshold) for threshold in thresholds]
+        scores = [
+            self.metric._compute(y_true, y_pred >= threshold)
+            for threshold in thresholds
+        ]
 
         # Get the best score and the corresponding threshold
         i = np.argmax(scores)

@@ -21,7 +21,9 @@ def is_valid_list(value, target_type) -> bool:
         True if and only if the given ``value`` is a list and all elements in
         the list are of type ``Type``, otherwise False.
     """
-    return isinstance(value, list) and all(isinstance(item, target_type) for item in value)
+    return isinstance(value, list) and all(
+        isinstance(item, target_type) for item in value
+    )
 
 
 def is_valid_array_like(array) -> bool:
@@ -46,7 +48,11 @@ def is_valid_array_like(array) -> bool:
     if isinstance(array, np.ndarray):
         if array.size == 0:
             return True
-        return np.issubdtype(array.dtype, np.number) or np.issubdtype(array.dtype, np.floating) or np.issubdtype(array.dtype, bool)
+        return (
+            np.issubdtype(array.dtype, np.number)
+            or np.issubdtype(array.dtype, np.floating)
+            or np.issubdtype(array.dtype, bool)
+        )
 
     # Check for numerical sequence
     if isinstance(array, Sequence) and not isinstance(array, str):
@@ -57,7 +63,10 @@ def is_valid_array_like(array) -> bool:
             # Multivariate case
             n_attributes = len(array[0])
             return all(
-                isinstance(sample, Sequence) and not isinstance(sample, str) and len(sample) == n_attributes and all(isinstance(item, (int, float)) for item in sample)
+                isinstance(sample, Sequence)
+                and not isinstance(sample, str)
+                and len(sample) == n_attributes
+                and all(isinstance(item, (int, float)) for item in sample)
                 for sample in array
             )
         else:

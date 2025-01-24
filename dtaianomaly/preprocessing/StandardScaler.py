@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 from sklearn.exceptions import NotFittedError
@@ -39,6 +38,7 @@ class StandardScaler(Preprocessor):
     NotFittedError
         If the `transform` method is called before fitting this StandardScaler.
     """
+
     min_std: float
     mean_: np.array
     std_: np.array
@@ -46,7 +46,7 @@ class StandardScaler(Preprocessor):
     def __init__(self, min_std: float = 1e-9):
         self.min_std = min_std
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'StandardScaler':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "StandardScaler":
         if len(X.shape) == 1 or X.shape[1] == 1:
             # univariate case
             self.mean_ = np.array([np.nanmean(X)])
@@ -58,11 +58,18 @@ class StandardScaler(Preprocessor):
 
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if not (hasattr(self, 'mean_') and hasattr(self, 'std_')):
-            raise NotFittedError(f'Call `fit` before using transform on {str(self)}')
-        if not ((len(X.shape) == 1 and self.mean_.shape[0] == 1) or X.shape[1] == self.mean_.shape[0]):
-            raise AttributeError(f'Trying to standard scale a time series with {X.shape[0]} attributes while it was fitted on {self.mean_.shape[0]} attributes!')
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        if not (hasattr(self, "mean_") and hasattr(self, "std_")):
+            raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
+        if not (
+            (len(X.shape) == 1 and self.mean_.shape[0] == 1)
+            or X.shape[1] == self.mean_.shape[0]
+        ):
+            raise AttributeError(
+                f"Trying to standard scale a time series with {X.shape[0]} attributes while it was fitted on {self.mean_.shape[0]} attributes!"
+            )
 
         # If the std of all attributes is 0, then no transformation happens
         if np.all((self.std_ < self.min_std)):

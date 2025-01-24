@@ -1,4 +1,3 @@
-
 import math
 import scipy
 import numpy as np
@@ -28,12 +27,20 @@ def sliding_window(X: np.ndarray, window_size: int, stride: int) -> np.ndarray:
         to form a 1D array of length the number of attributes multiplied
         by the window size.
     """
-    windows = [X[t:t+window_size].ravel() for t in range(0, X.shape[0] - window_size, stride)]
+    windows = [
+        X[t : t + window_size].ravel()
+        for t in range(0, X.shape[0] - window_size, stride)
+    ]
     windows.append(X[-window_size:].ravel())
     return np.array(windows)
 
 
-def reverse_sliding_window(per_window_anomaly_scores: np.ndarray, window_size: int, stride: int, length_time_series: int) -> np.ndarray:
+def reverse_sliding_window(
+    per_window_anomaly_scores: np.ndarray,
+    window_size: int,
+    stride: int,
+    length_time_series: int,
+) -> np.ndarray:
     """
     Reverses the sliding window, to convert the per-window anomaly
     scores into per-observation anomaly scores.
@@ -77,7 +84,9 @@ def reverse_sliding_window(per_window_anomaly_scores: np.ndarray, window_size: i
         while t >= min_end_window:
             end_window_index += 1
             min_end_window += stride
-        scores_time[t] = np.mean(per_window_anomaly_scores[start_window_index:end_window_index])
+        scores_time[t] = np.mean(
+            per_window_anomaly_scores[start_window_index:end_window_index]
+        )
 
     for t in range(length_time_series - window_size, length_time_series):
         while min_start_window + window_size <= t:
@@ -108,21 +117,22 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
     """
     if isinstance(window_size, int):
         if isinstance(window_size, bool):
-            raise ValueError('The window size can not be a boolean value!')
+            raise ValueError("The window size can not be a boolean value!")
         if window_size <= 0:
-            raise ValueError('An integer window size should be strictly positive.')
+            raise ValueError("An integer window size should be strictly positive.")
 
-    elif window_size not in ['fft', 'acf', 'mwf', 'suss']:
+    elif window_size not in ["fft", "acf", "mwf", "suss"]:
         raise ValueError(f"Invalid window_size given: '{window_size}'.")
 
 
 def compute_window_size(
-        X: np.ndarray,
-        window_size: Union[int, str],
-        lower_bound: int = 10,
-        upper_bound: int = 1000,
-        threshold: float = 0.89,
-        default_window_size: int = None) -> int:
+    X: np.ndarray,
+    window_size: Union[int, str],
+    lower_bound: int = 10,
+    upper_bound: int = 1000,
+    threshold: float = 0.89,
+    default_window_size: int = None,
+) -> int:
     """
     Compute the window size of the given time series [ermshaus2023window]_.
 
@@ -188,33 +198,44 @@ def compute_window_size(
 
     # Check if the time series is univariate (error should not be raise if given window size is an integer)
     elif not utils.is_univariate(X):
-        raise ValueError('It only makes sens to compute the window size in univariate time series.')
+        raise ValueError(
+            "It only makes sens to compute the window size in univariate time series."
+        )
 
     # Use the fft to compute a window size
-    elif window_size == 'fft':
-        window_size_ = _dominant_fourier_frequency(X, lower_bound=lower_bound, upper_bound=upper_bound)
+    elif window_size == "fft":
+        window_size_ = _dominant_fourier_frequency(
+            X, lower_bound=lower_bound, upper_bound=upper_bound
+        )
 
     # Use the acf to compute a window size
-    elif window_size == 'acf':
-        window_size_ = _highest_autocorrelation(X, lower_bound=lower_bound, upper_bound=upper_bound)
+    elif window_size == "acf":
+        window_size_ = _highest_autocorrelation(
+            X, lower_bound=lower_bound, upper_bound=upper_bound
+        )
 
-    elif window_size == 'mwf':
+    elif window_size == "mwf":
         window_size_ = _mwf(X, lower_bound=lower_bound, upper_bound=upper_bound)
 
     # Use SUSS to compute a window size
-    elif window_size == 'suss':
+    elif window_size == "suss":
         window_size_ = _suss(X, lower_bound=lower_bound, threshold=threshold)
 
     # Check if a valid window size was computed, and raise an error if necessary
     if window_size_ == -1:
         if default_window_size is None:
-            raise ValueError(f"Something went wrong when computing the window size using '{window_size}' on a time series with shape {X.shape}!")
+            raise ValueError(
+                f"Something went wrong when computing the window size using '{window_size}' on a time series with shape {X.shape}!"
+            )
         else:
             return default_window_size
     else:
         return window_size_
 
-def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
+
+def _dominant_fourier_frequency(
+    X: np.ndarray, lower_bound: int, upper_bound: int
+) -> int:
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L10
     fourier = np.fft.fft(X)
     freq = np.fft.fftfreq(X.shape[0], 1)
@@ -239,7 +260,7 @@ def _dominant_fourier_frequency(X: np.ndarray, lower_bound: int, upper_bound: in
 
 def _highest_autocorrelation(X: np.ndarray, lower_bound: int, upper_bound: int):
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L29
-    acf_values = acf(X, fft=True, nlags=int(X.shape[0]/2))
+    acf_values = acf(X, fft=True, nlags=int(X.shape[0] / 2))
 
     peaks, _ = scipy.signal.find_peaks(acf_values)
     peaks = peaks[np.logical_and(peaks >= lower_bound, peaks < upper_bound)]
@@ -257,7 +278,7 @@ def _mwf(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
     def moving_mean(time_series: np.ndarray, w: int):
         moving_avg = np.cumsum(time_series, dtype=float)
         moving_avg[w:] = moving_avg[w:] - moving_avg[:-w]
-        return moving_avg[w - 1:] / w
+        return moving_avg[w - 1 :] / w
 
     all_averages = []
     window_sizes = list(range(lower_bound, upper_bound))
@@ -267,11 +288,13 @@ def _mwf(X: np.ndarray, lower_bound: int, upper_bound: int) -> int:
 
     moving_average_residuals = []
     for i in range(len(window_sizes)):
-        moving_avg = all_averages[i][:len(all_averages[-1])]
+        moving_avg = all_averages[i][: len(all_averages[-1])]
         moving_avg_residual = np.log(abs(moving_avg - moving_avg.mean()).sum())
         moving_average_residuals.append(moving_avg_residual)
 
-    b = (np.diff(np.sign(np.diff(moving_average_residuals))) > 0).nonzero()[0] + 1  # local min
+    b = (np.diff(np.sign(np.diff(moving_average_residuals))) > 0).nonzero()[
+        0
+    ] + 1  # local min
 
     if len(b) == 0:
         return -1
@@ -290,11 +313,13 @@ def _suss(X: np.ndarray, lower_bound: int, threshold: float) -> int:
 
         # Compute the statistics in each window
         windows = np.lib.stride_tricks.sliding_window_view(time_series, w)
-        local_stats = np.array([
-            windows.mean(axis=1) - global_mean,
-            windows.std(axis=1) - global_std,
-            (windows.max(axis=1) - windows.min(axis=1)) - global_min_max
-        ])
+        local_stats = np.array(
+            [
+                windows.mean(axis=1) - global_mean,
+                windows.std(axis=1) - global_std,
+                (windows.max(axis=1) - windows.min(axis=1)) - global_min_max,
+            ]
+        )
 
         # Compute Euclidean distance between local and global stats
         stats_diff = np.sqrt(np.sum(np.square(local_stats), axis=0)) / np.sqrt(w)
@@ -308,37 +333,41 @@ def _suss(X: np.ndarray, lower_bound: int, threshold: float) -> int:
     global_min_max = np.max(X) - np.min(X)
 
     max_suss_score = suss_score(X, 1)
-    min_suss_score = suss_score(X, X.shape[0]-1)
+    min_suss_score = suss_score(X, X.shape[0] - 1)
     if min_suss_score == max_suss_score:
         return -1
 
     # exponential search (to find window size interval)
     exp = 0
     while True:
-        window_size = 2 ** exp
+        window_size = 2**exp
 
         if window_size < lower_bound:
             exp += 1
             continue
 
-        score = 1 - (suss_score(X, window_size) - min_suss_score) / (max_suss_score - min_suss_score)
+        score = 1 - (suss_score(X, window_size) - min_suss_score) / (
+            max_suss_score - min_suss_score
+        )
 
         if score > threshold:
             break
 
         exp += 1
 
-    lbound, ubound = max(lower_bound, 2 ** (exp - 1)), min(2 ** exp + 1, X.shape[0]-1)
+    lbound, ubound = max(lower_bound, 2 ** (exp - 1)), min(2**exp + 1, X.shape[0] - 1)
 
     # binary search (to find window size in interval)
     while lbound <= ubound:
         window_size = int((lbound + ubound) / 2)
-        score = 1 - (suss_score(X, window_size) - min_suss_score) / (max_suss_score - min_suss_score)
+        score = 1 - (suss_score(X, window_size) - min_suss_score) / (
+            max_suss_score - min_suss_score
+        )
 
         if score < threshold:
-            lbound = window_size+1
+            lbound = window_size + 1
         elif score > threshold:
-            ubound = window_size-1
+            ubound = window_size - 1
         else:
             lbound = window_size
             break

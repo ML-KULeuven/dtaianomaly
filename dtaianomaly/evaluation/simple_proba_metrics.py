@@ -1,4 +1,3 @@
-
 import numpy as np
 from sklearn import metrics
 
@@ -23,6 +22,7 @@ class AreaUnderROC(ProbaMetric):
     are rare, as it considers the trade-off between detecting true anomalies
     (high recall) and minimizing false positives.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -46,6 +46,7 @@ class AreaUnderPR(ProbaMetric):
     in check. A higher AUC-PR value indicates better performance, meaning the
     model is effective at detecting true anomalies with fewer false positives.
     """
+
     def __init__(self) -> None:
         super().__init__()
 

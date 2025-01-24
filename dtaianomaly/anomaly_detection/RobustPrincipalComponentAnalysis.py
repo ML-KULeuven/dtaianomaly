@@ -7,7 +7,12 @@ from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
+from dtaianomaly.anomaly_detection.windowing_utils import (
+    sliding_window,
+    reverse_sliding_window,
+    check_is_valid_window_size,
+    compute_window_size,
+)
 
 
 class RobustPrincipalComponentAnalysis(BaseDetector):
@@ -73,6 +78,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     .. [Candes2011robust] Emmanuel J. Candès, Xiaodong Li, Yi Ma, and John Wright. 2011. Robust principal
        component analysis? J. ACM 58, 3, Article 11 (June 2011), 37 pages. doi: `10.1145/1970392.1970395 <https://doi.org/10.1145/1970392.1970395>`_
     """
+
     window_size: Union[int, str]
     stride: int
     max_iter: int
@@ -80,7 +86,13 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     window_size_: int
     pca_: PCA
 
-    def __init__(self, window_size: Union[str, int], stride: int = 1, max_iter: int = 1000, **kwargs):
+    def __init__(
+        self,
+        window_size: Union[str, int],
+        stride: int = 1,
+        max_iter: int = 1000,
+        **kwargs,
+    ):
         super().__init__(Supervision.SEMI_SUPERVISED)
 
         check_is_valid_window_size(window_size)
@@ -97,7 +109,9 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         self.max_iter = max_iter
         self.kwargs = kwargs
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'RobustPrincipalComponentAnalysis':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "RobustPrincipalComponentAnalysis":
         """
         Fit this Robust PCA to the given data
 
@@ -138,8 +152,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         return self
 
     def decision_function(self, X: np.ndarray) -> np.ndarray:
-        if not hasattr(self, 'pca_'):
-            raise NotFittedError('Call the fit function before making predictions!')
+        if not hasattr(self, "pca_"):
+            raise NotFittedError("Call the fit function before making predictions!")
         if not utils.is_valid_array_like(X):
             raise ValueError(f"Input must be numerical array-like")
 
@@ -155,7 +169,9 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         per_window_decision_scores = S.sum(axis=1)
 
         # Get an anomaly score for each window
-        decision_scores = reverse_sliding_window(per_window_decision_scores, self.window_size_, self.stride, X.shape[0])
+        decision_scores = reverse_sliding_window(
+            per_window_decision_scores, self.window_size_, self.stride, X.shape[0]
+        )
 
         return decision_scores
 
@@ -174,7 +190,7 @@ class _RobustPCA:
 
     @staticmethod
     def frobenius_norm(M):
-        return np.linalg.norm(M, ord='fro')
+        return np.linalg.norm(M, ord="fro")
 
     @staticmethod
     def shrink(M, tau):
@@ -191,13 +207,17 @@ class _RobustPCA:
         Yk = self.Y
         Lk = np.zeros(self.D.shape)
 
-        _tol = 1E-7 * self.frobenius_norm(self.D)
+        _tol = 1e-7 * self.frobenius_norm(self.D)
 
         # this loop implements the principal component pursuit (PCP) algorithm
         # located in the table on page 29 of https://arxiv.org/pdf/0912.3599.pdf
         while (err > _tol) and iter < max_iter:
-            Lk = self.svd_threshold(self.D - Sk + self.mu_inv * Yk, self.mu_inv)  # this line implements step 3
-            Sk = self.shrink(self.D - Lk + (self.mu_inv * Yk), self.mu_inv * self.lmbda)  # this line implements step 4
+            Lk = self.svd_threshold(
+                self.D - Sk + self.mu_inv * Yk, self.mu_inv
+            )  # this line implements step 3
+            Sk = self.shrink(
+                self.D - Lk + (self.mu_inv * Yk), self.mu_inv * self.lmbda
+            )  # this line implements step 4
             Yk = Yk + self.mu * (self.D - Lk - Sk)  # this line implements step 5
             err = self.frobenius_norm(self.D - Lk - Sk)
             iter += 1

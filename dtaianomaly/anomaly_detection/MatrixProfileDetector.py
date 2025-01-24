@@ -1,4 +1,3 @@
-
 import numpy as np
 import stumpy
 from typing import Optional, Union
@@ -6,17 +5,21 @@ from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import reverse_sliding_window, check_is_valid_window_size, compute_window_size
+from dtaianomaly.anomaly_detection.windowing_utils import (
+    reverse_sliding_window,
+    check_is_valid_window_size,
+    compute_window_size,
+)
 
 
 class MatrixProfileDetector(BaseDetector):
     """
     Anomaly detector based on the Matrix Profile
 
-    Use the STOMP algorithm to detect anomalies in a time series 
+    Use the STOMP algorithm to detect anomalies in a time series
     [Zhu2016matrixII]_. STOMP is a fast and scalable algorithm for computing
-    the matrix profile, which measures the distance from each sequence to the 
-    most similar other sequence. Consequently, the matrix profile can be used 
+    the matrix profile, which measures the distance from each sequence to the
+    most similar other sequence. Consequently, the matrix profile can be used
     to quantify how anomalous a subsequence is, because it has a large distance
     to all other subsequences.
 
@@ -26,12 +29,12 @@ class MatrixProfileDetector(BaseDetector):
         The window size to use for computing the matrix profile. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     normalize : bool, default=True
-        Whether to z-normalize the time series before computing 
+        Whether to z-normalize the time series before computing
         the matrix profile.
     p : float, default=2.0
         The norm to use for computing the matrix profile.
     k : int, default=1
-        The k-th nearest neighbor to use for computing the sequence distance 
+        The k-th nearest neighbor to use for computing the sequence distance
         in the matrix profile.
     novelty: bool, default=False
         If novelty detection should be performed, i.e., detect anomalies in regard
@@ -48,7 +51,7 @@ class MatrixProfileDetector(BaseDetector):
 
     Notes
     -----
-    If the given time series is multivariate, the matrix profile is computed 
+    If the given time series is multivariate, the matrix profile is computed
     for each dimension separately and then summed up.
 
     Examples
@@ -68,6 +71,7 @@ class MatrixProfileDetector(BaseDetector):
        Motifs and Joins," 2016 IEEE 16th International Conference on Data Mining
        (ICDM), Barcelona, Spain, 2016, pp. 739-748, doi: `10.1109/ICDM.2016.0085 <https://doi.org/10.1109/ICDM.2016.0085>`_.
     """
+
     window_size: Union[int, str]
     normalize: bool
     p: float
@@ -76,12 +80,14 @@ class MatrixProfileDetector(BaseDetector):
     window_size_: int
     X_reference_: np.ndarray
 
-    def __init__(self,
-                 window_size: Union[int, str],
-                 normalize: bool = True,
-                 p: float = 2.0,
-                 k: int = 1,
-                 novelty: bool = False) -> None:
+    def __init__(
+        self,
+        window_size: Union[int, str],
+        normalize: bool = True,
+        p: float = 2.0,
+        k: int = 1,
+        novelty: bool = False,
+    ) -> None:
         super().__init__(Supervision.UNSUPERVISED)
 
         check_is_valid_window_size(window_size)
@@ -91,7 +97,7 @@ class MatrixProfileDetector(BaseDetector):
 
         if not isinstance(p, (float, int)) or isinstance(p, bool):
             raise TypeError("`p` should be numeric")
-        if p < 1.:
+        if p < 1.0:
             raise ValueError("`p` is a p-norm, value should be higher than 1.")
 
         if not isinstance(k, int) or isinstance(k, bool):
@@ -108,7 +114,9 @@ class MatrixProfileDetector(BaseDetector):
         self.k = k
         self.novelty = novelty
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'MatrixProfileDetector':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "MatrixProfileDetector":
         """
         Fit this detector to the given data. Function is only present for
         consistency. Only saves the given data as a numpy array if
@@ -170,15 +178,19 @@ class MatrixProfileDetector(BaseDetector):
         # Make sure X is a numpy array
         X = np.asarray(X)
 
-        if not hasattr(self, 'window_size_'):
-            raise NotFittedError('Call the fit function before making predictions!')
+        if not hasattr(self, "window_size_"):
+            raise NotFittedError("Call the fit function before making predictions!")
         if self.novelty:
             nb_attributes_test = 1 if len(X.shape) == 1 else X.shape[1]
-            nb_attributes_reference = 1 if len(self.X_reference_.shape) == 1 else self.X_reference_.shape[1]
+            nb_attributes_reference = (
+                1 if len(self.X_reference_.shape) == 1 else self.X_reference_.shape[1]
+            )
             if nb_attributes_reference != nb_attributes_test:
-                raise ValueError(f"Trying to detect anomalies with Matrix Profile using ``novelty=True``, but the number of attributes "
-                                 f"in the reference data is different from the number of attributes in the test data: "
-                                 f"({nb_attributes_reference} != {nb_attributes_test})!")
+                raise ValueError(
+                    f"Trying to detect anomalies with Matrix Profile using ``novelty=True``, but the number of attributes "
+                    f"in the reference data is different from the number of attributes in the test data: "
+                    f"({nb_attributes_reference} != {nb_attributes_test})!"
+                )
 
         # Stumpy assumes arrays of shape [C T], where C is the number of "channels"
         # and T the number of time samples
@@ -187,14 +199,41 @@ class MatrixProfileDetector(BaseDetector):
         ignore_trivial = True if not self.novelty else False
         if len(X.shape) == 1 or X.shape[1] == 1:
             T_B = None if not self.novelty else self.X_reference_.squeeze()
-            matrix_profile = stumpy.stump(X.squeeze(), T_B=T_B, m=self.window_size_, normalize=self.normalize, p=self.p, k=self.k, ignore_trivial=ignore_trivial)[:, self.k - 1]  # Needed if k>1?
+            matrix_profile = stumpy.stump(
+                X.squeeze(),
+                T_B=T_B,
+                m=self.window_size_,
+                normalize=self.normalize,
+                p=self.p,
+                k=self.k,
+                ignore_trivial=ignore_trivial,
+            )[
+                :, self.k - 1
+            ]  # Needed if k>1?
         else:
             if self.novelty:
-                matrix_profiles = np.full(shape=(X.shape[0] - self.window_size_ + 1, X.shape[1]), fill_value=np.nan)
+                matrix_profiles = np.full(
+                    shape=(X.shape[0] - self.window_size_ + 1, X.shape[1]),
+                    fill_value=np.nan,
+                )
                 for attribute in range(X.shape[1]):
-                    matrix_profiles[:, attribute] = stumpy.stump(X[:, attribute], T_B=self.X_reference_[:, attribute], m=self.window_size_, normalize=self.normalize, p=self.p, k=self.k, ignore_trivial=ignore_trivial)[:, self.k - 1]
+                    matrix_profiles[:, attribute] = stumpy.stump(
+                        X[:, attribute],
+                        T_B=self.X_reference_[:, attribute],
+                        m=self.window_size_,
+                        normalize=self.normalize,
+                        p=self.p,
+                        k=self.k,
+                        ignore_trivial=ignore_trivial,
+                    )[:, self.k - 1]
             else:
-                matrix_profiles, _ = stumpy.mstump(X.transpose(), m=self.window_size_, discords=True, normalize=self.normalize, p=self.p)
+                matrix_profiles, _ = stumpy.mstump(
+                    X.transpose(),
+                    m=self.window_size_,
+                    discords=True,
+                    normalize=self.normalize,
+                    p=self.p,
+                )
             matrix_profile = np.sum(matrix_profiles, axis=0)
 
         return reverse_sliding_window(matrix_profile, self.window_size_, 1, X.shape[0])

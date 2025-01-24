@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -35,6 +34,7 @@ class PiecewiseAggregateApproximation(Preprocessor):
        Databases. Knowledge and Information Systems 3, 263–286 (2001).
        doi: `10.1007/PL00011669 <https://doi.org/10.1007/PL00011669>`_.
     """
+
     n: int
 
     def __init__(self, n: int):
@@ -47,10 +47,12 @@ class PiecewiseAggregateApproximation(Preprocessor):
 
         self.n = n
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         if X.shape[0] <= self.n:
             return X, y
 

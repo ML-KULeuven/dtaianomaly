@@ -1,4 +1,3 @@
-
 import abc
 import numpy as np
 from typing import Tuple, Optional
@@ -26,14 +25,14 @@ def check_preprocessing_inputs(X: np.ndarray, y: Optional[np.ndarray] = None) ->
         If inputs have a different size in the first dimension (n_samples)
     """
     if not utils.is_valid_array_like(X):
-        raise ValueError('`X` is not a valid array')
+        raise ValueError("`X` is not a valid array")
     if y is not None and not utils.is_valid_array_like(y):
-        raise ValueError('`y` is not  valid array')
+        raise ValueError("`y` is not  valid array")
     if y is not None:
         X = np.asarray(X)
         y = np.asarray(y)
         if X.shape[0] != y.shape[0]:
-            raise ValueError('`X` and `y` have a different number of samples')
+            raise ValueError("`X` and `y` have a different number of samples")
 
 
 class Preprocessor(PrettyPrintable):
@@ -41,7 +40,7 @@ class Preprocessor(PrettyPrintable):
     Base preprocessor class.
     """
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
         """
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then fits this preprocessor.
@@ -62,10 +61,12 @@ class Preprocessor(PrettyPrintable):
         return self._fit(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
-        """ Effectively fit this preprocessor, without checking the inputs. """
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
+        """Effectively fit this preprocessor, without checking the inputs."""
 
-    def transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then transforms (i.e., preprocesses) the given time series.
@@ -89,10 +90,14 @@ class Preprocessor(PrettyPrintable):
         return self._transform(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        """ Effectively transform the given data, without checking the inputs. """
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        """Effectively transform the given data, without checking the inputs."""
 
-    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def fit_transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then chains the fit and transform methods on the given data, i.e.,
@@ -121,8 +126,11 @@ class Identity(Preprocessor):
     """
     Identity preprocessor. A dummy preprocessor which does not do any processing at all.
     """
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
+
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         return X, y

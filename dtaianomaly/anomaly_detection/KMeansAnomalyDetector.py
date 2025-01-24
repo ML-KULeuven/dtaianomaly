@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Union
 from sklearn.cluster import KMeans
@@ -6,7 +5,12 @@ from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
+from dtaianomaly.anomaly_detection.windowing_utils import (
+    sliding_window,
+    reverse_sliding_window,
+    check_is_valid_window_size,
+    compute_window_size,
+)
 
 
 class KMeansAnomalyDetector(BaseDetector):
@@ -54,6 +58,7 @@ class KMeansAnomalyDetector(BaseDetector):
        Artificial Intelligence, Robotics and Automation in Space, volume 18, page 21. Citeseer,
        2001.
     """
+
     window_size: Union[int, str]
     stride: int
     kwargs: dict
@@ -74,7 +79,9 @@ class KMeansAnomalyDetector(BaseDetector):
         self.kwargs = kwargs
         KMeans(**self.kwargs)  # Check if KMeans can be initialized
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'KMeansAnomalyDetector':
+    def fit(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
+    ) -> "KMeansAnomalyDetector":
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
 
@@ -88,13 +95,17 @@ class KMeansAnomalyDetector(BaseDetector):
     def decision_function(self, X: np.ndarray) -> np.ndarray:
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
-        if not hasattr(self, 'k_means_') or not hasattr(self, 'window_size_'):
-            raise NotFittedError('Call the fit function before making predictions!')
+        if not hasattr(self, "k_means_") or not hasattr(self, "window_size_"):
+            raise NotFittedError("Call the fit function before making predictions!")
 
         X = np.asarray(X)
         sliding_windows = sliding_window(X, self.window_size_, self.stride)
         clusters = self.k_means_.predict(sliding_windows)
-        distance_to_cluster_centers = np.linalg.norm(sliding_windows - self.k_means_.cluster_centers_[clusters], axis=1)
-        decision_scores = reverse_sliding_window(distance_to_cluster_centers, self.window_size_, self.stride, X.shape[0])
+        distance_to_cluster_centers = np.linalg.norm(
+            sliding_windows - self.k_means_.cluster_centers_[clusters], axis=1
+        )
+        decision_scores = reverse_sliding_window(
+            distance_to_cluster_centers, self.window_size_, self.stride, X.shape[0]
+        )
 
         return decision_scores

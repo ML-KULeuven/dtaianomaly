@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import List, Dict, Union, Optional
 
@@ -25,23 +24,30 @@ class EvaluationPipeline:
     metrics: list of Probametric objects
         The evaluation metrics to compute in this evaluation pipeline.
     """
+
     pipeline: Pipeline
     metrics: List[ProbaMetric]
 
-    def __init__(self,
-                 preprocessor: Union[Preprocessor, List[Preprocessor]],
-                 detector: BaseDetector,
-                 metrics: Union[ProbaMetric, List[ProbaMetric]]):
-        if not (isinstance(metrics, ProbaMetric) or is_valid_list(metrics, ProbaMetric)):
+    def __init__(
+        self,
+        preprocessor: Union[Preprocessor, List[Preprocessor]],
+        detector: BaseDetector,
+        metrics: Union[ProbaMetric, List[ProbaMetric]],
+    ):
+        if not (
+            isinstance(metrics, ProbaMetric) or is_valid_list(metrics, ProbaMetric)
+        ):
             raise TypeError("metrics should be a list of ProbaMetric objects")
         self.pipeline = Pipeline(preprocessor=preprocessor, detector=detector)
         self.metrics = metrics if isinstance(metrics, list) else [metrics]
 
-    def run(self,
-            X_test: np.ndarray,
-            y_test: np.array,
-            X_train: np.ndarray,
-            y_train: Optional[np.ndarray]) -> Dict[str, float]:
+    def run(
+        self,
+        X_test: np.ndarray,
+        y_test: np.array,
+        X_train: np.ndarray,
+        y_train: Optional[np.ndarray],
+    ) -> Dict[str, float]:
         """
         Run the pipeline and evaluate performance. The pipeline will
         be trained on the given train data (potentially without labels)

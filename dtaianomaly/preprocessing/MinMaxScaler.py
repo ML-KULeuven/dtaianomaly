@@ -1,4 +1,3 @@
-
 import numpy as np
 from typing import Optional, Tuple
 from sklearn.exceptions import NotFittedError
@@ -34,10 +33,11 @@ class MinMaxScaler(Preprocessor):
     NotFittedError
         If the `transform` method is called before fitting this MinMaxScaler.
     """
+
     min_: np.array
     max_: np.array
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'MinMaxScaler':
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "MinMaxScaler":
         if len(X.shape) == 1 or X.shape[1] == 1:
             # univariate case
             self.min_ = np.array([np.nanmin(X)])
@@ -48,17 +48,24 @@ class MinMaxScaler(Preprocessor):
             self.max_ = np.nanmax(X, axis=0)
 
         # Adjust to deal with constant attributes
-        constant_attributes = (self.min_ == self.max_)
+        constant_attributes = self.min_ == self.max_
         self.min_ = np.where(constant_attributes, 0, self.min_)
         self.max_ = np.where(constant_attributes, 1, self.max_)
 
         return self
 
-    def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if not (hasattr(self, 'min_') and hasattr(self, 'max_')):
-            raise NotFittedError(f'Call `fit` before using transform on {str(self)}')
-        if not ((len(X.shape) == 1 and self.min_.shape[0] == 1) or X.shape[1] == self.min_.shape[0]):
-            raise AttributeError(f'Trying to min max scale a time series with {X.shape[0]} attributes while it was fitted on {self.min_.shape[0]} attributes!')
+    def _transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        if not (hasattr(self, "min_") and hasattr(self, "max_")):
+            raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
+        if not (
+            (len(X.shape) == 1 and self.min_.shape[0] == 1)
+            or X.shape[1] == self.min_.shape[0]
+        ):
+            raise AttributeError(
+                f"Trying to min max scale a time series with {X.shape[0]} attributes while it was fitted on {self.min_.shape[0]} attributes!"
+            )
 
         X_ = (X - self.min_) / (self.max_ - self.min_)
         return X_, y

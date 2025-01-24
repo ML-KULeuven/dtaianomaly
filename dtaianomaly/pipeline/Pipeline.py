@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from typing import List, Optional, Union
 
@@ -15,7 +13,7 @@ class Pipeline(BaseDetector):
     The pipeline works with a single :py:class:`~dtaianomaly.preprocessing.Preprocessor` object or a
     list of :py:class:`~dtaianomaly.preprocessing.Preprocessor` objects. This list is converted into a
     :py:class:`~dtaianomaly.preprocessing.ChainedPreprocessor`. At the moment the `Pipeline` always
-    requires a `Preprocessor` object passed at construction. If 
+    requires a `Preprocessor` object passed at construction. If
     no preprocessing is desired, you need to explicitly pass an
     :py:class:`~dtaianomaly.preprocessing.Identity` preprocessor.
 
@@ -26,25 +24,33 @@ class Pipeline(BaseDetector):
     detector: BaseDetector
         The anomaly detector to include in this pipeline.
     """
+
     preprocessor: Preprocessor
     detector: BaseDetector
 
-    def __init__(self,
-                 preprocessor: Union[Preprocessor, List[Preprocessor]],
-                 detector: BaseDetector):
-        if not (isinstance(preprocessor, Preprocessor) or is_valid_list(preprocessor, Preprocessor)):
-            raise TypeError("preprocessor expects a Preprocessor object or list of Preprocessors")
+    def __init__(
+        self,
+        preprocessor: Union[Preprocessor, List[Preprocessor]],
+        detector: BaseDetector,
+    ):
+        if not (
+            isinstance(preprocessor, Preprocessor)
+            or is_valid_list(preprocessor, Preprocessor)
+        ):
+            raise TypeError(
+                "preprocessor expects a Preprocessor object or list of Preprocessors"
+            )
         if not isinstance(detector, BaseDetector):
             raise TypeError("detector expects a BaseDetector object")
         super().__init__(detector.supervision)
-        
+
         if isinstance(preprocessor, list):
             self.preprocessor = ChainedPreprocessor(preprocessor)
         else:
             self.preprocessor = preprocessor
         self.detector = detector
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Pipeline':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Pipeline":
         """
         Fit this pipeline to the given data.
 
@@ -68,7 +74,7 @@ class Pipeline(BaseDetector):
         """
         Compute raw anomaly scores.
 
-        Note that depending on the preprocessor this output might 
+        Note that depending on the preprocessor this output might
         not have the same shape as the input.
 
         Parameters
@@ -85,4 +91,4 @@ class Pipeline(BaseDetector):
         return self.detector.decision_function(X)
 
     def __str__(self) -> str:
-        return f'{self.preprocessor}->{self.detector}'
+        return f"{self.preprocessor}->{self.detector}"

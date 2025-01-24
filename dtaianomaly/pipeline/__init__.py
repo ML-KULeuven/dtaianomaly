@@ -14,7 +14,4 @@ better achieved by implementing the :py:class:`dtaianomaly.preprocessing.Preproc
 from .Pipeline import Pipeline
 from .EvaluationPipeline import EvaluationPipeline
 
-__all__ = [
-    'Pipeline',
-    'EvaluationPipeline'
-]
+__all__ = ["Pipeline", "EvaluationPipeline"]

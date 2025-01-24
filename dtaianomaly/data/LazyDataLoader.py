@@ -12,7 +12,7 @@ class LazyDataLoader(PrettyPrintable):
     A lazy dataloader for anomaly detection workflows
 
     This is a data loading utility to point towards a specific data set
-    (with `path`) and to load it at a later point in time during 
+    (with `path`) and to load it at a later point in time during
     execution of a workflow.
 
     This way we limit memory usage and allow for virtually unlimited scaling
@@ -36,13 +36,14 @@ class LazyDataLoader(PrettyPrintable):
     FileNotFoundError
         If the given path does not point to an existing file or directory.
     """
+
     path: str
     do_caching: bool
     cache_: DataSet
 
     def __init__(self, path: Union[str, Path], do_caching: bool = False):
         if not (Path(path).is_file() or Path(path).is_dir()):
-            raise FileNotFoundError(f'No such file or directory: {path}')
+            raise FileNotFoundError(f"No such file or directory: {path}")
         self.path = str(path)
         self.do_caching = do_caching
 
@@ -57,7 +58,7 @@ class LazyDataLoader(PrettyPrintable):
             The loaded dataset.
         """
         if self.do_caching:
-            if not hasattr(self, 'cache_'):
+            if not hasattr(self, "cache_"):
                 self.cache_ = self._load()
             return self.cache_
         else:
@@ -65,10 +66,12 @@ class LazyDataLoader(PrettyPrintable):
 
     @abc.abstractmethod
     def _load(self) -> DataSet:
-        """ Abstract method to effectively load the data. """
+        """Abstract method to effectively load the data."""
 
 
-def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader], **kwargs) -> List[LazyDataLoader]:
+def from_directory(
+    directory: Union[str, Path], dataloader: Type[LazyDataLoader], **kwargs
+) -> List[LazyDataLoader]:
     """
     Construct a `LazyDataLoader` instance for every file in the given `directory`
 
@@ -94,10 +97,12 @@ def from_directory(directory: Union[str, Path], dataloader: Type[LazyDataLoader]
         If `directory` cannot be found
     """
     if not Path(directory).is_dir():
-        raise FileNotFoundError(f'No such directory: {directory}')
+        raise FileNotFoundError(f"No such directory: {directory}")
 
     all_files = [
-        os.path.join(directory, f) for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f)) or os.path.isdir(os.path.join(directory, f))
+        os.path.join(directory, f)
+        for f in os.listdir(directory)
+        if os.path.isfile(os.path.join(directory, f))
+        or os.path.isdir(os.path.join(directory, f))
     ]
     return [dataloader(file, **kwargs) for file in all_files]

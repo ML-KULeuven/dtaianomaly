@@ -15,7 +15,11 @@ from dtaianomaly.preprocessing.Preprocessor import Preprocessor, Identity
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.pipeline.EvaluationPipeline import EvaluationPipeline
 
-from dtaianomaly.workflow.utils import build_pipelines, convert_to_proba_metrics, convert_to_list
+from dtaianomaly.workflow.utils import (
+    build_pipelines,
+    convert_to_proba_metrics,
+    convert_to_list,
+)
 from dtaianomaly.workflow.error_logging import log_error
 
 
@@ -77,6 +81,7 @@ class Workflow:
         detectors do not use labels and can deal with anomalies in the
         training data.
     """
+
     dataloaders: List[LazyDataLoader]
     pipelines: List[EvaluationPipeline]
     provided_preprocessors: bool
@@ -85,16 +90,18 @@ class Workflow:
     error_log_path: str
     fit_unsupervised_on_test_data: bool
 
-    def __init__(self,
-                 dataloaders: Union[LazyDataLoader, List[LazyDataLoader]],
-                 metrics: Union[Metric, List[Metric]],
-                 detectors: Union[BaseDetector, List[BaseDetector]],
-                 preprocessors: Union[Preprocessor, List[Preprocessor]] = None,
-                 thresholds: Union[Thresholding, List[Thresholding]] = None,
-                 n_jobs: int = 1,
-                 trace_memory: bool = False,
-                 error_log_path: str = './error_logs',
-                 fit_unsupervised_on_test_data: bool = False):
+    def __init__(
+        self,
+        dataloaders: Union[LazyDataLoader, List[LazyDataLoader]],
+        metrics: Union[Metric, List[Metric]],
+        detectors: Union[BaseDetector, List[BaseDetector]],
+        preprocessors: Union[Preprocessor, List[Preprocessor]] = None,
+        thresholds: Union[Thresholding, List[Thresholding]] = None,
+        n_jobs: int = 1,
+        trace_memory: bool = False,
+        error_log_path: str = "./error_logs",
+        fit_unsupervised_on_test_data: bool = False,
+    ):
 
         # Make sure the inputs are lists.
         dataloaders = convert_to_list(dataloaders)
@@ -107,28 +114,29 @@ class Workflow:
         detectors = convert_to_list(detectors)
 
         # Add thresholding to the binary metrics
-        if len(thresholds) == 0 and any(isinstance(metric, BinaryMetric) for metric in metrics):
-            raise ValueError('There should be at least one thresholding option if a binary metric is passed!')
-        proba_metrics = convert_to_proba_metrics(
-            metrics=metrics,
-            thresholds=thresholds
-        )
+        if len(thresholds) == 0 and any(
+            isinstance(metric, BinaryMetric) for metric in metrics
+        ):
+            raise ValueError(
+                "There should be at least one thresholding option if a binary metric is passed!"
+            )
+        proba_metrics = convert_to_proba_metrics(metrics=metrics, thresholds=thresholds)
 
         # Perform checks on input
         if len(dataloaders) == 0:
-            raise ValueError('At least one data loader should be given to the workflow!')
+            raise ValueError(
+                "At least one data loader should be given to the workflow!"
+            )
         if len(metrics) == 0:
-            raise ValueError('At least one metrics should be given to the workflow!')
+            raise ValueError("At least one metrics should be given to the workflow!")
         if len(detectors) == 0:
-            raise ValueError('At least one detectors should be given to the workflow!')
+            raise ValueError("At least one detectors should be given to the workflow!")
         if n_jobs < 1:
-            raise ValueError('There should be at least one job within a workflow!')
+            raise ValueError("There should be at least one job within a workflow!")
 
         # Set the properties of this workflow
         self.pipelines = build_pipelines(
-            preprocessors=preprocessors,
-            detectors=detectors,
-            metrics=proba_metrics
+            preprocessors=preprocessors, detectors=detectors, metrics=proba_metrics
         )
         self.dataloaders = dataloaders
         self.n_jobs = n_jobs
@@ -160,11 +168,21 @@ class Workflow:
         # Execute the jobs
         if self.n_jobs == 1:
             result = [
-                _single_job(*job, trace_memory=self.trace_memory, error_log_path=self.error_log_path, fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data)
+                _single_job(
+                    *job,
+                    trace_memory=self.trace_memory,
+                    error_log_path=self.error_log_path,
+                    fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+                )
                 for job in unit_jobs
             ]
         else:
-            single_run_function = partial(_single_job, trace_memory=self.trace_memory, error_log_path=self.error_log_path, fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data)
+            single_run_function = partial(
+                _single_job,
+                trace_memory=self.trace_memory,
+                error_log_path=self.error_log_path,
+                fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+            )
             with multiprocessing.Pool(processes=self.n_jobs) as pool:
                 result = pool.starmap(single_run_function, unit_jobs)
 
@@ -172,52 +190,83 @@ class Workflow:
         results_df = pd.DataFrame(result)
 
         # Reorder the columns
-        columns = ['Dataset', 'Detector', 'Preprocessor', 'Runtime Fit [s]', 'Runtime Predict [s]', 'Runtime [s]']
+        columns = [
+            "Dataset",
+            "Detector",
+            "Preprocessor",
+            "Runtime Fit [s]",
+            "Runtime Predict [s]",
+            "Runtime [s]",
+        ]
         if self.trace_memory:
-            columns.extend(['Peak Memory Fit [MB]', 'Peak Memory Predict [MB]', 'Peak Memory [MB]'])
-        results_df = results_df[columns + [x for x in results_df.columns if x not in columns]]
+            columns.extend(
+                ["Peak Memory Fit [MB]", "Peak Memory Predict [MB]", "Peak Memory [MB]"]
+            )
+        results_df = results_df[
+            columns + [x for x in results_df.columns if x not in columns]
+        ]
 
         # Drop the processors column, if none were provided.
         if not self.provided_preprocessors:
-            results_df.drop(columns='Preprocessor', inplace=True)
+            results_df.drop(columns="Preprocessor", inplace=True)
 
         # Return the results
         return results_df
 
 
-def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_memory: bool, error_log_path: str, fit_unsupervised_on_test_data: bool) -> Dict[str, Union[str, float]]:
+def _single_job(
+    dataloader: LazyDataLoader,
+    pipeline: EvaluationPipeline,
+    trace_memory: bool,
+    error_log_path: str,
+    fit_unsupervised_on_test_data: bool,
+) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
-    results = {'Dataset': str(dataloader)}
-    for key in pipeline.metrics + ['Detector', 'Preprocessor', 'Runtime Fit [s]', 'Runtime Predict [s]', 'Runtime [s]']:
-        results[str(key)] = 'Error'
+    results = {"Dataset": str(dataloader)}
+    for key in pipeline.metrics + [
+        "Detector",
+        "Preprocessor",
+        "Runtime Fit [s]",
+        "Runtime Predict [s]",
+        "Runtime [s]",
+    ]:
+        results[str(key)] = "Error"
     if trace_memory:
-        for key in ['Peak Memory Fit [MB]', 'Peak Memory Predict [MB]', 'Peak Memory [MB]']:
-            results[key] = 'Error'
+        for key in [
+            "Peak Memory Fit [MB]",
+            "Peak Memory Predict [MB]",
+            "Peak Memory [MB]",
+        ]:
+            results[key] = "Error"
 
     # Try to load the data set, if this fails, return the results
     try:
         data_set = dataloader.load()
     except Exception as exception:
-        results['Error file'] = log_error(error_log_path, exception, dataloader)
+        results["Error file"] = log_error(error_log_path, exception, dataloader)
         return results
 
     # We can already save the used preprocessor and detector
-    results['Preprocessor'] = str(pipeline.pipeline.preprocessor)
-    results['Detector'] = str(pipeline.pipeline.detector)
+    results["Preprocessor"] = str(pipeline.pipeline.preprocessor)
+    results["Detector"] = str(pipeline.pipeline.detector)
 
     # Check if the dataset and the anomaly detector are compatible
     if not data_set.is_compatible(pipeline.pipeline):
-        error_message = f'Not compatible: detector with supervision {pipeline.pipeline.supervision} ' \
-                        f'for data set with compatible supervision ['
-        error_message += ', '.join([str(s) for s in data_set.compatible_supervision()])
-        error_message += ']'
+        error_message = (
+            f"Not compatible: detector with supervision {pipeline.pipeline.supervision} "
+            f"for data set with compatible supervision ["
+        )
+        error_message += ", ".join([str(s) for s in data_set.compatible_supervision()])
+        error_message += "]"
         for key, value in results.items():
-            if value == 'Error':
+            if value == "Error":
                 results[key] = error_message
         return results
 
     # Format X_train, y_train, X_test and y_test
-    X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, pipeline.pipeline, fit_unsupervised_on_test_data)
+    X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
+        data_set, pipeline.pipeline, fit_unsupervised_on_test_data
+    )
 
     # Run the anomaly detector, and catch any exceptions
     try:
@@ -225,28 +274,34 @@ def _single_job(dataloader: LazyDataLoader, pipeline: EvaluationPipeline, trace_
         _start_tracing_memory(trace_memory)
         start = _start_tracing_runtime()
         pipeline.fit(X_train, y_train)
-        results['Runtime Fit [s]'] = _end_tracing_runtime(start)
-        _end_tracing_memory(trace_memory, results, 'Peak Memory Fit [MB]')
+        results["Runtime Fit [s]"] = _end_tracing_runtime(start)
+        _end_tracing_memory(trace_memory, results, "Peak Memory Fit [MB]")
 
         # Predicting
         _start_tracing_memory(trace_memory)
         start = _start_tracing_runtime()
         y_pred = pipeline.predict(X_test)
-        results['Runtime Predict [s]'] = _end_tracing_runtime(start)
-        _end_tracing_memory(trace_memory, results, 'Peak Memory Predict [MB]')
+        results["Runtime Predict [s]"] = _end_tracing_runtime(start)
+        _end_tracing_memory(trace_memory, results, "Peak Memory Predict [MB]")
 
         # Scoring
         y_test_ = pipeline.format_y_test(X_test, y_test)
         results.update(pipeline.evaluate(y_test_, y_pred))
 
         # Aggregate the used resources
-        results['Runtime [s]'] = results['Runtime Fit [s]'] + results['Runtime Predict [s]']
+        results["Runtime [s]"] = (
+            results["Runtime Fit [s]"] + results["Runtime Predict [s]"]
+        )
         if trace_memory:
-            results['Peak Memory [MB]'] = max(results['Peak Memory Fit [MB]'], results['Peak Memory Predict [MB]'])
+            results["Peak Memory [MB]"] = max(
+                results["Peak Memory Fit [MB]"], results["Peak Memory Predict [MB]"]
+            )
 
     except Exception as exception:
         # Log the errors
-        results['Error file'] = log_error(error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train)
+        results["Error file"] = log_error(
+            error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train
+        )
 
     # Return the results
     return results
@@ -268,11 +323,13 @@ def _start_tracing_memory(trace_memory: bool) -> None:
 def _end_tracing_memory(trace_memory: bool, results, key) -> None:
     if trace_memory:
         _, peak = tracemalloc.get_traced_memory()
-        results[key] = peak / 10 ** 6
+        results[key] = peak / 10**6
         tracemalloc.stop()
 
 
-def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):
+def _get_train_test_data(
+    data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool
+) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):
     """
     Separates the train and test data depending on the type of the anomaly
     detector and whether the test data should be used for fitting in an
@@ -296,7 +353,10 @@ def _get_train_test_data(data_set: DataSet, detector: BaseDetector, fit_unsuperv
         fit_on_X_train = False
 
     # If unsupervised detectors should fit on the test data.
-    if fit_unsupervised_on_test_data and detector.supervision == Supervision.UNSUPERVISED:
+    if (
+        fit_unsupervised_on_test_data
+        and detector.supervision == Supervision.UNSUPERVISED
+    ):
         X_train = X_test
         fit_on_X_train = False
 
