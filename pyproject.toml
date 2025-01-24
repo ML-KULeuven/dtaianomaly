@@ -62,7 +62,7 @@ all = [  # All the optional dependencies
     "jupyterlab",
     "precommit",
     "black",
-    "isort==5.13.2"
+    "isort"
 ]
 tests = [  # For testing
     "pytest",
@@ -81,5 +81,5 @@ notebooks = [  # For using notebooks
 lint = [
     "precommit",
     "black",
-    "isort==5.13.2"
+    "isort"
 ]
