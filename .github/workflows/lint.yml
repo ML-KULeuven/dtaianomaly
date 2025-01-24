@@ -39,6 +39,4 @@ jobs:
       # Apply isort
       - name: isort
         uses: isort/isort-action@v1
-        with:
-          sort-paths: "dtaianomaly"
-          configuration: "--check-only --diff"]
+
