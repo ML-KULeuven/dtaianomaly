@@ -27,7 +27,6 @@ jobs:
         with:
           options: "--check --verbose"
           src: "./dtaianomaly"
-          use_pyproject: true
 
       # Install dtaianomaly (not required for black)
       - name: Install dtaianomaly
