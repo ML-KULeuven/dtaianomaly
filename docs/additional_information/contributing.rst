@@ -92,6 +92,13 @@ run the following command:
 You should include the ``--editable`` flag to ensure that your
 changes to the code are actually reflected in the installed version.
 
+Next, make sure to install pre-commit to the project,
+using the following command:
+
+.. code-block:: bash
+
+     pre-commit install
+
 To check if the environment is correct, you verify if all tests
 succeed by running the following command (which also checks the
 coverage of the unit tests):

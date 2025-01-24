@@ -39,4 +39,5 @@ jobs:
       - name: isort
         uses: isort/isort-action@v1
         with:
+          isortVersion: "5.13.2"
           sortPaths: "dtaianomaly"

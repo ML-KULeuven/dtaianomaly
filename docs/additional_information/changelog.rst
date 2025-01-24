@@ -17,7 +17,8 @@ Added
   everything via different requirements files.
 - Added support for Python 3.13.
 - Implemented the ``predict_confidence()`` method in the ``BaseDetector``, which 
-  computes a confidence score for each prediction of the anomaly detector. 
+  computes a confidence score for each prediction of the anomaly detector.
+- Integrated ``black`` and ``isort`` to format the code.
 
 Changed
 ^^^^^^^
@@ -34,7 +35,6 @@ Changed
   ``sliding_window()`` function. Additionally, it is possible to set a default window size
   in ``compute_window_size()``, which will be returned (if provided) instead of raising
   an error to allow the system to continue.
-
 
 Fixed
 ^^^^^
