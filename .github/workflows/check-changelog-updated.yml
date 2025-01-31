@@ -1,8 +1,6 @@
 name: Changelog updated
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
