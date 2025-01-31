@@ -72,6 +72,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+os.makedirs("_static", exist_ok=True)  # Ensure the _static directory exists
 html_static_path = ['_static']
 
 # -- Options for HTMLHelp output ------------------------------------------

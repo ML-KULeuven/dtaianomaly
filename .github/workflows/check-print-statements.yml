@@ -16,7 +16,7 @@ jobs:
 
     - name: Check for print statements in source code
       run: |
-        print_files=$(grep -rnw 'print(' dtaianomaly --include \*.py)
+        print_files=$(grep -rnw --include="*.py" dtaianomaly -e 'print(' || true)
         if [ -n "$print_files" ]; then
           echo "::error::Print statements found in the following files and lines:"
           echo "$print_files"
