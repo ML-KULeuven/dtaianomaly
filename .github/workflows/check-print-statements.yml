@@ -1,0 +1,26 @@
+name: Print statements
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-print-statements:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for print statements in source code
+      run: |
+        print_files=$(grep -rnw 'print(' dtaianomaly --include \*.py)
+        if [ -n "$print_files" ]; then
+          echo "::error::Print statements found in the following files and lines:"
+          echo "$print_files"
+          exit 1
+        else
+          echo "No print statements found."
+        fi

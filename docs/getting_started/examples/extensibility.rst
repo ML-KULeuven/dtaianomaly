@@ -1,6 +1,6 @@
 :orphan:
 
-Custom models
+Extensibility
 =============
 
 Even though ``dtaianomaly`` already offers a lot of functionality, there is always room

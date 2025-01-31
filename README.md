@@ -5,11 +5,16 @@
 <h1 align="center">dtaianomaly</h1>
 <h2 align="center">Time series anomaly detection</h2>
 
-[![Documentation Status](https://readthedocs.org/projects/dtaianomaly/badge/?version=stable)](https://dtaianomaly.readthedocs.io/en/stable/?badge=stable)
+[![Unit tests](https://github.com/ML-KULeuven/dtaianomaly/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/ML-KULeuven/dtaianomaly/actions/workflows/unit-tests.yml)
+[![Doctest](https://github.com/ML-KULeuven/dtaianomaly/actions/workflows/doctest.yml/badge.svg)](https://github.com/ML-KULeuven/dtaianomaly/actions/workflows/doctest.yml)
+[![docs-stable](https://img.shields.io/readthedocs/aeon-toolkit/latest?logo=readthedocs&label=docs%20%28stable%29)](https://dtaianomaly.readthedocs.io/en/stable)
+[![docs-latest](https://img.shields.io/readthedocs/aeon-toolkit/latest?logo=readthedocs&label=docs%20%28latest%29)](https://dtaianomaly.readthedocs.io/en/latest)
 [![PyPi Version](https://img.shields.io/pypi/v/dtaianomaly.svg)](https://pypi.org/project/dtaianomaly/)
 [![Downloads](https://static.pepy.tech/badge/dtaianomaly)](https://pepy.tech/project/dtaianomaly)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/dtaianomaly)](https://pypi.python.org/pypi/dtaianomaly/)
 [![PyPI license](https://img.shields.io/pypi/l/dtaianomaly.svg)](https://pypi.python.org/pypi/dtaianomaly/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 A simple-to-use Python package for the development and analysis of time series anomaly 
 detection techniques. Here we describe the main usage of `dtaianomaly`, but be sure to

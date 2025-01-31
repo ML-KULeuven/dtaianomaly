@@ -54,7 +54,7 @@ to implement an anomaly detector), after which the component can be used is if i
 is natively a part of ``dtaianomaly``.
 
 .. seealso::
-    Check out the :doc:`custom model example<examples/custom_models>` for more information!
+    Check out the :doc:`extensibility example<examples/extensibility>` for more information!
 
 
 .. rubric:: Quantitative evaluation with a workflow
