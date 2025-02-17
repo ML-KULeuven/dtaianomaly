@@ -79,3 +79,6 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'dtaianomalydoc'
+
+# Prevent issue with pyximport when generating docs through readthedocs
+autodoc_mock_imports = ["pyximport"]
