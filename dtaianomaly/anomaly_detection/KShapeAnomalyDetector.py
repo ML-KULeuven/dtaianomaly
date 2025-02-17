@@ -67,8 +67,8 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import KShapeAnomalyDetector
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> matrix_profile = KShapeAnomalyDetector(window_size=50).fit(x)
-    >>> matrix_profile.decision_function(x)
+    >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
+    >>> kshape.decision_function(x)
     array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 ,
            1.34704128])
 
@@ -151,9 +151,11 @@ class KShapeAnomalyDetector(BaseDetector):
     ) -> "BaseDetector":
         if not utils.is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
+        if not utils.is_univariate(X):
+            raise ValueError("Input must be univariate!")
 
         # Compute the window size
-        X = np.asarray(X)
+        X = np.asarray(X).squeeze()
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
 
         # Compute sliding windows
@@ -185,6 +187,8 @@ class KShapeAnomalyDetector(BaseDetector):
     def decision_function(self, X: np.ndarray) -> np.ndarray:
         if not utils.is_valid_array_like(X):
             raise ValueError(f"Input must be numerical array-like")
+        if not utils.is_univariate(X):
+            raise ValueError("Input must be univariate!")
         if (
             not hasattr(self, "kshape_")
             or not hasattr(self, "window_size_")
@@ -194,7 +198,7 @@ class KShapeAnomalyDetector(BaseDetector):
             raise NotFittedError("Call the fit function before making predictions!")
 
         # Make sure X is a numpy array
-        X = np.asarray(X)
+        X = np.asarray(X).squeeze()
 
         # Compute the minimum distance of each subsequence to each cluster using matrix profile
         min_distance = np.array(

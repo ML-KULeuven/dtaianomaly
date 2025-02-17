@@ -201,7 +201,7 @@ def compute_window_size(
     # Check if the time series is univariate (error should not be raise if given window size is an integer)
     elif not utils.is_univariate(X):
         raise ValueError(
-            "It only makes sens to compute the window size in univariate time series."
+            "It only makes sense to compute the window size in univariate time series."
         )
 
     # Use the fft to compute a window size

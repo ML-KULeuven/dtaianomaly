@@ -8,12 +8,14 @@ Latest
 
 Added
 ^^^^^
+- Implemented ``KShapeAnomalyDetector`` anomaly detector.
 
 Changed
 ^^^^^^^
 
 Fixed
 ^^^^^
+- Fixed typo in error-message for computing window size for multivariate time series.
 
 [0.3.0] - 2025-01-31
 --------------------

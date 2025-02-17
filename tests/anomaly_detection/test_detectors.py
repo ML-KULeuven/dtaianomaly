@@ -14,7 +14,8 @@ DETECTORS_WITHOUT_FITTING = [
 ]
 
 DETECTORS_NOT_MULTIVARIATE = [
-    anomaly_detection.MedianMethod
+    anomaly_detection.MedianMethod,
+    anomaly_detection.KShapeAnomalyDetector
 ]
 
 
@@ -29,6 +30,7 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.KernelPrincipalComponentAnalysis(15),
     anomaly_detection.KMeansAnomalyDetector(15),
     anomaly_detection.KNearestNeighbors(15),
+    anomaly_detection.KShapeAnomalyDetector(15),
     anomaly_detection.LocalOutlierFactor(15),
     anomaly_detection.MatrixProfileDetector(15, novelty=False),
     anomaly_detection.MatrixProfileDetector(15, novelty=True),
@@ -88,6 +90,9 @@ class TestAnomalyDetectors:
             if type(detector) not in DETECTORS_WITHOUT_FITTING:
                 with pytest.raises(ValueError):
                     detector.fit(multivariate_time_series)
+                detector.fit(multivariate_time_series[:, 0])  # Fit on one dimension only
+                with pytest.raises(ValueError):
+                    detector.decision_function(multivariate_time_series)
             else:
                 with pytest.raises(ValueError):
                     detector.decision_function(multivariate_time_series)
@@ -126,6 +131,7 @@ class TestAnomalyDetectors:
     (anomaly_detection.IsolationForest, {}),
     (anomaly_detection.KernelPrincipalComponentAnalysis, {}),
     (anomaly_detection.KMeansAnomalyDetector, {}),
+    (anomaly_detection.KShapeAnomalyDetector, {}),
     (anomaly_detection.KNearestNeighbors, {}),
     (anomaly_detection.LocalOutlierFactor, {}),
     (anomaly_detection.MatrixProfileDetector, {}),
