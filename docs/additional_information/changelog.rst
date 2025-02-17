@@ -16,6 +16,10 @@ Changed
 Fixed
 ^^^^^
 - Fixed typo in error-message for computing window size for multivariate time series.
+- Fixed issue when generating the documentation through read the docs. The module
+  'pyximport' within tslearn was not found, while this is not necessary for our
+  codebase. Therefore, we have addid this dependency to the mock imports, which fixed
+  the issue.
 
 [0.3.0] - 2025-01-31
 --------------------
