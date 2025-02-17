@@ -17,6 +17,7 @@ from .IsolationForest import IsolationForest
 from .KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
 from .KMeansAnomalyDetector import KMeansAnomalyDetector
 from .KNearestNeighbors import KNearestNeighbors
+from .KShapeAnomalyDetector import KShapeAnomalyDetector
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
@@ -53,6 +54,7 @@ __all__ = [
     "KernelPrincipalComponentAnalysis",
     "KMeansAnomalyDetector",
     "KNearestNeighbors",
+    "KShapeAnomalyDetector",
     "LocalOutlierFactor",
     "MatrixProfileDetector",
     "MedianMethod",
