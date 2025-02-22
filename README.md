@@ -75,7 +75,7 @@ If you find ``dtaianomaly`` useful for your work, we would appreciate the follow
 
 ```bibtex
 @article{carpentier2025dtaianomaly,
-      title={dtaianomaly: A Python library for time series anomaly detection}, 
+      title={{dtaianomaly: A Python library for time series anomaly detection}}, 
       author={Louis Carpentier and Nick Seeuws and Wannes Meert and Mathias Verbeke},
       year={2025},
       eprint={2502.14381},
@@ -84,7 +84,7 @@ If you find ``dtaianomaly`` useful for your work, we would appreciate the follow
       url={https://arxiv.org/abs/2502.14381}, 
 }
 ```
-> Carpentier, L., Seeuws, N., Meert, W., Verbeke, M.: dtaianomaly: A python 
+> Carpentier, L., Seeuws, N., Meert, W., Verbeke, M.: dtaianomaly: A Python 
 > library for time series anomaly detection (2025), https://arxiv.org/abs/2502.14381
 
 ## Contribute
