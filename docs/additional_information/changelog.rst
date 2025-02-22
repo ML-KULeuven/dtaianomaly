@@ -9,6 +9,7 @@ Latest
 Added
 ^^^^^
 - Implemented ``KShapeAnomalyDetector`` anomaly detector.
+- Added arXiv citation to the documentation.
 
 Changed
 ^^^^^^^
