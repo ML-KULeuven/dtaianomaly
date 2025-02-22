@@ -68,6 +68,25 @@ anomaly_probabilities = detector.predict_proba(X_)
 ```
 ![Demonstration-time-series-detected-anomalies.svg](https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Demonstration-time-series-detected-anomalies.svg?raw=true)
 
+## Acknowledgments
+
+If you find ``dtaianomaly`` useful for your work, we would appreciate the following 
+[citation](https://arxiv.org/abs/2502.14381):
+
+```bibtex
+@article{carpentier2025dtaianomalypythonlibrarytime,
+      title={dtaianomaly: A Python library for time series anomaly detection}, 
+      author={Louis Carpentier and Nick Seeuws and Wannes Meert and Mathias Verbeke},
+      year={2025},
+      eprint={2502.14381},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2502.14381}, 
+}
+```
+> Carpentier, L., Seeuws, N., Meert, W., Verbeke, M.: dtaianomaly: A python 
+> library for time series anomaly detection (2025), https://arxiv.org/abs/2502.14381
+
 ## Contribute
 
 The goal of ``dtaianomaly`` is to be community-driven. All types of contributions
