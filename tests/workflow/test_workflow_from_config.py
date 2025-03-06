@@ -1,6 +1,7 @@
 
 import pytest
 import json
+import toml
 import pathlib
 
 from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data
@@ -10,6 +11,7 @@ from dtaianomaly.workflow.workflow_from_config import interpret_detectors, detec
 from dtaianomaly.workflow.workflow_from_config import interpret_preprocessing, preprocessing_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_metrics, metric_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_thresholds, threshold_entry
+from dtaianomaly.workflow.workflow_from_config import interpret_additional_information
 
 
 DATA_PATH = f'{pathlib.Path(__file__).parent.parent.parent}/data'
@@ -67,10 +69,16 @@ class TestWorkflowFromConfig:
         with pytest.raises(ValueError):
             workflow_from_config(str(tmp_path / 'config.json'), 1)
 
-    def test_success(self, tmp_path, valid_config):
+    def test_success_json(self, tmp_path, valid_config):
         with open(tmp_path / 'config.json', 'a') as file:
             json.dump(valid_config, file)
         workflow = workflow_from_config(str(tmp_path / 'config.json'))
+        assert isinstance(workflow, Workflow)
+
+    def test_success_toml(self, tmp_path, valid_config):
+        with open(tmp_path / 'config.toml', 'w') as file:
+            toml.dump(valid_config, file)
+        workflow = workflow_from_config(str(tmp_path / 'config.toml'))
         assert isinstance(workflow, Workflow)
 
 
@@ -459,3 +467,14 @@ class TestEntriesWithObligatedParameters:
     def test(self, entry_function, object_type):
         with pytest.raises(TypeError):
             entry_function({'type': object_type.__name__})
+
+
+class TestAdditionalInformation:
+
+    def test(self):
+        additional_inforamtion = interpret_additional_information({'n_jobs': 3, 'error_log_path': 'test', 'something_else': 5})
+        assert len(additional_inforamtion) == 2
+        assert 'n_jobs' in additional_inforamtion
+        assert additional_inforamtion['n_jobs'] == 3
+        assert 'error_log_path' in additional_inforamtion
+        assert additional_inforamtion['error_log_path'] == 'test'
