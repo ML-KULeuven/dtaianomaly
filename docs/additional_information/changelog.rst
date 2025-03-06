@@ -10,9 +10,15 @@ Added
 ^^^^^
 - Implemented ``KShapeAnomalyDetector`` anomaly detector.
 - Added arXiv citation to the documentation.
+- Added support for TOML configuration files in the ``Workflow``.
+- Added option to fit semi-supervised methods on test data in ``Workflow``.
 
 Changed
 ^^^^^^^
+- ``BestThresholdMetric`` now accepts an optional list of thresholds to use.
+- ``BestThresholdMetric`` stores all used thresholds and their respective scores.
+- ``BaseDetector`` by default checks the input variables, so this should no longer
+  be done in the implemented detectors.
 
 Fixed
 ^^^^^
@@ -21,6 +27,8 @@ Fixed
   'pyximport' within tslearn was not found, while this is not necessary for our
   codebase. Therefore, we have addid this dependency to the mock imports, which fixed
   the issue.
+- Ensured that ``interpret_additional_information()`` dynamically checks the possible
+  parameters of a ``Workflow``.
 
 [0.3.0] - 2025-01-31
 --------------------
