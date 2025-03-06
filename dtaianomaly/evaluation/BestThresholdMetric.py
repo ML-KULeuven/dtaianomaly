@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 
 from dtaianomaly.evaluation.metrics import BinaryMetric, ProbaMetric
@@ -27,11 +29,17 @@ class BestThresholdMetric(ProbaMetric):
     ----------
     threshold_: float
         The threshold resulting in the best performance.
+    thresholds_: array-like of floats
+        The thresholds used for evaluating the performance.
+    scores_: array-like of floats
+        The evaluation scores corresponding to each threshold in ``thresholds_``.
     """
 
     metric: BinaryMetric
     max_nb_thresholds: int
     threshold_: float
+    thresholds_: np.array
+    scores_: np.array
 
     def __init__(self, metric: BinaryMetric, max_nb_thresholds: int = -1) -> None:
         if not isinstance(metric, BinaryMetric):
@@ -47,16 +55,43 @@ class BestThresholdMetric(ProbaMetric):
         self.metric = metric
         self.max_nb_thresholds = max_nb_thresholds
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(
+        self,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        thresholds: Optional[np.array] = None,
+    ) -> float:
+        """
+        Effectively compute the score corresponding to the best threshold.
 
+        Parameters
+        ----------
+        y_true: array-like of shape (n_samples)
+            Ground-truth labels.
+        y_pred: array-like of shape (n_samples)
+            Predicted anomaly scores.
+        thresholds: array-like of float, default=None
+            The thresholds that should be used for computing the metric. If
+            ``thresholds=None`` (default), then all possible thresholds will
+            be used.
+
+        Returns
+        -------
+        score: float
+            The best evaluation score across all thresholds.
+        """
         # Sort all the predicted scores
         sorted_predicted_scores = np.sort(np.unique(y_pred))
 
-        # Get all possible thresholds
-        thresholds = (sorted_predicted_scores[:-1] + sorted_predicted_scores[1:]) / 2.0
+        # Compute the thresholds if none are given
+        if thresholds is None:
+            # Get all possible thresholds
+            thresholds = (
+                sorted_predicted_scores[:-1] + sorted_predicted_scores[1:]
+            ) / 2.0
 
-        # Add the minimum and maximum threshold
-        thresholds = np.append(np.insert(thresholds, 0, 0), 1)
+            # Add the minimum and maximum threshold
+            thresholds = np.append(np.insert(thresholds, 0, 0), 1)
 
         # Select a subset of the thresholds, if requested and useful
         if 0 < self.max_nb_thresholds < thresholds.shape[0]:
@@ -66,15 +101,18 @@ class BestThresholdMetric(ProbaMetric):
             thresholds = thresholds[selected_thresholds]
 
         # Compute the score for each threshold
-        scores = [
-            self.metric._compute(y_true, y_pred >= threshold)
-            for threshold in thresholds
-        ]
+        self.thresholds_ = thresholds
+        self.scores_ = np.array(
+            [
+                self.metric._compute(y_true, y_pred >= threshold)
+                for threshold in self.thresholds_
+            ]
+        )
 
         # Get the best score and the corresponding threshold
-        i = np.argmax(scores)
-        best_score = scores[i]
-        self.threshold_ = thresholds[i]
+        i = np.argmax(self.scores_)
+        best_score = self.scores_[i]
+        self.threshold_ = self.thresholds_[i]
 
         # Return the best score
         return best_score

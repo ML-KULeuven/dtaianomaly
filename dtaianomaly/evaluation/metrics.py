@@ -9,7 +9,7 @@ from dtaianomaly.thresholding import Thresholding
 
 class Metric(PrettyPrintable):
 
-    def compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         """
         Computes the performance score.
 
@@ -45,10 +45,10 @@ class Metric(PrettyPrintable):
             raise ValueError("Inputs should have identical shape")
         if not np.all(np.isin(y_true, [0, 1])):
             raise ValueError("The predicted anomaly scores must be binary!")
-        return self._compute(y_true, y_pred)
+        return self._compute(y_true, y_pred, **kwargs)
 
     @abc.abstractmethod
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         """Effectively compute the metric."""
 
 
