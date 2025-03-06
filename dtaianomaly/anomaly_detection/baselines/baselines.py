@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
 
@@ -16,48 +15,11 @@ class AlwaysNormal(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "AlwaysNormal":
-        """
-        Simply return this detector, because no fitting is required.
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        """Should not do anything."""
 
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-
-        Returns
-        -------
-        self: AlwaysNormal
-            Returns the instance itself
-        """
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predicts 'always normal' anomaly scores, i.e., always returns a '0.0'.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-
-        Returns
-        -------
-        normal_scores: array-like of shape (n_samples)
-            All normal anomaly scores.
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-        return np.zeros(shape=np.asarray(X).shape[0])
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.zeros(shape=X.shape[0])
 
 
 class AlwaysAnomalous(BaseDetector):
@@ -70,48 +32,11 @@ class AlwaysAnomalous(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "AlwaysAnomalous":
-        """
-        Simply return this detector, because no fitting is required.
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        """Should not do anything."""
 
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-
-        Returns
-        -------
-        self: AlwaysAnomalous
-            Returns the instance itself
-        """
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predicts 'always anomalous' anomaly scores, i.e., always returns a '1.0'.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-
-        Returns
-        -------
-        anomalous_scores: array-like of shape (n_samples)
-            All anomalous anomaly scores.
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-        return np.ones(shape=np.asarray(X).shape[0])
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.ones(shape=X.shape[0])
 
 
 class RandomDetector(BaseDetector):
@@ -132,47 +57,8 @@ class RandomDetector(BaseDetector):
         super().__init__(Supervision.UNSUPERVISED)
         self.seed = seed
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "RandomDetector":
-        """
-        Simply return this detector, because no fitting is required.
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        """Should not do anything."""
 
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-
-        Returns
-        -------
-        self: RandomDetector
-            Returns the instance itself
-        """
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predicts random anomaly scores. Uses numpy random-number generator, without
-        adjusting the internal seed of numpy.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-
-        Returns
-        -------
-        random_scores: array-like of shape (n_samples)
-            Random anomaly scores.
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-        rng = np.random.default_rng(seed=self.seed)
-        return rng.random(size=np.asarray(X).shape[0])
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.random.default_rng(seed=self.seed).random(size=X.shape[0])

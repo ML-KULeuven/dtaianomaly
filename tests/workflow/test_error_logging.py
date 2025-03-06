@@ -56,10 +56,10 @@ class ErrorAnomalyDetector(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs):
+        pass
 
-    def decision_function(self, X):
+    def _decision_function(self, X):
         raise Exception('An error occurred when detecting anomalies!')
 
 

@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import stumpy
 from scipy.spatial.distance import pdist, squareform
-from sklearn.exceptions import NotFittedError
 from tslearn.clustering import KShape
 
 from dtaianomaly import utils
@@ -137,25 +136,16 @@ class KShapeAnomalyDetector(BaseDetector):
             corresponding to each cluster and the second element corresponds to
             the normalized weight of that cluster.
         """
-        if (
-            not hasattr(self, "kshape_")
-            or not hasattr(self, "window_size_")
-            or not hasattr(self, "centroids_")
-            or not hasattr(self, "weights_")
-        ):
-            raise NotFittedError("Call the fit function before making predictions!")
+        self.check_is_fitted()
         return list(zip(self.centroids_, self.weights_))
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "BaseDetector":
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        # Make sure the data is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
+        X = X.squeeze()
 
         # Compute the window size
-        X = np.asarray(X).squeeze()
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
 
         # Compute sliding windows
@@ -182,23 +172,11 @@ class KShapeAnomalyDetector(BaseDetector):
         self.weights_ = cluster_sizes**2 / summed_cluster_distances
         self.weights_ /= self.weights_.sum()
 
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        if not utils.is_valid_array_like(X):
-            raise ValueError(f"Input must be numerical array-like")
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        # Make sure the data is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
-        if (
-            not hasattr(self, "kshape_")
-            or not hasattr(self, "window_size_")
-            or not hasattr(self, "centroids_")
-            or not hasattr(self, "weights_")
-        ):
-            raise NotFittedError("Call the fit function before making predictions!")
-
-        # Make sure X is a numpy array
-        X = np.asarray(X).squeeze()
+        X = X.squeeze()
 
         # Compute the minimum distance of each subsequence to each cluster using matrix profile
         min_distance = np.array(

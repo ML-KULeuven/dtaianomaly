@@ -309,10 +309,10 @@ class DetectorError(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs):
+        pass
 
-    def decision_function(self, X):
+    def _decision_function(self, X):
         raise Exception('Dummy exception')
 
 
@@ -321,10 +321,10 @@ class SupervisedDetector(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.SUPERVISED)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs):
+        pass
 
-    def decision_function(self, X):
+    def _decision_function(self, X):
         return np.zeros(X.shape[0])
 
 
@@ -484,10 +484,10 @@ class DummyDetector(BaseDetector):
     def __init__(self, supervision):
         super().__init__(supervision)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs):
+        pass
 
-    def decision_function(self, X):
+    def _decision_function(self, X):
         return np.zeros(X.shape[0])
 
 

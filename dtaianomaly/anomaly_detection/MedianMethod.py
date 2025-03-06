@@ -76,19 +76,14 @@ class MedianMethod(BaseDetector):
         self.neighborhood_size_before = neighborhood_size_before
         self.neighborhood_size_after = neighborhood_size_after
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "BaseDetector":
-        return self  # No fitting is required.
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        """Should not do anything."""
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        # Make sure that X is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
-
-        # Convert to a numpy array
-        X = np.asarray(X, dtype=float).squeeze()
+        X = X.squeeze().astype(float)
 
         # Set the neighborhood size after the observation
         if self.neighborhood_size_after is None:
@@ -101,6 +96,9 @@ class MedianMethod(BaseDetector):
             (self.neighborhood_size_before, neighborhood_size_after),
             constant_values=(np.nan,),
         )
+        print()
+        print(X)
+        print(X_padded)
         neighborhoods = np.lib.stride_tricks.sliding_window_view(
             X_padded,
             window_shape=(self.neighborhood_size_before + neighborhood_size_after + 1),

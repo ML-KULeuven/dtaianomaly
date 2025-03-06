@@ -1,7 +1,10 @@
 
 import os
+from typing import Optional
+
 import pytest
 import numpy as np
+from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.anomaly_detection import BaseDetector, load_detector, baselines, Supervision
 from dtaianomaly import utils
@@ -12,19 +15,19 @@ class InvalidConstantDecisionFunctionForPredictProba(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs) -> None:
+        pass
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
+    def _decision_function(self, X: np.ndarray) -> np.array:
         return np.ones(X.shape[0]) * 50
 
 
 class NoDefinedSupervisionDetector(BaseDetector):
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs) -> None:
+        pass
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
+    def _decision_function(self, X: np.ndarray) -> np.array:
         return np.ones(X.shape[0])
 
 
@@ -170,5 +173,68 @@ class TestConfidence:
         detector = baselines.RandomDetector(seed=42).fit(univariate_time_series)
         confidence1 = detector.predict_confidence(univariate_time_series)
         confidence2 = detector.predict_confidence(univariate_time_series)
-        print((confidence1 != confidence2).sum())
         assert np.array_equal(confidence1, confidence2)
+
+
+class DetectorWithMultipleFitProperties(BaseDetector):
+    a_: float
+    b_: float
+    c_: float
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
+
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        self.a_ = 0.1
+        self.b_ = 0.2
+        self.c_ = 0.3
+
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.zeros(shape=X.shape[0])
+
+
+class DetectorWithSingleFitProperty(BaseDetector):
+    a_: float
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
+
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        self.a_ = 0.1
+
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.zeros(shape=X.shape[0])
+
+
+class DetectorWithoutFitProperties(BaseDetector):
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
+
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        pass
+
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        return np.zeros(shape=X.shape[0])
+
+
+class TestCheckIsFitted:
+
+    @pytest.mark.parametrize('detector', [DetectorWithoutFitProperties, DetectorWithSingleFitProperty, DetectorWithMultipleFitProperties])
+    def test_fitted(self, detector, univariate_time_series):
+        detector().fit(univariate_time_series).check_is_fitted()
+
+    @pytest.mark.parametrize('detector', [DetectorWithoutFitProperties])
+    def test_not_fitted_no_properties(self, detector):
+        detector().check_is_fitted()
+
+    @pytest.mark.parametrize('detector', [DetectorWithSingleFitProperty, DetectorWithMultipleFitProperties])
+    def test_not_fitted_properties(self, detector):
+        with pytest.raises(NotFittedError):
+            detector().check_is_fitted()
+
+    def test_only_some_properties_initialized(self):
+        detector = DetectorWithMultipleFitProperties()
+        detector.a_ = 1.0
+        with pytest.raises(NotFittedError):
+            detector.check_is_fitted()

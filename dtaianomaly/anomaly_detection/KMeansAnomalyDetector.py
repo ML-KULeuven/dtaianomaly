@@ -2,9 +2,7 @@ from typing import Optional, Union
 
 import numpy as np
 from sklearn.cluster import KMeans
-from sklearn.exceptions import NotFittedError
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
@@ -80,26 +78,12 @@ class KMeansAnomalyDetector(BaseDetector):
         self.kwargs = kwargs
         KMeans(**self.kwargs)  # Check if KMeans can be initialized
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "KMeansAnomalyDetector":
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-
-        X = np.asarray(X)
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         self.k_means_ = KMeans(**self.kwargs)
         self.k_means_.fit(sliding_window(X, self.window_size_, self.stride))
 
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-        if not hasattr(self, "k_means_") or not hasattr(self, "window_size_"):
-            raise NotFittedError("Call the fit function before making predictions!")
-
-        X = np.asarray(X)
+    def _decision_function(self, X: np.ndarray) -> np.array:
         sliding_windows = sliding_window(X, self.window_size_, self.stride)
         clusters = self.k_means_.predict(sliding_windows)
         distance_to_cluster_centers = np.linalg.norm(

@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 import numpy as np
 import scipy
+from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.PrettyPrintable import PrettyPrintable
@@ -50,7 +51,6 @@ class BaseDetector(PrettyPrintable):
             raise TypeError("'supervision' should be a valid 'Supervision' type!")
         self.supervision = supervision
 
-    @abc.abstractmethod
     def fit(
         self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
     ) -> "BaseDetector":
@@ -69,9 +69,47 @@ class BaseDetector(PrettyPrintable):
         self: BaseDetector
             Returns the instance itself.
         """
+        # Check the input
+        if not utils.is_valid_array_like(X):
+            raise ValueError("Input must be numerical array-like")
+
+        # Fit the detector
+        self._fit(np.asarray(X), y, **kwargs)
+
+        # Return self
+        return self
 
     @abc.abstractmethod
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        """Effectively fit this detector."""
+
+    def is_fitted(self) -> bool:
+        """
+        Return whether this anomaly detector is fitted.
+
+        Returns
+        -------
+        is_fitted: bool
+            True if and only if this detector is fitted, and can be
+            used for detecting anomalies.
+        """
+        return all(
+            hasattr(self, attr) for attr in self.__annotations__ if attr.endswith("_")
+        )
+
+    def check_is_fitted(self) -> None:
+        """
+        Check whether this anomaly detector is fitted or not.
+
+        Raises
+        ------
+        NotFittedError
+            If this detector is not fitted yet.
+        """
+        if not self.is_fitted():
+            raise NotFittedError("This anomaly detector has not been fitted yet!")
+
+    def decision_function(self, X: np.ndarray) -> np.array:
         """
         Abstract method, compute anomaly scores.
 
@@ -85,6 +123,19 @@ class BaseDetector(PrettyPrintable):
         decision_scores: array-like of shape (n_samples)
             The computed anomaly scores.
         """
+        # Check input
+        if not utils.is_valid_array_like(X):
+            raise ValueError(f"Input must be numerical array-like")
+
+        # Check if fitted
+        self.check_is_fitted()
+
+        # Compute decision scores
+        return self._decision_function(np.asarray(X))
+
+    @abc.abstractmethod
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        """Effectively compute the decision function."""
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """

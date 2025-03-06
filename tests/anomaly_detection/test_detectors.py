@@ -52,12 +52,8 @@ class TestAnomalyDetectors:
         assert detector.fit(univariate_time_series) is detector
 
     def test_fit_invalid_array(self, detector):
-        if type(detector) in DETECTORS_WITHOUT_FITTING:
-            # If no fitting is needed, then no check should be performed
+        with pytest.raises(ValueError):
             detector.fit([5, 20, '5'])
-        else:
-            with pytest.raises(ValueError):
-                detector.fit([5, 20, '5'])
 
     def test_decision_function_invalid_array(self, detector, univariate_time_series):
         detector.fit(univariate_time_series)

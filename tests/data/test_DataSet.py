@@ -148,10 +148,10 @@ class DummyDetector(BaseDetector):
     def __init__(self, supervision):
         super().__init__(supervision)
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'BaseDetector':
-        return self
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+        pass
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
+    def _decision_function(self, X: np.ndarray) -> np.array:
         return np.zeros(X.shape[0])
 
 

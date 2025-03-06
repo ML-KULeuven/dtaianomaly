@@ -18,3 +18,4 @@ Evaluation module
 .. autoclass:: dtaianomaly.evaluation.AreaUnderPR
 .. autoclass:: dtaianomaly.evaluation.AreaUnderROC
 .. autoclass:: dtaianomaly.evaluation.BestThresholdMetric
+   :members: _compute

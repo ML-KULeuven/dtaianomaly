@@ -110,37 +110,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         self.max_iter = max_iter
         self.kwargs = kwargs
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "RobustPrincipalComponentAnalysis":
-        """
-        Fit this Robust PCA to the given data
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-        kwargs:
-            Additional parameters to be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-
-        Returns
-        -------
-        self: RobustPrincipleComponentAnalysis
-            Returns the instance itself
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-
-        # Make sure X is a numpy array
-        X = np.asarray(X)
-
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
         # Compute the windows
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         sliding_windows = sliding_window(X, self.window_size_, self.stride)
@@ -150,17 +120,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         L, S = robust_pca.fit(max_iter=self.max_iter)
         self.pca_ = PCA(n_components=L.shape[1], **self.kwargs)
         self.pca_.fit(L)
-        return self
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        if not hasattr(self, "pca_"):
-            raise NotFittedError("Call the fit function before making predictions!")
-        if not utils.is_valid_array_like(X):
-            raise ValueError(f"Input must be numerical array-like")
-
-        # Make sure X is a numpy array
-        X = np.asarray(X)
-
+    def _decision_function(self, X: np.ndarray) -> np.array:
         # Convert to sliding windows
         windows = sliding_window(X, self.window_size_, self.stride)
 
