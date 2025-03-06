@@ -79,6 +79,13 @@ class Workflow:
         to evaluate the detector. This is no issue, since unsupervised
         detectors do not use labels and can deal with anomalies in the
         training data.
+
+    fit_semi_supervised_on_test_data: bool, default=False
+        Whether to fit the semi-supervised anomaly detectors on the test data.
+        If True, then the test data will be used to fit the detector and
+        to evaluate the detector. This is not really an issue, because it only
+        breaks the assumption of semi-supervised methods of normal training data.
+        However, these methods do not use the training labels themselves.
     """
 
     dataloaders: List[LazyDataLoader]
@@ -88,6 +95,7 @@ class Workflow:
     trace_memory: bool
     error_log_path: str
     fit_unsupervised_on_test_data: bool
+    fit_semi_supervised_on_test_data: bool
 
     def __init__(
         self,
@@ -100,6 +108,7 @@ class Workflow:
         trace_memory: bool = False,
         error_log_path: str = "./error_logs",
         fit_unsupervised_on_test_data: bool = False,
+        fit_semi_supervised_on_test_data: bool = False,
     ):
 
         # Make sure the inputs are lists.
@@ -142,6 +151,7 @@ class Workflow:
         self.trace_memory = trace_memory
         self.error_log_path = error_log_path
         self.fit_unsupervised_on_test_data = fit_unsupervised_on_test_data
+        self.fit_semi_supervised_on_test_data = fit_semi_supervised_on_test_data
 
     def run(self) -> pd.DataFrame:
         """
@@ -172,6 +182,7 @@ class Workflow:
                     trace_memory=self.trace_memory,
                     error_log_path=self.error_log_path,
                     fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+                    fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
                 )
                 for job in unit_jobs
             ]
@@ -181,6 +192,7 @@ class Workflow:
                 trace_memory=self.trace_memory,
                 error_log_path=self.error_log_path,
                 fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+                fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
             )
             with multiprocessing.Pool(processes=self.n_jobs) as pool:
                 result = pool.starmap(single_run_function, unit_jobs)
@@ -219,6 +231,7 @@ def _single_job(
     trace_memory: bool,
     error_log_path: str,
     fit_unsupervised_on_test_data: bool,
+    fit_semi_supervised_on_test_data: bool,
 ) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
     results = {"Dataset": str(dataloader)}
@@ -264,7 +277,10 @@ def _single_job(
 
     # Format X_train, y_train, X_test and y_test
     X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
-        data_set, pipeline.pipeline, fit_unsupervised_on_test_data
+        data_set,
+        pipeline.pipeline,
+        fit_unsupervised_on_test_data,
+        fit_semi_supervised_on_test_data,
     )
 
     # Run the anomaly detector, and catch any exceptions
@@ -327,7 +343,10 @@ def _end_tracing_memory(trace_memory: bool, results, key) -> None:
 
 
 def _get_train_test_data(
-    data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool
+    data_set: DataSet,
+    detector: BaseDetector,
+    fit_unsupervised_on_test_data: bool,
+    fit_semi_supervised_on_test_data: bool,
 ) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):
     """
     Separates the train and test data depending on the type of the anomaly
@@ -355,6 +374,14 @@ def _get_train_test_data(
     if (
         fit_unsupervised_on_test_data
         and detector.supervision == Supervision.UNSUPERVISED
+    ):
+        X_train = X_test
+        fit_on_X_train = False
+
+    # If semi-supervised detectors should fit on the test data.
+    if (
+        fit_semi_supervised_on_test_data
+        and detector.supervision == Supervision.SEMI_SUPERVISED
     ):
         X_train = X_test
         fit_on_X_train = False

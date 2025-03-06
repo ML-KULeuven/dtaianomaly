@@ -491,60 +491,71 @@ class DummyDetector(BaseDetector):
         return np.zeros(X.shape[0])
 
 
+@pytest.mark.parametrize("fit_unsupervised_on_test_data", [True, False])
+@pytest.mark.parametrize("fit_semi_supervised_on_test_data", [True, False])
 class TestGetTrainTestData:
 
-    def test_unsupervised_use_test_set_for_fit(self):
+    def test_unsupervised(self, fit_unsupervised_on_test_data, fit_semi_supervised_on_test_data):
         data_set = DataSet(
             X_test=np.array([1, 2, 3, 4, 5, 6]),
             y_test=np.array([1, 0, 0, 0, 1, 0]),
             X_train=np.array([10, 20, 30, 40, 50])
         )
         detector = DummyDetector(Supervision.UNSUPERVISED)
-        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=True)
-        assert np.array_equal(data_set.X_test, X_test)
-        assert np.array_equal(data_set.y_test, y_test)
-        assert np.array_equal(data_set.X_test, X_train)
-        assert y_train is None
-        assert not fit_on_X_train
-
-    def test_unsupervised_do_not_use_test_set_for_fit(self):
-        data_set = DataSet(
-            X_test=np.array([1, 2, 3, 4, 5, 6]),
-            y_test=np.array([1, 0, 0, 0, 1, 0]),
-            X_train=np.array([10, 20, 30, 40, 50])
+        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
+            data_set,
+            detector,
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data
         )
-        detector = DummyDetector(Supervision.UNSUPERVISED)
-        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=False)
         assert np.array_equal(data_set.X_test, X_test)
         assert np.array_equal(data_set.y_test, y_test)
-        assert np.array_equal(data_set.X_train, X_train)
-        assert y_train is None
-        assert fit_on_X_train
 
-    def test_semi_supervised_use_test_set_for_fit(self):
-        data_set = DataSet(
-            X_test=np.array([1, 2, 3, 4, 5, 6]),
-            y_test=np.array([1, 0, 0, 0, 1, 0]),
-            X_train=np.array([10, 20, 30, 40, 50])
-        )
-        detector = DummyDetector(Supervision.SEMI_SUPERVISED)
-        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=True)
-        assert np.array_equal(data_set.X_test, X_test)
-        assert np.array_equal(data_set.y_test, y_test)
-        assert np.array_equal(data_set.X_train, X_train)
-        assert y_train is None
-        assert fit_on_X_train
+        if fit_unsupervised_on_test_data:
+            assert np.array_equal(data_set.X_test, X_train)
+            assert not fit_on_X_train
+        else:
+            assert np.array_equal(data_set.X_test, X_test)
+            assert fit_on_X_train
 
-    def test_semi_supervised_do_not_use_test_set_for_fit(self):
+    def test_semi_supervised(self, fit_unsupervised_on_test_data, fit_semi_supervised_on_test_data):
         data_set = DataSet(
             X_test=np.array([1, 2, 3, 4, 5, 6]),
             y_test=np.array([1, 0, 0, 0, 1, 0]),
             X_train=np.array([10, 20, 30, 40, 50])
         )
         detector = DummyDetector(Supervision.SEMI_SUPERVISED)
-        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(data_set, detector, fit_unsupervised_on_test_data=False)
+        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
+            data_set,
+            detector,
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data
+        )
         assert np.array_equal(data_set.X_test, X_test)
         assert np.array_equal(data_set.y_test, y_test)
-        assert np.array_equal(data_set.X_train, X_train)
-        assert y_train is None
+
+        if fit_semi_supervised_on_test_data:
+            assert np.array_equal(data_set.X_test, X_train)
+            assert not fit_on_X_train
+        else:
+            assert np.array_equal(data_set.X_test, X_test)
+            assert fit_on_X_train
+
+    def test_supervised(self, fit_unsupervised_on_test_data, fit_semi_supervised_on_test_data):
+        data_set = DataSet(
+            X_test=np.array([1, 2, 3, 4, 5, 6]),
+            y_test=np.array([1, 0, 0, 0, 1, 0]),
+            X_train=np.array([10, 20, 30, 40, 50])
+        )
+        detector = DummyDetector(Supervision.SUPERVISED)
+        X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
+            data_set,
+            detector,
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data
+        )
+        assert np.array_equal(data_set.X_test, X_test)
+        assert np.array_equal(data_set.y_test, y_test)
+
+        assert np.array_equal(data_set.X_test, X_test)
         assert fit_on_X_train
