@@ -12,6 +12,7 @@ Added
 - Added arXiv citation to the documentation.
 - Added support for TOML configuration files in the ``Workflow``.
 - Added option to fit semi-supervised methods on test data in ``Workflow``.
+- Option to show progress bar when running a ``Workflow``.
 
 Changed
 ^^^^^^^

@@ -1,4 +1,6 @@
 
+import sys
+from unittest.mock import MagicMock
 import pytest
 import numpy as np
 
@@ -7,7 +9,7 @@ from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_t
 from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
 from dtaianomaly.preprocessing import Identity, StandardScaler, Preprocessor
-from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision
+from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision, RandomDetector
 from dtaianomaly.workflow.Workflow import _get_train_test_data
 
 
@@ -151,9 +153,11 @@ class DummyDataLoader(LazyDataLoader):
         return DataSet(X, y)
 
 
+@pytest.mark.parametrize("show_progress", [True, False])
 class TestWorkflowSuccess:
+    pytest.importorskip("tqdm")
 
-    def test(self, tmp_path_factory):
+    def test(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
@@ -164,7 +168,8 @@ class TestWorkflowSuccess:
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
-            trace_memory=False
+            trace_memory=False,
+            show_progress=show_progress
         )
         results = workflow.run()
         assert results.shape == (4, 11)
@@ -186,7 +191,7 @@ class TestWorkflowSuccess:
         assert results.columns[4] == 'Runtime Predict [s]'
         assert results.columns[5] == 'Runtime [s]'
 
-    def test_parallel(self, tmp_path_factory):
+    def test_parallel(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
@@ -197,7 +202,8 @@ class TestWorkflowSuccess:
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
-            trace_memory=False
+            trace_memory=False,
+            show_progress=show_progress
         )
         results = workflow.run()
         assert results.shape == (4, 11)
@@ -219,7 +225,7 @@ class TestWorkflowSuccess:
         assert results.columns[4] == 'Runtime Predict [s]'
         assert results.columns[5] == 'Runtime [s]'
 
-    def test_trace_memory(self, tmp_path_factory):
+    def test_trace_memory(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
@@ -230,7 +236,8 @@ class TestWorkflowSuccess:
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
-            trace_memory=True
+            trace_memory=True,
+            show_progress=show_progress
         )
         results = workflow.run()
         assert results.shape == (4, 14)
@@ -255,7 +262,7 @@ class TestWorkflowSuccess:
         assert results.columns[7] == 'Peak Memory Predict [MB]'
         assert results.columns[8] == 'Peak Memory [MB]'
 
-    def test_no_preprocessors(self, tmp_path_factory, univariate_time_series):
+    def test_no_preprocessors(self, tmp_path_factory, univariate_time_series, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
@@ -265,7 +272,8 @@ class TestWorkflowSuccess:
             thresholds=[TopN(10), FixedCutoff(0.5)],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
-            trace_memory=True
+            trace_memory=True,
+            show_progress=show_progress
         )
         results = workflow.run()
         assert results.shape == (2, 13)
@@ -559,3 +567,69 @@ class TestGetTrainTestData:
 
         assert np.array_equal(data_set.X_test, X_test)
         assert fit_on_X_train
+
+
+@pytest.mark.parametrize('n_jobs', [1, 2])
+class TestWorkflowShowProgress:
+
+    def test_show_progress_tqdm_installed(self, monkeypatch, tmp_path_factory, n_jobs):
+        import tqdm
+        mock = MagicMock(side_effect=tqdm.tqdm)
+        monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
+
+        Workflow(
+            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            metrics=AreaUnderROC(),
+            detectors=[RandomDetector(seed) for seed in range(5)],
+            n_jobs=n_jobs,
+            show_progress=True
+        ).run()
+
+        mock.assert_called_once()
+
+    def test_show_progress_tqdm_not_installed(self, monkeypatch, tmp_path_factory, n_jobs):
+        # def raise_error(x=None, *args, **kwargs):
+        #     raise ModuleNotFoundError()
+
+        mock = MagicMock(side_effect=ModuleNotFoundError)
+        monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
+
+        Workflow(
+            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            metrics=AreaUnderROC(),
+            detectors=[RandomDetector(seed) for seed in range(5)],
+            n_jobs=n_jobs,
+            show_progress=True
+        ).run()
+
+        mock.assert_not_called()
+
+        assert 0
+
+    def test_do_not_show_progress_tqdm_installed(self, monkeypatch, tmp_path_factory, n_jobs):
+        mock = MagicMock(side_effect=lambda x=None, *args, **kwargs: x)
+        monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
+
+        Workflow(
+            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            metrics=AreaUnderROC(),
+            detectors=[RandomDetector(seed) for seed in range(5)],
+            n_jobs=n_jobs,
+            show_progress=False
+        ).run()
+
+        mock.assert_not_called()
+
+    def test_do_not_show_progress_tqdm_not_installed(self, monkeypatch, tmp_path_factory, n_jobs):
+        mock = MagicMock(side_effect=lambda x=None, *args, **kwargs: x)
+        monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
+
+        Workflow(
+            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            metrics=AreaUnderROC(),
+            detectors=[RandomDetector(seed) for seed in range(5)],
+            n_jobs=n_jobs,
+            show_progress=False
+        ).run()
+
+        mock.assert_not_called()

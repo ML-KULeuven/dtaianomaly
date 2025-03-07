@@ -1,6 +1,7 @@
 import multiprocessing
 import time
 import tracemalloc
+import warnings
 from functools import partial
 from typing import Dict, List, Union
 
@@ -86,6 +87,15 @@ class Workflow:
         to evaluate the detector. This is not really an issue, because it only
         breaks the assumption of semi-supervised methods of normal training data.
         However, these methods do not use the training labels themselves.
+
+    show_progress: bool, default=False
+        Whether to show the progress using a TQDM progress bar or not.
+
+        .. note::
+
+           Ensure ``tqdm`` installed for this (which is not part of the core
+           dependencies of ``dtaianomaly``). Otherwise, no progress bar will
+           be shown.
     """
 
     dataloaders: List[LazyDataLoader]
@@ -96,6 +106,7 @@ class Workflow:
     error_log_path: str
     fit_unsupervised_on_test_data: bool
     fit_semi_supervised_on_test_data: bool
+    show_progress: bool
 
     def __init__(
         self,
@@ -109,6 +120,7 @@ class Workflow:
         error_log_path: str = "./error_logs",
         fit_unsupervised_on_test_data: bool = False,
         fit_semi_supervised_on_test_data: bool = False,
+        show_progress: bool = False,
     ):
 
         # Make sure the inputs are lists.
@@ -152,6 +164,7 @@ class Workflow:
         self.error_log_path = error_log_path
         self.fit_unsupervised_on_test_data = fit_unsupervised_on_test_data
         self.fit_semi_supervised_on_test_data = fit_semi_supervised_on_test_data
+        self.show_progress = show_progress
 
     def run(self) -> pd.DataFrame:
         """
@@ -174,8 +187,23 @@ class Workflow:
             for pipeline in self.pipelines
         ]
 
+        if self.show_progress:
+            try:
+                import tqdm
+            except ModuleNotFoundError:
+                warnings.warn(
+                    "Flag 'tqdm_progress' was set to True in the workflow, but tqdm is not installed!\n"
+                    "No progress will be shown using tqdm. To do so, run 'pip install tqdm'!"
+                )
+                self.show_progress = False
+
         # Execute the jobs
         if self.n_jobs == 1:
+            if self.show_progress:
+                import tqdm
+
+                unit_jobs = tqdm.tqdm(unit_jobs)
+
             result = [
                 _single_job(
                     *job,
@@ -186,6 +214,7 @@ class Workflow:
                 )
                 for job in unit_jobs
             ]
+
         else:
             single_run_function = partial(
                 _single_job,
@@ -194,8 +223,28 @@ class Workflow:
                 fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
                 fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
             )
-            with multiprocessing.Pool(processes=self.n_jobs) as pool:
-                result = pool.starmap(single_run_function, unit_jobs)
+            if self.show_progress:
+                import tqdm
+
+                # Run jobs with tqdm progress bar
+                with multiprocessing.Pool(processes=self.n_jobs) as pool:
+                    with tqdm.tqdm(total=len(unit_jobs)) as pbar:
+                        result = [
+                            pool.apply_async(
+                                single_run_function,
+                                args=job,
+                                callback=lambda _: pbar.update(1),
+                            )
+                            for job in unit_jobs
+                        ]
+                        pool.close()
+                        pool.join()  # Wait for all processes to complete
+
+                result = [r.get() for r in result]
+
+            else:
+                with multiprocessing.Pool(processes=self.n_jobs) as pool:
+                    result = pool.starmap(single_run_function, unit_jobs)
 
         # Create a dataframe of the results
         results_df = pd.DataFrame(result)
@@ -387,3 +436,24 @@ def _get_train_test_data(
         fit_on_X_train = False
 
     return X_test, y_test, X_train, y_train, fit_on_X_train
+
+
+def main():
+    from dtaianomaly.anomaly_detection import MedianMethod
+    from dtaianomaly.data import UCRLoader, from_directory
+    from dtaianomaly.evaluation import AreaUnderPR, AreaUnderROC
+
+    workflow = Workflow(
+        dataloaders=from_directory(
+            "../../data/UCR-time-series-anomaly-archive", UCRLoader
+        )[:20],
+        detectors=[MedianMethod(i) for i in [100, 200, 300, 400]],
+        metrics=[AreaUnderROC(), AreaUnderPR()],
+        n_jobs=2,
+        show_progress=True,
+    )
+    df = workflow.run()
+
+
+if __name__ == "__main__":
+    main()

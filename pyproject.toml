@@ -64,11 +64,15 @@ all = [  # All the optional dependencies
     "jupyterlab",
     "pre-commit",
     "black",
-    "isort"
+    "isort",
+    'tqdm'
 ]
 tests = [  # For testing
     "pytest",
     "pytest-cov"
+]
+tqdm = [
+    'tqdm'
 ]
 docs = [  # For generating the docs
     "sphinx",
