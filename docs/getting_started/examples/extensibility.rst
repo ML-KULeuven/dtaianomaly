@@ -45,7 +45,7 @@ The methods have the following functionality:
 
 .. doctest::
 
-    >>> from dtaianomaly.anomaly_detection import BaseDetector
+    >>> from dtaianomaly.anomaly_detection import BaseDetector, Supervision
     >>>
     >>> class NbSigmaAnomalyDetector(BaseDetector):
     ...     nb_sigmas: float
@@ -53,17 +53,20 @@ The methods have the following functionality:
     ...     std_: float
     ...
     ...     def __init__(self, nb_sigmas: float = 3.0):
+    ...         super().__init__(Supervision.UNSUPERVISED)
     ...         self.nb_sigmas = nb_sigmas
     ...
-    ...     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'NbSigmaAnomalyDetector':
+    ...     def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'NbSigmaAnomalyDetector':
     ...         """ Compute the mean and standard deviation of the given time series. """
     ...         self.mean_ = X.mean()
     ...         self.std_ = X.std()
     ...         return self
     ...
-    ...     def decision_function(self, X: np.ndarray) -> np.ndarray:
+    ...     def _decision_function(self, X: np.ndarray) -> np.ndarray:
     ...         """ Compute which values are too far from the mean. """
     ...         return np.abs(X - self.mean_) > self.nb_sigmas * self.std_
+    >>>
+    >>> detector = NbSigmaAnomalyDetector()
 
 .. _custom-dataloader:
 
@@ -95,6 +98,8 @@ and easily analyze multiple detectors simultaneously.
     ...         """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
     ...         df = pd.read_clipboard(self.path)
     ...         return DataSet(df['X'].values, df['y'].values)
+    >>>
+    >>> data_loader = SimpleDataLoader('data')
 
 .. _custom-preprocessor:
 
@@ -137,6 +142,8 @@ to these methods.
     ...     def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     ...         X[np.isnan(X)] = self.fill_value_
     ...         return X, y
+    >>>
+    >>> imputer = Imputer()
 
 .. _custom-thresholding:
 
@@ -165,6 +172,8 @@ deviations above the mean anomaly score are considered anomalous.
     ...     def threshold(self, scores: np.ndarray) -> np.ndarray:
     ...         threshold = scores.mean() + self.factor * scores.std()
     ...         return scores > threshold
+    >>>
+    >>> dynamic_threshold = DynamicThreshold(1.0)
 
 .. _custom-evaluation:
 
@@ -198,6 +207,8 @@ method.
     >>> from dtaianomaly.evaluation import BinaryMetric
     >>>
     >>> class Accuracy(BinaryMetric):
-    ...     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray):
+    ...     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
     ...         """ Compute the accuracy. """
     ...         return np.nanmean(y_true == y_pred)
+    >>>
+    >>> accuracy = Accuracy()

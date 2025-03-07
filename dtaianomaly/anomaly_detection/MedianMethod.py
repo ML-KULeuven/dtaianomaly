@@ -96,9 +96,6 @@ class MedianMethod(BaseDetector):
             (self.neighborhood_size_before, neighborhood_size_after),
             constant_values=(np.nan,),
         )
-        print()
-        print(X)
-        print(X_padded)
         neighborhoods = np.lib.stride_tricks.sliding_window_view(
             X_padded,
             window_shape=(self.neighborhood_size_before + neighborhood_size_after + 1),

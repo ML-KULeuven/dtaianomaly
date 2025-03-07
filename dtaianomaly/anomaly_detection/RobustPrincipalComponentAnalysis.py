@@ -1,12 +1,10 @@
-""" This function is adapted from TSB-AD """
+"""This function is adapted from TSB-AD"""
 
 from typing import Optional, Union
 
 import numpy as np
 from sklearn.decomposition import PCA
-from sklearn.exceptions import NotFittedError
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
