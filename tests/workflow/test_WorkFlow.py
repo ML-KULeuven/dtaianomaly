@@ -2,6 +2,7 @@
 import sys
 from unittest.mock import MagicMock
 import pytest
+import warnings
 import numpy as np
 
 from dtaianomaly.workflow import Workflow
@@ -570,44 +571,65 @@ class TestGetTrainTestData:
 
 
 @pytest.mark.parametrize('n_jobs', [1, 2])
-class TestWorkflowShowProgress:
+class TestShowProgress:
 
     def test_show_progress_tqdm_installed(self, monkeypatch, tmp_path_factory, n_jobs):
-        import tqdm
+
+        # Skip if tqdm doesn't exist
+        tqdm = pytest.importorskip("tqdm")
+
         mock = MagicMock(side_effect=tqdm.tqdm)
         monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
 
-        Workflow(
-            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
-            metrics=AreaUnderROC(),
-            detectors=[RandomDetector(seed) for seed in range(5)],
-            n_jobs=n_jobs,
-            show_progress=True
-        ).run()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # Treat warnings as errors
+            Workflow(
+                dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+                metrics=AreaUnderROC(),
+                detectors=[RandomDetector(seed) for seed in range(5)],
+                n_jobs=n_jobs,
+                show_progress=True
+            ).run()
 
         mock.assert_called_once()
 
     def test_show_progress_tqdm_not_installed(self, monkeypatch, tmp_path_factory, n_jobs):
-        # def raise_error(x=None, *args, **kwargs):
-        #     raise ModuleNotFoundError()
 
-        mock = MagicMock(side_effect=ModuleNotFoundError)
-        monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
+        class BlockTqdmImport:
+            """A custom import hook that prevents tqdm from being imported."""
 
-        Workflow(
-            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
-            metrics=AreaUnderROC(),
-            detectors=[RandomDetector(seed) for seed in range(5)],
-            n_jobs=n_jobs,
-            show_progress=True
-        ).run()
+            def find_spec(self, fullname, path, target=None):
+                if fullname == "tqdm":
+                    raise ModuleNotFoundError("No module named 'tqdm'")
 
-        mock.assert_not_called()
+        monkeypatch.syspath_prepend("")  # Ensure imports still work
+        monkeypatch.setattr(sys, "meta_path", [BlockTqdmImport()] + sys.meta_path)
+        monkeypatch.delitem(sys.modules, "tqdm", raising=False)
 
-        assert 0
+        with pytest.raises(ModuleNotFoundError, match="No module named 'tqdm'"):
+            import tqdm  # First attempt should fail
+
+        with pytest.raises(ModuleNotFoundError, match="No module named 'tqdm'"):
+            import tqdm  # Second attempt should also fail => keeps failing
+
+        with pytest.warns(Warning):
+            workflow = Workflow(
+                dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+                metrics=AreaUnderROC(),
+                detectors=[RandomDetector(seed) for seed in range(5)],
+                n_jobs=n_jobs,
+                show_progress=True
+            )
+            workflow.run()
+
+        assert not workflow.show_progress
 
     def test_do_not_show_progress_tqdm_installed(self, monkeypatch, tmp_path_factory, n_jobs):
-        mock = MagicMock(side_effect=lambda x=None, *args, **kwargs: x)
+
+        # Skip if tqdm doesn't exist
+        pytest.importorskip("tqdm")
+
+        mock = MagicMock(side_effect=Exception)
         monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
 
         Workflow(
@@ -621,7 +643,7 @@ class TestWorkflowShowProgress:
         mock.assert_not_called()
 
     def test_do_not_show_progress_tqdm_not_installed(self, monkeypatch, tmp_path_factory, n_jobs):
-        mock = MagicMock(side_effect=lambda x=None, *args, **kwargs: x)
+        mock = MagicMock(side_effect=Exception)
         monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
 
         Workflow(

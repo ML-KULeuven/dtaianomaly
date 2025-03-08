@@ -190,7 +190,10 @@ class Workflow:
         if self.show_progress:
             try:
                 import tqdm
+
+                print("TQDM imported")
             except ModuleNotFoundError:
+                print("warning raised")
                 warnings.warn(
                     "Flag 'tqdm_progress' was set to True in the workflow, but tqdm is not installed!\n"
                     "No progress will be shown using tqdm. To do so, run 'pip install tqdm'!"
