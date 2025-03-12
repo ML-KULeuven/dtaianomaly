@@ -89,7 +89,7 @@ class DataSet:
                 raise ValueError(
                     "There have been time steps given for the training data, but no training data!"
                 )
-            if not utils.is_valid_array_like(time_steps_train):
+            if not is_valid_array_like(time_steps_train):
                 raise ValueError(
                     "The given time_steps_train is not a valid array-like!"
                 )

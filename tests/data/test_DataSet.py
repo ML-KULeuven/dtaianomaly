@@ -166,6 +166,7 @@ class TestTimeSteps:
         with pytest.raises(ValueError):
             DataSet(X_test=valid_X_test, y_test=valid_y_test, time_steps_train=np.arange(0, valid_X_test.shape[0]))
 
+
 class TestCompatibleSupervision:
 
     def test_unsupervised_all_data(self, valid_X_test, valid_y_test, valid_X_train, valid_y_train):
