@@ -100,5 +100,5 @@ Visualization module
    >>> from dtaianomaly.data import demonstration_time_series
    >>> from dtaianomaly.visualization import plot_with_zoom
    >>> X, y = demonstration_time_series()
-   >>> fig = plot_with_zoom(X, y, start_zoom=700, end_zoom=1200, figsize=(10, 3))
+   >>> fig = plot_with_zoom(X, y=y, start_zoom=700, end_zoom=1200, figsize=(10, 3))
    >>> fig.suptitle("Example of 'plot_with_zoom'")  # doctest: +SKIP

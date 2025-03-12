@@ -207,9 +207,9 @@ def plot_demarcated_anomalies(
 
 def plot_with_zoom(
     X: np.ndarray,
-    y: np.array,
     start_zoom: int,
     end_zoom: int,
+    y: np.array = None,
     time_steps: np.array = None,
     y_pred: np.array = None,
     method_to_plot=plot_demarcated_anomalies,
@@ -226,12 +226,12 @@ def plot_with_zoom(
     ----------
     X: np.ndarray of shape (n_samples, n_attributes)
         The time series to plot
-    y: np.array of shape (n_samples)
-        The binary anomaly scores.
     start_zoom: int
         The index in the data at which the zoom starts.
     end_zoom: int
         The index in the data at which the zoom ends.
+    y: np.array of shape (n_samples), default=None
+        The anomaly
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
@@ -265,22 +265,24 @@ def plot_with_zoom(
     # Format the time steps
     time_steps = format_time_steps(time_steps, X.shape[0])
 
+    # Format the y-parameters
+    y_parameters = {}
+    y_parameters_zoom = {}
+    if y is not None:
+        y_parameters["y"] = y
+        y_parameters_zoom["y"] = y[start_zoom:end_zoom]
+    if y_pred is not None:
+        y_parameters["y_pred"] = y_pred
+        y_parameters_zoom["y_pred"] = y_pred[start_zoom:end_zoom]
+
     # Plot the data
-    X_zoom = X[start_zoom:end_zoom]
-    y_zoom = y[start_zoom:end_zoom]
-    time_stamps_zoom = time_steps[start_zoom:end_zoom]
-    if y_pred is None:
-        method_to_plot(X=X, y=y, ax=ax_main, time_steps=time_steps)
-        method_to_plot(X=X_zoom, y=y_zoom, ax=ax_zoom, time_steps=time_stamps_zoom)
-    else:
-        method_to_plot(X=X, y=y, y_pred=y_pred, ax=ax_main, time_steps=time_steps)
-        method_to_plot(
-            X=X_zoom,
-            y=y_zoom,
-            y_pred=y_pred[start_zoom:end_zoom],
-            ax=ax_zoom,
-            time_steps=time_stamps_zoom,
-        )
+    method_to_plot(X=X, ax=ax_main, time_steps=time_steps, **y_parameters)
+    method_to_plot(
+        X=X[start_zoom:end_zoom],
+        ax=ax_zoom,
+        time_steps=time_steps[start_zoom:end_zoom],
+        **y_parameters_zoom,
+    )
 
     # Draw vertical lines to demarcate the area in which is zoomed
     for ax in [ax_main, ax_zoom]:
