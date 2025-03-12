@@ -3,7 +3,7 @@ from typing import Optional
 import pytest
 import numpy as np
 
-import utils
+from dtaianomaly import utils
 from dtaianomaly.data import DataSet
 from dtaianomaly.anomaly_detection import BaseDetector,  Supervision
 
