@@ -1,10 +1,14 @@
 from typing import List, Optional
 
 import numpy as np
-import utils
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.utils import get_dimension, is_univariate, is_valid_array_like
+from dtaianomaly.utils import (
+    get_dimension,
+    is_univariate,
+    is_valid_array_like,
+    is_valid_list,
+)
 
 
 class DataSet:
@@ -63,16 +67,16 @@ class DataSet:
 
         # Check feature names
         if feature_names is not None:
-            if not utils.is_valid_list(feature_names, str):
+            if not is_valid_list(feature_names, str):
                 raise ValueError("The given feature_names are not a valid list!")
-            if len(feature_names) != utils.get_dimension(X_test):
+            if len(feature_names) != get_dimension(X_test):
                 raise ValueError(
                     "The number of features do not correspond to the given number of feature names!"
                 )
 
         # Check time steps for the test data
         if time_steps_test is not None:
-            if not utils.is_valid_array_like(time_steps_test):
+            if not is_valid_array_like(time_steps_test):
                 raise ValueError("The given time_steps_test is not a valid array-like!")
             if time_steps_test.shape[0] != X_test.shape[0]:
                 raise ValueError(
