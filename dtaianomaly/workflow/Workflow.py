@@ -436,24 +436,3 @@ def _get_train_test_data(
         fit_on_X_train = False
 
     return X_test, y_test, X_train, y_train, fit_on_X_train
-
-
-def main():
-    from dtaianomaly.anomaly_detection import MedianMethod
-    from dtaianomaly.data import UCRLoader, from_directory
-    from dtaianomaly.evaluation import AreaUnderPR, AreaUnderROC
-
-    workflow = Workflow(
-        dataloaders=from_directory(
-            "../../data/UCR-time-series-anomaly-archive", UCRLoader
-        )[:20],
-        detectors=[MedianMethod(i) for i in [100, 200, 300, 400]],
-        metrics=[AreaUnderROC(), AreaUnderPR()],
-        n_jobs=2,
-        show_progress=True,
-    )
-    df = workflow.run()
-
-
-if __name__ == "__main__":
-    main()

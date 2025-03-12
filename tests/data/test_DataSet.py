@@ -2,6 +2,8 @@ from typing import Optional
 
 import pytest
 import numpy as np
+
+import utils
 from dtaianomaly.data import DataSet
 from dtaianomaly.anomaly_detection import BaseDetector,  Supervision
 
@@ -103,6 +105,66 @@ class TestCheckIsValid:
         with pytest.raises(ValueError):
             DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, y_train=np.append(valid_y_train, 0))
 
+
+class TestFeatureNames:
+
+    def test_no_feature_name_given(self, valid_X_test, valid_y_test):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test)
+        assert data_set.feature_names is None
+
+    def test_no_feature_name(self, valid_X_test, valid_y_test):
+        feature_names = [f'Feature {i}' for i in range(utils.get_dimension(valid_X_test))]
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, feature_names=feature_names)
+        assert data_set.feature_names == feature_names
+
+    def test_invalid_feature_names_given(self, valid_X_test, valid_y_test):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, feature_names=[i for i in range(utils.get_dimension(valid_X_test))])
+
+    def test_invalid_number_of_feature_names_given(self, valid_X_test, valid_y_test):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, feature_names=[f'Feature {i}' for i in range(utils.get_dimension(valid_X_test) + 1)])
+
+
+class TestTimeSteps:
+
+    def test_no_test_steps(self, valid_X_test, valid_y_test):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test)
+        assert data_set.time_steps_test is None
+
+    def test_valid_time_steps_test(self, valid_X_test, valid_y_test):
+        time_steps = np.arange(0, valid_X_test.shape[0])
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, time_steps_test=time_steps)
+        assert np.array_equal(data_set.time_steps_test, time_steps)
+
+    def test_invalid_time_steps_test(self, valid_X_test, valid_y_test):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, time_steps_test=0)
+
+    def test_time_steps_test_different_size(self, valid_X_test, valid_y_test):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, time_steps_test=np.arange(0, valid_X_test.shape[0] + 1))
+
+    def test_no_train_steps(self, valid_X_test, valid_y_test, valid_X_train):
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train)
+        assert data_set.time_steps_train is None
+
+    def test_valid_train_steps_test(self, valid_X_test, valid_y_test, valid_X_train):
+        time_steps = np.arange(0, valid_X_train.shape[0])
+        data_set = DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, time_steps_train=time_steps)
+        assert np.array_equal(data_set.time_steps_train, time_steps)
+
+    def test_invalid_train_steps_test(self, valid_X_test, valid_y_test, valid_X_train):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, time_steps_train=0)
+
+    def test_time_steps_train_different_size(self, valid_X_test, valid_y_test, valid_X_train):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, X_train=valid_X_train, time_steps_train=np.arange(0, valid_X_train.shape[0] + 1))
+
+    def test_time_steps_train_no_x_train(self, valid_X_test, valid_y_test):
+        with pytest.raises(ValueError):
+            DataSet(X_test=valid_X_test, y_test=valid_y_test, time_steps_train=np.arange(0, valid_X_test.shape[0]))
 
 class TestCompatibleSupervision:
 

@@ -13,6 +13,7 @@ Added
 - Added support for TOML configuration files in the ``Workflow``.
 - Added option to fit semi-supervised methods on test data in ``Workflow``.
 - Option to show progress bar when running a ``Workflow``.
+- Added optional feature names and time steps to ``DataSet``.
 
 Changed
 ^^^^^^^
@@ -30,6 +31,7 @@ Fixed
   the issue.
 - Ensured that ``interpret_additional_information()`` dynamically checks the possible
   parameters of a ``Workflow``.
+- Parameter ``y`` in ``visualizations.plot_with_zoom()`` is now optional.
 
 [0.3.0] - 2025-01-31
 --------------------
