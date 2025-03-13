@@ -9,20 +9,24 @@ Data module
 .. autoclass:: dtaianomaly.data.DataSet
     :members:
 
-Synthetic data
---------------
+Demonstration time series
+-------------------------
 
 .. autofunction:: dtaianomaly.data.demonstration_time_series
+
+.. autoclass:: dtaianomaly.data.DemonstrationTimeSeriesLoader
 
 .. image:: /../notebooks/Demonstration-time-series.svg
    :align: center
    :width: 100%
 
-.. autofunction:: dtaianomaly.data.make_sine_wave
-
 
 Loading data
 ------------
 
-.. autoclass:: dtaianomaly.data.UCRLoader
+.. autoclass:: dtaianomaly.data.PathDataLoader
+    :members:
+
 .. autofunction:: dtaianomaly.data.from_directory
+
+.. autoclass:: dtaianomaly.data.UCRLoader

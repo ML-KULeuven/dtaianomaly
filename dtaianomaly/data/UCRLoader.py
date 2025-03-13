@@ -1,10 +1,10 @@
 import numpy as np
 
 from dtaianomaly.data.DataSet import DataSet
-from dtaianomaly.data.LazyDataLoader import LazyDataLoader
+from dtaianomaly.data.PathDataLoader import PathDataLoader
 
 
-class UCRLoader(LazyDataLoader):
+class UCRLoader(PathDataLoader):
     """
     Lazy dataloader for the UCR suite of anomaly detection data sets.
 

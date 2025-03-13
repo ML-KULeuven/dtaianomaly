@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 
 from dtaianomaly.workflow import Workflow
-from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_time_series
+from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_time_series, PathDataLoader, DemonstrationTimeSeriesLoader
 from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
 from dtaianomaly.preprocessing import Identity, StandardScaler, Preprocessor
@@ -147,13 +147,6 @@ class TestWorkflowInitialization:
             )
 
 
-class DummyDataLoader(LazyDataLoader):
-
-    def _load(self) -> DataSet:
-        X, y = demonstration_time_series()
-        return DataSet(X, y)
-
-
 @pytest.mark.parametrize("show_progress", [True, False])
 class TestWorkflowSuccess:
     pytest.importorskip("tqdm")
@@ -161,9 +154,7 @@ class TestWorkflowSuccess:
     def test(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[Identity(), StandardScaler()],
@@ -174,7 +165,7 @@ class TestWorkflowSuccess:
         )
         results = workflow.run()
         assert results.shape == (4, 11)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
@@ -195,9 +186,7 @@ class TestWorkflowSuccess:
     def test_parallel(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[Identity(), StandardScaler()],
@@ -208,7 +197,7 @@ class TestWorkflowSuccess:
         )
         results = workflow.run()
         assert results.shape == (4, 11)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
@@ -229,9 +218,7 @@ class TestWorkflowSuccess:
     def test_trace_memory(self, tmp_path_factory, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[Identity(), StandardScaler()],
@@ -242,7 +229,7 @@ class TestWorkflowSuccess:
         )
         results = workflow.run()
         assert results.shape == (4, 14)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
@@ -266,9 +253,7 @@ class TestWorkflowSuccess:
     def test_no_preprocessors(self, tmp_path_factory, univariate_time_series, show_progress):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
@@ -278,7 +263,7 @@ class TestWorkflowSuccess:
         )
         results = workflow.run()
         assert results.shape == (2, 13)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 2
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 1
         assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 1
         assert 'Peak Memory Fit [MB]' in results.columns
@@ -343,8 +328,8 @@ class TestWorkflowFail:
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
-                DummyDataLoader(path=path),
-                DummyDataLoaderError(path=path),
+                DemonstrationTimeSeriesLoader(),
+                DummyDataLoaderError(),
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
@@ -356,8 +341,8 @@ class TestWorkflowFail:
         )
         results = workflow.run()
         assert results.shape == (8, 15)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
-        assert results['Dataset'].value_counts()[f"DummyDataLoaderError(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
+        assert results['Dataset'].value_counts()["DummyDataLoaderError()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
@@ -373,9 +358,7 @@ class TestWorkflowFail:
     def test_failed_to_preprocess(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[PreprocessorError(), StandardScaler()],
@@ -386,7 +369,7 @@ class TestWorkflowFail:
         )
         results = workflow.run()
         assert results.shape == (4, 15)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 2
@@ -402,9 +385,7 @@ class TestWorkflowFail:
     def test_failed_to_fit_model(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[Identity(), StandardScaler()],
@@ -415,7 +396,7 @@ class TestWorkflowFail:
         )
         results = workflow.run()
         assert results.shape == (4, 15)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
@@ -431,9 +412,7 @@ class TestWorkflowFail:
     def test_failed_to_preprocess_and_to_fit_model(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[PreprocessorError(), StandardScaler()],
@@ -444,7 +423,7 @@ class TestWorkflowFail:
         )
         results = workflow.run()
         assert results.shape == (4, 15)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['PreprocessorError()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['DetectorError()'] == 2
@@ -460,9 +439,7 @@ class TestWorkflowFail:
     def test_not_compatible(self, tmp_path_factory):
         path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
-            dataloaders=[
-                DummyDataLoader(path=path),
-            ],
+            dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
             thresholds=[TopN(10), FixedCutoff(0.5)],
             preprocessors=[Identity(), StandardScaler()],
@@ -473,7 +450,7 @@ class TestWorkflowFail:
         )
         results = workflow.run()
         assert results.shape == (4, 14)
-        assert results['Dataset'].value_counts()[f"DummyDataLoader(path='{path}')"] == 4
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
         assert results['Preprocessor'].value_counts()['Identity()'] == 2
         assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
         assert results['Detector'].value_counts()['SupervisedDetector()'] == 2
@@ -584,7 +561,7 @@ class TestShowProgress:
         with warnings.catch_warnings():
             warnings.simplefilter("error")  # Treat warnings as errors
             Workflow(
-                dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+                dataloaders=DemonstrationTimeSeriesLoader(),
                 metrics=AreaUnderROC(),
                 detectors=[RandomDetector(seed) for seed in range(5)],
                 n_jobs=n_jobs,
@@ -598,7 +575,8 @@ class TestShowProgress:
         class BlockTqdmImport:
             """A custom import hook that prevents tqdm from being imported."""
 
-            def find_spec(self, fullname, path, target=None):
+            @staticmethod
+            def find_spec(fullname, path, target=None):
                 if fullname == "tqdm":
                     raise ModuleNotFoundError("No module named 'tqdm'")
 
@@ -614,7 +592,7 @@ class TestShowProgress:
 
         with pytest.warns(Warning):
             workflow = Workflow(
-                dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+                dataloaders=DemonstrationTimeSeriesLoader(),
                 metrics=AreaUnderROC(),
                 detectors=[RandomDetector(seed) for seed in range(5)],
                 n_jobs=n_jobs,
@@ -633,7 +611,7 @@ class TestShowProgress:
         monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
 
         Workflow(
-            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            dataloaders=DemonstrationTimeSeriesLoader(),
             metrics=AreaUnderROC(),
             detectors=[RandomDetector(seed) for seed in range(5)],
             n_jobs=n_jobs,
@@ -647,7 +625,7 @@ class TestShowProgress:
         monkeypatch.setitem(sys.modules, "tqdm", MagicMock(tqdm=mock))
 
         Workflow(
-            dataloaders=DummyDataLoader(path=str(tmp_path_factory.mktemp('some-path-1'))),
+            dataloaders=DemonstrationTimeSeriesLoader(),
             metrics=AreaUnderROC(),
             detectors=[RandomDetector(seed) for seed in range(5)],
             n_jobs=n_jobs,

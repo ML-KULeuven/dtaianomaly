@@ -8,15 +8,22 @@ Custom data loaders can be implemented by extending :py:class:`~dtaianomaly.data
 """
 
 from .DataSet import DataSet
-from .LazyDataLoader import LazyDataLoader, from_directory
-from .synthetic import demonstration_time_series, make_sine_wave
+from .demonstration_time_series import (
+    DemonstrationTimeSeriesLoader,
+    demonstration_time_series,
+    make_sine_wave,
+)
+from .LazyDataLoader import LazyDataLoader
+from .PathDataLoader import PathDataLoader, from_directory
 from .UCRLoader import UCRLoader
 
 __all__ = [
     "LazyDataLoader",
+    "PathDataLoader",
     "DataSet",
     "from_directory",
     "demonstration_time_series",
+    "DemonstrationTimeSeriesLoader",
     "make_sine_wave",
     "UCRLoader",
 ]

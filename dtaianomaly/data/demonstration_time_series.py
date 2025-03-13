@@ -1,5 +1,17 @@
 import numpy as np
 
+from dtaianomaly.data import DataSet, LazyDataLoader
+
+
+class DemonstrationTimeSeriesLoader(LazyDataLoader):
+    """
+    A data loader object to load the demonstration time series.
+    """
+
+    def _load(self) -> DataSet:
+        X, y = demonstration_time_series()
+        return DataSet(X_test=X, y_test=y)
+
 
 def demonstration_time_series() -> (np.ndarray, np.ndarray):
     """
