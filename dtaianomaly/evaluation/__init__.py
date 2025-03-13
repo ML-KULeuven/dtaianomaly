@@ -19,6 +19,12 @@ from .point_adjusted_binary_metrics import (
 )
 from .simple_binary_metrics import FBeta, Precision, Recall
 from .simple_proba_metrics import AreaUnderPR, AreaUnderROC
+from .volume_under_surface import (
+    RangeAreaUnderPR,
+    RangeAreaUnderROC,
+    VolumeUnderPR,
+    VolumeUnderROC,
+)
 
 __all__ = [
     "Metric",
@@ -34,4 +40,8 @@ __all__ = [
     "PointAdjustedRecall",
     "PointAdjustedFBeta",
     "BestThresholdMetric",
+    "RangeAreaUnderROC",
+    "RangeAreaUnderPR",
+    "VolumeUnderROC",
+    "VolumeUnderPR",
 ]

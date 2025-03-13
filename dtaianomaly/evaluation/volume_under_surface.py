@@ -5,13 +5,11 @@ import numpy as np
 
 from dtaianomaly.evaluation.metrics import ProbaMetric
 
-# TODO docs -> Maybe create subsections on the webpage? Or add something similar to anomaly detectors?
-# TODO testing -> Maybe we can include the examples from tsb ad paper (fig 5)
-# TODO checks on input in __init__ (of VUS as well!)
-
 
 class RangeAucMetric(ProbaMetric, ABC):
-    """Base class for range-based area under the curve metrics.
+    """
+    # TODO docs -> Maybe create subsections on the webpage? Or add something similar to anomaly detectors?
+    Base class for range-based area under the curve metrics.
 
     All range-based metrics support continuous scorings and share a common implementation of the confusion matrix.
     See the subclasses' documentation for an explanation of the corresponding metric.
@@ -31,6 +29,20 @@ class RangeAucMetric(ProbaMetric, ABC):
         compatibility_mode: bool = False,
         max_samples: int = 250,
     ):
+        if buffer_size is not None:
+            if not isinstance(buffer_size, int) or isinstance(buffer_size, bool):
+                raise TypeError("`buffer_size` should be an integer")
+            if buffer_size < 1:
+                raise ValueError("`buffer_size`  should be at least 1!")
+
+        if not isinstance(compatibility_mode, bool):
+            raise TypeError("'compatibility_mode' should be a boolean")
+
+        if not isinstance(max_samples, int) or isinstance(max_samples, bool):
+            raise TypeError("`max_samples` should be an integer")
+        if max_samples < 1:
+            raise ValueError("`max_samples`  should be at least 1!")
+
         self.buffer_size = buffer_size
         self.compatibility_mode = compatibility_mode
         self.max_samples = max_samples
@@ -283,6 +295,12 @@ class VolumeUnderPR(RangeAucMetric):
         max_samples: int = 250,
     ):
         super().__init__(None, compatibility_mode, max_samples)
+
+        if not isinstance(max_buffer_size, int) or isinstance(max_buffer_size, bool):
+            raise TypeError("`max_buffer_size` should be an integer")
+        if max_buffer_size < 1:
+            raise ValueError("`max_buffer_size`  should be at least 1!")
+
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -330,6 +348,12 @@ class VolumeUnderROC(RangeAucMetric):
         max_samples: int = 250,
     ):
         super().__init__(None, compatibility_mode, max_samples)
+
+        if not isinstance(max_buffer_size, int) or isinstance(max_buffer_size, bool):
+            raise TypeError("`max_buffer_size` should be an integer")
+        if max_buffer_size < 1:
+            raise ValueError("`max_buffer_size`  should be at least 1!")
+
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
