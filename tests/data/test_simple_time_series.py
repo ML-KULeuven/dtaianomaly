@@ -1,6 +1,6 @@
 
 import numpy as np
-from dtaianomaly.data.demonstration_time_series import make_sine_wave, inject_anomalies, demonstration_time_series, DemonstrationTimeSeriesLoader
+from dtaianomaly.data.simple_time_series import make_sine_wave, inject_anomalies, demonstration_time_series, DemonstrationTimeSeriesLoader
 
 
 class TestDemonstrationTimeSeriesLoader:
