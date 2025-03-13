@@ -85,7 +85,7 @@ Visualization module
    >>> from dtaianomaly.visualization import plot_time_series_anomalies
    >>> from dtaianomaly.anomaly_detection import IsolationForest
    >>> from dtaianomaly.thresholding import FixedCutoff
-   >>> X, _ = demonstration_time_series()
+   >>> X, y = demonstration_time_series()
    >>> y_pred = IsolationForest(window_size=100).fit(X).predict_proba(X)
    >>> y_pred_binary = FixedCutoff(cutoff=0.9).threshold(y_pred)
    >>> fig = plot_time_series_anomalies(X, y, y_pred_binary, figsize=(10, 3))

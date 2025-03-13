@@ -33,6 +33,28 @@ class TestPlottingFunctions:
             additional_args['y_pred'] = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
         plot_function(univariate_time_series, y=y, time_steps=time_steps, **additional_args)
 
+    def test_given_feature_names_univariate(self, plot_function, additional_args, obligated_y_pred, univariate_time_series):
+        y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+        if obligated_y_pred:
+            additional_args['y_pred'] = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+        feature_names = ['dimension 0']
+        plot_function(univariate_time_series, y=y, feature_names=feature_names, **additional_args)
+
+    def test_given_feature_names_multivariate(self, plot_function, additional_args, obligated_y_pred, multivariate_time_series):
+        y = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
+        if obligated_y_pred:
+            additional_args['y_pred'] = np.random.choice([0, 1], size=multivariate_time_series.shape[0], replace=True)
+        feature_names = [f'dimension {i}' for i in range(multivariate_time_series.shape[1])]
+        plot_function(multivariate_time_series, y=y, feature_names=feature_names, **additional_args)
+
+    def test_given_feature_names_different_dimensionality(self, plot_function, additional_args, obligated_y_pred, univariate_time_series):
+        y = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+        if obligated_y_pred:
+            additional_args['y_pred'] = np.random.choice([0, 1], size=univariate_time_series.shape[0], replace=True)
+        feature_names = ['dimension 0', 'dimension 1']
+        with pytest.raises(ValueError):
+            plot_function(univariate_time_series, y=y, feature_names=feature_names, **additional_args)
+
 
 @pytest.mark.parametrize('plot_function,additional_args,obligated_y_pred', [
     (visualization.plot_demarcated_anomalies, {}, False),
@@ -77,7 +99,7 @@ class TestNonBinaryPrediction:
     (visualization.plot_demarcated_anomalies, {}, True, False),
     (visualization.plot_time_series_colored_by_score, {}, True, False),
     (visualization.plot_time_series_anomalies, {}, True, True),
-    (lambda X, ax, time_steps: None, {}, False, False),  # Test if it is possible to provide no 'y'
+    (lambda X, ax, time_steps=None: None, {}, False, False),  # Test if it is possible to provide no 'y'
 ])
 class TestPlotWithZoom:
 

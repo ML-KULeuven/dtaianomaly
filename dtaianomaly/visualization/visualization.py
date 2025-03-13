@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,6 +11,7 @@ def plot_time_series_colored_by_score(
     X: np.ndarray,
     y: np.ndarray,
     time_steps: np.array = None,
+    feature_names: List[str] = None,
     ax: plt.Axes = None,
     nb_colors: int = 100,
     **kwargs,
@@ -30,6 +31,11 @@ def plot_time_series_colored_by_score(
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
+    feature_names: list of str of shape (n_attributes), default=None
+        The names of each feature in the given time series ``X``. Because the
+        color of each attribute varies over time (to indicate ``y``), the labels
+        are not shown for simplicity. The parameter is available for compatability
+        reasons.
     ax: plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
@@ -53,6 +59,11 @@ def plot_time_series_colored_by_score(
         plt.figure(**kwargs)
         ax = plt.gca()
 
+    if feature_names is not None and len(feature_names) != utils.get_dimension(X):
+        raise ValueError(
+            f"The number of feature names ({len(feature_names)}) different from the dimension of X ({utils.get_dimension(X)})!"
+        )
+
     # Format the time steps
     time_steps = format_time_steps(time_steps, X.shape[0])
 
@@ -63,6 +74,7 @@ def plot_time_series_colored_by_score(
     for i in range(0, X.shape[0] - 1):
         color = colormap(y_binned[i])
         ax.plot([time_steps[i], time_steps[i + 1]], X[[i, i + 1]], c=color)
+
     return plt.gcf()
 
 
@@ -71,6 +83,7 @@ def plot_time_series_anomalies(
     y: np.ndarray,
     y_pred: np.ndarray,
     time_steps: np.array = None,
+    feature_names: List[str] = None,
     ax: plt.Axes = None,
     **kwargs,
 ) -> plt.Figure:
@@ -89,6 +102,8 @@ def plot_time_series_anomalies(
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
+    feature_names: list of str of shape (n_attributes), default=None
+        The names of each feature in the given time series ``X``.
     ax: plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
@@ -106,6 +121,11 @@ def plot_time_series_anomalies(
         plt.figure(**kwargs)
         ax = plt.gca()
 
+    if feature_names is not None and len(feature_names) != utils.get_dimension(X):
+        raise ValueError(
+            f"The number of feature names ({len(feature_names)}) different from the dimension of X ({utils.get_dimension(X)})!"
+        )
+
     # Check if the given y values are binary
     if not np.all(np.isin(y, [0, 1])):
         raise ValueError("The predicted anomaly scores must be binary.")
@@ -122,6 +142,11 @@ def plot_time_series_anomalies(
 
     # Plot the time series
     ax.plot(time_steps, X)
+    if feature_names is not None:
+        if len(feature_names) == 1:
+            ax.set_ylabel(feature_names[0])
+        else:
+            ax.add_artist(ax.legend(feature_names))
 
     # Scatter points for TP, FP, FN
     X_reshaped = X.reshape((-1, utils.get_dimension(X)))
@@ -140,6 +165,7 @@ def plot_demarcated_anomalies(
     y: np.array,
     ax: plt.Axes = None,
     time_steps: np.array = None,
+    feature_names: List[str] = None,
     color_anomaly: str = "red",
     alpha_anomaly: float = 0.2,
     **kwargs,
@@ -160,6 +186,8 @@ def plot_demarcated_anomalies(
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
+    feature_names: list of str of shape (n_attributes), default=None
+        The names of each feature in the given time series ``X``.
     color_anomaly: str, default='red'
         The color in which the anomaly should be marked.
     alpha_anomaly: float, default=0.2
@@ -176,6 +204,11 @@ def plot_demarcated_anomalies(
     if not np.all(np.isin(y, [0, 1])):
         raise ValueError("The predicted anomaly scores must be binary!")
 
+    if feature_names is not None and len(feature_names) != utils.get_dimension(X):
+        raise ValueError(
+            f"The number of feature names ({len(feature_names)}) different from the dimension of X ({utils.get_dimension(X)})!"
+        )
+
     # Initialize an axis object if none has been given
     if ax is None:
         plt.figure(**kwargs)
@@ -190,7 +223,7 @@ def plot_demarcated_anomalies(
     time_steps = format_time_steps(time_steps, X.shape[0])
 
     # Plot the time series data
-    ax.plot(time_steps, X)
+    ax.plot(time_steps, X, label=feature_names)
 
     # Plot the anomalous zones
     for start, end in zip(start_events, end_events):
@@ -201,6 +234,15 @@ def plot_demarcated_anomalies(
             alpha=alpha_anomaly,
         )
 
+    # Plot the legend
+    if feature_names is not None:
+        if len(feature_names) == 1:
+            ax.set_ylabel(feature_names[0])
+        else:
+            ax.legend(
+                loc="lower center", bbox_to_anchor=(0.5, 1), ncols=len(feature_names)
+            )
+
     # Return the active figure
     return plt.gcf()
 
@@ -210,8 +252,9 @@ def plot_with_zoom(
     start_zoom: int,
     end_zoom: int,
     y: np.array = None,
-    time_steps: np.array = None,
     y_pred: np.array = None,
+    time_steps: np.array = None,
+    feature_names: List[str] = None,
     method_to_plot=plot_demarcated_anomalies,
     color: str = "blue",
     linewidth: float = 3,
@@ -231,13 +274,16 @@ def plot_with_zoom(
     end_zoom: int
         The index in the data at which the zoom ends.
     y: np.array of shape (n_samples), default=None
-        The anomaly
-    time_steps: np.array of shape (n_samples), default=None
-        The time steps to plot. If no time steps are provided, then the
-        default range ``[0, ..., n_samples-1]`` will be used.
+        The anomaly ground truth anomaly scores, to be passed to
+        the ``method_to_plot`` function.
     y_pred: np.array of shape (n_samples), default=None
         The predicted anomaly scores to plot. Is necessary if the
         ``method_to_plot`` requires predicted anomaly scores.
+    time_steps: np.array of shape (n_samples), default=None
+        The time steps to plot. If no time steps are provided, then the
+        default range ``[0, ..., n_samples-1]`` will be used.
+    feature_names: list of str of shape (n_attributes), default=None
+        The names of each feature in the given time series ``X``.
     method_to_plot: callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
         Method used for plotting the data. Should take as inputs
         the values ``X`` (the time series data), ``y`` (the anomaly
@@ -262,29 +308,29 @@ def plot_with_zoom(
     # Create the main figure and two subplots (axes)
     fig, (ax_main, ax_zoom) = plt.subplots(2, 1, **kwargs)
 
-    # Format the time steps
-    time_steps = format_time_steps(time_steps, X.shape[0])
-
-    # Format the y-parameters
-    y_parameters = {}
-    y_parameters_zoom = {}
+    # Format the kwargs
+    kwargs_full = {"X": X}
+    kwargs_zoom = {"X": X[start_zoom:end_zoom]}
     if y is not None:
-        y_parameters["y"] = y
-        y_parameters_zoom["y"] = y[start_zoom:end_zoom]
+        kwargs_full["y"] = y
+        kwargs_zoom["y"] = y[start_zoom:end_zoom]
     if y_pred is not None:
-        y_parameters["y_pred"] = y_pred
-        y_parameters_zoom["y_pred"] = y_pred[start_zoom:end_zoom]
+        kwargs_full["y_pred"] = y_pred
+        kwargs_zoom["y_pred"] = y_pred[start_zoom:end_zoom]
+    if time_steps is not None:
+        kwargs_full["time_steps"] = time_steps
+        kwargs_zoom["time_steps"] = time_steps[start_zoom:end_zoom]
+    if feature_names is not None:
+        kwargs_full["feature_names"] = (
+            feature_names  # Only pass the feature names to the first axis
+        )
 
     # Plot the data
-    method_to_plot(X=X, ax=ax_main, time_steps=time_steps, **y_parameters)
-    method_to_plot(
-        X=X[start_zoom:end_zoom],
-        ax=ax_zoom,
-        time_steps=time_steps[start_zoom:end_zoom],
-        **y_parameters_zoom,
-    )
+    method_to_plot(ax=ax_main, **kwargs_full)
+    method_to_plot(ax=ax_zoom, **kwargs_zoom)
 
     # Draw vertical lines to demarcate the area in which is zoomed
+    time_steps = format_time_steps(time_steps, X.shape[0])
     for ax in [ax_main, ax_zoom]:
         for x in [start_zoom, end_zoom]:
             ax.axvline(
@@ -323,6 +369,7 @@ def plot_anomaly_scores(
     y: np.array,
     y_pred: np.array,
     time_steps: np.array = None,
+    feature_names: List[str] = None,
     method_to_plot=plot_demarcated_anomalies,
     confidence: np.array = None,
     **kwargs,
@@ -342,6 +389,8 @@ def plot_anomaly_scores(
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
+    feature_names: list of str of shape (n_attributes), default=None
+        The names of each feature in the given time series ``X``.
     method_to_plot: callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
         Method used for plotting the data along with the ground truth
         anomaly scores. Should take as inputs the values ``X`` (the
@@ -366,7 +415,9 @@ def plot_anomaly_scores(
 
     # Plot the time series data
     ax_data.set_title("Time series data")
-    method_to_plot(X=X, y=y, ax=ax_data, time_steps=time_steps)
+    method_to_plot(
+        X=X, y=y, ax=ax_data, time_steps=time_steps, feature_names=feature_names
+    )
 
     # Plot the anomaly scores
     ax_pred.set_title("Predicted anomaly scores")
