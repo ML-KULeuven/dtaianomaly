@@ -115,3 +115,30 @@ class TestVUSMetrics:
         y_true = np.array([0, 1, 1, 1, 0, 0, 0, 0, 0, 0])
         result = VolumeUnderROC(max_buffer_size=200).compute(y_true, y_pred)
         assert result == pytest.approx(0.9904, 1e-4)
+
+
+class TestStr:
+
+    def test_range_roc(self):
+        assert str(RangeAreaUnderPR()) == "RangeAreaUnderPR()"
+        assert str(RangeAreaUnderPR(buffer_size=50)) == "RangeAreaUnderPR(buffer_size=50)"
+        assert str(RangeAreaUnderPR(compatibility_mode=True)) == "RangeAreaUnderPR(compatibility_mode=True)"
+        assert str(RangeAreaUnderPR(buffer_size=50, max_samples=150)) == "RangeAreaUnderPR(buffer_size=50,max_samples=150)"
+
+    def test_range_pr(self):
+        assert str(RangeAreaUnderROC()) == "RangeAreaUnderROC()"
+        assert str(RangeAreaUnderROC(buffer_size=50)) == "RangeAreaUnderROC(buffer_size=50)"
+        assert str(RangeAreaUnderROC(compatibility_mode=True)) == "RangeAreaUnderROC(compatibility_mode=True)"
+        assert str(RangeAreaUnderROC(buffer_size=50, max_samples=150)) == "RangeAreaUnderROC(buffer_size=50,max_samples=150)"
+
+    def test_vus_roc(self):
+        assert str(VolumeUnderPR()) == "VolumeUnderPR()"
+        assert str(VolumeUnderPR(max_buffer_size=50)) == "VolumeUnderPR(max_buffer_size=50)"
+        assert str(VolumeUnderPR(compatibility_mode=True)) == "VolumeUnderPR(compatibility_mode=True)"
+        assert str(VolumeUnderPR(max_buffer_size=50, max_samples=150)) == "VolumeUnderPR(max_buffer_size=50,max_samples=150)"
+
+    def test_vus_pr(self):
+        assert str(VolumeUnderROC()) == "VolumeUnderROC()"
+        assert str(VolumeUnderROC(max_buffer_size=50)) == "VolumeUnderROC(max_buffer_size=50)"
+        assert str(VolumeUnderROC(compatibility_mode=True)) == "VolumeUnderROC(compatibility_mode=True)"
+        assert str(VolumeUnderROC(max_buffer_size=50, max_samples=150)) == "VolumeUnderROC(max_buffer_size=50,max_samples=150)"

@@ -161,7 +161,8 @@ class RangeAucMetric(ProbaMetric, ABC):
 
 
 class RangeAreaUnderPR(RangeAucMetric):
-    """Computes the area under the precision-recall-curve using the range-based precision and range-based recall
+    """
+    Computes the area under the precision-recall-curve using the range-based precision and range-based recall
     definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
 
     We first extend the anomaly labels by two slopes of ``buffer_size//2`` length on both sides of each anomaly,
@@ -211,7 +212,8 @@ class RangeAreaUnderPR(RangeAucMetric):
 
 
 class RangeAreaUnderROC(RangeAucMetric):
-    """Computes the area under the receiver-operating-characteristic-curve using the range-based TPR and
+    """
+    Computes the area under the receiver-operating-characteristic-curve using the range-based TPR and
     range-based FPR definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
 
     We first extend the anomaly labels by two slopes of ``buffer_size//2`` length on both sides of each anomaly,
@@ -261,7 +263,8 @@ class RangeAreaUnderROC(RangeAucMetric):
 
 
 class VolumeUnderPR(RangeAucMetric):
-    """Computes the volume under the precision-recall-buffer_size-surface using the range-based precision and
+    """
+    Computes the volume under the precision-recall-buffer_size-surface using the range-based precision and
     range-based recall definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
 
     For all buffer sizes from 0 to ``max_buffer_size``, we first extend the anomaly labels by two slopes of
@@ -314,7 +317,8 @@ class VolumeUnderPR(RangeAucMetric):
 
 
 class VolumeUnderROC(RangeAucMetric):
-    """Computes the volume under the receiver-operating-characteristic-buffer_size-surface using the range-based TPR and
+    """
+    Computes the volume under the receiver-operating-characteristic-buffer_size-surface using the range-based TPR and
     range-based FPR definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
 
     For all buffer sizes from 0 to ``max_buffer_size``, we first extend the anomaly labels by two slopes of
