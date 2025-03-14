@@ -7,7 +7,7 @@ from dtaianomaly.thresholding import FixedCutoff
 binary_metrics = [Precision(), Recall(), FBeta(), PointAdjustedPrecision(), PointAdjustedRecall(), PointAdjustedFBeta()]
 proba_metrics = [
     AreaUnderROC(), AreaUnderPR(), ThresholdMetric(FixedCutoff(0.5), Precision()), BestThresholdMetric(Precision()),
-    VolumeUnderPR(), VolumeUnderROC(), RangeAreaUnderPR(), RangeAreaUnderROC()
+    RangeAreaUnderPR(), RangeAreaUnderROC(), VolumeUnderPR(max_samples=20, max_buffer_size=250), VolumeUnderROC(max_samples=20, max_buffer_size=250),
 ]
 
 
@@ -39,6 +39,7 @@ class TestMetrics:
             metric.compute(y_true, y_pred)
 
     def test_between_0_and_1(self, metric):
+        print(metric)
         rng = np.random.default_rng()
         y_true = rng.choice([0, 1], size=1000, replace=True)
         y_pred = rng.choice([0, 1], size=1000, replace=True)

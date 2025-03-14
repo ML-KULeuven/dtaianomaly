@@ -142,3 +142,15 @@ class TestStr:
         assert str(VolumeUnderROC(max_buffer_size=50)) == "VolumeUnderROC(max_buffer_size=50)"
         assert str(VolumeUnderROC(compatibility_mode=True)) == "VolumeUnderROC(compatibility_mode=True)"
         assert str(VolumeUnderROC(max_buffer_size=50, max_samples=150)) == "VolumeUnderROC(max_buffer_size=50,max_samples=150)"
+
+    @pytest.mark.parametrize('metric,string', [
+        (VolumeUnderROC(), "VolumeUnderROC()"),
+        (VolumeUnderPR(), "VolumeUnderPR()")
+    ])
+    def test_vus_roc_after_running(self, metric, string):
+        # Buffer size is not None, but this shouldn't show in the string approach
+        assert str(metric) == string
+        y_pred = np.array([0.05, 0.2, 1., 0.2, 0.1, 0.05, 0.1, 0.05, 0.1, 0.07])
+        y_true = np.array([0, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+        metric.compute(y_true, y_pred)
+        assert str(metric) == string

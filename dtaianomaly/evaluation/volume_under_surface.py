@@ -8,15 +8,8 @@ from dtaianomaly.evaluation.metrics import ProbaMetric
 
 class RangeAucMetric(ProbaMetric, ABC):
     """
-    # TODO docs -> Maybe create subsections on the webpage? Or add something similar to anomaly detectors?
-    Base class for range-based area under the curve metrics.
-
-    All range-based metrics support continuous scorings and share a common implementation of the confusion matrix.
-    See the subclasses' documentation for an explanation of the corresponding metric.
-
-    .. note::
-
-       These implementations are adapted from TimeEval [ref] (add ref in the note?)
+    Base class for range-based area under the curve metrics, to share common implementations of
+    the confusion matrix.
     """
 
     buffer_size: Optional[int]
@@ -162,25 +155,14 @@ class RangeAucMetric(ProbaMetric, ABC):
 
 class RangeAreaUnderPR(RangeAucMetric):
     """
-    Computes the area under the precision-recall-curve using the range-based precision and range-based recall
-    definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
+    Computes the area under the range-based precision-recall-curve [paparrizos2022volume]_.
 
-    We first extend the anomaly labels by two slopes of ``buffer_size//2`` length on both sides of each anomaly,
-    uniformly sample thresholds from the anomaly score, and then compute the confusion matrix for all thresholds.
-    Using the resulting precision and recall values, we can plot a curve and compute its area.
-
-    We make some changes to the original implementation from [PaparrizosEtAl2022]_ because we do not agree with the
-    original assumptions. To reproduce the original results, you can set the parameter ``compatibility_mode=True``. This
-    will compute exactly the same values as the code by the authors of the paper.
-
-    The following things are different in TimeEval compared to the original version:
-
-    - For the recall (FPR) existence reward, we count anomalies as separate events, even if the added slopes overlap.
-    - Overlapping slopes don’t sum up in their anomaly weight, but we just take to maximum anomaly weight for each
-      point in the ground truth.
-    - The original slopes are asymmetric: The slopes at the end of anomalies are a single point shorter than the ones at
-      the beginning of anomalies. We use symmetric slopes of the same size for the beginning and end of anomalies.
-    - We use a linear approximation of the slopes instead of the convex slope shape presented in the paper.
+    A slope of length ``buffer_size // 2`` is added at the beginning and end of each anomalous
+    event. Next, the precision and recall is computed, taking into account the slopes in ground
+    truth labels to allow for some small misalignment in the predicted and actual anomalous events.
+    Then, ``max_samples`` thresholds are sampled uniformly from the anomaly scores to compute
+    the new precision and recall, after which the area under the curve can be computed as final
+    evaluation score.
 
     Parameters
     ----------
@@ -213,25 +195,14 @@ class RangeAreaUnderPR(RangeAucMetric):
 
 class RangeAreaUnderROC(RangeAucMetric):
     """
-    Computes the area under the receiver-operating-characteristic-curve using the range-based TPR and
-    range-based FPR definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
+    Computes the area under the range-based ROC-curve [paparrizos2022volume]_.
 
-    We first extend the anomaly labels by two slopes of ``buffer_size//2`` length on both sides of each anomaly,
-    uniformly sample thresholds from the anomaly score, and then compute the confusion matrix for all thresholds.
-    Using the resulting false positive (FPR) and false positive rates (FPR), we can plot a curve and compute its area.
-
-    We make some changes to the original implementation from [PaparrizosEtAl2022]_ because we do not agree with the
-    original assumptions. To reproduce the original results, you can set the parameter ``compatibility_mode=True``. This
-    will compute exactly the same values as the code by the authors of the paper.
-
-    The following things are different in TimeEval compared to the original version:
-
-    - For the recall (FPR) existence reward, we count anomalies as separate events, even if the added slopes overlap.
-    - Overlapping slopes don’t sum up in their anomaly weight, but we just take to maximum anomaly weight for each
-      point in the ground truth.
-    - The original slopes are asymmetric: The slopes at the end of anomalies are a single point shorter than the ones at
-      the beginning of anomalies. We use symmetric slopes of the same size for the beginning and end of anomalies.
-    - We use a linear approximation of the slopes instead of the convex slope shape presented in the paper.
+    A slope of length ``buffer_size // 2`` is added at the beginning and end of each anomalous
+    event. Next, the false positive rate and true positive rate is computed, taking into account
+    the slopes in ground truth labels to allow for some small misalignment in the predicted and
+    actual anomalous events. Then, ``max_samples`` thresholds are sampled uniformly from the
+    anomaly scores to compute the new FPR and TPR, after which the area under the curve
+    can be computed as final evaluation score.
 
     Parameters
     ----------
@@ -264,16 +235,13 @@ class RangeAreaUnderROC(RangeAucMetric):
 
 class VolumeUnderPR(RangeAucMetric):
     """
-    Computes the volume under the precision-recall-buffer_size-surface using the range-based precision and
-    range-based recall definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
+    Computes the volume under the range-based precision-recall-curve [paparrizos2022volume]_.
 
-    For all buffer sizes from 0 to ``max_buffer_size``, we first extend the anomaly labels by two slopes of
-    ``buffer_size//2`` length on both sides of each anomaly, uniformly sample thresholds from the anomaly score, and
-    then compute the confusion matrix for all thresholds. Using the resulting precision and recall values, we can plot
-    a curve and compute its area.
-
-    This metric includes similar changes as :class:`~timeeval.metrics.RangePrAUC`, which can be disabled using the
-    ``compatibility_mode`` parameter.
+    Create a buffer around the anomalous event (similar as for :py:class:`~dtaianomaly.evaluation.RangeAreaUnderPR`)
+    for each buffer size in the range ``[0, max_buffer_size]``. Then, ``max_samples`` thresholds are
+    sampled uniformly from the anomaly scores to compute the new precision and recall for each buffer size.
+    Also varying the buffer size results in a volume (instead of a curve), and the final evaluation
+    score is computed as the volume under this surface.
 
     Parameters
     ----------
@@ -318,16 +286,13 @@ class VolumeUnderPR(RangeAucMetric):
 
 class VolumeUnderROC(RangeAucMetric):
     """
-    Computes the volume under the receiver-operating-characteristic-buffer_size-surface using the range-based TPR and
-    range-based FPR definition from Paparrizos et al. published at VLDB 2022 [PaparrizosEtAl2022]_.
+    Computes the volume under the range-based ROC-curve [paparrizos2022volume]_.
 
-    For all buffer sizes from 0 to ``max_buffer_size``, we first extend the anomaly labels by two slopes of
-    ``buffer_size//2`` length on both sides of each anomaly, uniformly sample thresholds from the anomaly score, and
-    then compute the confusion matrix for all thresholds. Using the resulting false positive (FPR) and false positive
-    rates (FPR), we can plot a curve and compute its area.
-
-    This metric includes similar changes as :class:`~timeeval.metrics.RangeRocAUC`, which can be disabled using the
-    ``compatibility_mode`` parameter.
+    Create a buffer around the anomalous event (similar as for :py:class:`~dtaianomaly.evaluation.RangeAreaUnderROC`)
+    for each buffer size in the range ``[0, max_buffer_size]``. Then, ``max_samples`` thresholds are
+    sampled uniformly from the anomaly scores to compute the new FPR and TPR for each buffer size.
+    Also varying the buffer size results in a volume (instead of a curve), and the final evaluation
+    score is computed as the volume under this surface.
 
     Parameters
     ----------

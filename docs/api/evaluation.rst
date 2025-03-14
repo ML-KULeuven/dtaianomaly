@@ -3,18 +3,20 @@ Evaluation module
 
 .. automodule:: dtaianomaly.evaluation
 
-.. autoclass:: dtaianomaly.evaluation.Metric
-   :members:
+Implemented evaluation metrics
+------------------------------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   evaluation/*
+
+Base classes
+------------
 
 .. autoclass:: dtaianomaly.evaluation.BinaryMetric
+   :members:
+
 .. autoclass:: dtaianomaly.evaluation.ProbaMetric
-.. autoclass:: dtaianomaly.evaluation.ThresholdMetric
-.. autoclass:: dtaianomaly.evaluation.Precision
-.. autoclass:: dtaianomaly.evaluation.PointAdjustedPrecision
-.. autoclass:: dtaianomaly.evaluation.Recall
-.. autoclass:: dtaianomaly.evaluation.PointAdjustedRecall
-.. autoclass:: dtaianomaly.evaluation.FBeta
-.. autoclass:: dtaianomaly.evaluation.PointAdjustedFBeta
-.. autoclass:: dtaianomaly.evaluation.AreaUnderPR
-.. autoclass:: dtaianomaly.evaluation.AreaUnderROC
-.. autoclass:: dtaianomaly.evaluation.BestThresholdMetric
+   :inherited-members:

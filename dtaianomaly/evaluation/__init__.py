@@ -4,7 +4,7 @@ anomaly detector. It can be imported as follows:
 
 >>> from dtaianomaly import evaluation
 
-Custom evaluation metrics can be implemented by extending :py:class:`~dtaianomaly.evaluation.Metric` or
+Custom evaluation metrics can be implemented by extending :py:class:`~dtaianomaly.evaluation.BinaryMetric` or
 :py:class:`~dtaianomaly.evaluation.ProbaMetric`. The former expects predicted "decisions" (anomaly or not),
 the latter predicted "scores" (more or less anomalous). This distinction is important for later use in
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
