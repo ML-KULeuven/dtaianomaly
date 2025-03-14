@@ -339,9 +339,9 @@ class TestInterpretPreprocessors:
     (metric_entry, evaluation.RangeAreaUnderROC, {}),
     (metric_entry, evaluation.RangeAreaUnderROC, {'buffer_size': 100}),
     (metric_entry, evaluation.VolumeUnderPR, {}),
-    (metric_entry, evaluation.VolumeUnderPR, {'buffer_size': 100}),
+    (metric_entry, evaluation.VolumeUnderPR, {'max_buffer_size': 100}),
     (metric_entry, evaluation.VolumeUnderROC, {}),
-    (metric_entry, evaluation.VolumeUnderROC, {'buffer_size': 100}),
+    (metric_entry, evaluation.VolumeUnderROC, {'max_buffer_size': 100}),
     # Detectors
     (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
     (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),
