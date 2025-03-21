@@ -13,6 +13,7 @@ def log_error(
     data_loader: LazyDataLoader,
     pipeline: Pipeline = None,
     fit_on_X_train: bool = True,
+    **kwargs,
 ) -> str:
 
     # Ensure the directory exists
@@ -93,8 +94,16 @@ def log_error(
                 train_data = "X_train"
             else:
                 train_data = "X_test"
-            error_file.write(
-                f"y_pred = pipeline.fit(data.{train_data}, data.y_train).predict_proba(data.X_test)\n\n"
-            )
+
+            if len(kwargs) == 0:
+                error_file.write(
+                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train).predict_proba(data.X_test)\n\n"
+                )
+            else:
+
+                error_file.write(
+                    f"kwargs = {kwargs}\n"
+                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train, **kwargs).predict_proba(data.X_test)\n\n"
+                )
 
     return os.path.abspath(file_path)

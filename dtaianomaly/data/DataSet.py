@@ -3,7 +3,12 @@ from typing import List, Optional
 import numpy as np
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.utils import get_dimension, is_univariate, is_valid_array_like
+from dtaianomaly.utils import (
+    get_dimension,
+    is_univariate,
+    is_valid_array_like,
+    is_valid_list,
+)
 
 
 class DataSet:
@@ -18,33 +23,88 @@ class DataSet:
         The test time series data.
     y_test: array-like of shape (n_samples_test)
         The ground truth anomaly labels of the test data.
-    X_train: array-like of shape (n_samples_train, n_attributes), optional
+    X_train: array-like of shape (n_samples_train, n_attributes), default=None
         The train time series. If not given, then the test data will
         be used for training and the data is only compatible with
         unsupervised anomaly detectors.
-    y_train: array-like of shape (n_samples_train), optional
+    y_train: array-like of shape (n_samples_train), default=None
         The ground truth anomaly labels of the training data. If not given,
         either the train data should not be given either, or the train
         data is assumed to consist of only normal data.
+    feature_names: list of str, default=None
+        The name of each feature in the data. The number of names must be
+        identical to the number of actual features. If None, then the data
+        is assumed to be unnamed.
+    time_steps_test: array-like of shape (n_samples_test), default=None
+        The time steps corresponding to the test data. If ``None``, then no
+        time steps are known.
+    time_steps_train: array-like of shape (n_samples_train), default=None
+        The time steps corresponding to the train data. If ``None``, then no
+        time steps are known. Can only be provided if there is actually some
+        training data given (``X_train` != None``).
     """
 
     X_test: np.ndarray
-    y_test: np.ndarray
-    X_train: np.ndarray = None
-    y_train: np.ndarray = None
+    y_test: np.array
+    X_train: Optional[np.ndarray]
+    y_train: Optional[np.array]
+    feature_names: Optional[List[str]]
+    time_steps_test: Optional[np.array]
+    time_steps_train: Optional[np.array]
 
     def __init__(
         self,
         X_test: np.ndarray,
-        y_test: np.ndarray,
+        y_test: np.array,
         X_train: np.ndarray = None,
-        y_train: np.ndarray = None,
+        y_train: np.array = None,
+        feature_names: List[str] = None,
+        time_steps_test: np.array = None,
+        time_steps_train: np.array = None,
     ):
+        # Check actual data
         self.check_is_valid(X_test, y_test, X_train, y_train)
+
+        # Check feature names
+        if feature_names is not None:
+            if not is_valid_list(feature_names, str):
+                raise ValueError("The given feature_names are not a valid list!")
+            if len(feature_names) != get_dimension(X_test):
+                raise ValueError(
+                    "The number of features do not correspond to the given number of feature names!"
+                )
+
+        # Check time steps for the test data
+        if time_steps_test is not None:
+            if not is_valid_array_like(time_steps_test):
+                raise ValueError("The given time_steps_test is not a valid array-like!")
+            if time_steps_test.shape[0] != X_test.shape[0]:
+                raise ValueError(
+                    "The number of test time steps do not correspond to the actual number of observations in the test data!"
+                )
+
+        # Check time steps for the train data
+        if time_steps_train is not None:
+            if X_train is None:
+                raise ValueError(
+                    "There have been time steps given for the training data, but no training data!"
+                )
+            if not is_valid_array_like(time_steps_train):
+                raise ValueError(
+                    "The given time_steps_train is not a valid array-like!"
+                )
+            if time_steps_train.shape[0] != X_train.shape[0]:
+                raise ValueError(
+                    "The number of train time steps do not correspond to the actual number of observations in the train data!"
+                )
+
         self.X_test = X_test
         self.y_test = y_test
         self.X_train = X_train
         self.y_train = y_train
+        self.feature_names = feature_names
+        self.time_steps_test = time_steps_test
+        self.time_steps_train = time_steps_train
 
     @staticmethod
     def check_is_valid(

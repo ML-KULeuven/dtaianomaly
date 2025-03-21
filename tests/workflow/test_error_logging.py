@@ -56,10 +56,10 @@ class ErrorAnomalyDetector(BaseDetector):
     def __init__(self):
         super().__init__(Supervision.UNSUPERVISED)
 
-    def fit(self, X, y=None):
-        return self
+    def _fit(self, X, y=None, **kwargs):
+        pass
 
-    def decision_function(self, X):
+    def _decision_function(self, X):
         raise Exception('An error occurred when detecting anomalies!')
 
 
@@ -177,8 +177,35 @@ class TestErrorLogging:
             )
         )
         assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
         assert error_file_contains_error(error_file, error)
         assert error_file_runs_successfully(error_file)
+
+    def test_log_error_with_kwargs(self, tmp_path_factory):
+        kwargs = {
+            'lower_bound': 32,
+            'upper_bound': 16
+        }
+        X = DemonstrationDataLoaderWithTrainData().load().X_train
+        error = ValueError(
+                f"Something went wrong when computing the window size using 'fft', "
+                f"with lower bound 32 and upper bound 16 on a time series "
+                f"with shape {X.shape}!"
+            )
+        error_file = log_error(
+            error_log_path=str(tmp_path_factory.mktemp('error-log')),
+            exception=error,
+            data_loader=DemonstrationDataLoaderWithTrainData(),
+            pipeline=Pipeline(
+                preprocessor=Identity(),
+                detector=IsolationForest('fft')
+            ),
+            **kwargs
+        )
+        assert error_file_has_correct_syntax(error_file)
+        assert error_file_contains_dtaianomaly_version(error_file, dtaianomaly.__version__)
+        assert error_file_contains_error(error_file, error)
+        assert error_file_results_in_error(error_file, error)
 
 
 def error_file_has_correct_syntax(error_file):

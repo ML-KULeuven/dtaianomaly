@@ -6,7 +6,7 @@ from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
 from dtaianomaly.evaluation.metrics import ProbaMetric
 from dtaianomaly.pipeline.Pipeline import Pipeline
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
-from dtaianomaly.utils import is_valid_array_like, is_valid_list
+from dtaianomaly.utils import is_valid_list
 
 
 class EvaluationPipeline:
@@ -22,7 +22,7 @@ class EvaluationPipeline:
         The preprocessors to include in this evaluation pipeline.
     detector: BaseDetector
         The anomaly detector to include in this evaluation pipeline.
-    metrics: list of Probametric objects
+    metrics: list of ProbaMetric objects
         The evaluation metrics to compute in this evaluation pipeline.
     """
 
@@ -42,54 +42,7 @@ class EvaluationPipeline:
         self.pipeline = Pipeline(preprocessor=preprocessor, detector=detector)
         self.metrics = metrics if isinstance(metrics, list) else [metrics]
 
-    def run(
-        self,
-        X_test: np.ndarray,
-        y_test: np.array,
-        X_train: np.ndarray,
-        y_train: Optional[np.ndarray],
-    ) -> Dict[str, float]:
-        """
-        Run the pipeline and evaluate performance. The pipeline will
-        be trained on the given train data (potentially without labels)
-        and performance will be estimated on the test data.
-
-        Parameters
-        ----------
-        X_test: array-like of shape (n_samples_test, n_attributes)
-            The test time series data.
-        y_test: array-like of shape (n_samples_test)
-            The ground truth anomaly labels of the test data.
-        X_train: array-like of shape (n_samples_train, n_attributes)
-            The train time series data.
-        y_train: array-like of shape (n_samples) or ``None``.
-            The ground truth anomaly labels of the train data. Note that, even
-            though ``y_train`` can be ``None``, it must be provided (i.e., there
-            is no default value).
-
-        Returns
-        -------
-        performances: Dict[str, float]
-            The evaluation of the performance metrics. The keys are
-            string descriptors of the performance metrics, with values
-            the corresponding performance score.
-        """
-        # Validate the input
-        if not is_valid_array_like(X_test):
-            raise ValueError("X_test is not a valid array-like!")
-        if not is_valid_array_like(y_test):
-            raise ValueError("y_test is not a valid array-like!")
-        if not is_valid_array_like(X_train):
-            raise ValueError("X_train is not a valid array-like!")
-        if not (y_train is None or is_valid_array_like(y_train)):
-            raise ValueError("y_train is not a valid array-like!")
-
-        self.fit(X_train, y_train)
-        y_pred = self.predict(X_test)
-        y_test_ = self.format_y_test(X_test, y_test)
-        return self.evaluate(y_test_, y_pred)
-
-    def fit(self, X_train: np.ndarray, y_train: Optional[np.array]) -> None:
+    def fit(self, X_train: np.ndarray, y_train: Optional[np.array], **kwargs) -> None:
         """
         Apply the fit stage of this evaluation pipeline.
 
@@ -102,7 +55,7 @@ class EvaluationPipeline:
             though ``y_train`` can be ``None``, it must be provided (i.e., there
             is no default value).
         """
-        self.pipeline.fit(X_train, y_train)
+        self.pipeline.fit(X_train, y_train, **kwargs)
 
     def predict(self, X_test: np.ndarray):
         """

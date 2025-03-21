@@ -2,9 +2,7 @@ from typing import Optional, Union
 
 import numpy as np
 import stumpy
-from sklearn.exceptions import NotFittedError
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
@@ -115,72 +113,12 @@ class MatrixProfileDetector(BaseDetector):
         self.k = k
         self.novelty = novelty
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "MatrixProfileDetector":
-        """
-        Fit this detector to the given data. Function is only present for
-        consistency. Only saves the given data as a numpy array if
-        ``novelty=True``.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-        kwargs:
-            Additional parameters to be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-
-        Returns
-        -------
-        self: MatrixProfileDetector
-            Returns the instance itself
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-
-        X = np.asarray(X)
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         if self.novelty:
             self.X_reference_ = np.asarray(X)
 
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Compute anomaly scores.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-
-        Returns
-        -------
-        matrix_profile: array-like of shape (n_samples)
-            Matrix profile scores. Higher is more anomalous.
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        NotFittedError
-            If novelty detection must be performed (``novelty=True``), but this
-            detector has not been fitted yet.
-        ValueError
-            If novelty detection must be performed (``novelty=True``), but the reference
-            data ``X_reference_`` has a different number of attributes than the given
-            data ``X``.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError(f"Input must be numerical array-like")
-
-        # Make sure X is a numpy array
-        X = np.asarray(X)
-
-        if not hasattr(self, "window_size_"):
-            raise NotFittedError("Call the fit function before making predictions!")
+    def _decision_function(self, X: np.ndarray) -> np.array:
         if self.novelty:
             nb_attributes_test = 1 if len(X.shape) == 1 else X.shape[1]
             nb_attributes_reference = (
@@ -238,3 +176,18 @@ class MatrixProfileDetector(BaseDetector):
             matrix_profile = np.sum(matrix_profiles, axis=0)
 
         return reverse_sliding_window(matrix_profile, self.window_size_, 1, X.shape[0])
+
+    def is_fitted(self) -> bool:
+        # X reference should not exist if novelty=False
+        if self.novelty:
+            return all(
+                hasattr(self, attr)
+                for attr in self.__annotations__
+                if attr.endswith("_")
+            )
+        else:
+            return all(
+                hasattr(self, attr)
+                for attr in self.__annotations__
+                if attr.endswith("_") and attr != "X_reference_"
+            )

@@ -3,9 +3,7 @@ from typing import Optional, Union
 
 import numpy as np
 from pyod.models.base import BaseDetector as PyODBaseDetector
-from sklearn.exceptions import NotFittedError
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
@@ -84,7 +82,8 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
 
         Returns
         -------
-        A PyOD anomaly detector with the given hyperparameters.
+        detector: PyODBaseDetector
+            A PyOD anomaly detector with the given hyperparameters.
         """
 
     @abc.abstractmethod
@@ -98,68 +97,12 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
             The supervision of this PyOD anomaly detector.
         """
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "BaseDetector":
-        """
-        Fit this PyOD anomaly detector on the given data.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: ignored
-            Not used, present for API consistency by convention.
-        kwargs:
-            Additional parameters to be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-
-        Returns
-        -------
-        self: PyODAnomalyDetector
-            Returns the instance itself
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-
-        X = np.asarray(X)
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         self.pyod_detector_ = self._initialize_detector(**self.kwargs)
         self.pyod_detector_.fit(sliding_window(X, self.window_size_, self.stride))
 
-        return self
-
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Compute decision scores.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-
-        Returns
-        -------
-        decision_scores: array-like of shape (n_samples)
-            The decision scores of the anomaly detector. Higher indicates more anomalous.
-
-        Raises
-        ------
-        ValueError
-            If `X` is not a valid array.
-        NotFittedError
-            If this method is called before fitting the anomaly detector.
-        """
-        if not utils.is_valid_array_like(X):
-            raise ValueError("Input must be numerical array-like")
-        if not hasattr(self, "pyod_detector_") or not hasattr(self, "window_size_"):
-            raise NotFittedError("Call the fit function before making predictions!")
-
-        X = np.asarray(X)
+    def _decision_function(self, X: np.ndarray) -> np.array:
         per_window_decision_scores = self.pyod_detector_.decision_function(
             sliding_window(X, self.window_size_, self.stride)
         )

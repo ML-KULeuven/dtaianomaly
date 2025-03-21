@@ -1,5 +1,20 @@
 :orphan:
 
+.. testsetup::
+
+   X, y = None, None
+   X_, y_ = None, None
+   preprocessor = None
+   detector = None
+   y_pred = None
+   pipeline = None
+   thresholding = None
+   y_pred_binary = None
+   precision = None
+   recall = None
+   f_1 = None
+   auc_roc, auc_pr = None, None
+
 Anomaly detection
 =================
 
@@ -26,12 +41,12 @@ demonstration time series. This time series can easily be loaded using the
 using the :py:func:`~dtaianomaly.visualization.plot_time_series_colored_by_score`
 method.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.data import demonstration_time_series
-    from dtaianomaly.visualization import plot_time_series_colored_by_score
-    X, y = demonstration_time_series()
-    plot_time_series_colored_by_score(X, y, figsize=(10, 2))
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> from dtaianomaly.visualization import plot_time_series_colored_by_score
+    >>> X, y = demonstration_time_series()
+    >>> plot_time_series_colored_by_score(X, y, figsize=(10, 2))  # doctest: +SKIP
 
 .. image:: /../notebooks/Demonstration-time-series.svg
    :align: center
@@ -44,19 +59,19 @@ Before detecting anomalies, we can preprocess the time series. In this case,
 we apply :py:class:`~dtaianomaly.preprocessing.MovingAverage` to remove some
 of the noise from the time series.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.preprocessing import MovingAverage
-    preprocessor = MovingAverage(window_size=10)
+    >>> from dtaianomaly.preprocessing import MovingAverage
+    >>> preprocessor = MovingAverage(window_size=10)
 
 In general, `any anomaly detector <https://dtaianomaly.readthedocs.io/en/stable/api/anomaly_detection.html>`_
 in ``dtaianomaly`` can be used to detect anomalies in this time series. Here, we use the
 :py:class:`~dtaianomaly.anomaly_detection.MatrixProfileDetector`
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.anomaly_detection import MatrixProfileDetector
-    detector = MatrixProfileDetector(window_size=100)
+    >>> from dtaianomaly.anomaly_detection import MatrixProfileDetector
+    >>> detector = MatrixProfileDetector(window_size=100)
 
 
 Now that the components have been initialized, we can preprocess the time series and
@@ -66,10 +81,10 @@ does not process the ground truth, other preprocessors may change the ground tru
 For example, :py:class:`~dtaianomaly.preprocessing.SamplingRateUnderSampler` samples both
 the time series ``X`` and labels ``y``.
 
-.. code-block:: python
+.. doctest::
 
-    X_, y_ = preprocessor.fit_transform(X)
-    y_pred = detector.fit(X_).predict_proba(X_)
+    >>> X_, y_ = preprocessor.fit_transform(X)
+    >>> y_pred = detector.fit(X_).predict_proba(X_)
 
 Now we can plot the data along with the anomaly scores, and see that the predictions
 nicely align with the anomaly!
@@ -89,14 +104,14 @@ will automatically process the data before detecting anomalies. Note that it is 
 possible to pass a list of preprocessors to apply multiple preprocessing steps before
 detecting anomalies.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.pipeline import Pipeline
-    pipeline = Pipeline(
-        preprocessor=preprocessor,
-        detector=detector
-    )
-    y_pred = pipeline.fit(X).predict_proba(X)
+    >>> from dtaianomaly.pipeline import Pipeline
+    >>> pipeline = Pipeline(
+    ...     preprocessor=preprocessor,
+    ...     detector=detector
+    ... )
+    >>> y_pred = pipeline.fit(X).predict_proba(X)
 
 Quantitative evaluation
 -----------------------
@@ -111,14 +126,14 @@ to 0 ("normal"). At this threshold, we see that all anomalous observations are d
 (recall=1.0), at the cost of some false positives near the borders of the ground truth
 anomaly (precision<1).
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.thresholding import FixedCutoff
-    from dtaianomaly.evaluation import Precision, Recall
-    thresholding = FixedCutoff(0.85)
-    y_pred_binary = thresholding.threshold(y_pred)
-    precision = Precision().compute(y, y_pred_binary)
-    recall = Recall().compute(y, y_pred_binary)
+    >>> from dtaianomaly.thresholding import FixedCutoff
+    >>> from dtaianomaly.evaluation import Precision, Recall
+    >>> thresholding = FixedCutoff(0.85)
+    >>> y_pred_binary = thresholding.threshold(y_pred)
+    >>> precision = Precision().compute(y, y_pred_binary)
+    >>> recall = Recall().compute(y, y_pred_binary)
 
 
 Alternatively to manually applying a threshold to convert the continuous scores to
@@ -127,21 +142,35 @@ which will automatically apply a specified thresholding strategy before using a 
 evaluation metric. Below, we use the same thresholding as above, but compute the
 :py:class:`~dtaianomaly.evaluation.FBeta` score with :math:`\\beta = 1`.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.evaluation import ThresholdMetric, FBeta
-    f_1 = ThresholdMetric(thresholding, FBeta(1.0)).compute(y, y_pred)
+    >>> from dtaianomaly.evaluation import ThresholdMetric, FBeta
+    >>> f_1 = ThresholdMetric(thresholding, FBeta(1.0)).compute(y, y_pred)
 
 Lastly, we also compute the :py:class:`~dtaianomaly.evaluation.AreaUnderROC` and
 :py:class:`~dtaianomaly.evaluation.AreaUnderPR`. Because these metrics create a
 curve for all possible thresholds, we can simply pass the predicted, continuous
 anomaly scores, as shown below.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
-    auc_roc = AreaUnderROC().compute(y, y_pred)
-    auc_pr = AreaUnderPR().compute(y, y_pred)
+    >>> from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
+    >>> auc_roc = AreaUnderROC().compute(y, y_pred)
+    >>> auc_pr = AreaUnderPR().compute(y, y_pred)
+
+.. doctest::
+   :hide:
+
+   >>> round(precision, 2)
+   0.64
+   >>> round(recall, 2)
+   1.0
+   >>> round(f_1, 2)
+   0.78
+   >>> round(auc_roc, 2)
+   0.99
+   >>> round(auc_pr, 2)
+   0.68
 
 The table below shows the computed performance metrics for this example.
 

@@ -8,11 +8,36 @@ Latest
 
 Added
 ^^^^^
-- Implemented ``KShapeAnomalyDetector`` anomaly detector.
-- Added arXiv citation to the documentation.
 
 Changed
 ^^^^^^^
+
+Fixed
+^^^^^
+
+[0.4.0] - 2025-03-21
+--------------------
+
+Added
+^^^^^
+- Implemented ``KShapeAnomalyDetector`` anomaly detector.
+- Added arXiv citation to the documentation.
+- Added support for TOML configuration files in the ``Workflow``.
+- Added option to fit semi-supervised methods on test data in ``Workflow``.
+- Option to show progress bar when running a ``Workflow``.
+- Added optional feature names and time steps to ``DataSet``.
+- Added option for relative bounds when automatically computing the window size.
+- Added option to pass kwargs to the ``Workflow``.
+
+
+Changed
+^^^^^^^
+- ``BestThresholdMetric`` now accepts an optional list of thresholds to use.
+- ``BestThresholdMetric`` stores all used thresholds and their respective scores.
+- ``BaseDetector`` by default checks the input variables, so this should no longer
+  be done in the implemented detectors.
+- Removed ``Evaluation.run()`` method, since it is not used.
+
 
 Fixed
 ^^^^^
@@ -21,6 +46,9 @@ Fixed
   'pyximport' within tslearn was not found, while this is not necessary for our
   codebase. Therefore, we have addid this dependency to the mock imports, which fixed
   the issue.
+- Ensured that ``interpret_additional_information()`` dynamically checks the possible
+  parameters of a ``Workflow``.
+- Parameter ``y`` in ``visualizations.plot_with_zoom()`` is now optional.
 
 [0.3.0] - 2025-01-31
 --------------------

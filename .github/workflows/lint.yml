@@ -25,7 +25,7 @@ jobs:
       - name: black
         uses: psf/black@stable
         with:
-          options: "--check --verbose"
+          options: "--check --verbose --diff --color"
           src: "./dtaianomaly"
 
       # Install dtaianomaly (not required for black)

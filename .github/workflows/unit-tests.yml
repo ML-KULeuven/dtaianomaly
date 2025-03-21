@@ -31,7 +31,7 @@ jobs:
     - name: Install dtaianomaly
       run: |
         python -m pip install --upgrade pip
-        pip install .[tests]
+        pip install .[tests,tqdm]
         pip list
 
     - name: Test with pytest

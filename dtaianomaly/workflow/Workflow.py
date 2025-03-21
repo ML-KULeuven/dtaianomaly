@@ -1,6 +1,7 @@
 import multiprocessing
 import time
 import tracemalloc
+import warnings
 from functools import partial
 from typing import Dict, List, Union
 
@@ -79,6 +80,22 @@ class Workflow:
         to evaluate the detector. This is no issue, since unsupervised
         detectors do not use labels and can deal with anomalies in the
         training data.
+
+    fit_semi_supervised_on_test_data: bool, default=False
+        Whether to fit the semi-supervised anomaly detectors on the test data.
+        If True, then the test data will be used to fit the detector and
+        to evaluate the detector. This is not really an issue, because it only
+        breaks the assumption of semi-supervised methods of normal training data.
+        However, these methods do not use the training labels themselves.
+
+    show_progress: bool, default=False
+        Whether to show the progress using a TQDM progress bar or not.
+
+        .. note::
+
+           Ensure ``tqdm`` installed for this (which is not part of the core
+           dependencies of ``dtaianomaly``). Otherwise, no progress bar will
+           be shown.
     """
 
     dataloaders: List[LazyDataLoader]
@@ -88,6 +105,8 @@ class Workflow:
     trace_memory: bool
     error_log_path: str
     fit_unsupervised_on_test_data: bool
+    fit_semi_supervised_on_test_data: bool
+    show_progress: bool
 
     def __init__(
         self,
@@ -100,6 +119,8 @@ class Workflow:
         trace_memory: bool = False,
         error_log_path: str = "./error_logs",
         fit_unsupervised_on_test_data: bool = False,
+        fit_semi_supervised_on_test_data: bool = False,
+        show_progress: bool = False,
     ):
 
         # Make sure the inputs are lists.
@@ -142,8 +163,10 @@ class Workflow:
         self.trace_memory = trace_memory
         self.error_log_path = error_log_path
         self.fit_unsupervised_on_test_data = fit_unsupervised_on_test_data
+        self.fit_semi_supervised_on_test_data = fit_semi_supervised_on_test_data
+        self.show_progress = show_progress
 
-    def run(self) -> pd.DataFrame:
+    def run(self, **kwargs) -> pd.DataFrame:
         """
         Run the experimental workflow. Evaluate each pipeline within this
         workflow on each dataset within this workflow in a grid-like manner.
@@ -164,26 +187,66 @@ class Workflow:
             for pipeline in self.pipelines
         ]
 
+        if self.show_progress:
+            try:
+                import tqdm
+            except ModuleNotFoundError:
+                warnings.warn(
+                    "Flag 'tqdm_progress' was set to True in the workflow, but tqdm is not installed!\n"
+                    "No progress will be shown using tqdm. To do so, run 'pip install tqdm'!"
+                )
+                self.show_progress = False
+
         # Execute the jobs
         if self.n_jobs == 1:
+            if self.show_progress:
+                import tqdm
+
+                unit_jobs = tqdm.tqdm(unit_jobs)
+
             result = [
                 _single_job(
                     *job,
                     trace_memory=self.trace_memory,
                     error_log_path=self.error_log_path,
                     fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+                    fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
+                    **kwargs,
                 )
                 for job in unit_jobs
             ]
+
         else:
             single_run_function = partial(
                 _single_job,
                 trace_memory=self.trace_memory,
                 error_log_path=self.error_log_path,
                 fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
+                fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
+                **kwargs,
             )
-            with multiprocessing.Pool(processes=self.n_jobs) as pool:
-                result = pool.starmap(single_run_function, unit_jobs)
+            if self.show_progress:
+                import tqdm
+
+                # Run jobs with tqdm progress bar
+                with multiprocessing.Pool(processes=self.n_jobs) as pool:
+                    with tqdm.tqdm(total=len(unit_jobs)) as pbar:
+                        result = [
+                            pool.apply_async(
+                                single_run_function,
+                                args=job,
+                                callback=lambda _: pbar.update(1),
+                            )
+                            for job in unit_jobs
+                        ]
+                        pool.close()
+                        pool.join()  # Wait for all processes to complete
+
+                result = [r.get() for r in result]
+
+            else:
+                with multiprocessing.Pool(processes=self.n_jobs) as pool:
+                    result = pool.starmap(single_run_function, unit_jobs)
 
         # Create a dataframe of the results
         results_df = pd.DataFrame(result)
@@ -219,6 +282,8 @@ def _single_job(
     trace_memory: bool,
     error_log_path: str,
     fit_unsupervised_on_test_data: bool,
+    fit_semi_supervised_on_test_data: bool,
+    **kwargs,
 ) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
     results = {"Dataset": str(dataloader)}
@@ -264,7 +329,10 @@ def _single_job(
 
     # Format X_train, y_train, X_test and y_test
     X_test, y_test, X_train, y_train, fit_on_X_train = _get_train_test_data(
-        data_set, pipeline.pipeline, fit_unsupervised_on_test_data
+        data_set,
+        pipeline.pipeline,
+        fit_unsupervised_on_test_data,
+        fit_semi_supervised_on_test_data,
     )
 
     # Run the anomaly detector, and catch any exceptions
@@ -272,7 +340,7 @@ def _single_job(
         # Fitting
         _start_tracing_memory(trace_memory)
         start = _start_tracing_runtime()
-        pipeline.fit(X_train, y_train)
+        pipeline.fit(X_train, y_train, **kwargs)
         results["Runtime Fit [s]"] = _end_tracing_runtime(start)
         _end_tracing_memory(trace_memory, results, "Peak Memory Fit [MB]")
 
@@ -299,7 +367,12 @@ def _single_job(
     except Exception as exception:
         # Log the errors
         results["Error file"] = log_error(
-            error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train
+            error_log_path,
+            exception,
+            dataloader,
+            pipeline.pipeline,
+            fit_on_X_train,
+            **kwargs,
         )
 
     # Return the results
@@ -327,7 +400,10 @@ def _end_tracing_memory(trace_memory: bool, results, key) -> None:
 
 
 def _get_train_test_data(
-    data_set: DataSet, detector: BaseDetector, fit_unsupervised_on_test_data: bool
+    data_set: DataSet,
+    detector: BaseDetector,
+    fit_unsupervised_on_test_data: bool,
+    fit_semi_supervised_on_test_data: bool,
 ) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool):
     """
     Separates the train and test data depending on the type of the anomaly
@@ -355,6 +431,14 @@ def _get_train_test_data(
     if (
         fit_unsupervised_on_test_data
         and detector.supervision == Supervision.UNSUPERVISED
+    ):
+        X_train = X_test
+        fit_on_X_train = False
+
+    # If semi-supervised detectors should fit on the test data.
+    if (
+        fit_semi_supervised_on_test_data
+        and detector.supervision == Supervision.SEMI_SUPERVISED
     ):
         X_train = X_test
         fit_on_X_train = False

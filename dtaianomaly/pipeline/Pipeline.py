@@ -51,43 +51,11 @@ class Pipeline(BaseDetector):
             self.preprocessor = preprocessor
         self.detector = detector
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Pipeline":
-        """
-        Fit this pipeline to the given data.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Input time series.
-        y: array-like of shape (n_samples)
-            The ground truth labels, passed to the preprocessor and detector.
-
-        Returns
-        -------
-        self: Pipeline
-            Returns the instance itself
-        """
+    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
         X, y = self.preprocessor.fit_transform(X=X, y=y)
-        self.detector.fit(X=X, y=y)
-        return self
+        self.detector.fit(X=X, y=y, **kwargs)
 
-    def decision_function(self, X: np.ndarray) -> np.ndarray:
-        """
-        Compute raw anomaly scores.
-
-        Note that depending on the preprocessor this output might
-        not have the same shape as the input.
-
-        Parameters
-        ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Raw time series
-
-        Returns
-        -------
-        anomaly_scores: array-like of shape (n_samples)
-            The predicted anomaly scores
-        """
+    def _decision_function(self, X: np.ndarray) -> np.array:
         X, _ = self.preprocessor.transform(X=X, y=None)
         return self.detector.decision_function(X)
 

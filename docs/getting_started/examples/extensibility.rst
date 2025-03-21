@@ -1,5 +1,10 @@
 :orphan:
 
+.. testsetup::
+
+   import numpy as np
+   from typing import Optional, Tuple
+
 Extensibility
 =============
 
@@ -38,27 +43,30 @@ The methods have the following functionality:
    that have distance larger than ``nb_sigmas`` times the learned standard deviation from the learned
    mean. These values are considered anomalies.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.anomaly_detection import BaseDetector
-
-    class NbSigmaAnomalyDetector(BaseDetector):
-        nb_sigmas: float
-        mean_: float
-        std_: float
-
-        def __init__(self, nb_sigmas: float = 3.0):
-            self.nb_sigmas = nb_sigmas
-
-        def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'NbSigmaAnomalyDetector':
-            """ Compute the mean and standard deviation of the given time series. """
-            self.mean_ = X.mean()
-            self.std_ = X.std()
-            return self
-
-        def decision_function(self, X: np.ndarray) -> np.ndarray:
-            """ Compute which values are too far from the mean. """
-            return np.abs(X - self.mean_) > self.nb_sigmas * self.std_
+    >>> from dtaianomaly.anomaly_detection import BaseDetector, Supervision
+    >>>
+    >>> class NbSigmaAnomalyDetector(BaseDetector):
+    ...     nb_sigmas: float
+    ...     mean_: float
+    ...     std_: float
+    ...
+    ...     def __init__(self, nb_sigmas: float = 3.0):
+    ...         super().__init__(Supervision.UNSUPERVISED)
+    ...         self.nb_sigmas = nb_sigmas
+    ...
+    ...     def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> 'NbSigmaAnomalyDetector':
+    ...         """ Compute the mean and standard deviation of the given time series. """
+    ...         self.mean_ = X.mean()
+    ...         self.std_ = X.std()
+    ...         return self
+    ...
+    ...     def _decision_function(self, X: np.ndarray) -> np.ndarray:
+    ...         """ Compute which values are too far from the mean. """
+    ...         return np.abs(X - self.mean_) > self.nb_sigmas * self.std_
+    >>>
+    >>> detector = NbSigmaAnomalyDetector()
 
 .. _custom-dataloader:
 
@@ -81,16 +89,17 @@ Implementing a custom dataloader is especially useful for quantitatively evaluat
 detectors on your own data, as you can pass the loader to a :py:class:`~dtaianomaly.workflow.Workflow`
 and easily analyze multiple detectors simultaneously.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.data import LazyDataLoader, DataSet
-
-    class SimpleDataLoader(LazyDataLoader):
-
-        def _load(self)-> DataSet:
-            """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
-            df = pd.read_clipboard(self.path)
-            return DataSet(df['X'].values, df['y'].values)
+    >>> from dtaianomaly.data import LazyDataLoader, DataSet
+    >>>
+    >>> class SimpleDataLoader(LazyDataLoader):
+    ...     def _load(self) -> DataSet:
+    ...         """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
+    ...         df = pd.read_clipboard(self.path)
+    ...         return DataSet(df['X'].values, df['y'].values)
+    >>>
+    >>> data_loader = SimpleDataLoader('data')
 
 .. _custom-preprocessor:
 
@@ -119,20 +128,22 @@ is valid using the :py:func:`~dtaianomaly.preprocessing.check_preprocessing_inpu
 only then call the protected methods with starting underscores, ensuring that valid data is passed
 to these methods.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.preprocessing import Preprocessor
-
-    class Imputer(Preprocessor):
-        fill_value_: float
-
-        def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
-            self.fill_value_ = np.nanmean(X, axis=0)
-            return self
-
-        def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-            X[np.isnan(X)] = self.fill_value_
-            return X, y
+    >>> from dtaianomaly.preprocessing import Preprocessor
+    >>>
+    >>> class Imputer(Preprocessor):
+    ...     fill_value_: float
+    ...
+    ...     def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Preprocessor':
+    ...         self.fill_value_ = np.nanmean(X, axis=0)
+    ...         return self
+    ...
+    ...     def _transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    ...         X[np.isnan(X)] = self.fill_value_
+    ...         return X, y
+    >>>
+    >>> imputer = Imputer()
 
 .. _custom-thresholding:
 
@@ -148,19 +159,21 @@ object and implement the ``threshold`` method. Our custom thresholding technique
 threshold, such that observations with an anomaly score larger than a specified number of standard
 deviations above the mean anomaly score are considered anomalous.
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.thresholding import Thresholding
-
-    class DynamicThreshold(Thresholding):
-        factor: float
-
-        def __init__(self, factor: float):
-            self.factor = factor
-
-        def threshold(self, scores: np.ndarray) -> np.ndarray:
-            threshold = scores.mean() + self.factor * scores.std()
-            return scores > threshold
+    >>> from dtaianomaly.thresholding import Thresholding
+    >>>
+    >>> class DynamicThreshold(Thresholding):
+    ...     factor: float
+    ...
+    ...     def __init__(self, factor: float):
+    ...         self.factor = factor
+    ...
+    ...     def threshold(self, scores: np.ndarray) -> np.ndarray:
+    ...         threshold = scores.mean() + self.factor * scores.std()
+    ...         return scores > threshold
+    >>>
+    >>> dynamic_threshold = DynamicThreshold(1.0)
 
 .. _custom-evaluation:
 
@@ -189,12 +202,13 @@ method.
     rare. Therefore, it is not recommended to use accuracy for evaluation (time series) anomaly
     detection!
 
-.. code-block:: python
+.. doctest::
 
-    from dtaianomaly.evaluation import BinaryMetric
-
-    class Accuracy(BinaryMetric):
-
-        def _compute(self, y_true: np.ndarray, y_pred: np.ndarray):
-            """ Compute the accuracy. """
-            return np.nanmean(y_true == y_pred)
+    >>> from dtaianomaly.evaluation import BinaryMetric
+    >>>
+    >>> class Accuracy(BinaryMetric):
+    ...     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
+    ...         """ Compute the accuracy. """
+    ...         return np.nanmean(y_true == y_pred)
+    >>>
+    >>> accuracy = Accuracy()

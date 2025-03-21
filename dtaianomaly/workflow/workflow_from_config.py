@@ -1,6 +1,8 @@
+import inspect
 import json
 import os
-from itertools import chain
+
+import toml
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
 from dtaianomaly.workflow import Workflow
@@ -8,13 +10,13 @@ from dtaianomaly.workflow import Workflow
 
 def workflow_from_config(path: str, max_size: int = 1000000):
     """
-    Construct a Workflow instance based on a JSON file. The file is
+    Construct a Workflow instance based on a JSON or TOML file. The file is
     first parsed, and then interpreted to obtain a :py:class:`~dtaianomaly.workflow.Workflow`
 
     Parameters
     ----------
     path: str
-        Path to the config file in JSON format
+        Path to the config file
     max_size: int, optional
         Maximal size of the config file in bytes. Defaults to 1 MB.
 
@@ -30,25 +32,31 @@ def workflow_from_config(path: str, max_size: int = 1000000):
     FileNotFoundError
         If the given path does not correspond to an existing file.
     ValueError
-        If the given path does not refer to a json file.
+        If the given path does not refer to a json or TOML file.
     """
     if not isinstance(path, str):
         raise TypeError("Path expects a string")
     if not os.path.exists(path):
         raise FileNotFoundError("The given path does not exist!")
-    if not path.endswith(".json"):
-        raise ValueError("The given path should be a json file!")
 
-    with open(path, "r") as file:
-        # Check file size
-        file.seek(0, 2)
-        file_size = file.tell()
-        if file_size > max_size:
-            raise ValueError(f"File size exceeds maximum size of {max_size} bytes")
-        file.seek(0)
+    if path.endswith(".json"):
+        with open(path, "r") as file:
+            # Check file size
+            file.seek(0, 2)
+            file_size = file.tell()
+            if file_size > max_size:
+                raise ValueError(f"File size exceeds maximum size of {max_size} bytes")
+            file.seek(0)
 
-        # Parse actual JSON
-        parsed_config = json.load(file)
+            # Parse actual JSON
+            parsed_config = json.load(file)
+
+    elif path.endswith(".toml"):
+        with open(path, "r") as f:
+            parsed_config = toml.load(f)
+
+    else:
+        raise ValueError("The given path should be a json or toml file!")
 
     return interpret_config(parsed_config)
 
@@ -427,7 +435,16 @@ def preprocessing_entry(entry):
 
 def interpret_additional_information(config):
     return {
-        feature: config[feature]
-        for feature in ["n_jobs", "trace_memory"]
-        if feature in config
+        argument: config[argument]
+        for argument in inspect.signature(Workflow.__init__).parameters.keys()
+        if argument in config
+        and argument
+        not in [
+            "self",
+            "dataloaders",
+            "metrics",
+            "detectors",
+            "preprocessors",
+            "thresholds",
+        ]
     }

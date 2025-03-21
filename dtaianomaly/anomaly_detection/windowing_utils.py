@@ -131,7 +131,9 @@ def compute_window_size(
     X: np.ndarray,
     window_size: Union[int, str],
     lower_bound: int = 10,
+    relative_lower_bound: float = 0.0,
     upper_bound: int = 1000,
+    relative_upper_bound: float = 1.0,
     threshold: float = 0.89,
     default_window_size: int = None,
 ) -> int:
@@ -156,9 +158,19 @@ def compute_window_size(
         The lower bound on the automatically computed window size. Only used if ``window_size``
         equals ``'fft'``, ``'acf'``, ``'mwf'`` or ``'suss'``.
 
+    relative_lower_bound: float, default=0.0
+        The lower bound on the automatically computed window size, relative to the
+        length of the given time series. Only used if ``window_size`` equals ``'fft'``,
+        ``'acf'``, ``'mwf'`` or ``'suss'``.
+
     upper_bound: int, default=1000
         The lower bound on the automatically computed window size. Only used if ``window_size``
         equals ``'fft'``, ``'acf'``, or ``'mwf'``.
+
+    relative_upper_bound: float, default=1.0
+        The upper bound on the automatically computed window size, relative to the
+        length of the given time series. Only used if ``window_size`` equals ``'fft'``,
+        ``'acf'``, or ``'mwf'``.
 
     threshold: float, default=0.89
         The threshold for selecting the optimal window size using ``'suss'``.
@@ -194,6 +206,10 @@ def compute_window_size(
     # Initialize the variable
     window_size_ = -1
 
+    # Compute the upper and lower bound
+    lower_bound = max(lower_bound, int(relative_lower_bound * X.shape[0]))
+    upper_bound = min(upper_bound, int(relative_upper_bound * X.shape[0]))
+
     # If an int is given, then we can simply return the given window size
     if isinstance(window_size, int):
         return window_size
@@ -203,6 +219,10 @@ def compute_window_size(
         raise ValueError(
             "It only makes sense to compute the window size in univariate time series."
         )
+
+    # If the upper and lower bound are invalid, then use the default value (if given)
+    elif not (0 <= lower_bound < upper_bound <= X.shape[0]):
+        pass
 
     # Use the fft to compute a window size
     elif window_size == "fft":
@@ -227,7 +247,9 @@ def compute_window_size(
     if window_size_ == -1:
         if default_window_size is None:
             raise ValueError(
-                f"Something went wrong when computing the window size using '{window_size}' on a time series with shape {X.shape}!"
+                f"Something went wrong when computing the window size using '{window_size}', "
+                f"with lower bound {lower_bound} and upper bound {upper_bound} on a time series "
+                f"with shape {X.shape}!"
             )
         else:
             return default_window_size

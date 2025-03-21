@@ -1,6 +1,6 @@
 [project]
 name = "dtaianomaly"
-version = "0.3.0"
+version = "0.4.0"
 description = "A simple-to-use Python package for time series anomaly detection!"
 requires-python = ">=3.8,<3.14"
 authors = [
@@ -27,7 +27,8 @@ dependencies = [
     "matplotlib>=3.7",
     "statsmodels>=0.6",
     "pyod>=2.0.0",
-    "tslearn>=0.6.3"
+    "tslearn>=0.6.3",
+    "toml"
 ]
 
 [project.readme]
@@ -63,17 +64,20 @@ all = [  # All the optional dependencies
     "jupyterlab",
     "pre-commit",
     "black",
-    "isort"
+    "isort",
+    'tqdm'
 ]
 tests = [  # For testing
     "pytest",
     "pytest-cov"
 ]
+tqdm = [
+    'tqdm'
+]
 docs = [  # For generating the docs
     "sphinx",
     "sphinx-rtd-theme",
-    "numpydoc",
-    "toml"
+    "numpydoc"
 ]
 notebooks = [  # For using notebooks
     "notebook",

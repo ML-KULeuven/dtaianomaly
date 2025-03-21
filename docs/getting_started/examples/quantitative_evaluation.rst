@@ -32,8 +32,8 @@ the :py:func:`~dtaianomaly.data.from_directory` method in the data module.
 .. code-block:: python
 
     dataloaders = [
-        UCRLoader('../data/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt'),
-        UCRLoader('../data/UCR-time-series-anomaly-archive/002_UCR_Anomaly_DISTORTED2sddb40_35000_56600_56900.txt')
+        UCRLoader('data/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt'),
+        UCRLoader('data/UCR-time-series-anomaly-archive/002_UCR_Anomaly_DISTORTED2sddb40_35000_56600_56900.txt')
     ]
 
 Next, we initialize a number of :py:class:`~dtaianomaly.preprocessing.Preprocessor`s. Below, we create 4
@@ -119,9 +119,10 @@ via the :py:func:`~dtaianomaly.workflow.Workflow.run` function.
 A configuration file is build from different entries, with each entry representing a
 component of the :py:class:`~dtaianomaly.workflow.Workflow`. These entries are build
 as follows:
-.. code-block:: json
 
-    { 'type': <name-of-component>, 'optional-param': <value-optional-parameter>}
+.. code-block::
+
+    { "type": <name-of-component>, "optional-param": <value-optional-parameter>}
 
 The ``'type'`` equals the name of the component, for example ``'LocalOutlierFactor'``
 or ``'StandardScaler'``. This string must exactly match the object name of the component
