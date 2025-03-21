@@ -3,8 +3,8 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
-Latest
-------
+[0.4.0] - 2025-03-21
+--------------------
 
 Added
 ^^^^^
