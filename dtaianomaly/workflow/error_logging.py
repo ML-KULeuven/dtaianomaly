@@ -103,7 +103,7 @@ def log_error(
 
                 error_file.write(
                     f"kwargs = {kwargs}\n"
-                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train).predict_proba(data.X_test)\n\n"
+                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train, **kwargs).predict_proba(data.X_test)\n\n"
                 )
 
     return os.path.abspath(file_path)
