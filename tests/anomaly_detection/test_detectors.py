@@ -51,6 +51,15 @@ class TestAnomalyDetectors:
     def test_fit(self, detector, univariate_time_series):
         assert detector.fit(univariate_time_series) is detector
 
+    def test_fit_can_pass_kwargs(self, detector, univariate_time_series):
+        detector.fit(
+            univariate_time_series,
+            lower_bound=10,
+            upper_bound=1000,
+            threshold=0.89,
+            default_window_size=64
+        )
+
     def test_fit_invalid_array(self, detector):
         with pytest.raises(ValueError):
             detector.fit([5, 20, '5'])

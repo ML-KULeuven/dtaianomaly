@@ -152,7 +152,6 @@ class TestWorkflowSuccess:
     pytest.importorskip("tqdm")
 
     def test(self, tmp_path_factory, show_progress):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -183,8 +182,43 @@ class TestWorkflowSuccess:
         assert results.columns[4] == 'Runtime Predict [s]'
         assert results.columns[5] == 'Runtime [s]'
 
+    def test_with_kwargs(self, tmp_path_factory, show_progress):
+        workflow = Workflow(
+            dataloaders=[DemonstrationTimeSeriesLoader()],
+            metrics=[Precision(), Recall(), AreaUnderROC()],
+            thresholds=[TopN(10), FixedCutoff(0.5)],
+            preprocessors=[Identity(), StandardScaler()],
+            detectors=[LocalOutlierFactor('fft'), IsolationForest('fft')],
+            n_jobs=1,
+            trace_memory=False,
+            show_progress=show_progress
+        )
+        results = workflow.run(
+            # Force default window size by passing invalid values
+            lower_bound=32,
+            upper_bound=16,
+            default_window_size=24,
+        )
+        assert results.shape == (4, 11)
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 4
+        assert results['Preprocessor'].value_counts()['Identity()'] == 2
+        assert results['Preprocessor'].value_counts()['StandardScaler()'] == 2
+        assert results['Detector'].value_counts()["LocalOutlierFactor(window_size='fft')"] == 2
+        assert results['Detector'].value_counts()["IsolationForest(window_size='fft')"] == 2
+        assert 'Peak Memory Fit [MB]' not in results.columns
+        assert 'Peak Memory Predict [MB]' not in results.columns
+        assert 'Peak Memory [MB]' not in results.columns
+        assert not np.any(results == 'Error')
+        assert not results.isna().any().any()
+        # Check the order
+        assert results.columns[0] == 'Dataset'
+        assert results.columns[1] == 'Detector'
+        assert results.columns[2] == 'Preprocessor'
+        assert results.columns[3] == 'Runtime Fit [s]'
+        assert results.columns[4] == 'Runtime Predict [s]'
+        assert results.columns[5] == 'Runtime [s]'
+
     def test_parallel(self, tmp_path_factory, show_progress):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -216,7 +250,6 @@ class TestWorkflowSuccess:
         assert results.columns[5] == 'Runtime [s]'
 
     def test_trace_memory(self, tmp_path_factory, show_progress):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -251,7 +284,6 @@ class TestWorkflowSuccess:
         assert results.columns[8] == 'Peak Memory [MB]'
 
     def test_no_preprocessors(self, tmp_path_factory, univariate_time_series, show_progress):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -325,7 +357,6 @@ class SupervisedDetector(BaseDetector):
 class TestWorkflowFail:
 
     def test_failed_to_read_data(self, tmp_path_factory):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[
                 DemonstrationTimeSeriesLoader(),
@@ -356,7 +387,6 @@ class TestWorkflowFail:
         assert results['Error file'].isna().sum() == 4
 
     def test_failed_to_preprocess(self, tmp_path_factory):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -383,7 +413,6 @@ class TestWorkflowFail:
         assert results['Error file'].isna().sum() == 2
 
     def test_failed_to_fit_model(self, tmp_path_factory):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -410,7 +439,6 @@ class TestWorkflowFail:
         assert results['Error file'].isna().sum() == 2
 
     def test_failed_to_preprocess_and_to_fit_model(self, tmp_path_factory):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -437,7 +465,6 @@ class TestWorkflowFail:
         assert results['Error file'].isna().sum() == 1
 
     def test_not_compatible(self, tmp_path_factory):
-        path = str(tmp_path_factory.mktemp('some-path-1'))
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],

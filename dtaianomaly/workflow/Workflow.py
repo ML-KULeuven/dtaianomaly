@@ -166,7 +166,7 @@ class Workflow:
         self.fit_semi_supervised_on_test_data = fit_semi_supervised_on_test_data
         self.show_progress = show_progress
 
-    def run(self) -> pd.DataFrame:
+    def run(self, **kwargs) -> pd.DataFrame:
         """
         Run the experimental workflow. Evaluate each pipeline within this
         workflow on each dataset within this workflow in a grid-like manner.
@@ -211,6 +211,7 @@ class Workflow:
                     error_log_path=self.error_log_path,
                     fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
                     fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
+                    **kwargs,
                 )
                 for job in unit_jobs
             ]
@@ -222,6 +223,7 @@ class Workflow:
                 error_log_path=self.error_log_path,
                 fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
                 fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
+                **kwargs,
             )
             if self.show_progress:
                 import tqdm
@@ -281,6 +283,7 @@ def _single_job(
     error_log_path: str,
     fit_unsupervised_on_test_data: bool,
     fit_semi_supervised_on_test_data: bool,
+    **kwargs,
 ) -> Dict[str, Union[str, float]]:
     # Initialize the results, and by default everything went wrong ('Error')
     results = {"Dataset": str(dataloader)}
@@ -337,7 +340,7 @@ def _single_job(
         # Fitting
         _start_tracing_memory(trace_memory)
         start = _start_tracing_runtime()
-        pipeline.fit(X_train, y_train)
+        pipeline.fit(X_train, y_train, **kwargs)
         results["Runtime Fit [s]"] = _end_tracing_runtime(start)
         _end_tracing_memory(trace_memory, results, "Peak Memory Fit [MB]")
 
@@ -364,7 +367,12 @@ def _single_job(
     except Exception as exception:
         # Log the errors
         results["Error file"] = log_error(
-            error_log_path, exception, dataloader, pipeline.pipeline, fit_on_X_train
+            error_log_path,
+            exception,
+            dataloader,
+            pipeline.pipeline,
+            fit_on_X_train,
+            **kwargs,
         )
 
     # Return the results

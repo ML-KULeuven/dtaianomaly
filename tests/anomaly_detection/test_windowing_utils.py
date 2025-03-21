@@ -320,3 +320,43 @@ class TestComputeWindowSize:
     def test_suss_exact_threshold(self):
         X, _ = demonstration_time_series()
         assert compute_window_size(X, 'suss', threshold=0.9437091537824681) == 104
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    def test_invalid_bounds_default_window_size(self, window_size, univariate_time_series):
+        window_size_ = compute_window_size(
+            univariate_time_series, window_size,
+            lower_bound=int(univariate_time_series.shape[0] // 2),
+            upper_bound=int(univariate_time_series.shape[0] // 3),  # Smaller than lower_bound
+            default_window_size=16
+        )
+        assert window_size_ == 16
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    def test_invalid_bounds_no_default_window_size(self, window_size, univariate_time_series):
+        with pytest.raises(ValueError):
+            compute_window_size(
+                univariate_time_series, window_size,
+                lower_bound=int(univariate_time_series.shape[0] // 2),
+                upper_bound=int(univariate_time_series.shape[0] // 3),  # Smaller than lower_bound
+                default_window_size=None
+            )
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    def test_too_small_lower_bound(self, window_size, univariate_time_series):
+        with pytest.raises(ValueError):
+            compute_window_size(
+                univariate_time_series, window_size,
+                lower_bound=-1,
+                relative_upper_bound=-0.1,
+                default_window_size=None
+            )
+
+    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    def test_too_large_upper_bound(self, window_size, univariate_time_series):
+        with pytest.raises(ValueError):
+            compute_window_size(
+                univariate_time_series, window_size,
+                upper_bound=2*univariate_time_series.shape[0],
+                relative_upper_bound=1.1,
+                default_window_size=None
+            )
