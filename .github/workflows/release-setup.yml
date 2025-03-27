@@ -1,0 +1,86 @@
+name: Release [setup]
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  ###################################################################
+  # CHECK THE GIVEN VERSION NUMBER FOR CORRECT FORMATTING
+  ###################################################################
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check version format
+        id: check_version
+        run: |
+          if [[ "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version format is valid: ${{ github.event.inputs.version }}"
+          else
+            echo "Version format is invalid: ${{ github.event.inputs.version }}"
+            exit 1
+          fi
+
+  ###################################################################
+  # RUN EXTENSIVE UNIT TESTS TO CHECK CORRECTNESS
+  ###################################################################
+  extensive-unit-test:
+    needs: check
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: ${{ fromJson(vars.RELEASE_OS_MATRIX) }}
+        python-version: ${{ fromJson(vars.RELEASE_PYTHON_VERSION_MATRIX) }}
+
+  ###################################################################
+  # SETUP EVERYTHING FOR THE RELEASE
+  ###################################################################
+  release-setup:
+    needs: extensive-unit-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Update version in pyproject.toml
+        run: |
+          sed -i "s/^version = \".*\"/version = \"${{ github.event.inputs.version }}\"/" pyproject.toml
+          cat pyproject.toml
+
+      - name: Update version in __init__.py
+        run: | 
+          echo "__version__ = \"${{ github.event.inputs.version }}\"" > dtaianomaly/__init__.py
+          cat dtaianomaly/__init__.py
+
+      - name: Update title in changelog.rst
+        run: | 
+          sed -i "s/Latest/[${{ github.event.inputs.version }}] - $(date '+%Y-%m-%d')/" docs/additional_information/changelog.rst
+          cat docs/additional_information/changelog.rst
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        id: create_pull_request
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: version-bump-${{ github.event.inputs.version }}
+          base: ${{ github.event.repository.default_branch }}
+          title: "Bump version to ${{ github.event.inputs.version }}"
+          delete-branch: true
+          draft: true
