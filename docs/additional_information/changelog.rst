@@ -11,6 +11,7 @@ Added
 
 Changed
 ^^^^^^^
+- Updated the GitHub workflows to only run a single unit test, and the extensive test suite upon release. 
 
 Fixed
 ^^^^^
