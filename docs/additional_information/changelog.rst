@@ -9,6 +9,7 @@ Latest
 Added
 ^^^^^
 - Implementation of the Volume Under the Surface (VUS) metrics
+- Implementation of Event-Wise metrics
 
 Changed
 ^^^^^^^

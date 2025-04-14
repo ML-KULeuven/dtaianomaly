@@ -90,7 +90,7 @@ class TestVUSMetrics:
 
     def test_range_roc_volume_compat(self, y_true, y_pred):
         result = VolumeUnderROC(max_buffer_size=200, compatibility_mode=True).compute(y_true, y_pred)
-        assert result == pytest.approx(0.8763382130 )
+        assert result == pytest.approx(0.8763382130)
 
     def test_range_pr_auc(self):
         y_pred = np.array([0.05, 0.2, 1., 0.2, 0.1, 0.05, 0.1, 0.05, 0.1, 0.07])

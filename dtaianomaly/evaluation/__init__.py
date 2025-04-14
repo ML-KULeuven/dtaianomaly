@@ -11,6 +11,7 @@ a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
 
 from .BestThresholdMetric import BestThresholdMetric
+from .event_wise_metrics import EventWiseFBeta, EventWisePrecision, EventWiseRecall
 from .metrics import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
 from .point_adjusted_binary_metrics import (
     PointAdjustedFBeta,
@@ -44,4 +45,7 @@ __all__ = [
     "RangeAreaUnderPR",
     "VolumeUnderROC",
     "VolumeUnderPR",
+    "EventWisePrecision",
+    "EventWiseRecall",
+    "EventWiseFBeta",
 ]
