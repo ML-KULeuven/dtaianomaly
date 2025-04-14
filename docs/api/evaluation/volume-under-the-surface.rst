@@ -18,6 +18,10 @@ implementations:
 By default, the adjusted versions of each metric are used. To use the original implementations,
 you can set ``compatibility_mode=True`` when initializing the metrics.
 
+In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
+precisions and false positive rates for every threshold), which leads to a more than 25x
+speedup on the demonstration time series.
+
 .. [paparrizos2022volume] John Paparrizos, Paul Boniol, Themis Palpanas, Ruey S. Tsay,
    Aaron Elmore, and Michael J. Franklin. Volume under the surface: a new accuracy evaluation
    measure for time-series anomaly detection. Proceedings of the VLDB Endowment 15.11 (2022):

@@ -8,9 +8,12 @@ Latest
 
 Added
 ^^^^^
+- Implementation of the Volume Under the Surface (VUS) metrics
 
 Changed
 ^^^^^^^
+- Restructured the evaluation metrics documentation to categorize them, thus offering an
+  easier to understand overview instead of a list of all metrics.
 
 Fixed
 ^^^^^

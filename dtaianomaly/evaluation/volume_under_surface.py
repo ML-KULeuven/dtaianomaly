@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import Optional, Tuple
 
+import numba as nb
 import numpy as np
 
 from dtaianomaly.evaluation.metrics import ProbaMetric
@@ -117,40 +118,55 @@ class RangeAucMetric(ProbaMetric, ABC):
         thresholds = self._uniform_threshold_sampling(y_score)
         p = np.average([np.sum(y_true), np.sum(y_true_cont)])
 
-        recalls = np.zeros(thresholds.shape[0] + 2)  # tprs
-        fprs = np.zeros(thresholds.shape[0] + 2)
-        precisions = np.ones(thresholds.shape[0] + 1)
-
-        for i, t in enumerate(thresholds):
-            y_pred = y_score >= t
-            product = y_true_cont * y_pred
-            tp = np.sum(product)
-            # fp = np.dot((np.ones_like(y_pred) - y_true_cont).T, y_pred)
-            fp = np.sum(y_pred) - tp
-            n = len(y_pred) - p
-
-            existence_reward = [np.sum(product[s : e + 1]) > 0 for s, e in anomalies]
-            existence_reward = np.sum(existence_reward) / anomalies.shape[0]
-
-            recall = min(tp / p, 1) * existence_reward  # = tpr
-            fpr = min(fp / n, 1)
-            precision = tp / np.sum(y_pred)
-
-            recalls[i + 1] = recall
-            fprs[i + 1] = fpr
-            precisions[i + 1] = precision
-
-        recalls[-1] = 1
-        fprs[-1] = 1
-
-        range_pr_auc: float = np.sum(
-            (recalls[1:-1] - recalls[:-2]) * (precisions[1:] + precisions[:-1]) / 2
-        )
-        range_roc_auc: float = np.sum(
-            (fprs[1:] - fprs[:-1]) * (recalls[1:] + recalls[:-1]) / 2
+        return _range_pr_roc_auc_support_numbafied(
+            thresholds, y_score, y_true_cont, anomalies, p
         )
 
-        return range_pr_auc, range_roc_auc
+
+@nb.njit(fastmath=True, parallel=True)
+def _range_pr_roc_auc_support_numbafied(
+    thresholds: np.array,
+    y_score: np.ndarray,
+    y_true_cont: np.ndarray,
+    anomalies: np.ndarray,
+    p,
+):
+    recalls = np.zeros(thresholds.shape[0] + 2)  # tprs
+    fprs = np.zeros(thresholds.shape[0] + 2)
+    precisions = np.ones(thresholds.shape[0] + 1)
+
+    for i in nb.prange(thresholds.shape[0]):
+        t = thresholds[i]
+        y_pred = y_score >= t
+        product = y_true_cont * y_pred
+        tp = np.sum(product)
+        fp = np.sum(y_pred) - tp
+        n = len(y_pred) - p
+
+        existence_reward = np.array(
+            [np.sum(product[s : e + 1]) > 0 for s, e in anomalies]
+        )
+        existence_reward = np.sum(existence_reward) / anomalies.shape[0]
+
+        recall = min(tp / p, 1) * existence_reward  # = tpr
+        fpr = min(fp / n, 1)
+        precision = tp / np.sum(y_pred)
+
+        recalls[i + 1] = recall
+        fprs[i + 1] = fpr
+        precisions[i + 1] = precision
+
+    recalls[-1] = 1
+    fprs[-1] = 1
+
+    range_pr_auc: float = np.sum(
+        (recalls[1:-1] - recalls[:-2]) * (precisions[1:] + precisions[:-1]) / 2
+    )
+    range_roc_auc: float = np.sum(
+        (fprs[1:] - fprs[:-1]) * (recalls[1:] + recalls[:-1]) / 2
+    )
+
+    return range_pr_auc, range_roc_auc
 
 
 class RangeAreaUnderPR(RangeAucMetric):
