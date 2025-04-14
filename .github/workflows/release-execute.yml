@@ -1,0 +1,173 @@
+name: Release [execute]
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  ###################################################################
+  # CHECK IF A RELEASE SHOULD BE MADE
+  ###################################################################
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version:  ${{ steps.extract_version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version number
+        id: extract_version
+        run: |
+          version=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)
+          echo "version=$version" >> $GITHUB_OUTPUT
+      
+      - name: Check version format
+        id: check_version
+        run: |
+          if [[ "${{ steps.extract_version.outputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version format is valid: ${{ steps.extract_version.outputs.version }}"
+          else
+            echo "Version format is invalid: ${{ steps.extract_version.outputs.version }}"
+            exit 1
+          fi
+
+  ###################################################################
+  # BUILD THE PROJECT
+  ###################################################################
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install pypa/build
+        run: |
+          python3 -m pip install build --user
+          pip list 
+
+      - name: Build a binary wheel and a source tarball
+        run: python3 -m build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  ###################################################################
+  # PUBLISH TO PYPI
+  ###################################################################
+  publish-to-pypi:
+    needs:
+    - build
+    - check
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dtaianomaly
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  ###################################################################
+  # CREATE A RELEASE ON GITHUB
+  ###################################################################
+  github-release:
+    needs:
+      - publish-to-pypi
+      - check
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Sign the dists with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v3.0.0
+      with:
+        inputs: >-
+          ./dist/*.tar.gz
+          ./dist/*.whl
+
+    - name: Debug
+      run: echo ${{ needs.check.outputs.version }}
+
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: gh release create "${{ needs.check.outputs.version }}" --title "${{ needs.check.outputs.version }}" --repo "$GITHUB_REPOSITORY" --notes ""
+
+    - name: Upload artifact signatures to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: gh release upload "${{ needs.check.outputs.version }}" dist/**  --repo "$GITHUB_REPOSITORY"
+
+  ###################################################################
+  # SETUP FOR NEXT DEVELOPMENT CYCLE
+  ###################################################################
+  next-development-cycle:
+    needs:
+    - github-release
+    - check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          
+      - name: Update version in __init__.py
+        run: |
+          sed -i 's/__version__ = "\([^"]*\)"/__version__ = "\1.dev"/' dtaianomaly/__init__.py
+          cat dtaianomaly/__init__.py
+
+      - name: Update changelog.rst
+        run: |
+          NEW_SECTION="Latest\n------\n\nAdded\n^^^^^\n\nChanged\n^^^^^^^\n\nFixed\n^^^^^\n"
+          sed -i "6i $NEW_SECTION" docs/additional_information/changelog.rst
+          cat docs/additional_information/changelog.rst
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        id: create_pull_request
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: setup-development-cycle-on-${{ needs.check.outputs.version }}
+          base: ${{ github.event.repository.default_branch }}
+          title: "Setup development cycle on ${{ needs.check.outputs.version }}"
+          delete-branch: true
+          draft: true
