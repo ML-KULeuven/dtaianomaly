@@ -49,7 +49,7 @@ class PointAdjusted(BinaryMetric, abc.ABC):
             raise TypeError("The given `metric` should be a binary metric")
         self.metric = metric
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         point_adjusted_y_pred = point_adjust(y_true, y_pred)
         return self.metric._compute(y_true, point_adjusted_y_pred)
 

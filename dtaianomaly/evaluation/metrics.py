@@ -59,7 +59,7 @@ class ProbaMetric(Metric, abc.ABC):
 class BinaryMetric(Metric, abc.ABC):
     """A metric that takes as input binary anomaly labels."""
 
-    def compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         """
         Computes the performance score.
 
@@ -122,7 +122,7 @@ class ThresholdMetric(ProbaMetric):
         self.thresholder = thresholder
         self.metric = metric
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         y_pred_binary = self.thresholder.threshold(y_pred)
         # Can compute the inner method, because checks have already been done at this point.
         return self.metric._compute(y_true=y_true, y_pred=y_pred_binary)

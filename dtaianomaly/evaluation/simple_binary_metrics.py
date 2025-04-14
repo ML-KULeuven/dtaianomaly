@@ -32,7 +32,7 @@ class Precision(BinaryMetric):
     def __init__(self) -> None:
         super().__init__()
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return metrics.precision_score(y_true=y_true, y_pred=y_pred)
 
 
@@ -64,7 +64,7 @@ class Recall(BinaryMetric):
     def __init__(self) -> None:
         super().__init__()
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return metrics.recall_score(y_true=y_true, y_pred=y_pred)
 
 
@@ -114,5 +114,5 @@ class FBeta(BinaryMetric):
         super().__init__()
         self.beta = beta
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return metrics.fbeta_score(y_true=y_true, y_pred=y_pred, beta=self.beta)

@@ -4,7 +4,11 @@ import numpy as np
 from dtaianomaly.evaluation import *
 from dtaianomaly.thresholding import FixedCutoff
 
-binary_metrics = [Precision(), Recall(), FBeta(), PointAdjustedPrecision(), PointAdjustedRecall(), PointAdjustedFBeta()]
+binary_metrics = [
+    Precision(), Recall(), FBeta(),
+    PointAdjustedPrecision(), PointAdjustedRecall(), PointAdjustedFBeta(),
+    EventWisePrecision(), EventWiseRecall(), EventWiseFBeta()
+]
 proba_metrics = [
     AreaUnderROC(), AreaUnderPR(), ThresholdMetric(FixedCutoff(0.5), Precision()), BestThresholdMetric(Precision()),
     RangeAreaUnderPR(), RangeAreaUnderROC(), VolumeUnderPR(max_samples=20, max_buffer_size=250), VolumeUnderROC(max_samples=20, max_buffer_size=250),

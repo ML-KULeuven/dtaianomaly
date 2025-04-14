@@ -26,7 +26,7 @@ class AreaUnderROC(ProbaMetric):
     def __init__(self) -> None:
         super().__init__()
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return float(metrics.roc_auc_score(y_true=y_true, y_score=y_pred))
 
 
@@ -50,6 +50,6 @@ class AreaUnderPR(ProbaMetric):
     def __init__(self) -> None:
         super().__init__()
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred)
         return float(metrics.auc(recall, precision))

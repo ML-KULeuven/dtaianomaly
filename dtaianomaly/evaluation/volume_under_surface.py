@@ -204,7 +204,7 @@ class RangeAreaUnderPR(RangeAucMetric):
     ):
         super().__init__(buffer_size, compatibility_mode, max_samples)
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         range_pr_auc, _ = self._range_pr_roc_auc_support(y_true, y_pred)
         return range_pr_auc
 
@@ -244,7 +244,7 @@ class RangeAreaUnderROC(RangeAucMetric):
     ):
         super().__init__(buffer_size, compatibility_mode, max_samples)
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         _, range_auc_roc = self._range_pr_roc_auc_support(y_true, y_pred)
         return range_auc_roc
 
@@ -290,7 +290,7 @@ class VolumeUnderPR(RangeAucMetric):
 
         self.max_buffer_size = max_buffer_size
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         prs = np.zeros(self.max_buffer_size + 1)
         for bs in np.arange(0, self.max_buffer_size + 1):
             self.buffer_size = bs
@@ -341,7 +341,7 @@ class VolumeUnderROC(RangeAucMetric):
 
         self.max_buffer_size = max_buffer_size
 
-    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         rocs = np.zeros(self.max_buffer_size + 1)
         for bs in np.arange(0, self.max_buffer_size + 1):
             self.buffer_size = bs
