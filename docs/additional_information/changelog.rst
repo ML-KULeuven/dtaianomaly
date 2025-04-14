@@ -8,13 +8,17 @@ Latest
 
 Added
 ^^^^^
+- Implementation of the Volume Under the Surface (VUS) metrics
 
 Changed
 ^^^^^^^
 - Updated the GitHub workflows to only run a single unit test, and the extensive test suite upon release. 
+- Restructured the evaluation metrics documentation to categorize them, thus offering an
+  easier to understand overview instead of a list of all metrics.
 
 Fixed
 ^^^^^
+- Fixed failing doctests because of changed numpy array output in version ``numpy==2.2``.
 
 [0.4.0] - 2025-03-21
 --------------------

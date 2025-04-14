@@ -67,9 +67,8 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
-    >>> kshape.decision_function(x)
-    array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 ,
-           1.34704128])
+    >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 , 1.34704128]...)
 
     References
     ----------

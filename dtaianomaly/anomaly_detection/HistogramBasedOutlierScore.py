@@ -45,9 +45,8 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> hbos = HistogramBasedOutlierScore(1).fit(x)
-    >>> hbos.decision_function(x)
-    array([0.51808795, 0.51808795, 0.51808795, ..., 0.48347552, 0.48347552,
-           0.48347552])
+    >>> hbos.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.51808795, 0.51808795, 0.51808795, ..., 0.48347552, 0.48347552, 0.48347552]...)
 
     References
     ----------

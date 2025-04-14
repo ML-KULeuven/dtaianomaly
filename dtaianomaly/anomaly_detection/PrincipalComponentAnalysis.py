@@ -42,9 +42,8 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> pca = PrincipalComponentAnalysis(10).fit(x)
-    >>> pca.decision_function(x)
-    array([16286.63724327, 15951.05917741, 15613.5739773 , ...,
-           18596.5273311 , 18496.96613747, 18483.47985554])
+    >>> pca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([16286.63724327, 15951.05917741, 15613.5739773 , ..., 18596.5273311 , 18496.96613747, 18483.47985554]...)
 
     References
     ----------

@@ -68,9 +68,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> rpca = RobustPrincipalComponentAnalysis(2).fit(x)
-    >>> rpca.decision_function(x)
-    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662,
-           1.2923824 ])
+    >>> rpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662, 1.2923824 ]...)
 
     References
     ----------

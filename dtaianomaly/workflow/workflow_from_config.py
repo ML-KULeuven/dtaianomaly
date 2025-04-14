@@ -255,6 +255,18 @@ def metric_entry(entry):
             raise ValueError(f"BestThresholdMetric must have metric as key: {entry}")
         return evaluation.BestThresholdMetric(metric=metric_entry(entry["metric"]))
 
+    elif metric_type == "RangeAreaUnderPR":
+        return evaluation.RangeAreaUnderPR(**entry_without_type)
+
+    elif metric_type == "RangeAreaUnderROC":
+        return evaluation.RangeAreaUnderROC(**entry_without_type)
+
+    elif metric_type == "VolumeUnderPR":
+        return evaluation.VolumeUnderPR(**entry_without_type)
+
+    elif metric_type == "VolumeUnderROC":
+        return evaluation.VolumeUnderROC(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid metric entry: {entry}")
 

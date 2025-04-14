@@ -41,9 +41,8 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> kpca = KernelPrincipalComponentAnalysis(10, n_components=2).fit(x)
-    >>> kpca.decision_function(x)
-    array([0.03151377, 0.03697829, 0.04415575, ..., 0.03345565, 0.0330048 ,
-           0.03089501])
+    >>> kpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.03151377, 0.03697829, 0.04415575, ..., 0.03345565, 0.0330048 , 0.03089501]...)
 
     References
     ----------
