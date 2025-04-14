@@ -18,6 +18,7 @@ Changed
 
 Fixed
 ^^^^^
+- Fixed failing doctests because of changed numpy array output in version ``numpy==2.2``.
 
 [0.4.0] - 2025-03-21
 --------------------

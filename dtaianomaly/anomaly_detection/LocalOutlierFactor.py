@@ -42,9 +42,8 @@ class LocalOutlierFactor(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> local_outlier_factor = LocalOutlierFactor(10).fit(x)
-    >>> local_outlier_factor.decision_function(x)
-    array([0.98370943, 0.98533454, 0.98738196, ..., 1.02394282, 1.02648068,
-           1.01827158])
+    >>> local_outlier_factor.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.98370943, 0.98533454, 0.98738196, ..., 1.02394282, 1.02648068, 1.01827158]...)
 
     References
     ----------

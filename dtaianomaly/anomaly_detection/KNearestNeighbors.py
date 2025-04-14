@@ -43,9 +43,8 @@ class KNearestNeighbors(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> knn = KNearestNeighbors(10).fit(x)
-    >>> knn.decision_function(x)
-    array([0.2527578 , 0.26430228, 0.2728953 , ..., 0.26269151, 0.26798469,
-           0.26139759])
+    >>> knn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.2527578 , 0.26430228, 0.2728953 , ..., 0.26269151, 0.26798469, 0.26139759]...)
 
     References
     ----------

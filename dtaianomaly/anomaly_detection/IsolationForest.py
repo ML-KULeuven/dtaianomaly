@@ -40,9 +40,8 @@ class IsolationForest(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> isolation_forest = IsolationForest(10).fit(x)
-    >>> isolation_forest.decision_function(x)
-    array([-0.02301142, -0.01266304, -0.00786237, ..., -0.04561172,
-           -0.0420979 , -0.04414417])
+    >>> isolation_forest.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([-0.02301142, -0.01266304, -0.00786237, ..., -0.04561172, -0.0420979 , -0.04414417]...)
 
     References
     ----------

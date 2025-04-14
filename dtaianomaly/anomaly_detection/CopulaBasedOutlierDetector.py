@@ -44,9 +44,8 @@ class CopulaBasedOutlierDetector(PyODAnomalyDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> copod = CopulaBasedOutlierDetector(10).fit(x)
-    >>> copod.decision_function(x)
-    array([ 9.90110663,  9.67868282,  9.51525285, ..., 25.00182389,
-           24.60594424, 24.30393026])
+    >>> copod.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([ 9.90110663,  9.67868282,  9.51525285, ..., 25.00182389, 24.60594424, 24.30393026]...)
 
     References
     ----------
