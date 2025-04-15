@@ -16,6 +16,7 @@ Changed
 - Updated the GitHub workflows to only run a single unit test, and the extensive test suite upon release. 
 - Restructured the evaluation metrics documentation to categorize them, thus offering an
   easier to understand overview instead of a list of all metrics.
+- Moved checks when reading workflow from config to ``interpret_config()`` from the ``interpret_<component>()`` method.
 
 Fixed
 ^^^^^

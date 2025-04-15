@@ -25,8 +25,10 @@ command above. To install multiple subsets, separate the names with a comma.
 Currently, following subsets are available:
 
 - ``tests``: Dependencies for running the tests.
+- ``tqdm``: Install TQDM (for showing ``WorkFlow``-progress)
 - ``docs``: Dependencies for generating the documentation.
 - ``notebooks``: Dependencies for using jupyter notebooks.
+- ``lint``: Dependencies for linting the code.
 
 To install version ``X.Y.Z``, use the following command:
 

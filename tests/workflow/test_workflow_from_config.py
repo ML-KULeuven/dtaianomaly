@@ -126,19 +126,17 @@ class TestInterpretThresholds:
         interpret_config(valid_config)  # No error
 
     def test_single_entry(self):
-        thresholds = interpret_thresholds({'thresholds': {"type": "TopN", "n": 10}})
+        thresholds = interpret_thresholds({"type": "TopN", "n": 10})
         assert isinstance(thresholds, list)
         assert len(thresholds) == 1
         assert isinstance(thresholds[0], thresholding.TopN)
         assert thresholds[0].n == 10
 
     def test_multiple_entries(self):
-        thresholds = interpret_thresholds({
-            'thresholds': [
-                {"type": "TopN", "n": 10},
-                {"type": "FixedCutoff", "cutoff": 0.5}
-            ]
-        })
+        thresholds = interpret_thresholds([
+            {"type": "TopN", "n": 10},
+            {"type": "FixedCutoff", "cutoff": 0.5}
+        ])
         assert isinstance(thresholds, list)
         assert len(thresholds) == 2
         assert isinstance(thresholds[0], thresholding.TopN)
@@ -156,7 +154,7 @@ class TestInterpretDataloaders:
 
     def test_single_entry(self):
         path = f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"
-        dataloaders = interpret_dataloaders({"dataloaders": {"type": "UCRLoader", "path": path}})
+        dataloaders = interpret_dataloaders({"type": "UCRLoader", "path": path})
         assert isinstance(dataloaders, list)
         assert len(dataloaders) == 1
         assert isinstance(dataloaders[0], data.UCRLoader)
@@ -164,12 +162,10 @@ class TestInterpretDataloaders:
 
     def test_multiple_entries(self):
         path = f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"
-        dataloaders = interpret_dataloaders({
-            'dataloaders': [
-                {"type": "UCRLoader", "path": path},
-                {"type": "directory", "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive", "base_type": "UCRLoader"}
-            ]
-        })
+        dataloaders = interpret_dataloaders([
+            {"type": "UCRLoader", "path": path},
+            {"type": "directory", "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive", "base_type": "UCRLoader"}
+        ])
         assert isinstance(dataloaders, list)
         assert len(dataloaders) >= 1
         assert all(isinstance(loader, data.UCRLoader) for loader in dataloaders)
@@ -206,13 +202,13 @@ class TestInterpretMetrics:
             interpret_config(valid_config)
 
     def test_single_entry(self):
-        metrics = interpret_metrics({'metrics': {"type": "Precision"}})
+        metrics = interpret_metrics({"type": "Precision"})
         assert isinstance(metrics, list)
         assert len(metrics) == 1
         assert isinstance(metrics[0], evaluation.Precision)
 
     def test_multiple_entries(self):
-        metrics = interpret_metrics({'metrics': [{"type": "Precision"}, {"type": "Recall"}]})
+        metrics = interpret_metrics([{"type": "Precision"}, {"type": "Recall"}])
         assert isinstance(metrics, list)
         assert len(metrics) == 2
         assert isinstance(metrics[0], evaluation.Precision)
@@ -250,19 +246,17 @@ class TestInterpretDetectors:
             interpret_config(valid_config)
 
     def test_single_entry(self):
-        detectors = interpret_detectors({'detectors': {"type": "IsolationForest", 'window_size': 15}})
+        detectors = interpret_detectors({"type": "IsolationForest", 'window_size': 15})
         assert isinstance(detectors, list)
         assert len(detectors) == 1
         assert isinstance(detectors[0], anomaly_detection.IsolationForest)
         assert detectors[0].window_size == 15
 
     def test_multiple_entries(self):
-        detectors = interpret_detectors({
-            'detectors': [
-                {"type": "IsolationForest", 'window_size': 15},
-                {"type": "MatrixProfileDetector", 'window_size': 25}
-            ]
-        })
+        detectors = interpret_detectors([
+            {"type": "IsolationForest", 'window_size': 15},
+            {"type": "MatrixProfileDetector", 'window_size': 25}
+        ])
         assert isinstance(detectors, list)
         assert len(detectors) == 2
         assert isinstance(detectors[0], anomaly_detection.IsolationForest)
@@ -278,13 +272,13 @@ class TestInterpretPreprocessors:
         interpret_config(valid_config)  # No error
 
     def test_single_entry(self):
-        preprocessors = interpret_preprocessing({'preprocessors': {"type": "MinMaxScaler"}})
+        preprocessors = interpret_preprocessing({"type": "MinMaxScaler"})
         assert isinstance(preprocessors, list)
         assert len(preprocessors) == 1
         assert isinstance(preprocessors[0], preprocessing.MinMaxScaler)
 
     def test_multiple_entries(self):
-        preprocessors = interpret_preprocessing({'preprocessors': [{"type": "MinMaxScaler"}, {'type': 'MovingAverage', 'window_size': 40}]})
+        preprocessors = interpret_preprocessing([{"type": "MinMaxScaler"}, {'type': 'MovingAverage', 'window_size': 40}])
         assert isinstance(preprocessors, list)
         assert len(preprocessors) == 2
         assert isinstance(preprocessors[0], preprocessing.MinMaxScaler)
@@ -350,6 +344,10 @@ class TestInterpretPreprocessors:
     (metric_entry, evaluation.VolumeUnderPR, {'max_buffer_size': 100}),
     (metric_entry, evaluation.VolumeUnderROC, {}),
     (metric_entry, evaluation.VolumeUnderROC, {'max_buffer_size': 100}),
+    (metric_entry, evaluation.EventWisePrecision, {}),
+    (metric_entry, evaluation.EventWiseRecall, {}),
+    (metric_entry, evaluation.EventWiseFBeta, {}),
+    (metric_entry, evaluation.EventWiseFBeta, {'beta': 0.5}),
     # Detectors
     (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
     (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),

@@ -109,7 +109,7 @@ class EventWisePrecision(BinaryMetric):
 
     - :math:`FP`: the number of detected anomalous **points** that are not actually anomalous.
 
-    We then compute the Event-Wise Precision as (with :math:`N`: the total number of points):
+    We then compute the Event-Wise Precision as (with :math:`N`: the total number of normal points):
 
     .. math::
 
