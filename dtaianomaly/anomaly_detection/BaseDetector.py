@@ -10,7 +10,6 @@ import scipy
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
-from dtaianomaly.PrettyPrintable import PrettyPrintable
 from dtaianomaly.thresholding.thresholding import ContaminationRate
 
 
@@ -29,7 +28,7 @@ class Supervision(enum.Enum):
     SUPERVISED = 3
 
 
-class BaseDetector(PrettyPrintable):
+class BaseDetector(utils.PrettyPrintable):
     """
     Abstract base class for time series anomaly detection.
 

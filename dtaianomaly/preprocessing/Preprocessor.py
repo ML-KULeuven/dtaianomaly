@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import numpy as np
 
 from dtaianomaly import utils
-from dtaianomaly.PrettyPrintable import PrettyPrintable
 
 
 def check_preprocessing_inputs(X: np.ndarray, y: Optional[np.ndarray] = None) -> None:
@@ -36,7 +35,7 @@ def check_preprocessing_inputs(X: np.ndarray, y: Optional[np.ndarray] = None) ->
             raise ValueError("`X` and `y` have a different number of samples")
 
 
-class Preprocessor(PrettyPrintable):
+class Preprocessor(utils.PrettyPrintable):
     """
     Base preprocessor class.
     """
