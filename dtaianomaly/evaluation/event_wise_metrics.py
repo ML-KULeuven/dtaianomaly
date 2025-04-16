@@ -1,79 +1,85 @@
+import numba as nb
 import numpy as np
 
 from dtaianomaly.evaluation.metrics import BinaryMetric
 
 
-def _make_intervals(y: np.array):
-    if not isinstance(y, np.ndarray):
-        y = np.asarray(y)
+@nb.njit(fastmath=True, cache=True)
+def np_diff(x: np.array):
+    diff = np.empty(shape=(x.shape[0] + 1))
+    diff[1:-1] = x[1:] - x[:-1]
+    diff[0] = x[0]
+    diff[-1] = -x[-1]
+    return diff
 
-    if y.ndim != 1:
-        raise ValueError("Input must be a 1D array.")
 
-    if len(y) == 0:
-        return []  # Handle empty array case
+@nb.njit(fastmath=True, cache=True)
+def np_any_axis0(x):
+    """Numba compatible version of np.any(x, axis=0)."""
+    out = np.zeros(x.shape[1], dtype=nb.bool)
+    for i in range(x.shape[0]):
+        out = np.logical_or(out, x[i, :])
+    return out
 
+
+@nb.njit(fastmath=True, cache=True)
+def np_any_axis1(x):
+    """Numba compatible version of np.any(x, axis=1)."""
+    out = np.zeros(x.shape[0], dtype=nb.bool)
+    for i in range(x.shape[1]):
+        out = np.logical_or(out, x[:, i])
+    return out
+
+
+@nb.njit(fastmath=True, cache=True)
+def _make_intervals(y: np.array) -> (np.array, np.array):
     y = (y > 0).astype(np.int8)
-
-    change_points = np.diff(y, prepend=0, append=0)
+    change_points = np_diff(y)
     starts = np.where(change_points == 1)[0]
     ends = np.where(change_points == -1)[0] - 1
-
-    # Return empty list if no intervals found
-    if len(starts) == 0:
-        return []
-
-    return list(zip(starts, ends))
+    return starts, ends
 
 
+@nb.njit(fastmath=True, cache=True, parallel=True)
 def _compute_event_wise_metrics(y_true: np.ndarray, y_pred: np.ndarray):
-    if y_true.shape != y_pred.shape or y_true.ndim != 1:
-        raise ValueError("y_true and y_pred must be 1D arrays of the same shape.")
-
-    if not np.all(np.isin(y_true, [0, 1])):
-        raise ValueError("y_true must contain only 0s and 1s")
-    if not np.all(np.isin(y_pred, [0, 1])):
-        raise ValueError("y_pred must contain only 0s and 1s")
-
-    y_true = np.asarray(y_true).astype(bool)
-    y_pred = np.asarray(y_pred).astype(bool)
 
     # --- 1. Point-Wise Calculations ---
     fp = np.sum((~y_true) & y_pred)  # Using boolean operators for clarity
     tn = np.sum((~y_true) & (~y_pred))
 
     # --- 2. Identify Segments/Events ---
-    gt_events = _make_intervals(y_true)
-    pred_events = _make_intervals(y_pred)
+    gt_starts, gt_ends = _make_intervals(y_true)
+    pred_starts, pred_ends = _make_intervals(y_pred)
 
-    num_gt_events = len(gt_events)
-    num_pred_events = len(pred_events)
+    num_gt_events = gt_starts.shape[0]
+    num_pred_events = pred_starts.shape[0]
 
     # Handle edge cases early
     if num_gt_events == 0:
         return 0.0, 1.0
-
     if num_pred_events == 0:
         return 0.0, 0.0
 
     # Build interval overlap matrix for efficient calculation
     # This avoids repeated overlap calculations
-    overlap_matrix = np.zeros((num_gt_events, num_pred_events), dtype=bool)
+    overlap_matrix = np.zeros(shape=(num_gt_events, num_pred_events), dtype=nb.bool)
 
-    for i, (gt_start, gt_end) in enumerate(gt_events):
-        for j, (pred_start, pred_end) in enumerate(pred_events):
+    for i in nb.prange(num_gt_events):
+        for j in nb.prange(num_pred_events):
+
             # Calculate overlap
-            start_overlap = max(gt_start, pred_start)
-            end_overlap = min(gt_end, pred_end)
+            start_overlap = max(gt_starts[i], pred_starts[j])
+            end_overlap = min(gt_ends[i], pred_ends[j])
+
             # Simple overlap check
             overlap_matrix[i, j] = start_overlap <= end_overlap
 
     # Count true positives - each GT event detected at least once
-    gt_detected = np.any(overlap_matrix, axis=1)
+    gt_detected = np_any_axis1(overlap_matrix)
     tpe = np.sum(gt_detected)
 
     # Count false positives - predicted events that don't overlap with any GT
-    pred_is_fp = ~np.any(overlap_matrix, axis=0)
+    pred_is_fp = ~np_any_axis0(overlap_matrix)
     fpe = np.sum(pred_is_fp)
 
     # Calculate metrics
@@ -118,7 +124,7 @@ class EventWisePrecision(BinaryMetric):
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         event_wise_precision, _ = _compute_event_wise_metrics(
-            y_true.astype(int), y_pred.astype(int)
+            y_true.astype(bool), y_pred.astype(bool)
         )
         return event_wise_precision
 
@@ -145,7 +151,7 @@ class EventWiseRecall(BinaryMetric):
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         _, event_wise_recall = _compute_event_wise_metrics(
-            y_true.astype(int), y_pred.astype(int)
+            y_true.astype(bool), y_pred.astype(bool)
         )
         return event_wise_recall
 
@@ -188,7 +194,7 @@ class EventWiseFBeta(BinaryMetric):
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         event_wise_precision, event_wise_recall = _compute_event_wise_metrics(
-            y_true.astype(int), y_pred.astype(int)
+            y_true.astype(bool), y_pred.astype(bool)
         )
 
         numerator = (1 + self.beta**2) * event_wise_precision * event_wise_recall
