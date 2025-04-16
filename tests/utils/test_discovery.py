@@ -8,33 +8,77 @@ anomaly_detectors = [
     anomaly_detection.AlwaysNormal,
     anomaly_detection.AlwaysAnomalous,
     anomaly_detection.RandomDetector,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
-    anomaly_detection.AlwaysAnomalous,
+    anomaly_detection.ClusterBasedLocalOutlierFactor,
+    anomaly_detection.CopulaBasedOutlierDetector,
+    anomaly_detection.HistogramBasedOutlierScore,
+    anomaly_detection.IsolationForest,
+    anomaly_detection.KernelPrincipalComponentAnalysis,
+    anomaly_detection.KMeansAnomalyDetector,
+    anomaly_detection.KNearestNeighbors,
+    anomaly_detection.KShapeAnomalyDetector,
+    anomaly_detection.LocalOutlierFactor,
+    anomaly_detection.MatrixProfileDetector,
+    anomaly_detection.MedianMethod,
+    anomaly_detection.OneClassSupportVectorMachine,
+    anomaly_detection.PrincipalComponentAnalysis,
+    anomaly_detection.RobustPrincipalComponentAnalysis,
 ]
 data_loaders = [
-
+    data.DemonstrationTimeSeriesLoader,
+    data.UCRLoader
 ]
 metrics = [
-
+    evaluation.ThresholdMetric,
+    evaluation.Precision,
+    evaluation.Recall,
+    evaluation.FBeta,
+    evaluation.AreaUnderPR,
+    evaluation.AreaUnderROC,
+    evaluation.PointAdjustedPrecision,
+    evaluation.PointAdjustedRecall,
+    evaluation.PointAdjustedFBeta,
+    evaluation.BestThresholdMetric,
+    evaluation.RangeAreaUnderROC,
+    evaluation.RangeAreaUnderPR,
+    evaluation.VolumeUnderROC,
+    evaluation.VolumeUnderPR,
+    evaluation.EventWisePrecision,
+    evaluation.EventWiseRecall,
+    evaluation.EventWiseFBeta,
 ]
 proba_metrics = [
-
+    evaluation.ThresholdMetric,
+    evaluation.AreaUnderPR,
+    evaluation.AreaUnderROC,
+    evaluation.BestThresholdMetric,
+    evaluation.RangeAreaUnderROC,
+    evaluation.RangeAreaUnderPR,
+    evaluation.VolumeUnderROC,
+    evaluation.VolumeUnderPR,
 ]
 binary_metrics = [
-
+    evaluation.Precision,
+    evaluation.Recall,
+    evaluation.FBeta,
+    evaluation.PointAdjustedPrecision,
+    evaluation.PointAdjustedRecall,
+    evaluation.PointAdjustedFBeta,
+    evaluation.EventWisePrecision,
+    evaluation.EventWiseRecall,
+    evaluation.EventWiseFBeta,
 ]
 preprocessors = [
-
+    preprocessing.Identity,
+    preprocessing.ChainedPreprocessor,
+    preprocessing.MinMaxScaler,
+    preprocessing.StandardScaler,
+    preprocessing.MovingAverage,
+    preprocessing.ExponentialMovingAverage,
+    preprocessing.SamplingRateUnderSampler,
+    preprocessing.NbSamplesUnderSampler,
+    preprocessing.Differencing,
+    preprocessing.PiecewiseAggregateApproximation,
+    preprocessing.RobustScaler,
 ]
 thresholders = [
     thresholding.FixedCutoff,
