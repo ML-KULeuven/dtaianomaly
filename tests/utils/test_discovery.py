@@ -85,11 +85,12 @@ thresholders = [
     thresholding.ContaminationRate,
     thresholding.TopN
 ]
+everything = anomaly_detectors + data_loaders + metrics + preprocessors + thresholders
 
 
 @pytest.mark.parametrize('return_names', [True, False])
 @pytest.mark.parametrize('type_filter,expected', [
-    (None, anomaly_detectors + data_loaders + metrics + preprocessors + thresholders),
+    (None, everything),
     (anomaly_detection.BaseDetector, anomaly_detectors),
     (data.LazyDataLoader, data_loaders),
     (evaluation.Metric, metrics),
@@ -118,16 +119,40 @@ class TestAllClasses:
 class TestTypeFilter:
 
     def test_str(self):
-        pass
+        discovered = all_classes(type_filter='anomaly-detector', return_names=False)
+        assert len(discovered) == len(anomaly_detectors)
+        for exp in anomaly_detectors:
+            assert exp in discovered
 
     def test_type(self):
-        pass
+        discovered = all_classes(type_filter=anomaly_detection.BaseDetector, return_names=False)
+        assert len(discovered) == len(anomaly_detectors)
+        for exp in anomaly_detectors:
+            assert exp in discovered
 
     def test_str_list(self):
-        assert 0
+        discovered = all_classes(type_filter=['anomaly-detector', 'data-loader'], return_names=False)
+        assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
+        for exp in anomaly_detectors:
+            assert exp in discovered
+        for exp in data_loaders:
+            assert exp in discovered
 
     def test_type_list(self):
-        assert 0
+        discovered = all_classes(type_filter=[anomaly_detection.BaseDetector, data.LazyDataLoader], return_names=False)
+        assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
+        for exp in anomaly_detectors:
+            assert exp in discovered
+        for exp in data_loaders:
+            assert exp in discovered
+
+    def test_str_type_list(self):
+        discovered = all_classes(type_filter=['anomaly-detector', data.LazyDataLoader], return_names=False)
+        assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
+        for exp in anomaly_detectors:
+            assert exp in discovered
+        for exp in data_loaders:
+            assert exp in discovered
 
     def test_all_valid_strs(self):
         for key in _TYPE_FILTERS:
@@ -137,16 +162,39 @@ class TestTypeFilter:
 class TestExcludeType:
 
     def test_str(self):
-        pass
+        discovered = all_classes(exclude_types='anomaly-detector', return_names=False)
+        assert len(discovered) == len(everything) - len(anomaly_detectors)
+        for exp in everything:
+            if exp not in anomaly_detectors:
+                assert exp in discovered
 
     def test_type(self):
-        pass
+        discovered = all_classes(exclude_types=anomaly_detection.BaseDetector, return_names=False)
+        assert len(discovered) == len(everything) - len(anomaly_detectors)
+        for exp in everything:
+            if exp not in anomaly_detectors:
+                assert exp in discovered
 
     def test_str_list(self):
-        assert 0
+        discovered = all_classes(exclude_types=['anomaly-detector', 'data-loader'], return_names=False)
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        for exp in everything:
+            if not (exp in anomaly_detectors or exp in data_loaders):
+                assert exp in discovered
 
     def test_type_list(self):
-        assert 0
+        discovered = all_classes(exclude_types=[anomaly_detection.BaseDetector, data.LazyDataLoader], return_names=False)
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        for exp in everything:
+            if not (exp in anomaly_detectors or exp in data_loaders):
+                assert exp in discovered
+
+    def test_str_type_list(self):
+        discovered = all_classes(exclude_types=['anomaly-detector', data.LazyDataLoader], return_names=False)
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        for exp in everything:
+            if not (exp in anomaly_detectors or exp in data_loaders):
+                assert exp in discovered
 
     def test_all_valid_strs(self):
         for key in _TYPE_FILTERS:
