@@ -13,6 +13,7 @@ Added
 - Added optional configuration ``data_root`` in when reading a config, which is used by
   all ``PathDataLoaders`` to read data relative to that root.
 - Discovery methods to obtain all the models from the code base.
+
 Changed
 ^^^^^^^
 - Updated the GitHub workflows to only run a single unit test, and the extensive test suite upon release. 

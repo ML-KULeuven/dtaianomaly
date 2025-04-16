@@ -2,7 +2,7 @@
 import pytest
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
-from dtaianomaly.utils.discovery import all_classes, _TYPE_FILTERS
+from dtaianomaly.utils.discovery import all_classes
 
 anomaly_detectors = [
     anomaly_detection.AlwaysNormal,
@@ -154,9 +154,9 @@ class TestTypeFilter:
         for exp in data_loaders:
             assert exp in discovered
 
-    def test_all_valid_strs(self):
-        for key in _TYPE_FILTERS:
-            all_classes(type_filter=key)
+    def test_invalid_type(self):
+        with pytest.raises(ValueError):
+            all_classes(type_filter='invalid')
 
 
 class TestExcludeType:
@@ -196,6 +196,6 @@ class TestExcludeType:
             if not (exp in anomaly_detectors or exp in data_loaders):
                 assert exp in discovered
 
-    def test_all_valid_strs(self):
-        for key in _TYPE_FILTERS:
-            all_classes(exclude_types=key)
+    def test_invalid_type(self):
+        with pytest.raises(ValueError):
+            all_classes(exclude_types='invalid')

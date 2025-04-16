@@ -1,10 +1,11 @@
 
 import pytest
+import inspect
 import json
 import toml
 import pathlib
 
-from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data
+from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data, utils
 from dtaianomaly.workflow import workflow_from_config, interpret_config, Workflow
 from dtaianomaly.workflow.workflow_from_config import interpret_dataloaders, data_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_detectors, detector_entry
@@ -12,7 +13,6 @@ from dtaianomaly.workflow.workflow_from_config import interpret_preprocessing, p
 from dtaianomaly.workflow.workflow_from_config import interpret_metrics, metric_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_thresholds, threshold_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_additional_information
-
 
 DATA_PATH = f'{pathlib.Path(__file__).parent.parent.parent}/data'
 
@@ -122,7 +122,6 @@ class TestInterpretConfig:
             {"type": "UCRLoader", "path": f"UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"},
             {"type": "directory", "path": f"UCR-time-series-anomaly-archive", "base_type": "UCRLoader"}
         ]
-        print(config)
         self.test(config)
 
 
@@ -245,7 +244,7 @@ class TestInterpretMetrics:
             })
 
     def test_best_threshold_metric_no_metric(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             metric_entry({
                 'type': 'BestThresholdMetric',
                 'no_metric': {"type": "Precision"}
@@ -307,7 +306,7 @@ class TestInterpretPreprocessors:
             })
 
     def test_chained_preprocessor_no_base_preprocessors(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             preprocessing_entry({
                 'type': 'ChainedPreprocessor',
                 'no_base_preprocessors': [{"type": "MinMaxScaler"}, {'type': 'MovingAverage', 'window_size': 40}]
@@ -325,107 +324,77 @@ class TestInterpretPreprocessors:
         assert preprocessor.base_preprocessors[1].window_size == 40
 
 
-@pytest.mark.parametrize("entry_function,object_type,entry", [
-    # Thresholds
-    (threshold_entry, thresholding.FixedCutoff, {'cutoff': 0.9}),
-    (threshold_entry, thresholding.ContaminationRate, {'contamination_rate': 0.05}),
-    (threshold_entry, thresholding.TopN, {'n': 10}),
-    # Dataloaders
-    (data_entry, data.UCRLoader, {"path": f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"}),
-    (data_entry, data.DemonstrationTimeSeriesLoader, {}),
-    # Metrics
-    (metric_entry, evaluation.Precision, {}),
-    (metric_entry, evaluation.Recall, {}),
-    (metric_entry, evaluation.FBeta, {}),
-    (metric_entry, evaluation.FBeta, {'beta': 2.0}),
-    (metric_entry, evaluation.AreaUnderROC, {}),
-    (metric_entry, evaluation.AreaUnderPR, {}),
-    (metric_entry, evaluation.PointAdjustedPrecision, {}),
-    (metric_entry, evaluation.PointAdjustedRecall, {}),
-    (metric_entry, evaluation.PointAdjustedFBeta, {}),
-    (metric_entry, evaluation.PointAdjustedFBeta, {'beta': 2.0}),
-    (metric_entry, evaluation.ThresholdMetric, {
-        'thresholder': {"type": "FixedCutoff", 'cutoff': 0.9},
-        'metric': {"type": "Precision"}
-    }),
-    (metric_entry, evaluation.BestThresholdMetric, {
-        'metric': {"type": "Precision"}
-    }),
-    (metric_entry, evaluation.RangeAreaUnderPR, {}),
-    (metric_entry, evaluation.RangeAreaUnderPR, {'buffer_size': 100}),
-    (metric_entry, evaluation.RangeAreaUnderROC, {}),
-    (metric_entry, evaluation.RangeAreaUnderROC, {'buffer_size': 100}),
-    (metric_entry, evaluation.VolumeUnderPR, {}),
-    (metric_entry, evaluation.VolumeUnderPR, {'max_buffer_size': 100}),
-    (metric_entry, evaluation.VolumeUnderROC, {}),
-    (metric_entry, evaluation.VolumeUnderROC, {'max_buffer_size': 100}),
-    (metric_entry, evaluation.EventWisePrecision, {}),
-    (metric_entry, evaluation.EventWiseRecall, {}),
-    (metric_entry, evaluation.EventWiseFBeta, {}),
-    (metric_entry, evaluation.EventWiseFBeta, {'beta': 0.5}),
-    # Detectors
-    (detector_entry, anomaly_detection.baselines.AlwaysNormal, {}),
-    (detector_entry, anomaly_detection.baselines.AlwaysAnomalous, {}),
-    (detector_entry, anomaly_detection.baselines.RandomDetector, {}),
-    (detector_entry, anomaly_detection.baselines.RandomDetector, {'seed': 42}),
-    (detector_entry, anomaly_detection.ClusterBasedLocalOutlierFactor, {'window_size': 10}),
-    (detector_entry, anomaly_detection.CopulaBasedOutlierDetector, {'window_size': 10}),
-    (detector_entry, anomaly_detection.HistogramBasedOutlierScore, {'window_size': 1}),
-    (detector_entry, anomaly_detection.IsolationForest, {'window_size': 15}),
-    (detector_entry, anomaly_detection.IsolationForest, {'window_size': 25, 'stride': 5}),
-    (detector_entry, anomaly_detection.IsolationForest, {'window_size': 35, 'n_estimators': 100}),
-    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 15}),
-    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 25, 'stride': 100}),
-    (detector_entry, anomaly_detection.KNearestNeighbors, {'window_size': 35, 'n_neighbors': 8}),
-    (detector_entry, anomaly_detection.KShapeAnomalyDetector, {'window_size': 35}),
-    (detector_entry, anomaly_detection.KShapeAnomalyDetector, {'window_size': 35, 'sequence_length_multiplier': 5}),
-    (detector_entry, anomaly_detection.KShapeAnomalyDetector, {'window_size': 35, 'n_clusters': 8}),
-    (detector_entry, anomaly_detection.KMeansAnomalyDetector, {'window_size': 25}),
-    (detector_entry, anomaly_detection.KMeansAnomalyDetector, {'window_size': 35, 'n_clusters': 20}),
-    (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 15}),
-    (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 25, 'stride': 5}),
-    (detector_entry, anomaly_detection.LocalOutlierFactor, {'window_size': 35, 'n_neighbors': 4}),
-    (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15}),
-    (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 15, 'novelty': True}),
-    (detector_entry, anomaly_detection.MatrixProfileDetector, {'window_size': 25, 'normalize': True, 'p': 1.5, 'k': 5}),
-    (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 15}),
-    (detector_entry, anomaly_detection.MedianMethod, {'neighborhood_size_before': 25, 'neighborhood_size_after': 5}),
-    (detector_entry, anomaly_detection.OneClassSupportVectorMachine, {'window_size': 15}),
-    (detector_entry, anomaly_detection.OneClassSupportVectorMachine, {'window_size': 15, 'kernel': 'poly'}),
-    (detector_entry, anomaly_detection.PrincipalComponentAnalysis, {'window_size': 15}),
-    (detector_entry, anomaly_detection.PrincipalComponentAnalysis, {'window_size': 15, 'n_components': 0.5}),
-    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis, {'window_size': 15}),
-    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis, {'window_size': 15, 'n_components': 0.5}),
-    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis, {'window_size': 15}),
-    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis, {'window_size': 15, 'max_iter': 100}),
-    # Preprocessors
-    (preprocessing_entry, preprocessing.Identity, {}),
-    (preprocessing_entry, preprocessing.ChainedPreprocessor, {
-        'base_preprocessors': [
-            {"type": "MovingAverage", "window_size": 15},
-            {"type": "Identity"}
-        ]
-    }),
-    (preprocessing_entry, preprocessing.MinMaxScaler, {}),
-    (preprocessing_entry, preprocessing.StandardScaler, {}),
-    (preprocessing_entry, preprocessing.RobustScaler, {}),
-    (preprocessing_entry, preprocessing.MovingAverage, {'window_size': 40}),
-    (preprocessing_entry, preprocessing.ExponentialMovingAverage, {"alpha": 0.8}),
-    (preprocessing_entry, preprocessing.NbSamplesUnderSampler, {'nb_samples': 250}),
-    (preprocessing_entry, preprocessing.SamplingRateUnderSampler, {'sampling_rate': 5}),
-    (preprocessing_entry, preprocessing.Differencing, {'order': 1}),
-    (preprocessing_entry, preprocessing.PiecewiseAggregateApproximation, {'n': 32}),
-])
+class TestAdditionalInformation:
+
+    def test(self):
+        additional_information = interpret_additional_information({'n_jobs': 3, 'error_log_path': 'test', 'something_else': 5})
+        assert len(additional_information) == 2
+        assert 'n_jobs' in additional_information
+        assert additional_information['n_jobs'] == 3
+        assert 'error_log_path' in additional_information
+        assert additional_information['error_log_path'] == 'test'
+
+
+def infer_entry_function(cls):
+    if issubclass(cls, anomaly_detection.BaseDetector):
+        return detector_entry
+    elif issubclass(cls, data.LazyDataLoader):
+        return data_entry
+    elif issubclass(cls, evaluation.Metric):
+        return metric_entry
+    elif issubclass(cls, thresholding.Thresholding):
+        return threshold_entry
+    elif issubclass(cls, preprocessing.Preprocessor):
+        return preprocessing_entry
+    else:
+        pytest.fail(f"An invalid object is given: {cls}")
+
+
+def infer_minimal_entry(cls):
+    kwargs = {
+        'window_size': 15,
+        'neighborhood_size_before': 15,
+        'detector': anomaly_detection.IsolationForest(window_size=15),
+        'preprocessor': preprocessing.Identity(),
+        'order': 2,
+        'alpha': 0.7,
+        'nb_samples': 500,
+        'sampling_rate': 2,
+        'n': 4,
+        'metric': {'type': 'Precision'},
+        'thresholder': {'type': 'FixedCutoff', 'cutoff': 0.9},
+        'cutoff': 0.9,
+        'contamination_rate': 0.1,
+        'base_preprocessors': [{'type': 'Identity'}],
+        'path': DATA_PATH
+    }
+    sig = inspect.signature(cls.__init__)
+    accepted_params = set(sig.parameters) - {"self"}
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    return {'type': cls.__name__} | filtered_kwargs
+
+
+def infer_extensive_entry(cls):
+    minimal_entry = infer_minimal_entry(cls)
+    sig = inspect.signature(cls.__init__)
+    optional_parameters = set(sig.parameters) - {"self", "kwargs", "args"} - set(minimal_entry.keys())
+    return minimal_entry | {parameter: sig.parameters[parameter].default for parameter in optional_parameters}
+
+
+@pytest.mark.parametrize("cls", utils.all_classes(return_names=False))
 class TestInterpretEntries:
 
-    def test(self, entry_function, object_type, entry):
-        entry_copy = entry.copy()
-        entry_copy['type'] = object_type.__name__
-        read_object = entry_function(entry_copy)
-        assert isinstance(read_object, object_type)
+    @pytest.mark.parametrize("infer_entry", [infer_minimal_entry, infer_extensive_entry])
+    def test(self, cls, infer_entry):
+        entry_function = infer_entry_function(cls)
+        entry = infer_entry(cls)
+        read_object = entry_function(entry)
+        assert isinstance(read_object, cls)
         for key, value in entry.items():
             if key in ['base_preprocessors', 'metric', 'thresholder']:
-                pass  # Simply assume it is correct, because test would become so difficult that errors can sneak in
+                continue  # Simply assume it is correct, because test would become so difficult that errors can sneak in
+            elif key == 'type':
+                continue  # Skip this key as it is only necessary for the configuration
             elif hasattr(read_object, key):
                 assert getattr(read_object, key) == value
             elif hasattr(read_object, 'kwargs'):
@@ -433,69 +402,28 @@ class TestInterpretEntries:
             else:
                 pytest.fail(f"Object should either have '{key}' as attribute, or have 'kwargs' as attribute, which in turn has '{key}' as attribute!")
 
-    def test_additional_parameter(self, entry_function, object_type, entry):
-        entry_copy = entry.copy()
-        entry_copy['type'] = object_type.__name__
-        entry_copy['some-other-random-parameter'] = 0
+    def test_invalid_parameter(self, cls):
+        entry_function = infer_entry_function(cls)
+        minimal_entry = infer_minimal_entry(cls)
+        minimal_entry['some-other-random-parameter'] = 0
         with pytest.raises(TypeError):
-            entry_function(entry_copy)
+            entry_function(minimal_entry)
 
-    def test_invalid_type(self, entry_function, object_type, entry):
-        entry_copy = entry.copy()
-        entry_copy['type'] = 'INVALID-TYPE'
+    def test_missing_obligated_parameters(self, cls):
+        entry_function = infer_entry_function(cls)
+        minimal_entry = infer_minimal_entry(cls)
+        if len(minimal_entry) > 1:
+            with pytest.raises(TypeError):
+                entry_function({'type': cls.__name__})
+
+
+@pytest.mark.parametrize("entry_function", [threshold_entry, metric_entry, metric_entry, detector_entry, preprocessing_entry])
+class TestInvalidEntries:
+
+    def test_invalid_type(self, entry_function):
         with pytest.raises(ValueError):
-            entry_function(entry_copy)
+            entry_function({'type': 'INVALID-TYPE'})
 
-    def test_no_type(self, entry_function, object_type, entry):
+    def test_no_type(self, entry_function):
         with pytest.raises(KeyError):
-            entry_function(entry)
-            
-
-@pytest.mark.parametrize("entry_function,object_type", [
-    (threshold_entry, thresholding.FixedCutoff),
-    (threshold_entry, thresholding.ContaminationRate),
-    (threshold_entry, thresholding.TopN),
-    # Dataloaders
-    (data_entry, data.UCRLoader),
-    # Metrics
-    (metric_entry, evaluation.ThresholdMetric),
-    (metric_entry, evaluation.BestThresholdMetric),
-    # Detectors
-    (detector_entry, anomaly_detection.ClusterBasedLocalOutlierFactor),
-    (detector_entry, anomaly_detection.CopulaBasedOutlierDetector),
-    (detector_entry, anomaly_detection.HistogramBasedOutlierScore),
-    (detector_entry, anomaly_detection.IsolationForest),
-    (detector_entry, anomaly_detection.KernelPrincipalComponentAnalysis),
-    (detector_entry, anomaly_detection.KNearestNeighbors),
-    (detector_entry, anomaly_detection.KMeansAnomalyDetector),
-    (detector_entry, anomaly_detection.KShapeAnomalyDetector),
-    (detector_entry, anomaly_detection.LocalOutlierFactor),
-    (detector_entry, anomaly_detection.MatrixProfileDetector),
-    (detector_entry, anomaly_detection.MedianMethod),
-    (detector_entry, anomaly_detection.OneClassSupportVectorMachine),
-    (detector_entry, anomaly_detection.PrincipalComponentAnalysis),
-    (detector_entry, anomaly_detection.RobustPrincipalComponentAnalysis),
-    # Preprocessors
-    (preprocessing_entry, preprocessing.ChainedPreprocessor),
-    (preprocessing_entry, preprocessing.MovingAverage),
-    (preprocessing_entry, preprocessing.ExponentialMovingAverage),
-    (preprocessing_entry, preprocessing.NbSamplesUnderSampler),
-    (preprocessing_entry, preprocessing.SamplingRateUnderSampler),
-    (preprocessing_entry, preprocessing.Differencing),
-])
-class TestEntriesWithObligatedParameters:
-
-    def test(self, entry_function, object_type):
-        with pytest.raises(TypeError):
-            entry_function({'type': object_type.__name__})
-
-
-class TestAdditionalInformation:
-
-    def test(self):
-        additional_inforamtion = interpret_additional_information({'n_jobs': 3, 'error_log_path': 'test', 'something_else': 5})
-        assert len(additional_inforamtion) == 2
-        assert 'n_jobs' in additional_inforamtion
-        assert additional_inforamtion['n_jobs'] == 3
-        assert 'error_log_path' in additional_inforamtion
-        assert additional_inforamtion['error_log_path'] == 'test'
+            entry_function({})

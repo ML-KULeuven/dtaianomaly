@@ -6,22 +6,7 @@ from operator import itemgetter
 from pathlib import Path
 from typing import List, Tuple, Union
 
-from dtaianomaly.anomaly_detection import BaseDetector
-from dtaianomaly.data import LazyDataLoader
-from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric
-from dtaianomaly.preprocessing import Preprocessor
-from dtaianomaly.thresholding import Thresholding
-
 _MODULES_TO_IGNORE = ("pipeline", "utils", "visualisation", "workflow")
-_TYPE_FILTERS = {
-    "anomaly-detector": BaseDetector,
-    "data-loader": LazyDataLoader,
-    "metric": Metric,
-    "binary-metric": BinaryMetric,
-    "proba-metric": ProbaMetric,
-    "preprocessor": Preprocessor,
-    "thresholder": Thresholding,
-}
 
 
 def all_classes(
@@ -90,7 +75,7 @@ def all_classes(
         return [cls for _, cls in classes]
 
 
-def _is_abstract(cls: type):
+def _is_abstract(cls):
     if abc.ABC in cls.__bases__:
         return True
     if not (hasattr(cls, "__abstractmethods__")):
@@ -101,12 +86,36 @@ def _is_abstract(cls: type):
 
 
 def _has_valid_type(cls: type):
-    return any(issubclass(cls, v) for v in _TYPE_FILTERS.values())
+    from dtaianomaly.anomaly_detection import BaseDetector
+    from dtaianomaly.data import LazyDataLoader
+    from dtaianomaly.evaluation import Metric
+    from dtaianomaly.preprocessing import Preprocessor
+    from dtaianomaly.thresholding import Thresholding
+
+    return any(
+        issubclass(cls, v)
+        for v in [BaseDetector, LazyDataLoader, Metric, Preprocessor, Thresholding]
+    )
 
 
 def _filter_types(
     types: Union[str, type, List[str], List[type]], classes: List[Tuple[str, type]]
 ):
+    from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
+    from dtaianomaly.data.LazyDataLoader import LazyDataLoader
+    from dtaianomaly.evaluation.metrics import BinaryMetric, Metric, ProbaMetric
+    from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+    from dtaianomaly.thresholding.thresholding import Thresholding
+
+    _TYPE_FILTERS = {
+        "anomaly-detector": BaseDetector,
+        "data-loader": LazyDataLoader,
+        "metric": Metric,
+        "binary-metric": BinaryMetric,
+        "proba-metric": ProbaMetric,
+        "preprocessor": Preprocessor,
+        "thresholder": Thresholding,
+    }
 
     if not isinstance(types, list):
         types = [types]
