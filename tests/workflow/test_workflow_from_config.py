@@ -115,6 +115,16 @@ class TestInterpretConfig:
         with pytest.raises(TypeError):
             interpret_config(str(tmp_path / 'config.json'))
 
+    def test_with_data_root(self, valid_config):
+        config = valid_config.copy()
+        config['data_root'] = DATA_PATH
+        config['dataloaders'] = [
+            {"type": "UCRLoader", "path": f"UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"},
+            {"type": "directory", "path": f"UCR-time-series-anomaly-archive", "base_type": "UCRLoader"}
+        ]
+        print(config)
+        self.test(config)
+
 
 class TestInterpretThresholds:
 
@@ -192,6 +202,10 @@ class TestInterpretDataloaders:
     def test_from_directory_invalid_base_type(self):
         with pytest.raises(ValueError):
             data_entry({"type": "directory", "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive", "base_type": "INVALID"})
+
+    def test_data_root(self):
+
+        pass
 
 
 class TestInterpretMetrics:
@@ -318,6 +332,7 @@ class TestInterpretPreprocessors:
     (threshold_entry, thresholding.TopN, {'n': 10}),
     # Dataloaders
     (data_entry, data.UCRLoader, {"path": f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"}),
+    (data_entry, data.DemonstrationTimeSeriesLoader, {}),
     # Metrics
     (metric_entry, evaluation.Precision, {}),
     (metric_entry, evaluation.Recall, {}),

@@ -86,7 +86,11 @@ def interpret_config(config: dict):
     # Interpret the data loaders
     if "dataloaders" not in config:
         raise ValueError("No `dataloaders` key in the config")
-    dataloaders = interpret_dataloaders(config["dataloaders"])
+    if "data_root" in config:
+        data_root = config["data_root"]
+    else:
+        data_root = ""
+    dataloaders = interpret_dataloaders(config["dataloaders"], data_root=data_root)
 
     # Interpret the preprocessors
     preprocessors = (
@@ -153,11 +157,11 @@ def threshold_entry(entry):
 ###################################################################
 
 
-def interpret_dataloaders(config):
+def interpret_dataloaders(config, data_root: str = ""):
     if isinstance(config, list):
         data_loaders = []
         for entry in config:
-            new_loaders = data_entry(entry)
+            new_loaders = data_entry(entry, data_root)
             if isinstance(new_loaders, list):
                 data_loaders.extend(new_loaders)
             else:
@@ -165,12 +169,15 @@ def interpret_dataloaders(config):
         return data_loaders
 
     else:
-        return [data_entry(config)]
+        return [data_entry(config, data_root)]
 
 
-def data_entry(entry):
+def data_entry(entry, data_root: str = ""):
     data_type = entry["type"]
     entry_without_type = {key: value for key, value in entry.items() if key != "type"}
+
+    if "path" in entry_without_type:
+        entry_without_type["path"] = os.path.join(data_root, entry_without_type["path"])
 
     if data_type == "UCRLoader":
         return data.UCRLoader(**entry_without_type)
@@ -188,7 +195,12 @@ def data_entry(entry):
         else:
             raise ValueError(f"Invalid base type: {entry}")
 
-        return data.from_directory(entry["path"], base_type)
+        return data.from_directory(entry_without_type["path"], base_type)
+
+    elif data_type == "DemonstrationTimeSeriesLoader":
+        if len(entry_without_type) > 0:
+            raise TypeError(f"Too many parameters given for entry: {entry}")
+        return data.DemonstrationTimeSeriesLoader()
 
     else:
         raise ValueError(f"Invalid data entry: {entry}")

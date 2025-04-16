@@ -10,6 +10,8 @@ Added
 ^^^^^
 - Implementation of the Volume Under the Surface (VUS) metrics
 - Implementation of Event-Wise metrics
+- Added optional configuration ``data_root`` in when reading a config, which is used by
+  all ``PathDataLoaders`` to read data relative to that root.
 
 Changed
 ^^^^^^^
