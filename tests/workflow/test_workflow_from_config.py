@@ -202,10 +202,6 @@ class TestInterpretDataloaders:
         with pytest.raises(ValueError):
             data_entry({"type": "directory", "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive", "base_type": "INVALID"})
 
-    def test_data_root(self):
-
-        pass
-
 
 class TestInterpretMetrics:
 

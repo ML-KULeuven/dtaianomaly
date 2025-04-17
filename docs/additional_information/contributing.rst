@@ -249,17 +249,17 @@ BaseDetector
 | |check_box| Does the constructor call ``super().__init__(Supervision)`` with the correct supervision type?
 | |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
 | |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()` method?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._fit()` method?
+| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._decision_function()` method?
 | |check_box| Did you add the anomaly detector in ``__all__`` of the ``dtaianomaly/anomaly_detection/__init__.py`` file?
 | |check_box| Can you load the anomaly detector via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``detector_entry()`` function)?
 
 .. rubric:: Test the anomaly detector
 
 | |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/anomaly_detection``?
+| |check_box| Did you add the detector in ``tests/utils/test_discovery.py``?
+| |check_box| Do all the tests still succeed?
 | |check_box| Is a test coverage of at least 95% reached?
-| |check_box| Have you included the anomaly detector in the tests in ``tests/anomaly_detection/test_detectors.py``?
-| |check_box| Have you tested loading the new anomaly detector in ``tests/workflow/test_workflow_from_config.py``?
 
 .. rubric:: Document the anomaly detector
 
@@ -286,8 +286,9 @@ LazyDataLoader
 .. rubric:: Test the data loader
 
 | |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/data``?
+| |check_box| Did you add the data loader in ``tests/utils/test_discovery.py``?
+| |check_box| Do all the tests still succeed?
 | |check_box| Is a test coverage of at least 95% reached?
-| |check_box| Have you tested loading the new data loader in ``tests/workflow/test_workflow_from_config.py``?
 
 .. rubric:: Document the data loader
 
@@ -315,9 +316,8 @@ Preprocessor
 .. rubric:: Test the preprocessor
 
 | |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/preprocessing``?
+| |check_box| Did you add the preprocessor in ``tests/utils/test_discovery.py``?
 | |check_box| Is a test coverage of at least 95% reached?
-| |check_box| Has the preprocessor been included in the tests in ``tests/preprocessing/test_preprocessors.py``?
-| |check_box| Have you tested loading the new preprocessor in ``tests/workflow/test_workflow_from_config.py``?
 
 .. rubric:: Document the preprocessor
 
@@ -343,8 +343,9 @@ Thresholding
 .. rubric:: Test the thresholder
 
 | |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/thresholding``?
+| |check_box| Did you add the thresholder in ``tests/utils/test_discovery.py``?
+| |check_box| Do all the tests still succeed?
 | |check_box| Is a test coverage of at least 95% reached?
-| |check_box| Have you tested loading the new thresholder in ``tests/workflow/test_workflow_from_config.py``?
 
 .. rubric:: Document the thresholder
 
@@ -370,9 +371,9 @@ Evaluation Metric
 .. rubric:: Test the evaluation metric
 
 | |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/evaluation``?
+| |check_box| Did you add the metric in ``tests/utils/test_discovery.py``?
+| |check_box| Do all the tests still succeed?
 | |check_box| Is a test coverage of at least 95% reached?
-| |check_box| Has the evaluation metric been included in the tests in ``tests/evaluation/test_metrics.py``?
-| |check_box| Have you tested loading the new evaluation metric in ``tests/workflow/test_workflow_from_config.py``?
 
 .. rubric:: Document the evaluation metric
 
