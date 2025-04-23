@@ -13,6 +13,7 @@ Added
 - Added optional configuration ``data_root`` when reading a config, which is used by
   all ``PathDataLoaders`` to read data relative to that root.
 - Discovery methods to obtain all the models from the code base.
+- Implemented ``MultivariateDetector``.
 
 Changed
 ^^^^^^^

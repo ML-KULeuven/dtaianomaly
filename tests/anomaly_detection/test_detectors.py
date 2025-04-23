@@ -24,11 +24,13 @@ def initialize(cls):
         'window_size': 15,
         'neighborhood_size_before': 15,
         'detector': anomaly_detection.IsolationForest(window_size=15),
-        'preprocessor': preprocessing.Identity()
+        'preprocessor': preprocessing.Identity(),
     }
     sig = inspect.signature(cls.__init__)
     accepted_params = set(sig.parameters) - {"self"}
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    if cls == anomaly_detection.ClusterBasedLocalOutlierFactor:  # Because sometimes this gives an error based on 'cluster separation'
+        filtered_kwargs['random_state'] = 0
     return cls(**filtered_kwargs)
 
 

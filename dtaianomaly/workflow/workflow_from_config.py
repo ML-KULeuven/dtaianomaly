@@ -380,6 +380,16 @@ def detector_entry(entry):
     elif detector_type == "KShapeAnomalyDetector":
         return anomaly_detection.KShapeAnomalyDetector(**entry_without_type)
 
+    elif detector_type == "MultivariateDetector":
+        if "detector" not in entry:
+            raise TypeError(f"MultivariateDetector must have detector as key: {entry}")
+        detector = detector_entry(entry["detector"])
+        entry_without_detector = entry_without_type.copy()
+        entry_without_detector.pop("detector")
+        return anomaly_detection.MultivariateDetector(
+            detector, **entry_without_detector
+        )
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

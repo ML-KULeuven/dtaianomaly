@@ -202,6 +202,10 @@ class TestInterpretDataloaders:
         with pytest.raises(ValueError):
             data_entry({"type": "directory", "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive", "base_type": "INVALID"})
 
+    def test_invalid_type(self):
+        with pytest.raises(ValueError):
+            data_entry({"type": "INVALID"})
+
 
 class TestInterpretMetrics:
 
@@ -350,7 +354,7 @@ def infer_minimal_entry(cls):
     kwargs = {
         'window_size': 15,
         'neighborhood_size_before': 15,
-        'detector': anomaly_detection.IsolationForest(window_size=15),
+        'detector': {'type': 'IsolationForest', 'window_size': 15},
         'preprocessor': preprocessing.Identity(),
         'order': 2,
         'alpha': 0.7,
@@ -387,7 +391,7 @@ class TestInterpretEntries:
         read_object = entry_function(entry)
         assert isinstance(read_object, cls)
         for key, value in entry.items():
-            if key in ['base_preprocessors', 'metric', 'thresholder']:
+            if key in ['base_preprocessors', 'metric', 'thresholder', 'detector']:
                 continue  # Simply assume it is correct, because test would become so difficult that errors can sneak in
             elif key == 'type':
                 continue  # Skip this key as it is only necessary for the configuration

@@ -19,6 +19,7 @@ anomaly_detectors = [
     anomaly_detection.LocalOutlierFactor,
     anomaly_detection.MatrixProfileDetector,
     anomaly_detection.MedianMethod,
+    anomaly_detection.MultivariateDetector,
     anomaly_detection.OneClassSupportVectorMachine,
     anomaly_detection.PrincipalComponentAnalysis,
     anomaly_detection.RobustPrincipalComponentAnalysis,
