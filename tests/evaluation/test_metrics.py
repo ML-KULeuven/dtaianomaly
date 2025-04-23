@@ -1,65 +1,78 @@
 
 import pytest
+import inspect
 import numpy as np
 from dtaianomaly.evaluation import *
 from dtaianomaly.thresholding import FixedCutoff
+from dtaianomaly import utils
 
-binary_metrics = [
-    Precision(), Recall(), FBeta(),
-    PointAdjustedPrecision(), PointAdjustedRecall(), PointAdjustedFBeta(),
-    EventWisePrecision(), EventWiseRecall(), EventWiseFBeta()
-]
-proba_metrics = [
-    AreaUnderROC(), AreaUnderPR(), ThresholdMetric(FixedCutoff(0.5), Precision()), BestThresholdMetric(Precision()),
-    RangeAreaUnderPR(), RangeAreaUnderROC(), VolumeUnderPR(max_samples=20, max_buffer_size=250), VolumeUnderROC(max_samples=20, max_buffer_size=250),
-]
+binary_metrics = utils.all_classes('binary-metric', return_names=False)
+proba_metrics = utils.all_classes('proba-metric', return_names=False)
 
 
-@pytest.mark.parametrize('metric', binary_metrics + proba_metrics)
+def initialize(cls):
+    kwargs = {
+        'beta': 1.0,
+        'metric': Precision(),
+        'thresholder': FixedCutoff(0.9)
+    }
+    sig = inspect.signature(cls.__init__)
+    accepted_params = set(sig.parameters) - {"self"}
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    return cls(**filtered_kwargs)
+
+
+@pytest.mark.parametrize('cls', binary_metrics + proba_metrics)
 class TestMetrics:
 
-    def test_non_numeric_y_true(self, metric):
+    def test_non_numeric_y_true(self, cls):
+        metric = initialize(cls)
         y_true = ['yes', 'no', 'yes', 'no', 'yes', 'no', 'yes', 'no', 'yes']
         y_pred = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
-    def test_non_binary_y_true(self, metric):
+    def test_non_binary_y_true(self, cls):
+        metric = initialize(cls)
         y_true = [0.1, 0.9, 0.5, 0.3, 0.9, 0.1, 0.2, 0.2, 0.0]
         y_pred = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
-    def test_non_numeric_y_pred(self, metric):
+    def test_non_numeric_y_pred(self, cls):
+        metric = initialize(cls)
         y_true = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         y_pred = ['yes', 'no', 'yes', 'no', 'yes', 'no', 'yes', 'no', 'yes']
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
-    def test_different_size(self, metric):
+    def test_different_size(self, cls):
+        metric = initialize(cls)
         y_true = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         y_pred = [0, 0, 1, 0, 1, 0, 1, 0]
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
-    def test_between_0_and_1(self, metric):
-        print(metric)
+    def test_between_0_and_1(self, cls):
+        metric = initialize(cls)
         rng = np.random.default_rng()
         y_true = rng.choice([0, 1], size=1000, replace=True)
         y_pred = rng.choice([0, 1], size=1000, replace=True)
         assert 0 <= metric.compute(y_true, y_pred) <= 1
 
 
-@pytest.mark.parametrize('metric', binary_metrics)
+@pytest.mark.parametrize('cls', binary_metrics)
 class TestBinaryMetrics:
 
-    def test_non_binary_input(self, metric):
+    def test_non_binary_input(self, cls):
+        metric = initialize(cls)
         y_true = [0, 0, 1, 0, 1, 0, 1, 0, 1]
         y_pred = [0.2, 0.3, 0.9, 0.4, 0.6, 0.3, 0.7, 0.6, 0.9]
         with pytest.raises(ValueError):
             metric.compute(y_true, y_pred)
 
-    def test_combined_with_metric(self, metric):
+    def test_combined_with_metric(self, cls):
+        metric = initialize(cls)
         y_true = [0,   0,   1,   0,   1,   0,   1,   0,   1]
         y_pred = [0.2, 0.3, 0.9, 0.4, 0.6, 0.3, 0.7, 0.6, 0.9]
         y_pred_thresholded = [0, 0, 1, 0, 1, 0, 1, 1, 1]

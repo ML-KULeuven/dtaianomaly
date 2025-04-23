@@ -10,12 +10,17 @@ Added
 ^^^^^
 - Implementation of the Volume Under the Surface (VUS) metrics
 - Implementation of Event-Wise metrics
+- Added optional configuration ``data_root`` when reading a config, which is used by
+  all ``PathDataLoaders`` to read data relative to that root.
+- Discovery methods to obtain all the models from the code base.
+- Implemented ``MultivariateDetector``.
 
 Changed
 ^^^^^^^
 - Updated the GitHub workflows to only run a single unit test, and the extensive test suite upon release. 
 - Restructured the evaluation metrics documentation to categorize them, thus offering an
   easier to understand overview instead of a list of all metrics.
+- Moved checks when reading workflow from a config file to ``interpret_config()`` from the ``interpret_<component>()`` method.
 
 Fixed
 ^^^^^

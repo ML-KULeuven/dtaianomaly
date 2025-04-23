@@ -1,10 +1,10 @@
 import abc
 
+from dtaianomaly import utils
 from dtaianomaly.data.DataSet import DataSet
-from dtaianomaly.PrettyPrintable import PrettyPrintable
 
 
-class LazyDataLoader(PrettyPrintable):
+class LazyDataLoader(utils.PrettyPrintable):
     """
     A lazy dataloader for anomaly detection workflows
 

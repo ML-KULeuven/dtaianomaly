@@ -3,10 +3,9 @@ import abc
 import numpy as np
 
 from dtaianomaly import utils
-from dtaianomaly.PrettyPrintable import PrettyPrintable
 
 
-class Thresholding(PrettyPrintable):
+class Thresholding(utils.PrettyPrintable):
 
     @abc.abstractmethod
     def threshold(self, scores: np.ndarray) -> np.ndarray:

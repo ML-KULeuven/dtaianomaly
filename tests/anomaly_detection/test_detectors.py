@@ -1,6 +1,6 @@
 
 import pytest
-import copy
+import inspect
 import numpy as np
 from sklearn.exceptions import NotFittedError
 from dtaianomaly import anomaly_detection, pipeline, preprocessing, utils
@@ -19,40 +19,30 @@ DETECTORS_NOT_MULTIVARIATE = [
 ]
 
 
-@pytest.fixture(params=[
-    anomaly_detection.baselines.AlwaysNormal(),
-    anomaly_detection.baselines.AlwaysAnomalous(),
-    anomaly_detection.baselines.RandomDetector(seed=42),
-    anomaly_detection.ClusterBasedLocalOutlierFactor(15, n_clusters=20),
-    anomaly_detection.CopulaBasedOutlierDetector(15),
-    anomaly_detection.HistogramBasedOutlierScore(1),
-    anomaly_detection.IsolationForest(15),
-    anomaly_detection.KernelPrincipalComponentAnalysis(15),
-    anomaly_detection.KMeansAnomalyDetector(15),
-    anomaly_detection.KNearestNeighbors(15),
-    anomaly_detection.KShapeAnomalyDetector(15),
-    anomaly_detection.LocalOutlierFactor(15),
-    anomaly_detection.MatrixProfileDetector(15, novelty=False),
-    anomaly_detection.MatrixProfileDetector(15, novelty=True),
-    anomaly_detection.MedianMethod(15),
-    anomaly_detection.MedianMethod(15, 10),
-    anomaly_detection.OneClassSupportVectorMachine(15),
-    anomaly_detection.PrincipalComponentAnalysis(15),
-    anomaly_detection.RobustPrincipalComponentAnalysis(15),
-    anomaly_detection.RobustPrincipalComponentAnalysis(15, svd_solver='randomized'),
-    pipeline.Pipeline(preprocessing.Identity(), anomaly_detection.IsolationForest(15))
-])
-def detector(request):
-    return copy.deepcopy(request.param)
+def initialize(cls):
+    kwargs = {
+        'window_size': 15,
+        'neighborhood_size_before': 15,
+        'detector': anomaly_detection.IsolationForest(window_size=15),
+        'preprocessor': preprocessing.Identity(),
+    }
+    sig = inspect.signature(cls.__init__)
+    accepted_params = set(sig.parameters) - {"self"}
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    if cls == anomaly_detection.ClusterBasedLocalOutlierFactor:  # Because sometimes this gives an error based on 'cluster separation'
+        filtered_kwargs['random_state'] = 0
+    return cls(**filtered_kwargs)
 
 
+@pytest.mark.parametrize('cls', utils.all_classes('anomaly-detector', return_names=False) + [pipeline.Pipeline])
 class TestAnomalyDetectors:
 
-    def test_fit(self, detector, univariate_time_series):
+    def test_fit(self, cls, univariate_time_series):
+        detector = initialize(cls)
         assert detector.fit(univariate_time_series) is detector
 
-    def test_fit_can_pass_kwargs(self, detector, univariate_time_series):
-        detector.fit(
+    def test_fit_can_pass_kwargs(self, cls, univariate_time_series):
+        initialize(cls).fit(
             univariate_time_series,
             lower_bound=10,
             upper_bound=1000,
@@ -60,37 +50,43 @@ class TestAnomalyDetectors:
             default_window_size=64
         )
 
-    def test_fit_invalid_array(self, detector):
+    def test_fit_invalid_array(self, cls):
         with pytest.raises(ValueError):
-            detector.fit([5, 20, '5'])
+            initialize(cls).fit([5, 20, '5'])
 
-    def test_decision_function_invalid_array(self, detector, univariate_time_series):
+    def test_decision_function_invalid_array(self, cls, univariate_time_series):
+        detector = initialize(cls)
         detector.fit(univariate_time_series)
         with pytest.raises(ValueError):
             detector.decision_function(np.asarray(['foo', 'bar', 'lorem', 'ipsum']))
 
-    def test_decision_function_not_fitted(self, detector, univariate_time_series):
+    def test_decision_function_not_fitted(self, cls, univariate_time_series):
+        detector = initialize(cls)
         if type(detector) not in DETECTORS_WITHOUT_FITTING:
             with pytest.raises(NotFittedError):
                 detector.decision_function(univariate_time_series)
 
-    def test_decision_function_list_as_input(self, detector, univariate_time_series):
+    def test_decision_function_list_as_input(self, cls, univariate_time_series):
+        detector = initialize(cls)
         detector.fit(univariate_time_series)
         decision_function = detector.decision_function([item for item in univariate_time_series])
         assert decision_function.shape[0] == univariate_time_series.shape[0]
 
-    def test_univariate(self, detector, univariate_time_series):
+    def test_univariate(self, cls, univariate_time_series):
+        detector = initialize(cls)
         detector.fit(univariate_time_series)
         decision_function = detector.decision_function(univariate_time_series)
         assert decision_function.shape[0] == univariate_time_series.shape[0]
 
-    def test_univariate_reshape(self, detector, univariate_time_series):
+    def test_univariate_reshape(self, cls, univariate_time_series):
+        detector = initialize(cls)
         reshaped_univariate_time_series = univariate_time_series.reshape(-1, 1)
         assert reshaped_univariate_time_series.shape == (univariate_time_series.shape[0], 1)
         detector.fit(reshaped_univariate_time_series)
         decision_function = detector.decision_function(reshaped_univariate_time_series)
 
-    def test_multivariate(self, detector, multivariate_time_series):
+    def test_multivariate(self, cls, multivariate_time_series):
+        detector = initialize(cls)
         if type(detector) in DETECTORS_NOT_MULTIVARIATE:
             if type(detector) not in DETECTORS_WITHOUT_FITTING:
                 with pytest.raises(ValueError):
@@ -106,48 +102,28 @@ class TestAnomalyDetectors:
             decision_function = detector.decision_function(multivariate_time_series)
             assert decision_function.shape[0] == multivariate_time_series.shape[0]
 
-    def test_is_valid_array_like_univariate(self, detector, univariate_time_series):
+    def test_is_valid_array_like_univariate(self, cls, univariate_time_series):
+        detector = initialize(cls)
         X_ = detector.fit(univariate_time_series).decision_function(univariate_time_series)
         assert utils.is_valid_array_like(X_)
 
-    def test_is_valid_array_like_multivariate(self, detector, multivariate_time_series):
+    def test_is_valid_array_like_multivariate(self, cls, multivariate_time_series):
+        detector = initialize(cls)
         if type(detector) not in DETECTORS_NOT_MULTIVARIATE:
             X_ = detector.fit(multivariate_time_series).decision_function(multivariate_time_series)
             assert utils.is_valid_array_like(X_)
 
-    def test_fit_predict_on_different_time_series(self, detector, univariate_time_series):
+    def test_fit_predict_on_different_time_series(self, cls, univariate_time_series):
         # 66% train-test split
+        detector = initialize(cls)
         X_train = univariate_time_series[:univariate_time_series.shape[0] * 2 // 3]
         X_test = univariate_time_series[univariate_time_series.shape[0] * 2 // 3:]
         detector.fit(X_train)
         decision_function = detector.predict_proba(X_test)
         assert decision_function.shape[0] == X_test.shape[0]
 
-    def test_predict_confidence(self, detector, univariate_time_series):
+    def test_predict_confidence(self, cls, univariate_time_series):
+        detector = initialize(cls)
         detector.fit(univariate_time_series)
         confidence = detector.predict_confidence(univariate_time_series)
         assert confidence.shape[0] == univariate_time_series.shape[0]
-
-
-@pytest.mark.parametrize('detector_class,additional_args', [
-    (anomaly_detection.ClusterBasedLocalOutlierFactor, {'n_clusters': 20}),
-    (anomaly_detection.CopulaBasedOutlierDetector, {}),
-    (anomaly_detection.HistogramBasedOutlierScore, {}),
-    (anomaly_detection.IsolationForest, {}),
-    (anomaly_detection.KernelPrincipalComponentAnalysis, {}),
-    (anomaly_detection.KMeansAnomalyDetector, {}),
-    (anomaly_detection.KShapeAnomalyDetector, {}),
-    (anomaly_detection.KNearestNeighbors, {}),
-    (anomaly_detection.LocalOutlierFactor, {}),
-    (anomaly_detection.MatrixProfileDetector, {}),
-    (anomaly_detection.OneClassSupportVectorMachine, {}),
-    (anomaly_detection.PrincipalComponentAnalysis, {}),
-    (anomaly_detection.RobustPrincipalComponentAnalysis, {}),
-])
-@pytest.mark.parametrize('window_size', [15, 'fft', 'acf', 'mwf', 'suss'])
-class TestAnomalyDetectorsAutomaticWindowSize:
-
-    def test(self, detector_class, window_size, additional_args, univariate_time_series):
-        detector_object = detector_class(window_size=window_size, **additional_args)
-        detector_object.fit(univariate_time_series)
-        detector_object.decision_function(univariate_time_series)

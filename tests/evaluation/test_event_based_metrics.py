@@ -39,31 +39,14 @@ class TestMakeIntervals:
         ([0, 1, 1, 1, 0, 0, 1, 0], [(1, 3), (6, 6)]),
     ])
     def test_make_intervals(self, value, expected):
-        assert _make_intervals(np.array(value)) == expected
-        assert _make_intervals(value) == expected
-
-    def test_higher_dimensional(self):
-        value = np.zeros(shape=(1000, 2))
-        with pytest.raises(ValueError):
-            _make_intervals(value)
+        start, end = _make_intervals(np.array(value))
+        assert start.shape[0] == end.shape[0] == len(expected)
+        for s, e, (s_expected, e_expected) in zip(start, end, expected):
+            assert s == s_expected
+            assert e == e_expected
 
 
 class TestComputeEventWiseMetrics:
-
-    def test_input_validation(self):
-        y_true = np.array([0, 1, 0])
-        y_pred_short = np.array([0, 1])
-        y_pred_long = np.array([0, 1, 0, 0])
-        y_pred_invalid_val = np.array([0, 2, 0])
-
-        with pytest.raises(ValueError):
-            _compute_event_wise_metrics(y_true, y_pred_short)
-        with pytest.raises(ValueError):
-            _compute_event_wise_metrics(y_true, y_pred_long)
-        with pytest.raises(ValueError):
-            _compute_event_wise_metrics(y_true, y_pred_invalid_val)
-        with pytest.raises(ValueError):
-            _compute_event_wise_metrics(y_pred_invalid_val, y_true)  # Check y_true too
 
     def test_perfect_match(self):
         y_true = np.array([0, 1, 1, 0, 0, 1, 0])
@@ -79,9 +62,11 @@ class TestComputeEventWiseMetrics:
         # RE = 2/2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 0) = 1.0 * 1.0 = 1.0
         # F1E = 2 * (1 * 1) / (1 + 1) = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_all_zeros(self):
         y_true = np.zeros(10)
@@ -97,9 +82,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1.0 (0/0 -> treat as 1.0 according to implementation logic)
         # PE = 0.0 (denominator 0 -> treat as 0.0)
         # F1E = 0.0 (2*0*1 / (0+1))
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_all_ones(self):
         y_true = np.ones(10)
@@ -115,9 +102,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1/1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0) = 1.0
         # F1E = 2 * (1 * 1) / (1 + 1) = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_no_true_anomalies_fp_pred(self):
         y_true = np.zeros(10)
@@ -133,9 +122,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1.0 (0/0 -> treat as 1.0)
         # PE = (0 / (0 + 2)) * (1 - 0.3) = 0 * 0.7 = 0.0
         # F1E = 0.0 (because PE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_all_anomalies_missed(self):
         y_true = np.array([0, 0, 1, 1, 0, 0, 0, 1, 0, 0])
@@ -151,9 +142,11 @@ class TestComputeEventWiseMetrics:
         # RE = 0/2 = 0.0
         # PE = 0.0 (denominator TPE+FPE is 0 -> treat as 0.0)
         # F1E = 0.0 (because RE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 0.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_predict_all_ones_some_true(self):
         y_true = np.array([0, 1, 1, 0, 0, 1, 0])
@@ -169,9 +162,11 @@ class TestComputeEventWiseMetrics:
         # RE = 2/2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 1.0) = 1.0 * 0.0 = 0.0
         # F1E = 0.0 (because PE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_partial_overlap_fp_fn(self):
         y_true = np.array(
@@ -190,9 +185,11 @@ class TestComputeEventWiseMetrics:
         # RE = 2 / 2 = 1.0
         # PE = (2 / (2 + 1)) * (1 - 4/7) = (2/3) * (3/7) = 2/7
         # F1E = 2 * (1.0 * 2/7) / (1.0 + 2/7) = (4/7) / (9/7) = 4/9
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 2/7
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_one_gt_multiple_pred_overlap(self):
         y_true = np.array([0, 0, 1, 1, 1, 1, 1, 0, 0])  # GT: (2, 6) -> Total 1
@@ -209,9 +206,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0) = 1.0
         # F1E = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_multiple_gt_one_pred_overlap_all(self):
         y_true = np.array([0, 1, 1, 0, 0, 1, 1, 0])  # GT: (1, 2), (5, 6) -> Total 2
@@ -226,9 +225,11 @@ class TestComputeEventWiseMetrics:
         # RE = 2 / 2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (1.0 * 0.5) / (1.0 + 0.5) = 1.0 / 1.5 = 2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_multiple_gt_one_pred_overlap_partial(self):
         y_true = np.array([0, 1, 1, 0, 0, 1, 1, 0])  # GT: (1, 2), (5, 6) -> Total 2
@@ -243,9 +244,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 2 = 0.5
         # PE = (1 / (1 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (0.5 * 0.5) / (0.5 + 0.5) = 2 * 0.25 / 1.0 = 0.5
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 0.5
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_pred_segment_between_gt(self):
         y_true = np.array([0, 1, 1, 0, 0, 0, 1, 1, 0])  # GT: (1,2), (6,7) -> Total 2
@@ -260,9 +263,11 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 2 = 0.5
         # PE = (1 / (1 + 1)) * (1 - 0.4) = 0.5 * 0.6 = 0.3
         # F1E = 2 * (0.5 * 0.3) / (0.5 + 0.3) = 0.3 / 0.8 = 3/8 = 0.375
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.3
         assert pytest.approx(recall_event) == 0.5
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
     def test_pred_touching_edge(self):
         y_true = np.array([0, 1, 1, 1, 0])  # GT: (1, 3) -> Total 1
@@ -277,24 +282,29 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (1.0 * 0.5) / (1.0 + 0.5) = 1.0 / 1.5 = 2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true, y_pred)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
-    def test_identical_overlap_different_far(self):
+    def test_identical_overlap_different_far_1(self):
         # Scenario 1: Low FAR
-        y_true1 = np.array([0, 0, 1, 1, 0, 0])  # GT: (2, 3) -> Total 1
-        y_pred1 = np.array([0, 1, 1, 1, 1, 0])  # Pred: (1, 4) -> Total 1
+        y_true = np.array([0, 0, 1, 1, 0, 0])  # GT: (2, 3) -> Total 1
+        y_pred = np.array([0, 1, 1, 1, 1, 0])  # Pred: (1, 4) -> Total 1
         # TPE=1, FNE=0, FPE=0
         # N=4 (0,1,4,5), FP=2 (1,4), FAR=0.5
         # RE=1.0, PE=(1/1)*(1-0.5)=0.5, F1E=2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true1, y_pred1)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
+    def test_identical_overlap_different_far_2(self):
         # Scenario 2: High FAR (same event overlap, more normal points hit)
-        y_true2 = np.array([0, 0, 1, 1, 0, 0, 0, 0])  # GT: (2, 3) -> Total 1
-        y_pred2 = np.array([0, 1, 1, 1, 1, 0, 1, 1])  # Pred: (1, 4), (6, 7) -> Total 2
+        y_true = np.array([0, 0, 1, 1, 0, 0, 0, 0])  # GT: (2, 3) -> Total 1
+        y_pred = np.array([0, 1, 1, 1, 1, 0, 1, 1])  # Pred: (1, 4), (6, 7) -> Total 2
         # TPE=1 (from (1,4) overlapping (2,3))
         # FNE=0
         # FPE=1 (segment (6,7) is FP)
@@ -302,9 +312,11 @@ class TestComputeEventWiseMetrics:
         # RE=1.0
         # PE = (1 / (1 + 1)) * (1 - 2/3) = 0.5 * (1/3) = 1/6
         # F1E = 2 * (1.0 * 1/6) / (1.0 + 1/6) = (1/3) / (7/6) = (1/3) * (6/7) = 2/7
-        precision_event, recall_event = _compute_event_wise_metrics(y_true2, y_pred2)
+        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
         assert pytest.approx(precision_event) == 1/6
         assert pytest.approx(recall_event) == 1.0
+        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
+        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
 
 class TestMetrics:

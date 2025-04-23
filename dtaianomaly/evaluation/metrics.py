@@ -3,11 +3,10 @@ import abc
 import numpy as np
 
 from dtaianomaly import utils
-from dtaianomaly.PrettyPrintable import PrettyPrintable
 from dtaianomaly.thresholding import Thresholding
 
 
-class Metric(PrettyPrintable):
+class Metric(utils.PrettyPrintable):
 
     def compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         """

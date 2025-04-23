@@ -21,6 +21,7 @@ from .KShapeAnomalyDetector import KShapeAnomalyDetector
 from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
+from .MultivariateDetector import MultivariateDetector
 from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .PyODAnomalyDetector import PyODAnomalyDetector
@@ -62,4 +63,5 @@ __all__ = [
     "PrincipalComponentAnalysis",
     "PyODAnomalyDetector",
     "RobustPrincipalComponentAnalysis",
+    "MultivariateDetector",
 ]

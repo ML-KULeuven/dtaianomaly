@@ -79,15 +79,47 @@ def interpret_config(config: dict):
     Workflow
         Containing all the components specified in the config
     """
+    # Check the config file
     if not isinstance(config, dict):
         raise TypeError("Input should be a dictionary")
 
+    # Interpret the data loaders
+    if "dataloaders" not in config:
+        raise ValueError("No `dataloaders` key in the config")
+    if "data_root" in config:
+        data_root = config["data_root"]
+    else:
+        data_root = ""
+    dataloaders = interpret_dataloaders(config["dataloaders"], data_root=data_root)
+
+    # Interpret the preprocessors
+    preprocessors = (
+        interpret_preprocessing(config["preprocessors"])
+        if "preprocessors" in config
+        else None
+    )
+
+    # Interpret the detectors
+    if "detectors" not in config:
+        raise ValueError("No `detectors` key in the config")
+    detectors = interpret_detectors(config["detectors"])
+
+    # Interpret the metrics
+    if "metrics" not in config:
+        raise ValueError("No `metrics` key in the config")
+    metrics = interpret_metrics(config["metrics"])
+
+    # Interpret the thresholds
+    thresholds = (
+        interpret_thresholds(config["thresholds"]) if "thresholds" in config else None
+    )
+
     return Workflow(
-        dataloaders=interpret_dataloaders(config),
-        preprocessors=interpret_preprocessing(config),
-        detectors=interpret_detectors(config),
-        metrics=interpret_metrics(config),
-        thresholds=interpret_thresholds(config),
+        dataloaders=dataloaders,
+        preprocessors=preprocessors,
+        detectors=detectors,
+        metrics=metrics,
+        thresholds=thresholds,
         **interpret_additional_information(config),
     )
 
@@ -98,16 +130,10 @@ def interpret_config(config: dict):
 
 
 def interpret_thresholds(config):
-    if "thresholds" not in config:
-        return None
-
-    threshold_config = config["thresholds"]
-    if isinstance(threshold_config, list):
-        return [threshold_entry(entry) for entry in threshold_config]
+    if isinstance(config, list):
+        return [threshold_entry(entry) for entry in config]
     else:
-        return [
-            threshold_entry(threshold_config),
-        ]
+        return [threshold_entry(config)]
 
 
 def threshold_entry(entry):
@@ -131,15 +157,11 @@ def threshold_entry(entry):
 ###################################################################
 
 
-def interpret_dataloaders(config):
-    if "dataloaders" not in config:
-        raise ValueError("No `dataloaders` key in the config")
-
-    data_config = config["dataloaders"]
-    if isinstance(data_config, list):
+def interpret_dataloaders(config, data_root: str = ""):
+    if isinstance(config, list):
         data_loaders = []
-        for entry in data_config:
-            new_loaders = data_entry(entry)
+        for entry in config:
+            new_loaders = data_entry(entry, data_root)
             if isinstance(new_loaders, list):
                 data_loaders.extend(new_loaders)
             else:
@@ -147,12 +169,15 @@ def interpret_dataloaders(config):
         return data_loaders
 
     else:
-        return [data_entry(data_config)]
+        return [data_entry(config, data_root)]
 
 
-def data_entry(entry):
+def data_entry(entry, data_root: str = ""):
     data_type = entry["type"]
     entry_without_type = {key: value for key, value in entry.items() if key != "type"}
+
+    if "path" in entry_without_type:
+        entry_without_type["path"] = os.path.join(data_root, entry_without_type["path"])
 
     if data_type == "UCRLoader":
         return data.UCRLoader(**entry_without_type)
@@ -170,7 +195,10 @@ def data_entry(entry):
         else:
             raise ValueError(f"Invalid base type: {entry}")
 
-        return data.from_directory(entry["path"], base_type)
+        return data.from_directory(entry_without_type["path"], base_type)
+
+    elif data_type == "DemonstrationTimeSeriesLoader":
+        return data.DemonstrationTimeSeriesLoader(**entry_without_type)
 
     else:
         raise ValueError(f"Invalid data entry: {entry}")
@@ -182,14 +210,10 @@ def data_entry(entry):
 
 
 def interpret_metrics(config):
-    if "metrics" not in config:
-        raise ValueError("No `metrics` key in the config")
-
-    metric_config = config["metrics"]
-    if isinstance(metric_config, list):
-        return [metric_entry(entry) for entry in metric_config]
+    if isinstance(config, list):
+        return [metric_entry(entry) for entry in config]
     else:
-        return [metric_entry(metric_config)]
+        return [metric_entry(config)]
 
 
 def metric_entry(entry):
@@ -249,11 +273,12 @@ def metric_entry(entry):
         )
 
     elif metric_type == "BestThresholdMetric":
-        if len(entry_without_type) != 1:
-            raise TypeError(f"BestThresholdMetric must have metric as key: {entry}")
         if "metric" not in entry:
-            raise ValueError(f"BestThresholdMetric must have metric as key: {entry}")
-        return evaluation.BestThresholdMetric(metric=metric_entry(entry["metric"]))
+            raise TypeError(f"BestThresholdMetric must have metric as key: {entry}")
+        metric = metric_entry(entry["metric"])
+        entry_without_metric = entry_without_type.copy()
+        entry_without_metric.pop("metric")
+        return evaluation.BestThresholdMetric(metric=metric, **entry_without_metric)
 
     elif metric_type == "RangeAreaUnderPR":
         return evaluation.RangeAreaUnderPR(**entry_without_type)
@@ -267,6 +292,19 @@ def metric_entry(entry):
     elif metric_type == "VolumeUnderROC":
         return evaluation.VolumeUnderROC(**entry_without_type)
 
+    elif metric_type == "EventWisePrecision":
+        if len(entry_without_type) > 0:
+            raise TypeError(f"Too many parameters given for entry: {entry}")
+        return evaluation.EventWisePrecision()
+
+    elif metric_type == "EventWiseRecall":
+        if len(entry_without_type) > 0:
+            raise TypeError(f"Too many parameters given for entry: {entry}")
+        return evaluation.EventWiseRecall()
+
+    elif metric_type == "EventWiseFBeta":
+        return evaluation.EventWiseFBeta(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid metric entry: {entry}")
 
@@ -277,14 +315,10 @@ def metric_entry(entry):
 
 
 def interpret_detectors(config):
-    if "detectors" not in config:
-        raise ValueError("No `detectors` key in the config")
-
-    detector_config = config["detectors"]
-    if isinstance(detector_config, list):
-        return [detector_entry(entry) for entry in detector_config]
+    if isinstance(config, list):
+        return [detector_entry(entry) for entry in config]
     else:
-        return [detector_entry(detector_config)]
+        return [detector_entry(config)]
 
 
 def detector_entry(entry):
@@ -346,6 +380,16 @@ def detector_entry(entry):
     elif detector_type == "KShapeAnomalyDetector":
         return anomaly_detection.KShapeAnomalyDetector(**entry_without_type)
 
+    elif detector_type == "MultivariateDetector":
+        if "detector" not in entry:
+            raise TypeError(f"MultivariateDetector must have detector as key: {entry}")
+        detector = detector_entry(entry["detector"])
+        entry_without_detector = entry_without_type.copy()
+        entry_without_detector.pop("detector")
+        return anomaly_detection.MultivariateDetector(
+            detector, **entry_without_detector
+        )
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 
@@ -356,15 +400,10 @@ def detector_entry(entry):
 
 
 def interpret_preprocessing(config):
-    if "preprocessors" not in config:
-        return None
-
-    preprocessing_config = config["preprocessors"]
-
-    if isinstance(preprocessing_config, list):
-        return [preprocessing_entry(entry) for entry in preprocessing_config]
+    if isinstance(config, list):
+        return [preprocessing_entry(entry) for entry in config]
     else:
-        return [preprocessing_entry(preprocessing_config)]
+        return [preprocessing_entry(config)]
 
 
 def preprocessing_entry(entry):
@@ -382,9 +421,7 @@ def preprocessing_entry(entry):
         return preprocessing.MinMaxScaler()
 
     elif processing_type == "StandardScaler":
-        if len(entry_without_type) > 0:
-            raise TypeError(f"Too many parameters given for entry: {entry}")
-        return preprocessing.StandardScaler()
+        return preprocessing.StandardScaler(**entry_without_type)
 
     elif processing_type == "MovingAverage":
         return preprocessing.MovingAverage(**entry_without_type)
@@ -413,7 +450,7 @@ def preprocessing_entry(entry):
                 f"ChainedPreprocessor must have base_preprocessors as key: {entry}"
             )
         if "base_preprocessors" not in entry:
-            raise ValueError(
+            raise TypeError(
                 f"ChainedPreprocessor must have base_preprocessors as key: {entry}"
             )
         if not isinstance(entry["base_preprocessors"], list):

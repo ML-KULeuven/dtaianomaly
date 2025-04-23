@@ -145,12 +145,10 @@ class TestIsUnivariate:
 class TestGetDimension:
 
     def test_single_dimension(self):
-        rng = np.random.default_rng(42)
-        X = np.random.uniform(size=1000)
+        X = np.random.default_rng(42).uniform(size=1000)
         assert get_dimension(X) == 1
 
     @pytest.mark.parametrize('dimension', [1, 2, 3, 5, 10])
     def test_dimension(self, dimension):
-        rng = np.random.default_rng(42)
-        X = np.random.uniform(size=(1000, dimension))
+        X = np.random.default_rng(42).uniform(size=(1000, dimension))
         assert get_dimension(X) == dimension
