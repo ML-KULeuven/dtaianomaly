@@ -41,9 +41,9 @@ class DWT_MLEAD(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import DWT_MLEAD
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> dwt_mlead = DWT_MLEAD().fit(x)
+    >>> dwt_mlead = DWT_MLEAD()  # No fitting is necessary
     >>> dwt_mlead.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([ 0.,  0.,  0., ..., 12., 12., 12.])
+    array([ 0.,  0.,  0., ..., 12., 12., 12.]...)
 
     Notes
     -----
