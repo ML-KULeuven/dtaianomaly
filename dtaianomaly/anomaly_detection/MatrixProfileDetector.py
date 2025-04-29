@@ -48,11 +48,6 @@ class MatrixProfileDetector(BaseDetector):
     X_reference_ : np.ndarray of shape (n_samples, n_attributes)
         The reference time series. Only available if ``novelty=True``
 
-    Notes
-    -----
-    If the given time series is multivariate, the matrix profile is computed
-    for each dimension separately and then summed up.
-
     Examples
     --------
     >>> from dtaianomaly.anomaly_detection import MatrixProfileDetector
@@ -61,6 +56,11 @@ class MatrixProfileDetector(BaseDetector):
     >>> matrix_profile = MatrixProfileDetector(window_size=50).fit(x)
     >>> matrix_profile.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.20325439, 1.20690487, 1.20426043, ..., 1.47953858, 1.50188666, 1.49891281]...)
+
+    Notes
+    -----
+    If the given time series is multivariate, the matrix profile is computed
+    for each dimension separately and then summed up.
 
     References
     ----------

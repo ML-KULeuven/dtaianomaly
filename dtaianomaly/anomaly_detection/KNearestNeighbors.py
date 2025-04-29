@@ -16,10 +16,6 @@ class KNearestNeighbors(PyODAnomalyDetector):
     away it is from the other instances. :math:`K`-nearest neighbor uses this distance
     as an anomaly score, and thus detects distance-based anomalies.
 
-    Notes
-    -----
-    The K-nearest neighbors inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -45,6 +41,10 @@ class KNearestNeighbors(PyODAnomalyDetector):
     >>> knn = KNearestNeighbors(10).fit(x)
     >>> knn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.2527578 , 0.26430228, 0.2728953 , ..., 0.26269151, 0.26798469, 0.26139759]...)
+
+    Notes
+    -----
+    The K-nearest neighbors inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------

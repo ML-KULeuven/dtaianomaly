@@ -390,6 +390,9 @@ def detector_entry(entry):
             detector, **entry_without_detector
         )
 
+    elif detector_type == "DWT_MLEAD":
+        return anomaly_detection.DWT_MLEAD(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

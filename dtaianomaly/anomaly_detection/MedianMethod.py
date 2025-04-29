@@ -36,9 +36,13 @@ class MedianMethod(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import MedianMethod
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> median_method = MedianMethod(10).fit(x)
+    >>> median_method = MedianMethod(10)  # No fitting is necessary
     >>> median_method.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.1851476 , 0.68191703, 1.05125284, ..., 0.81373386, 1.86097851, 0.05852008]...)
+
+    Notes
+    -----
+    MedianMethod only handles univariate time series.
 
     References
     ----------

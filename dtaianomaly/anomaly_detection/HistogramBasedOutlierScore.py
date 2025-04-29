@@ -18,10 +18,6 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
     attributes and a window size :math:`w`, HBOS constructs :math:`D \\times w` independent histograms,
     from which the anomaly score is computed.
 
-    Notes
-    -----
-    The HBOS detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -47,6 +43,10 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
     >>> hbos = HistogramBasedOutlierScore(1).fit(x)
     >>> hbos.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.51808795, 0.51808795, 0.51808795, ..., 0.48347552, 0.48347552, 0.48347552]...)
+
+    Notes
+    -----
+    The HBOS detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
 
     References
     ----------

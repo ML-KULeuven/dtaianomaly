@@ -13,10 +13,6 @@ class IsolationForest(PyODAnomalyDetector):
     the other data, it is nearer to the root of the tree, and consequently
     receives a higher anomaly score.
 
-    Notes
-    -----
-    The isolation forest inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -42,6 +38,10 @@ class IsolationForest(PyODAnomalyDetector):
     >>> isolation_forest = IsolationForest(10).fit(x)
     >>> isolation_forest.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([-0.02301142, -0.01266304, -0.00786237, ..., -0.04561172, -0.0420979 , -0.04414417]...)
+
+    Notes
+    -----
+    The isolation forest inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------

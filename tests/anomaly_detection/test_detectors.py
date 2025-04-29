@@ -10,10 +10,12 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.baselines.AlwaysNormal,
     anomaly_detection.baselines.AlwaysAnomalous,
     anomaly_detection.baselines.RandomDetector,
+    anomaly_detection.DWT_MLEAD,
     anomaly_detection.MedianMethod
 ]
 
 DETECTORS_NOT_MULTIVARIATE = [
+    anomaly_detection.DWT_MLEAD,
     anomaly_detection.MedianMethod,
     anomaly_detection.KShapeAnomalyDetector
 ]
