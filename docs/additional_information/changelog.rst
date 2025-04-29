@@ -14,6 +14,7 @@ Added
   all ``PathDataLoaders`` to read data relative to that root.
 - Discovery methods to obtain all the models from the code base.
 - Implemented ``MultivariateDetector``.
+- Implemented ``DWT_MLEAD``
 
 Changed
 ^^^^^^^

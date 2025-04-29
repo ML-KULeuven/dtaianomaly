@@ -12,6 +12,7 @@ from .BaseDetector import BaseDetector, Supervision, load_detector
 from .baselines import AlwaysAnomalous, AlwaysNormal, RandomDetector
 from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
+from .DWT_MLEAD import DWT_MLEAD
 from .HistogramBasedOutlierScore import HistogramBasedOutlierScore
 from .IsolationForest import IsolationForest
 from .KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
@@ -64,4 +65,5 @@ __all__ = [
     "PyODAnomalyDetector",
     "RobustPrincipalComponentAnalysis",
     "MultivariateDetector",
+    "DWT_MLEAD",
 ]

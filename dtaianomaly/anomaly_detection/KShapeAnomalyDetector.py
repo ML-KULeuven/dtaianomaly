@@ -57,10 +57,6 @@ class KShapeAnomalyDetector(BaseDetector):
     kshape_: KShape
         The fitted KShape-object of tslearn, used to cluster the data.
 
-    Notes
-    -----
-    KshapeAD only handles univariate time series.
-
     Examples
     --------
     >>> from dtaianomaly.anomaly_detection import KShapeAnomalyDetector
@@ -69,6 +65,10 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
     >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 , 1.34704128]...)
+
+    Notes
+    -----
+    KshapeAD only handles univariate time series.
 
     References
     ----------

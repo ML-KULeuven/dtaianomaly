@@ -14,10 +14,6 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     extension of PCA, which maps the data into a new kernel space, from
     which the principal components are learned.
 
-    Notes
-    -----
-    KPCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -43,6 +39,10 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     >>> kpca = KernelPrincipalComponentAnalysis(10, n_components=2).fit(x)
     >>> kpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.03151377, 0.03697829, 0.04415575, ..., 0.03345565, 0.0330048 , 0.03089501]...)
+
+    Notes
+    -----
+    KPCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------

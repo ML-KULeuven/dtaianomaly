@@ -23,6 +23,7 @@ anomaly_detectors = [
     anomaly_detection.OneClassSupportVectorMachine,
     anomaly_detection.PrincipalComponentAnalysis,
     anomaly_detection.RobustPrincipalComponentAnalysis,
+    anomaly_detection.DWT_MLEAD,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

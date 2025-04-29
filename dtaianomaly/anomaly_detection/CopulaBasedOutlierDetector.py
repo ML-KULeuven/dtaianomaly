@@ -17,10 +17,6 @@ class CopulaBasedOutlierDetector(PyODAnomalyDetector):
     tail probabilities. COPOD is parameter-free because the copula function
     does not involve learning or stochastic training.
 
-    Notes
-    -----
-    The COPOD detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -46,6 +42,10 @@ class CopulaBasedOutlierDetector(PyODAnomalyDetector):
     >>> copod = CopulaBasedOutlierDetector(10).fit(x)
     >>> copod.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([ 9.90110663,  9.67868282,  9.51525285, ..., 25.00182389, 24.60594424, 24.30393026]...)
+
+    Notes
+    -----
+    The COPOD detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
 
     References
     ----------

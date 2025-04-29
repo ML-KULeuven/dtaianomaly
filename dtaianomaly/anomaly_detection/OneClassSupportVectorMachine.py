@@ -14,10 +14,6 @@ class OneClassSupportVectorMachine(PyODAnomalyDetector):
     this boundary (and thus is normal) or outside the boundary (and thus is
     anomalous).
 
-    Notes
-    -----
-    The OC-SVM inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -43,6 +39,10 @@ class OneClassSupportVectorMachine(PyODAnomalyDetector):
     >>> ocsvm = OneClassSupportVectorMachine(10).fit(x)
     >>> ocsvm.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([-0.7442125 , -1.57019847, -1.86868112, ..., 13.33883568, 12.6492399 , 11.8761641 ]...)
+
+    Notes
+    -----
+    The OC-SVM inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------

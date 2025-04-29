@@ -40,6 +40,10 @@ class MedianMethod(BaseDetector):
     >>> median_method.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.1851476 , 0.68191703, 1.05125284, ..., 0.81373386, 1.86097851, 0.05852008]...)
 
+    Notes
+    -----
+    MedianMethod only handles univariate time series.
+
     References
     ----------
     .. [basu2007automatic] Basu, Sabyasachi, and Martin Meckesheimer. "Automatic outlier

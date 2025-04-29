@@ -31,10 +31,6 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
     cluster, then the size of  :math:`C_i` is multiplied by the distance to the nearest
     *large* cluster  :math:`C_j`.
 
-    Notes
-    -----
-    CBLOF inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -60,6 +56,11 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
     >>> cblof = ClusterBasedLocalOutlierFactor(10).fit(x)
     >>> cblof.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.50321076, 0.5753145 , 0.61938076, ..., 0.29794485, 0.30720306,  0.29857479]...)
+
+
+    Notes
+    -----
+    CBLOF inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------

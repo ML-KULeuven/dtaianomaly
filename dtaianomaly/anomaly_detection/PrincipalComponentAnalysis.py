@@ -15,10 +15,6 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
     in the data. Thus, anomalies are detected by measuring the deviation
     of the samples in the lower dimensional space.
 
-    Notes
-    -----
-    PCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
     Parameters
     ----------
     window_size: int or str
@@ -44,6 +40,10 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
     >>> pca = PrincipalComponentAnalysis(10).fit(x)
     >>> pca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([16286.63724327, 15951.05917741, 15613.5739773 , ..., 18596.5273311 , 18496.96613747, 18483.47985554]...)
+
+    Notes
+    -----
+    PCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
 
     References
     ----------
