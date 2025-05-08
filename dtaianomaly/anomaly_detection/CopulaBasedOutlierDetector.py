@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class CopulaBasedOutlierDetector(PyODAnomalyDetector):
     """
-    Copula-based outlier detector (COPD) algorithm.
+    Copula-based outlier detector (COPD) algorithm :cite:`li2020copod`.
 
-    COPOD [li2020copod]_ is based on modeling multivariate data distributions
+    COPOD  is based on modeling multivariate data distributions
     using Copula models. Copula functions separate the marginal distributions
     from the dependency structure of a multivariate distribution. This allows
     a copula to describe the joint distribution over the features using only
@@ -46,12 +46,6 @@ class CopulaBasedOutlierDetector(PyODAnomalyDetector):
     Notes
     -----
     The COPOD detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
-
-    References
-    ----------
-    .. [li2020copod] Li, Z., Zhao, Y., Botta, N., Ionescu, C. and Hu, X.
-       COPOD: Copula-Based Outlier Detection. IEEE International Conference
-       on Data Mining (ICDM), 2020.
     """
 
     def _initialize_detector(self, **kwargs) -> COPOD:

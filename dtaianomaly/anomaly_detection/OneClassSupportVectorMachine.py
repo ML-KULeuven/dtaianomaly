@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class OneClassSupportVectorMachine(PyODAnomalyDetector):
     """
-    Anomaly detector based on One-Class Support Vector Machines (OC-SVM).
+    Anomaly detector based on One-Class Support Vector Machines (OC-SVM) :cite:`scholkopf1999support`.
 
-    The OC-SVM [Scholkopf1999support]_ uses a Support Vector Machine to learn
+    The OC-SVM uses a Support Vector Machine to learn
     a boundary around the normal behavior with minimal margin. New data can
     then be identified as anomaly or not, depending on if the data falls within
     this boundary (and thus is normal) or outside the boundary (and thus is
@@ -43,12 +43,6 @@ class OneClassSupportVectorMachine(PyODAnomalyDetector):
     Notes
     -----
     The OC-SVM inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [Scholkopf1999support] Schölkopf, Bernhard, et al. "Support vector method
-       for novelty detection." Advances in neural information processing systems 12
-       (1999).
     """
 
     def _initialize_detector(self, **kwargs) -> OCSVM:

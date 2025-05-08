@@ -6,7 +6,7 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class KNearestNeighbors(PyODAnomalyDetector):
     """
-    Anomaly detector based on K-nearest neighbors [ramaswamy2000efficient]_.
+    Anomaly detector based on K-nearest neighbors :cite:`ramaswamy2000efficient`.
 
     Given some distance metric :math:`dist`, the :math:`K`-nearest neighbor of an
     instance :math:`x` is the sample :math:`y` such that there exist exactly :math:`K-1`
@@ -45,13 +45,6 @@ class KNearestNeighbors(PyODAnomalyDetector):
     Notes
     -----
     The K-nearest neighbors inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [ramaswamy2000efficient] Ramaswamy, Sridhar, Rajeev Rastogi, and Kyuseok Shim.
-       "Efficient algorithms for mining outliers from large data sets." Proceedings
-       of the 2000 ACM SIGMOD international conference on Management of data. 2000,
-       doi: `10.1145/342009.33543 <https://doi.org/10.1145/342009.33543>`_.
     """
 
     def _initialize_detector(self, **kwargs) -> KNN:

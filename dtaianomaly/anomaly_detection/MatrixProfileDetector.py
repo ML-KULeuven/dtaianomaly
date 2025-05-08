@@ -13,10 +13,9 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
 
 class MatrixProfileDetector(BaseDetector):
     """
-    Anomaly detector based on the Matrix Profile
+    Anomaly detector based on the Matrix Profile :cite:`zhu2016matrix`.
 
-    Use the STOMP algorithm to detect anomalies in a time series
-    [Zhu2016matrixII]_. STOMP is a fast and scalable algorithm for computing
+    Use the STOMP algorithm to detect anomalies in a time series. STOMP is a fast and scalable algorithm for computing
     the matrix profile, which measures the distance from each sequence to the
     most similar other sequence. Consequently, the matrix profile can be used
     to quantify how anomalous a subsequence is, because it has a large distance
@@ -61,13 +60,6 @@ class MatrixProfileDetector(BaseDetector):
     -----
     If the given time series is multivariate, the matrix profile is computed
     for each dimension separately and then summed up.
-
-    References
-    ----------
-    .. [Zhu2016matrixII] Y. Zhu et al., "Matrix Profile II: Exploiting a Novel
-       Algorithm and GPUs to Break the One Hundred Million Barrier for Time Series
-       Motifs and Joins," 2016 IEEE 16th International Conference on Data Mining
-       (ICDM), Barcelona, Spain, 2016, pp. 739-748, doi: `10.1109/ICDM.2016.0085 <https://doi.org/10.1109/ICDM.2016.0085>`_.
     """
 
     window_size: Union[int, str]

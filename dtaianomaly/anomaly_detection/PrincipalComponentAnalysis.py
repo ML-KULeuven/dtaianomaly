@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class PrincipalComponentAnalysis(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Principal Component Analysis (PCA).
+    Anomaly detector based on the Principal Component Analysis (PCA) :cite:`aggarwal2017linear`.
 
-    PCA [Charu2015outlier]_ maps the data to a lower dimensional space
+    PCA maps the data to a lower dimensional space
     through linear projections. The goal of these projections is to
     capture the most important information of the samples. This important
     information is related to the type of behaviors that occur frequently
@@ -44,10 +44,6 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
     Notes
     -----
     PCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [Charu2015outlier] Charu C Aggarwal. Outlier analysis. In Data mining, 75–79. Springer, 2015.
     """
 
     def _initialize_detector(self, **kwargs) -> PCA:

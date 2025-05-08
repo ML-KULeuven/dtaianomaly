@@ -17,9 +17,9 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
 
 class KShapeAnomalyDetector(BaseDetector):
     """
-    Anomaly detector based on KShape-clustering.
+    Anomaly detector based on KShape-clustering :cite:`paparrizos2017fast`.
 
-    Use the KShapeAD algorithm to detect anomalies in time series [paparrizos2017fast]_.
+    Use the KShapeAD algorithm to detect anomalies in time series.
     The subsequences are first clustered using KShape-clustering,
     in which the clusters represent the different normal behaviors
     in the data. For each cluster there is also a weight computed
@@ -27,7 +27,7 @@ class KShapeAnomalyDetector(BaseDetector):
     cluster in comparison to the other clusters. Anomalies are then
     detected by computing a weighted average of the distance of
     a subsequence to each other cluster. KShapeAD equals the
-    offline version of SAND [boniol2021sand]_
+    offline version of SAND :cite:`boniol2021sand`.
 
     Parameters
     ----------
@@ -69,15 +69,6 @@ class KShapeAnomalyDetector(BaseDetector):
     Notes
     -----
     KshapeAD only handles univariate time series.
-
-    References
-    ----------
-    .. [paparrizos2017fast] Paparrizos, J. and Gravano, L., 2017. Fast and accurate
-       time-series clustering. ACM Transactions on Database Systems (TODS), 42(2),
-       pp.1-49, doi: `10.1145/3044711 <https://doi.org/10.1145/3044711>`_
-    .. [boniol2021sand] Boniol, P., Paparrizos, J., Palpanas, T. and Franklin, M.J.,
-       2021. SAND: streaming subsequence anomaly detection. Proceedings of the VLDB
-       Endowment, 14(10), pp.1717-1729, doi: `10.14778/3467861.3467863 <https://doi.org/10.14778/3467861.3467863>`_
     """
 
     window_size: Union[str, int]

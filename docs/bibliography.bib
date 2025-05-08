@@ -1,0 +1,313 @@
+@article{carpentier2025dtaianomaly,
+      title={{dtaianomaly: A Python library for time series anomaly detection}},
+      author={Louis Carpentier and Nick Seeuws and Wannes Meert and Mathias Verbeke},
+      year={2025},
+      eprint={2502.14381},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      journal={}
+}
+
+@article{he2003discovering,
+    title = {{Discovering cluster-based local outliers}},
+    journal = {Pattern Recognition Letters},
+    volume = {24},
+    number = {9},
+    pages = {1641-1650},
+    year = {2003},
+    issn = {0167-8655},
+    doi = {10.1016/S0167-8655(03)00003-5},
+    author = {Zengyou He and Xiaofei Xu and Shengchun Deng},
+    keywords = {Outlier detection, Clustering, Data mining},
+}
+
+@inproceedings{li2020copod,
+    author={Li, Zheng and Zhao, Yue and Botta, Nicola and Ionescu, Cezar and Hu, Xiyang},
+    booktitle={2020 IEEE International Conference on Data Mining (ICDM)},
+    title={[COPOD: Copula-Based Outlier Detection]},
+    year={2020},
+    volume={},
+    number={},
+    pages={1118-1123},
+    keywords={Conferences;Computational modeling;Prediction algorithms;Data models;Computational efficiency;Task analysis;Anomaly detection;outlier detection;anomaly detection;copula;data mining},
+    doi={10.1109/ICDM50108.2020.00135}
+}
+
+@inproceedings{thill2017time,
+    title={Time series anomaly detection with discrete wavelet transforms and maximum likelihood estimation},
+    author={Thill, Markus and Konen, Wolfgang and B{\"a}ck, Thomas},
+    booktitle={Intern. Conference on Time Series (ITISE)},
+    volume={2},
+    pages={11--23},
+    year={2017}
+}
+
+@article{goldstein2012histogram,
+    title={Histogram-based outlier score (HBOS): A fast unsupervised anomaly detection algorithm},
+    author={Goldstein, Markus and Dengel, Andreas},
+    journal={KI-2012: poster and demo track},
+    volume={1},
+    pages={59--63},
+    year={2012},
+    publisher={Citeseer}
+}
+
+@INPROCEEDINGS{liu2008isolation,
+    author={Liu, Fei Tony and Ting, Kai Ming and Zhou, Zhi-Hua},
+    booktitle={2008 Eighth IEEE International Conference on Data Mining},
+    title={Isolation Forest},
+    year={2008},
+    volume={},
+    number={},
+    pages={413-422},
+    keywords={Application software;Credit cards;Detectors;Constraint optimization;Data mining;Information technology;Laboratories;Isolation technology;Performance evaluation;Astronomy;anomaly detection;outlier detection;novelty detection;isolation forest;binary trees;model based},
+    doi={10.1109/ICDM.2008.17}
+}
+
+@article{hoffmann2007kernel,
+    title = {Kernel PCA for novelty detection},
+    journal = {Pattern Recognition},
+    volume = {40},
+    number = {3},
+    pages = {863-874},
+    year = {2007},
+    issn = {0031-3203},
+    doi = {10.1016/j.patcog.2006.07.009},
+    author = {Heiko Hoffmann},
+    keywords = {Kernel method, Novelty detection, PCA, Handwritten digit, Breast cancer},
+    abstract = {Kernel principal component analysis (kernel PCA) is a non-linear extension of PCA. This study introduces and investigates the use of kernel PCA for novelty detection. Training data are mapped into an infinite-dimensional feature space. In this space, kernel PCA extracts the principal components of the data distribution. The squared distance to the corresponding principal subspace is the measure for novelty. This new method demonstrated a competitive performance on two-dimensional synthetic distributions and on two real-world data sets: handwritten digits and breast-cancer cytology.}
+}
+
+@inproceedings{yairi2001fault,
+    title={Fault detection by mining association rules from house-keeping data},
+    author={Yairi, Takehisa and Kato, Yoshikiyo and Hori, Koichi},
+    booktitle={proceedings of the 6th International Symposium on Artificial Intelligence, Robotics and Automation in Space},
+    volume={18},
+    pages={21},
+    year={2001},
+    organization={Citeseer}
+}
+
+@article{ramaswamy2000efficient,
+    author = {Ramaswamy, Sridhar and Rastogi, Rajeev and Shim, Kyuseok},
+    title = {Efficient algorithms for mining outliers from large data sets},
+    year = {2000},
+    issue_date = {June 2000},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {29},
+    number = {2},
+    issn = {0163-5808},
+    doi = {10.1145/335191.335437},
+    abstract = {In this paper, we propose a novel formulation for distance-based outliers that is based on the distance of a point from its kth nearest neighbor. We rank each point on the basis of its distance to its kth nearest neighbor and declare the top n points in this ranking to be outliers. In addition to developing relatively straightforward solutions to finding such outliers based on the classical nested-loop join and index join algorithms, we develop a highly efficient partition-based algorithm for mining outliers. This algorithm first partitions the input data set into disjoint subsets, and then prunes entire partitions as soon as it is determined that they cannot contain outliers. This results in substantial savings in computation. We present the results of an extensive experimental study on real-life and synthetic data sets. The results from a real-life NBA database highlight and reveal several expected and unexpected aspects of the database. The results from a study on synthetic data sets demonstrate that the partition-based algorithm scales well with respect to both data set size and data set dimensionality.},
+    journal = {SIGMOD Rec.},
+    month = may,
+    pages = {427–438},
+    numpages = {12}
+}
+
+@article{boniol2021sand,
+    author = {Boniol, Paul and Paparrizos, John and Palpanas, Themis and Franklin, Michael J.},
+    title = {SAND: streaming subsequence anomaly detection},
+    year = {2021},
+    issue_date = {June 2021},
+    publisher = {VLDB Endowment},
+    volume = {14},
+    number = {10},
+    issn = {2150-8097},
+    doi = {10.14778/3467861.3467863},
+    abstract = {With the increasing demand for real-time analytics and decision making, anomaly detection methods need to operate over streams of values and handle drifts in data distribution. Unfortunately, existing approaches have severe limitations: they either require prior domain knowledge or become cumbersome and expensive to use in situations with recurrent anomalies of the same type. In addition, subsequence anomaly detection methods usually require access to the entire dataset and are not able to learn and detect anomalies in streaming settings. To address these problems, we propose SAND, a novel online method suitable for domain-agnostic anomaly detection. SAND aims to detect anomalies based on their distance to a model that represents normal behavior. SAND relies on a novel steaming methodology to incrementally update such model, which adapts to distribution drifts and omits obsolete data. The experimental results on several real-world datasets demonstrate that SAND correctly identifies single and recurrent anomalies without prior knowledge of the characteristics of these anomalies. SAND outperforms by a large margin the current state-of-the-art algorithms in terms of accuracy while achieving orders of magnitude speedups.},
+    journal = {Proc. VLDB Endow.},
+    month = jun,
+    pages = {1717–1729},
+    numpages = {13}
+}
+
+@article{paparrizos2017fast,
+    author = {Paparrizos, John and Gravano, Luis},
+    title = {Fast and Accurate Time-Series Clustering},
+    year = {2017},
+    issue_date = {June 2017},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {42},
+    number = {2},
+    issn = {0362-5915},
+    doi = {10.1145/3044711},
+    abstract = {The proliferation and ubiquity of temporal data across many disciplines has generated substantial interest in the analysis and mining of time series. Clustering is one of the most popular data-mining methods, not only due to its exploratory power but also because it is often a preprocessing step or subroutine for other techniques. In this article, we present k-Shape and k-MultiShapes (k-MS), two novel algorithms for time-series clustering. k-Shape and k-MS rely on a scalable iterative refinement procedure. As their distance measure, k-Shape and k-MS use shape-based distance (SBD), a normalized version of the cross-correlation measure, to consider the shapes of time series while comparing them. Based on the properties of SBD, we develop two new methods, namely ShapeExtraction (SE) and MultiShapesExtraction (MSE), to compute cluster centroids that are used in every iteration to update the assignment of time series to clusters. k-Shape relies on SE to compute a single centroid per cluster based on all time series in each cluster. In contrast, k-MS relies on MSE to compute multiple centroids per cluster to account for the proximity and spatial distribution of time series in each cluster. To demonstrate the robustness of SBD, k-Shape, and k-MS, we perform an extensive experimental evaluation on 85 datasets against state-of-the-art distance measures and clustering methods for time series using rigorous statistical analysis. SBD, our efficient and parameter-free distance measure, achieves similar accuracy to Dynamic Time Warping (DTW), a highly accurate but computationally expensive distance measure that requires parameter tuning. For clustering, we compare k-Shape and k-MS against scalable and non-scalable partitional, hierarchical, spectral, density-based, and shapelet-based methods, with combinations of the most competitive distance measures. k-Shape outperforms all scalable methods in terms of accuracy. Furthermore, k-Shape also outperforms all non-scalable approaches, with one exception, namely k-medoids with DTW, which achieves similar accuracy. However, unlike k-Shape, this approach requires tuning of its distance measure and is significantly slower than k-Shape. k-MS performs similarly to k-Shape in comparison to rival methods, but k-MS is significantly more accurate than k-Shape. Beyond clustering, we demonstrate the effectiveness of k-Shape to reduce the search space of one-nearest-neighbor classifiers for time series. Overall, SBD, k-Shape, and k-MS emerge as domain-independent, highly accurate, and efficient methods for time-series comparison and clustering with broad applications.},
+    journal = {ACM Trans. Database Syst.},
+    month = jun,
+    articleno = {8},
+    numpages = {49},
+    keywords = {time-series classification, distance measures, Time-series clustering}
+}
+
+@inproceedings{breunig2000lof,
+    author = {Breunig, Markus M. and Kriegel, Hans-Peter and Ng, Raymond T. and Sander, J\"{o}rg},
+    title = {LOF: identifying density-based local outliers},
+    year = {2000},
+    isbn = {1581132174},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    doi = {10.1145/342009.335388},
+    abstract = {For many KDD applications, such as detecting criminal activities in E-commerce, finding the rare instances or the outliers, can be more interesting than finding the common patterns. Existing work in outlier detection regards being an outlier as a binary property. In this paper, we contend that for many scenarios, it is more meaningful to assign to each object a degree of being an outlier. This degree is called the local outlier factor (LOF) of an object. It is local in that the degree depends on how isolated the object is with respect to the surrounding neighborhood. We give a detailed formal analysis showing that LOF enjoys many desirable properties. Using real-world datasets, we demonstrate that LOF can be used to find outliers which appear to be meaningful, but can otherwise not be identified with existing approaches. Finally, a careful performance evaluation of our algorithm confirms we show that our approach of finding local outliers can be practical.},
+    booktitle = {Proceedings of the 2000 ACM SIGMOD International Conference on Management of Data},
+    pages = {93–104},
+    numpages = {12},
+    keywords = {database mining, outlier detection},
+    location = {Dallas, Texas, USA},
+    series = {SIGMOD '00}
+}
+
+@inproceedings{zhu2016matrix,
+    author={Zhu, Yan and Zimmerman, Zachary and Senobari, Nader Shakibay and Yeh, Chin-Chia Michael and Funning, Gareth and Mueen, Abdullah and Brisk, Philip and Keogh, Eamonn},
+    booktitle={2016 IEEE 16th International Conference on Data Mining (ICDM)},
+    title={Matrix Profile II: Exploiting a Novel Algorithm and GPUs to Break the One Hundred Million Barrier for Time Series Motifs and Joins},
+    year={2016},
+    volume={},
+    number={},
+    pages={739-748},
+    keywords={Time series analysis;Earthquakes;Seismology;Scalability;Data mining;Graphics processing units;Indexes;Time series;joins;motifs;GPUs},
+    doi={10.1109/ICDM.2016.0085}
+}
+
+@article{basu2007automatic,
+  title={Automatic outlier detection for time series: an application to sensor data},
+  author={Basu, Sabyasachi and Meckesheimer, Martin},
+  journal={Knowledge and Information Systems},
+  volume={11},
+  pages={137--154},
+  year={2007},
+  publisher={Springer},
+  doi={10.1007/s10115-006-0026-6}
+}
+
+@inproceedings{scholkopf1999support,
+    author = {Sch\"{o}lkopf, Bernhard and Williamson, Robert C and Smola, Alex and Shawe-Taylor, John and Platt, John},
+    booktitle = {Advances in Neural Information Processing Systems},
+    editor = {S. Solla and T. Leen and K. M\"{u}ller},
+    pages = {},
+    publisher = {MIT Press},
+    title = {Support Vector Method for Novelty Detection},
+    url = {https://papers.nips.cc/paper_files/paper/1999/hash/8725fb777f25776ffa9076e44fcfd776-Abstract.html},
+    volume = {12},
+    year = {1999}
+}
+
+@Inbook{aggarwal2017linear,
+    author="Aggarwal, Charu C.",
+    title="Linear Models for Outlier Detection",
+    bookTitle="Outlier Analysis",
+    year="2017",
+    publisher="Springer International Publishing",
+    address="Cham",
+    pages="65--110",
+    abstract="The attributes in real data are usually highly correlated. Such dependencies provide the ability to predict attributes from one another. The notions of prediction and anomaly detection are intimately related. Outliers are, after all, values that deviate from expected (or predicted) values on the basis of a particular model. Linear models focus on the use of interattribute dependencies to achieve this goal. In the classical statistics literature, this process is referred to as regression modeling.",
+    isbn="978-3-319-47578-3",
+    doi="10.1007/978-3-319-47578-3_3",
+}
+
+@article{zhao2019pyod,
+    author  = {Yue Zhao and Zain Nasrullah and Zheng Li},
+    title   = {PyOD: A Python Toolbox for Scalable Outlier Detection},
+    journal = {Journal of Machine Learning Research},
+    year    = {2019},
+    volume  = {20},
+    number  = {96},
+    pages   = {1--7},
+    url     = {http://jmlr.org/papers/v20/19-011.html}
+}
+
+@article{candes2011robust,
+    author = {Cand\`{e}s, Emmanuel J. and Li, Xiaodong and Ma, Yi and Wright, John},
+    title = {Robust principal component analysis?},
+    year = {2011},
+    issue_date = {May 2011},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {58},
+    number = {3},
+    issn = {0004-5411},
+    doi = {10.1145/1970392.1970395},
+    abstract = {This article is about a curious phenomenon. Suppose we have a data matrix, which is the superposition of a low-rank component and a sparse component. Can we recover each component individually? We prove that under some suitable assumptions, it is possible to recover both the low-rank and the sparse components exactly by solving a very convenient convex program called Principal Component Pursuit; among all feasible decompositions, simply minimize a weighted combination of the nuclear norm and of the ℓ1 norm. This suggests the possibility of a principled approach to robust principal component analysis since our methodology and results assert that one can recover the principal components of a data matrix even though a positive fraction of its entries are arbitrarily corrupted. This extends to the situation where a fraction of the entries are missing as well. We discuss an algorithm for solving this optimization problem, and present applications in the area of video surveillance, where our methodology allows for the detection of objects in a cluttered background, and in the area of face recognition, where it offers a principled way of removing shadows and specularities in images of faces.},
+    journal = {J. ACM},
+    month = jun,
+    articleno = {11},
+    numpages = {37},
+    keywords = {video surveillance, sparsity, robustness vis-a-vis outliers, nuclear-norm minimization, low-rank matrices, duality, Principal components, ℓ1-norm minimization}
+}
+
+@article{wu2023current,
+    author={Wu, Renjie and Keogh, Eamonn J.},
+    journal={IEEE Transactions on Knowledge and Data Engineering},
+    title={Current Time Series Anomaly Detection Benchmarks are Flawed and are Creating the Illusion of Progress},
+    year={2023},
+    volume={35},
+    number={3},
+    pages={2421-2429},
+    keywords={Benchmark testing;Anomaly detection;Time series analysis;Codes;Deep learning;NASA;Computer science;Anomaly detection;benchmark datasets;deep learning;time series analysis},
+    doi={10.1109/TKDE.2021.3112126}
+}
+
+@article{keogh2001dimensionality,
+    title={Dimensionality reduction for fast similarity search in large time series databases},
+    author={Keogh, Eamonn and Chakrabarti, Kaushik and Pazzani, Michael and Mehrotra, Sharad},
+    journal={Knowledge and information Systems},
+    volume={3},
+    pages={263--286},
+    year={2001},
+    publisher={Springer},
+    doi={10.1007/PL00011669}
+}
+
+@InProceedings{el2024multivariate,
+    author="El Amine Sehili, Mohamed
+    and Zhang, Zonghua",
+    editor="Nambiar, Raghunath
+    and Poess, Meikel",
+    title="Multivariate Time Series Anomaly Detection: Fancy Algorithms and Flawed Evaluation Methodology",
+    booktitle="Performance Evaluation and Benchmarking",
+    year="2024",
+    publisher="Springer Nature Switzerland",
+    address="Cham",
+    pages="1--17",
+    abstract="Multivariate Time Series (MVTS) anomaly detection is a long-standing and challenging research topic that has attracted tremendous research effort from both industry and academia in recent years. However, a careful study of the literature makes us realize that 1) the community is active but not as organized as other sibling machine learning communities such as Computer Vision (CV) and Natural Language Processing (NLP), and 2) most proposed solutions are evaluated using either inappropriate or highly flawed protocols, with an apparent lack of scientific foundation. So flawed is one very popular protocol, the so-called point-adjust protocol, that a random guess can be shown to systematically outperform all algorithms developed so far. In this paper, we review and evaluate a number of recent algorithms using more robust protocols and discuss how a normally good protocol may have weaknesses in the context of MVTS anomaly detection and how to mitigate them. We also share our concerns about benchmark datasets, experiment design and evaluation methodology we observe in many works. Furthermore, we propose a simple, yet challenging, baseline algorithm based on Principal Components Analysis (PCA) that surprisingly outperforms many recent deep learning based approaches on popular benchmark datasets. The main objective of this work is to stimulate more effort towards important aspects of the research such as data, experiment design, evaluation methodology and result interpretability, as opposed to putting the highest weight on the design of increasingly more complex and ``fancier'' algorithms (Code repository associated with this paper can be found at https://github.com/amsehili/MVTSEvalPaper).",
+    isbn="978-3-031-68031-1",
+    doi="10.1007/PL00011669"
+}
+
+@article{paparrizos2022volume,
+    author = {Paparrizos, John and Boniol, Paul and Palpanas, Themis and Tsay, Ruey S. and Elmore, Aaron and Franklin, Michael J.},
+    title = {Volume under the surface: a new accuracy evaluation measure for time-series anomaly detection},
+    year = {2022},
+    issue_date = {July 2022},
+    publisher = {VLDB Endowment},
+    volume = {15},
+    number = {11},
+    issn = {2150-8097},
+    url = {https://doi.org/10.14778/3551793.3551830},
+    doi = {10.14778/3551793.3551830},
+    abstract = {Anomaly detection (AD) is a fundamental task for time-series analytics with important implications for the downstream performance of many applications. In contrast to other domains where AD mainly focuses on point-based anomalies (i.e., outliers in standalone observations), AD for time series is also concerned with range-based anomalies (i.e., outliers spanning multiple observations). Nevertheless, it is common to use traditional point-based information retrieval measures, such as Precision, Recall, and F-score, to assess the quality of methods by thresholding the anomaly score to mark each point as an anomaly or not. However, mapping discrete labels into continuous data introduces unavoidable shortcomings, complicating the evaluation of range-based anomalies. Notably, the choice of evaluation measure may significantly bias the experimental outcome. Despite over six decades of attention, there has never been a large-scale systematic quantitative and qualitative analysis of time-series AD evaluation measures. This paper extensively evaluates quality measures for time-series AD to assess their robustness under noise, misalignments, and different anomaly cardinality ratios. Our results indicate that measures producing quality values independently of a threshold (i.e., AUC-ROC and AUC-PR) are more suitable for time-series AD. Motivated by this observation, we first extend the AUC-based measures to account for range-based anomalies. Then, we introduce a new family of parameter-free and threshold-independent measures, VUS (Volume Under the Surface), to evaluate methods while varying parameters. Our findings demonstrate that our four measures are significantly more robust in assessing the quality of time-series AD methods.},
+    journal = {Proc. VLDB Endow.},
+    month = jul,
+    pages = {2774–2787},
+    numpages = {14}
+}
+
+@article{wenig2022timeeval,
+    author = {Wenig, Phillip and Schmidl, Sebastian and Papenbrock, Thorsten},
+    title = {TimeEval: a benchmarking toolkit for time series anomaly detection algorithms},
+    year = {2022},
+    issue_date = {August 2022},
+    publisher = {VLDB Endowment},
+    volume = {15},
+    number = {12},
+    issn = {2150-8097},
+    url = {https://doi.org/10.14778/3554821.3554873},
+    doi = {10.14778/3554821.3554873},
+    abstract = {Detecting anomalous subsequences in time series is an important task in time series analytics because it serves the identification of special events, such as production faults, delivery bottlenecks, system defects, or heart flicker. Consequently, many algorithms have been developed for the automatic detection of such anomalous patterns. The enormous number of approaches (i. e., more than 158 as of today), the lack of properly labeled test data, and the complexity of time series anomaly benchmarking have, though, led to a situation where choosing the best detection technique for a given anomaly detection task is a difficult challenge.In this demonstration, we present TimeEval, an extensible, scalable and automatic benchmarking toolkit for time series anomaly detection algorithms. TimeEval includes an extensive data generator and supports both interactive and batch evaluation scenarios. With our novel toolkit, we aim to ease the evaluation effort and help the community to provide more meaningful evaluations.},
+    journal = {Proc. VLDB Endow.},
+    month = aug,
+    pages = {3678–3681},
+    numpages = {4}
+}

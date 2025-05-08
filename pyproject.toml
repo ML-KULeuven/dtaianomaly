@@ -77,7 +77,8 @@ tqdm = [
 docs = [  # For generating the docs
     "sphinx",
     "sphinx-rtd-theme",
-    "numpydoc"
+    "numpydoc",
+    "sphinxcontrib-bibtex"
 ]
 notebooks = [  # For using notebooks
     "notebook",

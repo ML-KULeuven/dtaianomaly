@@ -41,14 +41,9 @@ UCR time series anomaly archive
 -------------------------------
 
 The UCR time series anomaly archive consists of 250 time series, which have been published
-to `mitigate` common issues in existing time series anomaly detection benchmarks [Wu2023current]_:
+to `mitigate` common issues in existing time series anomaly detection benchmarks :cite:`wu2023current`:
 
 1. **Triviality**: many benchmarks are easily solved without any fancy algorithms;
 2. **Unrealistic anomaly density**: the number of ground truth anomalies is relatively high, even though anomalies should be rare observations;
 3. **Mislabeling**: the ground truth labels might not be perfectly aligned with the actual anomalies in the data;
 4. **Run-to-failure bias**: most anomalies are located near the end of the time series.
-
-.. [Wu2023current] R. Wu and E. J. Keogh, "Current Time Series Anomaly Detection
-   Benchmarks are Flawed and are Creating the Illusion of Progress" IEEE Transactions
-   on Knowledge and Data Engineering, 2023, pp. 2421--2429,
-   doi: `10.1109/TKDE.2021.3112126 <https://doi.org/10.1109/TKDE.2021.3112126>`_.

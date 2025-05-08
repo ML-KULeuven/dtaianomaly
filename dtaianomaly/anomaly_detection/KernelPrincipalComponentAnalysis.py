@@ -6,11 +6,11 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Kernel Principal Component Analysis (KPCA).
+    Anomaly detector based on the Kernel Principal Component Analysis (KPCA) :cite:`hoffmann2007kernel`.
 
     Standard PCA maps the data to a lower dimensional space through linear
     projections. Deviations in this lower dimensional space are then
-    considered to be anomalies. KPCA [hoffmann2007kernel]_ is a non-linear
+    considered to be anomalies. KPCA is a non-linear
     extension of PCA, which maps the data into a new kernel space, from
     which the principal components are learned.
 
@@ -43,11 +43,6 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     Notes
     -----
     KPCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [hoffmann2007kernel] Heiko Hoffmann. Kernel pca for novelty detection. Pattern recognition,
-       40(3):863–874, 2007, doi: `10.1016/j.patcog.2006.07.009 <https://doi.org/10.1016/j.patcog.2006.07.009>`_.
     """
 
     def _initialize_detector(self, **kwargs) -> KPCA:

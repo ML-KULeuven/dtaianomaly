@@ -14,9 +14,9 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
 
 class KMeansAnomalyDetector(BaseDetector):
     """
-    Use KMeans clustering to detect anomalies.
+    Use KMeans clustering to detect anomalies :cite:`yairi2001fault`.
 
-    KMeans anomaly detector [yairi2001fault]_ first clusters the data using
+    KMeans anomaly detector  first clusters the data using
     the KMeasn clustering algorithm. Next, for new data, the corresponding
     cluster is predicted, and the distance to the cluster centroid is computed.
     This distance corresponds to the decision scores of this anomaly detector:
@@ -48,13 +48,6 @@ class KMeansAnomalyDetector(BaseDetector):
     >>> kmeans_ad = KMeansAnomalyDetector(10).fit(x)
     >>> kmeans_ad.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.50321076, 0.5753145 , 0.61938076, ..., 0.29794485, 0.30720306, 0.29857479]...)
-
-    References
-    ----------
-    .. [yairi2001fault] T. Yairi, Y. Kato, and K. Hori. Fault detection by mining association
-       rules from house-keeping data. In proceedings of the 6th International Symposium on
-       Artificial Intelligence, Robotics and Automation in Space, volume 18, page 21. Citeseer,
-       2001.
     """
 
     window_size: Union[int, str]

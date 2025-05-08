@@ -6,7 +6,7 @@ from dtaianomaly.data.PathDataLoader import PathDataLoader
 
 class UCRLoader(PathDataLoader):
     """
-    Lazy dataloader for the UCR suite of anomaly detection data sets.
+    Lazy dataloader for the UCR suite of anomaly detection data sets :cite:`wu2023current`.
 
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:

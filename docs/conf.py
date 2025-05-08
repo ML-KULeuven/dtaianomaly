@@ -37,7 +37,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'numpydoc',
-    'matplotlib.sphinxext.plot_directive'
+    'matplotlib.sphinxext.plot_directive',
+    'sphinxcontrib.bibtex',
 ]
 
 numpydoc_show_class_members = False
@@ -53,6 +54,9 @@ html_logo = 'logo/html-logo.svg'
 html_theme_options = {
     'logo_only': True
 }
+
+# References
+bibtex_bibfiles = ['bibliography.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class HistogramBasedOutlierScore(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Histogram Based Outlier Score (HBOS) algorithm.
+    Anomaly detector based on the Histogram Based Outlier Score (HBOS) algorithm :cite:`goldstein2012histogram`.
 
-    Histogram Based Outlier Score (HBOS) [goldstein2012histogram]_ constructs for each feature
+    Histogram Based Outlier Score (HBOS)  constructs for each feature
     a univariate histogram. Bins with a small height (for static bin widths) or wider bins (for
     dynamic bin widths) correspond to sparse regions of the feature space. Thus, values falling
     in these bins lay in sparse regions of the feature space and are considered more anomalous.
@@ -47,11 +47,6 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
     Notes
     -----
     The HBOS detector inherets from :py:class:`~dtaianomaly.anomaly_detection.PyODAnomalyDetector`.
-
-    References
-    ----------
-    .. [goldstein2012histogram] Goldstein, Markus, and Andreas Dengel. "Histogram-based outlier score (hbos):
-       A fast unsupervised anomaly detection algorithm." KI-2012: poster and demo track 1 (2012): 59-63.
     """
 
     def _initialize_detector(self, **kwargs) -> HBOS:

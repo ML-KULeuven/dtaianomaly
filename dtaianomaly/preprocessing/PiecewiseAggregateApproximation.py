@@ -7,9 +7,9 @@ from dtaianomaly.preprocessing.Preprocessor import Preprocessor
 
 class PiecewiseAggregateApproximation(Preprocessor):
     """
-    Performs piecewise aggregate approximation.
+    Performs piecewise aggregate approximation :cite:`keogh2001dimensionality`.
 
-    Piecewise Aggregate Approximation (PAA) [keogh2001dimensionality]_ is a
+    Piecewise Aggregate Approximation (PAA) is a
     form of dimensionality reduction of time series, originally proposed for
     fast indexing of time series in large databases. Given a value for :math:`n`,
     PAA divides the time series in :math:`n` equi-sized frames. Next, each frame
@@ -28,13 +28,6 @@ class PiecewiseAggregateApproximation(Preprocessor):
     ----------
     n: int
         The number of equi-sized frames to generate.
-
-    References
-    ----------
-    .. [keogh2001dimensionality] Keogh, E., Chakrabarti, K., Pazzani, M. et al.
-       Dimensionality Reduction for Fast Similarity Search in Large Time Series
-       Databases. Knowledge and Information Systems 3, 263–286 (2001).
-       doi: `10.1007/PL00011669 <https://doi.org/10.1007/PL00011669>`_.
     """
 
     n: int
