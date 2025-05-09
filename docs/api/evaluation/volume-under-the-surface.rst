@@ -1,8 +1,8 @@
 Volume Under the Surface (VUS)
 ==============================
 
-Implementation of the Volume Under the Surface (VUS) metrics proposed by [paparrizos2022volume]_
-The implementations are adopted from [wenig2022timeeval]_, who slightly modified the original
+Implementation of the Volume Under the Surface (VUS) metrics proposed by :cite:`paparrizos2022volume`
+The implementations are adopted from :cite:`wenig2022timeeval`, who slightly modified the original
 implementations:
 
 - For the recall (FPR) existence reward, anomalies are counted as separate events, even
@@ -21,15 +21,6 @@ you can set ``compatibility_mode=True`` when initializing the metrics.
 In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
 precisions and false positive rates for every threshold), which leads to a more than 25x
 speedup on the demonstration time series.
-
-.. [paparrizos2022volume] John Paparrizos, Paul Boniol, Themis Palpanas, Ruey S. Tsay,
-   Aaron Elmore, and Michael J. Franklin. Volume under the surface: a new accuracy evaluation
-   measure for time-series anomaly detection. Proceedings of the VLDB Endowment 15.11 (2022):
-   2774-2787, doi: `10.14778/3551793.3551830 <https://doi.org/10.14778/3551793.3551830>`_.
-
-.. [wenig2022timeeval] Phillip Wenig, Sebastian Schmidl, and Thorsten Papenbrock. TimeEval:
-   A Benchmarking Toolkit for Time Series Anomaly Detection Algorithms. PVLDB, 15(12):
-   3678 - 3681, 2022. doi:`10.14778/3554821.3554873 <https://doi.org/10.14778/3554821.3554873>`_
 
 .. autoclass:: dtaianomaly.evaluation.RangeAreaUnderPR
 .. autoclass:: dtaianomaly.evaluation.RangeAreaUnderROC

@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class IsolationForest(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Isolation Forest algorithm.
+    Anomaly detector based on the Isolation Forest algorithm :cite:`liu2008isolation`.
 
-    The isolation forest [Liu2008isolation]_ generates random binary trees to
+    The isolation forest generates random binary trees to
     split the data. If an instance requires fewer splits to isolate it from
     the other data, it is nearer to the root of the tree, and consequently
     receives a higher anomaly score.
@@ -42,12 +42,6 @@ class IsolationForest(PyODAnomalyDetector):
     Notes
     -----
     The isolation forest inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [Liu2008isolation] F. T. Liu, K. M. Ting and Z. -H. Zhou, "Isolation Forest,"
-       2008 Eighth IEEE International Conference on Data Mining, Pisa, Italy, 2008,
-       pp. 413-422, doi: `10.1109/ICDM.2008.17 <https://doi.org/10.1109/ICDM.2008.17>`_.
     """
 
     def _initialize_detector(self, **kwargs) -> IForest:

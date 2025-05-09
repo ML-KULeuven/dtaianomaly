@@ -171,7 +171,7 @@ def _range_pr_roc_auc_support_numbafied(
 
 class RangeAreaUnderPR(RangeAucMetric):
     """
-    Computes the area under the range-based precision-recall-curve [paparrizos2022volume]_.
+    Computes the area under the range-based precision-recall-curve :cite:`paparrizos2022volume`.
 
     A slope of length ``buffer_size // 2`` is added at the beginning and end of each anomalous
     event. Next, the precision and recall is computed, taking into account the slopes in ground
@@ -211,7 +211,7 @@ class RangeAreaUnderPR(RangeAucMetric):
 
 class RangeAreaUnderROC(RangeAucMetric):
     """
-    Computes the area under the range-based ROC-curve [paparrizos2022volume]_.
+    Computes the area under the range-based ROC-curve :cite:`paparrizos2022volume`.
 
     A slope of length ``buffer_size // 2`` is added at the beginning and end of each anomalous
     event. Next, the false positive rate and true positive rate is computed, taking into account
@@ -251,7 +251,7 @@ class RangeAreaUnderROC(RangeAucMetric):
 
 class VolumeUnderPR(RangeAucMetric):
     """
-    Computes the volume under the range-based precision-recall-curve [paparrizos2022volume]_.
+    Computes the volume under the range-based precision-recall-curve :cite:`paparrizos2022volume`.
 
     Create a buffer around the anomalous event (similar as for :py:class:`~dtaianomaly.evaluation.RangeAreaUnderPR`)
     for each buffer size in the range ``[0, max_buffer_size]``. Then, ``max_samples`` thresholds are
@@ -302,7 +302,7 @@ class VolumeUnderPR(RangeAucMetric):
 
 class VolumeUnderROC(RangeAucMetric):
     """
-    Computes the volume under the range-based ROC-curve [paparrizos2022volume]_.
+    Computes the volume under the range-based ROC-curve :cite:`paparrizos2022volume`.
 
     Create a buffer around the anomalous event (similar as for :py:class:`~dtaianomaly.evaluation.RangeAreaUnderROC`)
     for each buffer size in the range ``[0, max_buffer_size]``. Then, ``max_samples`` thresholds are

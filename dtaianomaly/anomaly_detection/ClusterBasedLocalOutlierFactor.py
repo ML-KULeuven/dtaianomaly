@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Cluster-based Local Outlier Factor (CBLOF).
+    Anomaly detector based on the Cluster-based Local Outlier Factor (CBLOF) :cite:`he2003discovering`.
 
-    CBLOF [he2003discovering]_ is a cluster-based LOF which uses the distance to
+    CBLOF is a cluster-based LOF which uses the distance to
     clusters in the data to compute an outlier score. Specifically, CBLOF first
     clusters the data using some clustering algorithm (by default K-means). Next,
     the clusters are separated in the so-called 'large clusters' $LC$ and 'small
@@ -57,16 +57,9 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
     >>> cblof.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.50321076, 0.5753145 , 0.61938076, ..., 0.29794485, 0.30720306,  0.29857479]...)
 
-
     Notes
     -----
     CBLOF inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [he2003discovering] He, Zengyou, Xiaofei Xu, and Shengchun Deng. "Discovering
-       cluster-based local outliers." Pattern recognition letters 24.9-10 (2003): 1641-1650,
-       doi: `10.1016/S0167-8655(03)00003-5 <https://doi.org/10.1016/S0167-8655(03)00003-5>`_.
     """
 
     def _initialize_detector(self, **kwargs) -> CBLOF:

@@ -15,9 +15,9 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
 
 class PyODAnomalyDetector(BaseDetector, abc.ABC):
     """
-    Abstract class for anomaly detection based on the PyOD library.
+    Abstract class for anomaly detection based on the PyOD library :cite:`zhao2019pyod`.
 
-    PyOD [zhao2019pyod]_ is a Python library for detecting anomalies in multivariate
+    PyOD is a Python library for detecting anomalies in multivariate
     data. The anomaly detectors in PyOD typically deal with tabular data, which assumes
     i.i.d (independent and identically distributed) data. This is generally not the
     case for time series data, which has a temporal dependency. Nevertheless, the detectors
@@ -39,12 +39,6 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
         The effectively used window size for this anomaly detector
     pyod_detector_ : SklearnLocalOutlierFactor
         The PyOD anomaly detector
-
-    References
-    ----------
-    .. [zhao2019pyod] Zhao, Y., Nasrullah, Z. and Li, Z., 2019. PyOD: A Python Toolbox
-       for Scalable Outlier Detection. Journal of machine learning research (JMLR), 20(96),
-       pp.1-7.
     """
 
     window_size: Union[int, str]

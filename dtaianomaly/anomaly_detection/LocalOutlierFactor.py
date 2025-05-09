@@ -6,9 +6,9 @@ from dtaianomaly.anomaly_detection.PyODAnomalyDetector import PyODAnomalyDetecto
 
 class LocalOutlierFactor(PyODAnomalyDetector):
     """
-    Anomaly detector based on the Local Outlier Factor.
+    Anomaly detector based on the Local Outlier Factor :cite:`breunig2000lof`.
 
-    The local outlier factor [Breunig2000LOF]_ compares the density of each
+    The local outlier factor  compares the density of each
     sample to the density of the neighboring samples. If the neighbors of a
     sample have a much higher density that the sample itself, the sample is
     considered anomalous. By looking at the local density (i.e., only comparing
@@ -44,13 +44,6 @@ class LocalOutlierFactor(PyODAnomalyDetector):
     Notes
     -----
     The Local Outlier Factor inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
-
-    References
-    ----------
-    .. [Breunig2000LOF] Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, and Jörg Sander.
-       2000. LOF: identifying density-based local outliers. In Proceedings of the 2000 ACM
-       SIGMOD international conference on Management of data (SIGMOD '00). Association for
-       Computing Machinery, New York, NY, USA, 93–104. doi: `10.1145/342009.335388 <https://doi.org/10.1145/342009.335388>`_
     """
 
     def _initialize_detector(self, **kwargs) -> LOF:

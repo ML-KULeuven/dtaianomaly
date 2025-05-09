@@ -16,10 +16,10 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
 
 class RobustPrincipalComponentAnalysis(BaseDetector):
     """
-    Anomaly detection based on Robust Principal Component Analysis (Robust PCA).
+    Anomaly detection based on Robust Principal Component Analysis (Robust PCA) :cite:`candes2011robust`.
 
     Assume that the data matrix is a superposition of a low-rank component and a s
-    parse component. Robust PCA [Candes2011robust]_ will solve this decomposition
+    parse component. Robust PCA will solve this decomposition
     as a convex optimization problem. The superposition offers a principeled manner
     to robust PCA, since the methodology can recover the principal components (first
     component) of a data matrix even though a positive fraction of the entries are
@@ -70,11 +70,6 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     Therefore, we added a parameter ``window_size`` to apply Robust PCA in windows
     of a univariate time series, to make it applicable. Common behavior on multivariate
     time series can be obtained by setting ``window_size = 1``.
-
-    References
-    ----------
-    .. [Candes2011robust] Emmanuel J. Candès, Xiaodong Li, Yi Ma, and John Wright. 2011. Robust principal
-       component analysis? J. ACM 58, 3, Article 11 (June 2011), 37 pages. doi: `10.1145/1970392.1970395 <https://doi.org/10.1145/1970392.1970395>`_
     """
 
     window_size: Union[int, str]

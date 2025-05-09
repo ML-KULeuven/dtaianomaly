@@ -15,6 +15,7 @@ Added
 - Discovery methods to obtain all the models from the code base.
 - Implemented ``MultivariateDetector``.
 - Implemented ``DWT_MLEAD``
+- Separate reference page containing the bibliography in the documentation.
 
 Changed
 ^^^^^^^

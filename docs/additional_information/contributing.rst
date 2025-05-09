@@ -267,7 +267,7 @@ BaseDetector
 | |check_box| Does the class documentation contain an explanation of the anomaly detector?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
 | |check_box| Does the class documentation contain a code-example?
-| |check_box| Has a reference to the relevant paper(s) been added in the class documentation?
+| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Is a separate file for the anomaly detector created in ``docs/api/anomaly_detection_algorithms/`` with the same name as the anomaly detector?
 
 LazyDataLoader
@@ -295,7 +295,7 @@ LazyDataLoader
 | |check_box| Have you added class documentation to your implementation?
 | |check_box| Does the class documentation contain an explanation of expected format of the data?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a reference to the relevant paper(s) been added in the class documentation?
+| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Have you added the data loader to ``docs/api/data.rst``?
 | |check_box| Did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
 
@@ -324,7 +324,7 @@ Preprocessor
 | |check_box| Have you added class documentation to your implementation?
 | |check_box| Does the class documentation contain an explanation of the preprocessor?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a reference to the relevant paper(s) been added in the class documentation?
+| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Have you added the preprocessor to ``docs/api/preprocessing.rst``?
 
 Thresholding
@@ -352,7 +352,7 @@ Thresholding
 | |check_box| Have you added class documentation to your implementation?
 | |check_box| Does the class documentation contain an explanation of the thresholder?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a reference to the relevant paper(s) been added in the class documentation?
+| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Have you added the thresholder to ``docs/api/thresholding.rst``?
 
 Evaluation Metric
@@ -380,5 +380,5 @@ Evaluation Metric
 | |check_box| Have you added class documentation to your implementation?
 | |check_box| Does the class documentation contain an explanation of the evaluation metric?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a reference to the relevant paper(s) been added in the class documentation?
+| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Have you added the evaluation metric to ``docs/api/evaluation.rst``?

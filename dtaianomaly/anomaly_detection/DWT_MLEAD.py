@@ -13,10 +13,10 @@ from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
 class DWT_MLEAD(BaseDetector):
     """
-    Anomaly detection based on the Discrete Wavelet Transform.
+    Anomaly detection based on the Discrete Wavelet Transform :cite:`thill2017time`.
 
     DWT-MLEAD (Discrete Wavelet Transform and Maximum Likelihood Estimation
-    for Anomaly Detection) [thill2017time]_ first performs multilevel DWT
+    for Anomaly Detection) first performs multilevel DWT
     using Haar wavelets. Next, for each window in the obtained coefficients,
     a likelihood is estimated using a Guassian distribution. A boundary on
     the likelihood is computed within each DWT-level based on the quantiles,

@@ -8,12 +8,12 @@ from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
 
 class MedianMethod(BaseDetector):
     """
-    Anomaly detection based on the Two-sided Median Method.
+    Anomaly detection based on the Two-sided Median Method :cite:`basu2007automatic`.
 
-    The Median Method [basu2007automatic]_ computes the deviation of a sample
+    The Median Method computes the deviation of a sample
     compared to its neighborhood. This neighborhood is computed as a window
     around the sample. The deviation is consequently measured as the number
-    of standard deviations     the observations deviates from the mean of its
+    of standard deviations the observations deviates from the mean of its
     neighborhood.
 
     In contrast to the original paper, this implementation allows to define a
@@ -43,12 +43,6 @@ class MedianMethod(BaseDetector):
     Notes
     -----
     MedianMethod only handles univariate time series.
-
-    References
-    ----------
-    .. [basu2007automatic] Basu, Sabyasachi, and Martin Meckesheimer. "Automatic outlier
-       detection for time series: an application to sensor data." Knowledge and Information
-       Systems 11 (2007), 137-154, doi: `10.1007/s10115-006-0026-6 <https://doi.org/10.1007/s10115-006-0026-6>`_.
     """
 
     neighborhood_size_before: int
