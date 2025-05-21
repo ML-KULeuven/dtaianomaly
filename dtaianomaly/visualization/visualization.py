@@ -317,20 +317,21 @@ def plot_with_zoom(
     if y_pred is not None:
         kwargs_full["y_pred"] = y_pred
         kwargs_zoom["y_pred"] = y_pred[start_zoom:end_zoom]
-    if time_steps is not None:
-        kwargs_full["time_steps"] = time_steps
-        kwargs_zoom["time_steps"] = time_steps[start_zoom:end_zoom]
     if feature_names is not None:
         kwargs_full["feature_names"] = (
             feature_names  # Only pass the feature names to the first axis
         )
+
+    # Format the time steps
+    time_steps = format_time_steps(time_steps, X.shape[0])
+    kwargs_full["time_steps"] = time_steps
+    kwargs_zoom["time_steps"] = time_steps[start_zoom:end_zoom]
 
     # Plot the data
     method_to_plot(ax=ax_main, **kwargs_full)
     method_to_plot(ax=ax_zoom, **kwargs_zoom)
 
     # Draw vertical lines to demarcate the area in which is zoomed
-    time_steps = format_time_steps(time_steps, X.shape[0])
     for ax in [ax_main, ax_zoom]:
         for x in [start_zoom, end_zoom]:
             ax.axvline(
