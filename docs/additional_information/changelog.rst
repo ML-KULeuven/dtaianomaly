@@ -28,6 +28,7 @@ Fixed
 ^^^^^
 - Fixed failing doctests because of changed numpy array output in version ``numpy==2.2``.
 - Fixed bug in ``plot_with_zoom`` method to align the time series correctly.
+- Fixed issue in typing of ``DWT_MLEAD``
 
 [0.4.0] - 2025-03-21
 --------------------
