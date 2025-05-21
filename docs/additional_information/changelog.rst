@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 Latest
 ------
 
+.. warning::
+   We ended the support for Python version 3.8
+
 Added
 ^^^^^
 - Implementation of the Volume Under the Surface (VUS) metrics
