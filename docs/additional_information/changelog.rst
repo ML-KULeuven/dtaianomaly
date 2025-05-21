@@ -29,6 +29,7 @@ Fixed
 - Fixed failing doctests because of changed numpy array output in version ``numpy==2.2``.
 - Fixed bug in ``plot_with_zoom`` method to align the time series correctly.
 - Fixed issue in typing of ``DWT_MLEAD``
+- Fixed issue with failing tests regarding cluster separation in CBLOF.
 
 [0.4.0] - 2025-03-21
 --------------------
@@ -43,7 +44,6 @@ Added
 - Added optional feature names and time steps to ``DataSet``.
 - Added option for relative bounds when automatically computing the window size.
 - Added option to pass kwargs to the ``Workflow``.
-
 
 Changed
 ^^^^^^^
