@@ -3,7 +3,7 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
-[0.4.1] - 2025-05-21
+Latest
 ------
 
 .. warning::
@@ -33,6 +33,7 @@ Fixed
 - Fixed bug in ``plot_with_zoom`` method to align the time series correctly.
 - Fixed issue in typing of ``DWT_MLEAD``
 - Fixed issue with failing tests regarding cluster separation in CBLOF.
+- Fixed issue with readthedocs.yml configuration (fail on warning turned off).
 
 [0.4.0] - 2025-03-21
 --------------------
