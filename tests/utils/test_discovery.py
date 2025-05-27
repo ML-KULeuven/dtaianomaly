@@ -47,6 +47,9 @@ metrics = [
     evaluation.EventWisePrecision,
     evaluation.EventWiseRecall,
     evaluation.EventWiseFBeta,
+    evaluation.AffiliationPrecision,
+    evaluation.AffiliationRecall,
+    evaluation.AffiliationFBeta,
 ]
 proba_metrics = [
     evaluation.ThresholdMetric,
@@ -68,6 +71,9 @@ binary_metrics = [
     evaluation.EventWisePrecision,
     evaluation.EventWiseRecall,
     evaluation.EventWiseFBeta,
+    evaluation.AffiliationPrecision,
+    evaluation.AffiliationRecall,
+    evaluation.AffiliationFBeta,
 ]
 preprocessors = [
     preprocessing.Identity,

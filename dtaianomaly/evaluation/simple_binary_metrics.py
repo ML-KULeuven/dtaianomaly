@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn import metrics
 
+from dtaianomaly.evaluation._common import FBetaBase
 from dtaianomaly.evaluation.metrics import BinaryMetric
 
 
@@ -68,7 +69,7 @@ class Recall(BinaryMetric):
         return metrics.recall_score(y_true=y_true, y_pred=y_pred)
 
 
-class FBeta(BinaryMetric):
+class FBeta(BinaryMetric, FBetaBase):
     """
     Computes the :math:`F_\\beta` score.
 
@@ -103,16 +104,11 @@ class FBeta(BinaryMetric):
     Recall: Compute the Recall score.
     """
 
-    beta: float
-
     def __init__(self, beta: (float, int) = 1) -> None:
-        if not isinstance(beta, (int, float)) or isinstance(beta, bool):
-            raise TypeError("`beta` should be numeric")
-        if beta <= 0.0:
-            raise ValueError("`beta` should be strictly positive")
-
-        super().__init__()
-        self.beta = beta
+        super().__init__(beta)
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        return metrics.fbeta_score(y_true=y_true, y_pred=y_pred, beta=self.beta)
+        return self._f_score(
+            precision=metrics.precision_score(y_true=y_true, y_pred=y_pred),
+            recall=metrics.recall_score(y_true=y_true, y_pred=y_pred),
+        )

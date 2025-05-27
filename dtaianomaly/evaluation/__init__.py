@@ -10,6 +10,11 @@ the latter predicted "scores" (more or less anomalous). This distinction is impo
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
 
+from .affiliation_metric import (
+    AffiliationFBeta,
+    AffiliationPrecision,
+    AffiliationRecall,
+)
 from .BestThresholdMetric import BestThresholdMetric
 from .event_wise_metrics import EventWiseFBeta, EventWisePrecision, EventWiseRecall
 from .metrics import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
@@ -48,4 +53,7 @@ __all__ = [
     "EventWisePrecision",
     "EventWiseRecall",
     "EventWiseFBeta",
+    "AffiliationPrecision",
+    "AffiliationRecall",
+    "AffiliationFBeta",
 ]

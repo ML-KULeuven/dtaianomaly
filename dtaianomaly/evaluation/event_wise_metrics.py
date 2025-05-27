@@ -1,6 +1,7 @@
 import numba as nb
 import numpy as np
 
+from dtaianomaly.evaluation._common import FBetaBase
 from dtaianomaly.evaluation.metrics import BinaryMetric
 
 
@@ -156,7 +157,7 @@ class EventWiseRecall(BinaryMetric):
         return event_wise_recall
 
 
-class EventWiseFBeta(BinaryMetric):
+class EventWiseFBeta(BinaryMetric, FBetaBase):
     """
     Computes the Event-Wise :math:`F_\\beta` score :cite:`el2024multivariate`.
 
@@ -183,20 +184,11 @@ class EventWiseFBeta(BinaryMetric):
     EventWiseRecall: Compute the Event-Wise Recall score.
     """
 
-    beta: float
-
-    def __init__(self, beta: float = 1.0) -> None:
-        if not isinstance(beta, (int, float)) or isinstance(beta, bool):
-            raise TypeError("`beta` should be numeric")
-        if beta <= 0.0:
-            raise ValueError("`beta` should be strictly positive")
-        self.beta = beta
+    def __init__(self, beta: (float, int) = 1) -> None:
+        super().__init__(beta)
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         event_wise_precision, event_wise_recall = _compute_event_wise_metrics(
             y_true.astype(bool), y_pred.astype(bool)
         )
-
-        numerator = (1 + self.beta**2) * event_wise_precision * event_wise_recall
-        denominator = self.beta**2 * event_wise_precision + event_wise_recall
-        return 0.0 if denominator == 0 else numerator / denominator
+        return self._f_score(precision=event_wise_precision, recall=event_wise_recall)
