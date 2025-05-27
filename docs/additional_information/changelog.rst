@@ -8,6 +8,7 @@ Latest
 
 Added
 ^^^^^
+- Implemented affiliation-based metrics.
 
 Changed
 ^^^^^^^

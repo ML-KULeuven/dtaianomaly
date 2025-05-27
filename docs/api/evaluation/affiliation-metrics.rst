@@ -1,5 +1,5 @@
-Event-wise metrics
-==================
+Affiliation-based metrics
+=========================
 
 Implementations of the affiliation-based metrics proposed by :cite:`huet2022local`.
 These metrics will consider local affiliations around the ground truth anomalous
