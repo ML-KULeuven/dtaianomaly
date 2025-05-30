@@ -369,7 +369,10 @@ def infer_minimal_entry(cls):
         'path': DATA_PATH
     }
     sig = inspect.signature(cls.__init__)
-    accepted_params = set(sig.parameters) - {"self"}
+    accepted_params = set([
+        p.name for p in sig.parameters.values()
+        if p.name != 'self' and p.default is inspect.Parameter.empty
+    ])
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
     return {'type': cls.__name__} | filtered_kwargs
 
@@ -413,6 +416,7 @@ class TestInterpretEntries:
         entry_function = infer_entry_function(cls)
         minimal_entry = infer_minimal_entry(cls)
         if len(minimal_entry) > 1:
+            print(minimal_entry)
             with pytest.raises(TypeError):
                 entry_function({'type': cls.__name__})
 

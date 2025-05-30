@@ -8,6 +8,8 @@ Latest
 
 Added
 ^^^^^
+- Implemented affiliation-based metrics.
+- Implemented range-based metrics.
 
 Changed
 ^^^^^^^
@@ -16,7 +18,7 @@ Fixed
 ^^^^^
 
 [0.4.1] - 2025-05-22
-------
+--------------------
 
 .. warning::
    We ended the support for Python version 3.8
