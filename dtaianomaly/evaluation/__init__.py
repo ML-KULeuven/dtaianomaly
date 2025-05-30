@@ -10,7 +10,7 @@ the latter predicted "scores" (more or less anomalous). This distinction is impo
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
 
-from .affiliation_metric import (
+from .affiliation_metrics import (
     AffiliationFBeta,
     AffiliationPrecision,
     AffiliationRecall,
@@ -23,6 +23,7 @@ from .point_adjusted_binary_metrics import (
     PointAdjustedPrecision,
     PointAdjustedRecall,
 )
+from .range_based_metrics import RangeBasedFBeta, RangeBasedPrecision, RangeBasedRecall
 from .simple_binary_metrics import FBeta, Precision, Recall
 from .simple_proba_metrics import AreaUnderPR, AreaUnderROC
 from .volume_under_surface import (
@@ -56,4 +57,7 @@ __all__ = [
     "AffiliationPrecision",
     "AffiliationRecall",
     "AffiliationFBeta",
+    "RangeBasedPrecision",
+    "RangeBasedRecall",
+    "RangeBasedFBeta",
 ]

@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-from dtaianomaly.evaluation.affiliation_metric import (
+from dtaianomaly.evaluation.affiliation_metrics import (
         AffiliationPrecision,
         AffiliationRecall,
         AffiliationFBeta,

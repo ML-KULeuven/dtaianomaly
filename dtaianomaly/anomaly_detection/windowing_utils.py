@@ -138,7 +138,7 @@ def compute_window_size(
     default_window_size: int = None,
 ) -> int:
     """
-    Compute the window size of the given time series [ermshaus2023window]_.
+    Compute the window size of the given time series :cite:`ermshaus2023window`.
 
     Parameters
     ----------
@@ -151,8 +151,8 @@ def compute_window_size(
         - ``int``: Simply return the given window size.
         - ``'fft'``: Compute the window size by selecting the dominant Fourier frequency.
         - ``'acf'``: Compute the window size as the leg with the highest autocorrelation.
-        - ``'mwf'``: Computes the window size using the Multi-Window-Finder method [shima2021multi]_.
-        - ``'suss'``: Computes the window size using the Summary Statistics Subsequence method [ermshaus2023clasp]_.
+        - ``'mwf'``: Computes the window size using the Multi-Window-Finder method :cite:`imani2021multi`.
+        - ``'suss'``: Computes the window size using the Summary Statistics Subsequence method :cite:`ermshaus2023clasp`.
 
     lower_bound: int, default=10
         The lower bound on the automatically computed window size. Only used if ``window_size``
@@ -183,20 +183,6 @@ def compute_window_size(
     -------
     window_size_: int
         The computed window size.
-
-    References
-    ----------
-    .. [ermshaus2023window] Ermshaus, Arik, Patrick Schäfer, and Ulf Leser. "Window
-       size selection in unsupervised time series analytics: A review and benchmark."
-       International Workshop on Advanced Analytics and Learning on Temporal Data.
-       Springer, Cham, 2023, doi: `10.1007/978-3-031-24378-3_6 <https://doi.org/10.1007/978-3-031-24378-3_6>`_
-
-    .. [shima2021multi] Imani, Shima, and Eamonn Keogh. "Multi-window-finder: domain
-       agnostic window size for time series data." Proceedings of the MileTS 21 (2021).
-
-    .. [ermshaus2023clasp] Ermshaus, Arik, Patrick Schäfer, and Ulf Leser. "ClaSP:
-       parameter-free time series segmentation." Data Mining and Knowledge Discovery
-       37.3 (2023): 1262-1300, doi: `10.1007/s10618-023-00923-x <https://doi.org/10.1007/s10618-023-00923-x>`_
     """
     # Check the input
     check_is_valid_window_size(window_size)
