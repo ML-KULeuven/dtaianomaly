@@ -305,6 +305,28 @@ def metric_entry(entry):
     elif metric_type == "EventWiseFBeta":
         return evaluation.EventWiseFBeta(**entry_without_type)
 
+    elif metric_type == "AffiliationPrecision":
+        if len(entry_without_type) > 0:
+            raise TypeError(f"Too many parameters given for entry: {entry}")
+        return evaluation.AffiliationPrecision()
+
+    elif metric_type == "AffiliationRecall":
+        if len(entry_without_type) > 0:
+            raise TypeError(f"Too many parameters given for entry: {entry}")
+        return evaluation.AffiliationRecall()
+
+    elif metric_type == "AffiliationFBeta":
+        return evaluation.AffiliationFBeta(**entry_without_type)
+
+    elif metric_type == "RangeBasedPrecision":
+        return evaluation.RangeBasedPrecision(**entry_without_type)
+
+    elif metric_type == "RangeBasedRecall":
+        return evaluation.RangeBasedRecall(**entry_without_type)
+
+    elif metric_type == "RangeBasedFBeta":
+        return evaluation.RangeBasedFBeta(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid metric entry: {entry}")
 
