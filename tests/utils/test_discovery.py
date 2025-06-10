@@ -24,6 +24,7 @@ anomaly_detectors = [
     anomaly_detection.PrincipalComponentAnalysis,
     anomaly_detection.RobustPrincipalComponentAnalysis,
     anomaly_detection.DWT_MLEAD,
+    anomaly_detection.AutoEncoder,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

@@ -27,7 +27,8 @@ dependencies = [
     "statsmodels>=0.6",
     "pyod>=2.0.0",
     "tslearn>=0.6.3",
-    "toml"
+    "toml",
+    "torch>=1.8.0",
 ]
 
 [project.readme]

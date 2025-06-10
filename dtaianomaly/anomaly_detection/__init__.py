@@ -8,6 +8,7 @@ We refer to the `documentation <https://dtaianomaly.readthedocs.io/en/stable/get
 for more information regarding detecting anomalies using ``dtaianomaly``.
 """
 
+from .AutoEncoder import AutoEncoder
 from .BaseDetector import BaseDetector, Supervision, load_detector
 from .baselines import AlwaysAnomalous, AlwaysNormal, RandomDetector
 from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
@@ -23,6 +24,7 @@ from .LocalOutlierFactor import LocalOutlierFactor
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
 from .MultivariateDetector import MultivariateDetector
+from .NeuralBaseDetector import NeuralBaseDetector
 from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .PyODAnomalyDetector import PyODAnomalyDetector
@@ -66,4 +68,6 @@ __all__ = [
     "RobustPrincipalComponentAnalysis",
     "MultivariateDetector",
     "DWT_MLEAD",
+    "NeuralBaseDetector",
+    "AutoEncoder",
 ]
