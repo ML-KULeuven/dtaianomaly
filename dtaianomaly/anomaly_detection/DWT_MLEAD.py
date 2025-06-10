@@ -65,12 +65,6 @@ class DWT_MLEAD(BaseDetector):
     - aeon uses ``'wrap'`` padding and TimeEval uses ``'periodic'`` padding. Initial
       experiments show that different values may lead to quite different anomaly scores.
       Therefore, we included the padding as a parameter of DWT-MLEAD.
-
-    References
-    ----------
-    .. [thill2017time] Thill, Markus, Wolfgang Konen, and Thomas Bäck. "Time series anomaly
-       detection with discrete wavelet transforms and maximum likelihood estimation." International
-       Conference on Time Series (ITISE). Vol. 2. 2017.
     """
 
     start_level: int
