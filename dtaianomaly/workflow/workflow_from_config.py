@@ -415,6 +415,9 @@ def detector_entry(entry):
     elif detector_type == "DWT_MLEAD":
         return anomaly_detection.DWT_MLEAD(**entry_without_type)
 
+    elif detector_type == "AutoEncoder":
+        return anomaly_detection.AutoEncoder(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

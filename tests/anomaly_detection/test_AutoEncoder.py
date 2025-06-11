@@ -1,7 +1,19 @@
 
-import textwrap
 import pytest
+import numpy as np
+import torch
+
 from dtaianomaly.anomaly_detection import AutoEncoder, Supervision
+from dtaianomaly.anomaly_detection.AutoEncoder import _AutoEncoderArchitecture
+from conftest import (
+    is_sequential,
+    is_activation,
+    is_batch_normalization,
+    is_dropout,
+    is_linear
+)
+
+_VALID_ERROR_METRICS = ['mae', 'mse', 'l1', 'l2']
 
 
 class TestAutoEncoder:
@@ -16,6 +28,21 @@ class TestAutoEncoder:
 
 
 class TestInitialization:
+
+    @pytest.mark.parametrize('error_metric', _VALID_ERROR_METRICS)
+    def test_error_metric_valid(self, error_metric):
+        detector = AutoEncoder(window_size=16, error_metric=error_metric)
+        assert detector.error_metric == error_metric
+
+    @pytest.mark.parametrize('error_metric', [32, 16.0, True])
+    def test_error_metric_invalid_type(self, error_metric):
+        with pytest.raises(TypeError):
+            AutoEncoder(window_size=16, error_metric=error_metric)
+
+    @pytest.mark.parametrize('error_metric', ['invalid'])
+    def test_error_metric_invalid_value(self, error_metric):
+        with pytest.raises(ValueError):
+            AutoEncoder(window_size=16, error_metric=error_metric)
 
     @pytest.mark.parametrize('dimension', [32, 16, 8])
     def test_latent_space_valid(self, dimension):
@@ -128,154 +155,575 @@ class TestInitialization:
             AutoEncoder(window_size=16, decoder_hidden_layer_dimension=[32], decoder_dropout_rate=[0.2, 0.3, 0.4])
 
 
+class TestErrorMetric:
+
+    @pytest.mark.parametrize('error_metric', _VALID_ERROR_METRICS)
+    def test(self, error_metric, univariate_time_series):
+        auto_encoder = AutoEncoder(window_size=12, error_metric=error_metric, n_epochs=1)
+        auto_encoder.fit(univariate_time_series)
+        auto_encoder.decision_function(univariate_time_series)
+
+    def test_update_after_initialization(self, univariate_time_series):
+        auto_encoder = AutoEncoder(window_size=12, error_metric='mae', n_epochs=1)
+        auto_encoder.fit(univariate_time_series)
+
+        auto_encoder.error_metric = 'invalid'
+        with pytest.raises(ValueError):
+            auto_encoder.decision_function(univariate_time_series)
+
+
+class TestInitializeDataset:
+
+    @pytest.mark.parametrize('seed', [0])
+    def test(self, seed):
+        rng = np.random.default_rng(seed)
+        t = rng.integers(100, 1000)
+        n = rng.integers(1, 10)
+        X = rng.uniform(size=(t, n))
+
+        dataset = AutoEncoder(window_size=1)._initialize_dataset(X)
+        assert len(dataset) == t
+        for i in range(len(dataset)):
+            (data, target) = dataset[i]
+            assert torch.equal(data, target)
+            assert torch.equal(data, torch.from_numpy(X[i]))
+
+
 class TestArchitecture:
 
     def test_default_architecture(self):
         architecture = AutoEncoder(window_size=16)._initialize_architecture(64)
-        expected = """
-            _AutoEncoderArchitecture(
-              (encoder): Sequential(
-                (linear-0 (64->64)): Linear(in_features=64, out_features=64, bias=True)
-                (activation-0-relu): ReLU()
-                (dropout-0): Dropout(p=0.2, inplace=False)
-                (linear-1 (64->32)): Linear(in_features=64, out_features=32, bias=True)
-                (batch-norm-1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-1-relu): ReLU()
-                (dropout-1): Dropout(p=0.2, inplace=False)
-                (linear-2 (32->8)): Linear(in_features=32, out_features=8, bias=True)
-                (batch-norm-2): BatchNorm1d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-2-relu): ReLU()
-                (dropout-2): Dropout(p=0.2, inplace=False)
-              )
-              (decoder): Sequential(
-                (linear-0 (8->32)): Linear(in_features=8, out_features=32, bias=True)
-                (batch-norm-0): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-0-relu): ReLU()
-                (dropout-0): Dropout(p=0.2, inplace=False)
-                (linear-1 (32->64)): Linear(in_features=32, out_features=64, bias=True)
-                (batch-norm-1): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-1-relu): ReLU()
-                (dropout-1): Dropout(p=0.2, inplace=False)
-                (linear-2 (64->64)): Linear(in_features=64, out_features=64, bias=True)
-                (activation-2-relu): ReLU()
-              )
-            )
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        modules = architecture.modules()
 
-    def test_non_symmetric_architecture(self):  # TODO rerun when the other tests are done
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
+
+    def test_non_symmetric_architecture(self):
         architecture = AutoEncoder(window_size=16, encoder_hidden_layer_dimension=[32, 16, 8], decoder_hidden_layer_dimension=[16])._initialize_architecture(64)
-        expected = """
-            _AutoEncoderArchitecture(
-              (encoder): Sequential(
-                (linear-0 (64->32)): Linear(in_features=64, out_features=64, bias=True)
-                (activation-0-relu): ReLU()
-                (dropout-0): Dropout(p=0.2, inplace=False)
-                (linear-1 (32->16)): Linear(in_features=64, out_features=32, bias=True)
-                (batch-norm-1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-1-relu): ReLU()
-                (dropout-1): Dropout(p=0.2, inplace=False)
-                (linear-2 (16->8)): Linear(in_features=32, out_features=8, bias=True)
-                (batch-norm-2): BatchNorm1d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-2-relu): ReLU()
-                (dropout-2): Dropout(p=0.2, inplace=False)
-                (linear-3 (8->8)): Linear(in_features=32, out_features=8, bias=True)
-                (batch-norm-3): BatchNorm1d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-3-relu): ReLU()
-                (dropout-3): Dropout(p=0.2, inplace=False)
-              )
-              (decoder): Sequential(
-                (linear-0 (8->16)): Linear(in_features=8, out_features=32, bias=True)
-                (batch-norm-0): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-                (activation-0-relu): ReLU()
-                (dropout-0): Dropout(p=0.2, inplace=False)
-                (linear-1 (16->64)): Linear(in_features=32, out_features=64, bias=True)
-                (activation-1-relu): ReLU()
-              )
-            )
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        modules = architecture.modules()
+
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 16)
+        assert is_batch_normalization(next(modules), 16)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 16, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 8, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 16)
+        assert is_batch_normalization(next(modules), 16)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 16, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_single_activation_function(self):
-        architecture = AutoEncoder(window_size=16, encoder_activation_functions='relu')._initialize_architecture(64)
-        expected = """
+        architecture = AutoEncoder(window_size=16, encoder_activation_functions='tanh')._initialize_architecture(64)
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'tanh')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_multiple_activation_functions(self):
         architecture = AutoEncoder(window_size=16, encoder_activation_functions=['relu', 'tanh', 'sigmoid'])._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'sigmoid')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'sigmoid')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_single_activation_functions(self):
-        architecture = AutoEncoder(window_size=16, decoder_activation_functions='relu')._initialize_architecture(64)
-        expected = """
+        architecture = AutoEncoder(window_size=16, decoder_activation_functions='tanh')._initialize_architecture(64)
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'tanh')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_multiple_activation_functions(self):
         architecture = AutoEncoder(window_size=16, decoder_activation_functions=['relu', 'tanh', 'sigmoid'])._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'tanh')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'sigmoid')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_single_batch_normalization(self):
         architecture = AutoEncoder(window_size=16, encoder_batch_normalization=False)._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_multiple_batch_normalization(self):
         architecture = AutoEncoder(window_size=16, encoder_batch_normalization=[False, False, True])._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_single_batch_normalization(self):
         architecture = AutoEncoder(window_size=16, decoder_batch_normalization=False)._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_multiple_batch_normalization(self):
-        architecture = AutoEncoder(window_size=16, decoder_batch_normalization=[False, False, True])._initialize_architecture(64)
-        expected = """
+        architecture = AutoEncoder(window_size=16, decoder_batch_normalization=[False, True, False])._initialize_architecture(64)
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_single_dropout(self):
         architecture = AutoEncoder(window_size=16, encoder_dropout_rate=0.5)._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_multiple_dropout(self):
         architecture = AutoEncoder(window_size=16, encoder_dropout_rate=[0.2, 0.3, 0.5])._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.3)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.3)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_single_dropout(self):
         architecture = AutoEncoder(window_size=16, decoder_dropout_rate=0.5)._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.5)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
 
     def test_custom_decoder_multiple_dropout(self):
         architecture = AutoEncoder(window_size=16, decoder_dropout_rate=[0.2, 0.3, 0.5])._initialize_architecture(64)
-        expected = """
+        modules = architecture.modules()
 
-        """
-        assert str(list(architecture.modules())[0]) == textwrap.dedent(expected).strip()
+        assert isinstance(next(modules), _AutoEncoderArchitecture)
+        assert is_sequential(next(modules))  # Encoder
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 64, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 8)
+        assert is_batch_normalization(next(modules), 8)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_sequential(next(modules))  # Decoder
+
+        assert is_linear(next(modules), 8, 32)
+        assert is_batch_normalization(next(modules), 32)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.2)
+
+        assert is_linear(next(modules), 32, 64)
+        assert is_batch_normalization(next(modules), 64)
+        assert is_activation(next(modules), 'relu')
+        assert is_dropout(next(modules), 0.3)
+
+        assert is_linear(next(modules), 64, 64)
+        assert is_activation(next(modules), 'relu')
+
+        with pytest.raises(StopIteration):
+            next(modules)
