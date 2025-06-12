@@ -2,842 +2,335 @@
 import pytest
 import torch
 import numpy as np
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection import AutoEncoder, NeuralBaseDetector
-from dtaianomaly.anomaly_detection.NeuralBaseDetector import (
-    _scale,
-    _initialize_optimizer,
-    _initialize_activation_function,
-    _initialize_data_loader,
-    _initialize_mlp
-)
-from conftest import (
-    is_sequential,
-    is_activation,
-    is_batch_normalization,
-    is_dropout,
-    is_linear
-)
+from dtaianomaly.anomaly_detection import MultilayerPerceptron, BaseNeuralDetector, ForecastDataset, ReconstructionDataset
 
 
 class TestNeuralBaseDetector:
 
     def test_str(self):
-        assert str(AutoEncoder(window_size=100)) == "AutoEncoder(window_size=100)"
-        assert str(AutoEncoder(window_size=100, learning_rate=0.01)) == "AutoEncoder(window_size=100,learning_rate=0.01)"
-        assert str(AutoEncoder(window_size=100, loss_function=torch.nn.L1Loss())) == "AutoEncoder(window_size=100,loss_function=L1Loss())"
-        assert str(AutoEncoder(window_size=100, data_loader_kwargs={'shuffle': True})) == "AutoEncoder(window_size=100,data_loader_kwargs={'shuffle': True})"
-        assert str(AutoEncoder(window_size=100, optimizer_kwargs={'weight_decay': 0.001})) == "AutoEncoder(window_size=100,optimizer_kwargs={'weight_decay': 0.001})"
+        assert str(MultilayerPerceptron(window_size=100)) == "MultilayerPerceptron(window_size=100)"
+        assert str(MultilayerPerceptron(window_size=100, learning_rate=0.01)) == "MultilayerPerceptron(window_size=100,learning_rate=0.01)"
+        assert str(MultilayerPerceptron(window_size=100, loss_function=torch.nn.L1Loss())) == "MultilayerPerceptron(window_size=100,loss_function=L1Loss())"
+        assert str(MultilayerPerceptron(window_size=100, data_loader_kwargs={'shuffle': True})) == "MultilayerPerceptron(window_size=100,data_loader_kwargs={'shuffle': True})"
+        assert str(MultilayerPerceptron(window_size=100, optimizer_kwargs={'weight_decay': 0.001})) == "MultilayerPerceptron(window_size=100,optimizer_kwargs={'weight_decay': 0.001})"
 
 
 class TestInitialize:
 
     def test_window_size_and_stride(self):
         # Quick and dirty tests as these things have generally been tested elsewhere
-        AutoEncoder(window_size='fft')
-        AutoEncoder(window_size='suss')
-        AutoEncoder(window_size=16)
+        MultilayerPerceptron(window_size='fft')
+        MultilayerPerceptron(window_size='suss')
+        MultilayerPerceptron(window_size=16)
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=16.0)
+            MultilayerPerceptron(window_size=16.0)
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=-5)
+            MultilayerPerceptron(window_size=-5)
 
-        AutoEncoder(window_size='fft', stride=1)
-        AutoEncoder(window_size='fft', stride=5)
+        MultilayerPerceptron(window_size='fft', stride=1)
+        MultilayerPerceptron(window_size='fft', stride=5)
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', stride=1.0)
+            MultilayerPerceptron(window_size='fft', stride=1.0)
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', stride=-1)
+            MultilayerPerceptron(window_size='fft', stride=-1)
 
-    @pytest.mark.parametrize('scaling_method', [None, 'min-max-scaling', 'standard-scaling'])
-    def test_scaling_method_valid(self, scaling_method):
-        detector = AutoEncoder(window_size='fft', scaling_method=scaling_method)
-        assert detector.scaling_method == scaling_method
+    @pytest.mark.parametrize('standard_scaling', [True, False])
+    def test_standard_scaling_valid(self, standard_scaling):
+        detector = MultilayerPerceptron(window_size='fft', standard_scaling=standard_scaling)
+        assert detector.standard_scaling == standard_scaling
 
-    @pytest.mark.parametrize('scaling_method', [5, 1.0, True])
-    def test_scaling_method_invalid_type(self, scaling_method):
+    @pytest.mark.parametrize('standard_scaling', [5, 1.0, 'invalid'])
+    def test_standard_scaling_invalid_type(self, standard_scaling):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', scaling_method=scaling_method)
-
-    @pytest.mark.parametrize('scaling_method', ['invalid-scaling'])
-    def test_scaling_method_invalid_value(self, scaling_method):
-        with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', scaling_method=scaling_method)
-
-    def test_scaling_kwargs_kwargs_valid(self):
-        detector = AutoEncoder(window_size='fft', scaling_method='min-max-scaling', scaling_kwargs={'feature_range': (0, 5)})
-        assert detector.scaling_kwargs == {'feature_range': (0, 5)}
-
-    def test_scaling_kwargs_kwargs_invalid_type(self):
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', scaling_method='min-max-scaling', scaling_kwargs={'invalid_kwarg': 1e-5})
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', scaling_method='min-max-scaling', scaling_kwargs='invalid')
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', scaling_method='standard-scaling', scaling_kwargs={'feature_range': (0, 5)})
+            MultilayerPerceptron(window_size='fft', standard_scaling=standard_scaling)
 
     @pytest.mark.parametrize('batch_size', [8, 16, 32])
     def test_batch_size_valid(self, batch_size):
-        detector = AutoEncoder(window_size='fft', batch_size=batch_size)
+        detector = MultilayerPerceptron(window_size='fft', batch_size=batch_size)
         assert detector.batch_size == batch_size
 
     @pytest.mark.parametrize('batch_size', ['8', 8.0])
     def test_batch_size_invalid_type(self, batch_size):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', batch_size=batch_size)
+            MultilayerPerceptron(window_size='fft', batch_size=batch_size)
 
     @pytest.mark.parametrize('batch_size', [0, -8])
     def test_batch_size_invalid_value(self, batch_size):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', batch_size=batch_size)
+            MultilayerPerceptron(window_size='fft', batch_size=batch_size)
 
     def test_data_loader_kwargs_valid(self):
-        detector = AutoEncoder(window_size='fft', data_loader_kwargs={'shuffle': True})
+        detector = MultilayerPerceptron(window_size='fft', data_loader_kwargs={'shuffle': True})
         assert detector.data_loader_kwargs == {'shuffle': True}
 
     def test_data_loader_kwargs_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', data_loader_kwargs={'invalid-kwarg': True})
+            MultilayerPerceptron(window_size='fft', data_loader_kwargs={'invalid-kwarg': True})
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', data_loader_kwargs='invalid-kwarg')
+            MultilayerPerceptron(window_size='fft', data_loader_kwargs='invalid-kwarg')
 
-    @pytest.mark.parametrize('validation_size', [0, 0.2, 0.5])
-    def test_validation_size_valid(self, validation_size):
-        detector = AutoEncoder(window_size='fft', validation_size=validation_size)
-        assert detector.validation_size == validation_size
-
-    @pytest.mark.parametrize('validation_size', ['0', False])
-    def test_validation_size_invalid_type(self, validation_size):
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', validation_size=validation_size)
-
-    @pytest.mark.parametrize('validation_size', [-0.2, 1.0])
-    def test_validation_size_invalid_value(self, validation_size):
-        with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', validation_size=validation_size)
-
-    @pytest.mark.parametrize('optimizer', ['Adam', 'SGD'])
+    @pytest.mark.parametrize('optimizer', BaseNeuralDetector._OPTIMIZERS.keys())
     def test_optimizer_valid(self, optimizer):
-        detector = AutoEncoder(window_size='fft', optimizer=optimizer)
+        detector = MultilayerPerceptron(window_size='fft', optimizer=optimizer)
         assert detector.optimizer == optimizer
 
     @pytest.mark.parametrize('optimizer', [10, False])
     def test_optimizer_invalid_type(self, optimizer):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', optimizer=optimizer)
+            MultilayerPerceptron(window_size='fft', optimizer=optimizer)
 
     @pytest.mark.parametrize('optimizer', ['invalid-optimizer'])
     def test_optimizer_invalid_value(self, optimizer):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', optimizer=optimizer)
+            MultilayerPerceptron(window_size='fft', optimizer=optimizer)
 
     @pytest.mark.parametrize('learning_rate', [0.01, 1.0, 10])
     def test_learning_rate_valid(self, learning_rate):
-        detector = AutoEncoder(window_size='fft', learning_rate=learning_rate)
+        detector = MultilayerPerceptron(window_size='fft', learning_rate=learning_rate)
         assert detector.learning_rate == learning_rate
 
     @pytest.mark.parametrize('learning_rate', ['0.001', False])
     def test_learning_rate_invalid_type(self, learning_rate):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', learning_rate=learning_rate)
+            MultilayerPerceptron(window_size='fft', learning_rate=learning_rate)
 
     @pytest.mark.parametrize('learning_rate', [-1, 0])
     def test_learning_rate_invalid_value(self, learning_rate):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', learning_rate=learning_rate)
+            MultilayerPerceptron(window_size='fft', learning_rate=learning_rate)
 
     def test_optimizer_kwargs_kwargs_valid(self):
-        detector = AutoEncoder(window_size='fft', optimizer_kwargs={'weight_decay': 1e-5})
+        detector = MultilayerPerceptron(window_size='fft', optimizer_kwargs={'weight_decay': 1e-5})
         assert detector.optimizer_kwargs == {'weight_decay': 1e-5}
 
     def test_optimizer_kwargs_kwargs_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', optimizer_kwargs={'invalid_kwarg': 1e-5})
+            MultilayerPerceptron(window_size='fft', optimizer_kwargs={'invalid_kwarg': 1e-5})
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', optimizer_kwargs='invalid')
+            MultilayerPerceptron(window_size='fft', optimizer_kwargs='invalid')
+
+    @pytest.mark.parametrize('compile_model', [True, False])
+    def test_compile_model_valid(self, compile_model):
+        detector = MultilayerPerceptron(window_size='fft', compile_model=compile_model)
+        assert detector.compile_model == compile_model
+
+    @pytest.mark.parametrize('compile_model', [5, 1.0, 'invalid'])
+    def test_compile_model_invalid_type(self, compile_model):
+        with pytest.raises(TypeError):
+            MultilayerPerceptron(window_size='fft', compile_model=compile_model)
+
+    @pytest.mark.parametrize('compile_mode', [
+        "default",
+        "reduce-overhead",
+        "max-autotune",
+        "max-autotune-no-cudagraphs"
+    ])
+    def test_compile_mode_valid(self, compile_mode):
+        detector = MultilayerPerceptron(window_size='fft', compile_mode=compile_mode)
+        assert detector.compile_mode == compile_mode
+
+    @pytest.mark.parametrize('compile_mode', [5, 1.0, True])
+    def test_compile_mode_invalid_type(self, compile_mode):
+        with pytest.raises(TypeError):
+            MultilayerPerceptron(window_size='fft', compile_mode=compile_mode)
+
+    @pytest.mark.parametrize('compile_mode', ['invalid'])
+    def test_compile_mode_invalid_value(self, compile_mode):
+        with pytest.raises(ValueError):
+            MultilayerPerceptron(window_size='fft', compile_mode=compile_mode)
 
     @pytest.mark.parametrize('n_epochs', [5, 100])
     def test_n_epochs_valid(self, n_epochs):
-        detector = AutoEncoder(window_size='fft', n_epochs=n_epochs)
+        detector = MultilayerPerceptron(window_size='fft', n_epochs=n_epochs)
         assert detector.n_epochs == n_epochs
 
     @pytest.mark.parametrize('n_epochs', [True, '100'])
     def test_n_epochs_invalid_type(self, n_epochs):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', n_epochs=n_epochs)
+            MultilayerPerceptron(window_size='fft', n_epochs=n_epochs)
 
     @pytest.mark.parametrize('n_epochs', [-1, 0])
     def test_n_epochs_invalid_value(self, n_epochs):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', n_epochs=n_epochs)
+            MultilayerPerceptron(window_size='fft', n_epochs=n_epochs)
 
     @pytest.mark.parametrize('loss_function', [torch.nn.MSELoss(), torch.nn.L1Loss()])
     def test_loss_function_valid(self, loss_function):
-        detector = AutoEncoder(window_size='fft', loss_function=loss_function)
+        detector = MultilayerPerceptron(window_size='fft', loss_function=loss_function)
         assert detector.loss_function == loss_function
 
     @pytest.mark.parametrize('loss_function', ['torch.nn.MSELoss()', 'MSELoss', 10])
     def test_loss_function_invalid_type(self, loss_function):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', loss_function=loss_function)
+            MultilayerPerceptron(window_size='fft', loss_function=loss_function)
 
     def test_device_cpu(self):
-        detector = AutoEncoder(window_size='fft', device='cpu')
+        detector = MultilayerPerceptron(window_size='fft', device='cpu')
         assert detector.device == 'cpu'
 
     def test_device_cuda(self, monkeypatch):
         monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
-        detector = AutoEncoder(window_size='fft', device='cuda')
+        detector = MultilayerPerceptron(window_size='fft', device='cuda')
         assert detector.device == 'cuda'
 
     def test_device_cuda_not_available(self, monkeypatch):
         monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', device='cuda')
+            MultilayerPerceptron(window_size='fft', device='cuda')
 
     def test_device_cuda_invalid_index(self, monkeypatch):
         monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', device='cuda:10000000')
+            MultilayerPerceptron(window_size='fft', device='cuda:10000000')
 
     @pytest.mark.parametrize('device', [True, 100])
     def test_device_invalid_type(self, device):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size='fft', device=device)
+            MultilayerPerceptron(window_size='fft', device=device)
 
     @pytest.mark.parametrize('device', ['invalid-device'])
     def test_device_invalid_value(self, device):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size='fft', device=device)
+            MultilayerPerceptron(window_size='fft', device=device)
 
 
-class TestScaling:
-
-    def test_no_scaling(self):
-        np.random.seed(42)
-        X = np.random.uniform(size=(100, 5))
-        X_, scaler = _scale(X, None, None)
-
-        assert np.array_equal(X, X_)
-        assert scaler is None
-
-    def test_standard_scaling(self):
-        X = np.array([
-            [5, 10, 15],
-            [9, 15, 10]
-        ])
-        X_, scaler = _scale(X, 'standard-scaling', None)
-        assert np.allclose(X_, np.array([[-1.22474487, 0, 1.22474487], [-0.88900089, 1.3970014, -0.50800051]]))
-        assert isinstance(scaler, StandardScaler)
-
-    def test_min_max_scaling(self):
-        X = np.array([
-            [5, 10, 15],
-            [0, 75, 100]
-        ])
-        X_, scaler = _scale(X, 'min-max-scaling', None)
-        assert np.array_equal(X_, np.array([[0, 0.5, 1], [0, 0.75, 1]]))
-        assert isinstance(scaler, MinMaxScaler)
-
-    def test_kwargs(self):
-        X = np.array([
-            [5, 10, 15],
-            [0, 75, 100]
-        ])
-        X_, scaler = _scale(X, 'min-max-scaling', {'feature_range': (0, 5)})
-        assert np.array_equal(X_, np.array([[0, 2.5, 5.0], [0, 3.75, 5]]))
-        assert isinstance(scaler, MinMaxScaler)
-
-    @pytest.mark.parametrize('scaling_method', [None, 'standard-scaling', 'min-max-scaling'])
-    def test_training(self, univariate_time_series, scaling_method):
-        auto_encoder = AutoEncoder(window_size=12, scaling_method=scaling_method, n_epochs=1)
-        auto_encoder.fit(univariate_time_series)
-        auto_encoder.decision_function(univariate_time_series)
-
-
-class TestInitializeOptimizer:
-
-    @pytest.mark.parametrize('optimizer,expected_cls', [
-        ('Adam', torch.optim.Adam),
-        ('SGD', torch.optim.SGD),
-        ('Adagrad', torch.optim.Adagrad),
-        ('RMSprop', torch.optim.RMSprop),
-    ])
-    def test(self, optimizer, expected_cls):
-        optimizer = _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], optimizer, 1e-3, None)
-        assert isinstance(optimizer, expected_cls)
-
-    def test_invalid_optimizer(self):
-        with pytest.raises(ValueError):
-            _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], 'invalid', 1e-3, None)
-
-    @pytest.mark.parametrize('learning_rate', [0.01, 0.00005])
-    def test_learning_rate(self, learning_rate):
-        optimizer = _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], 'Adam', learning_rate, None)
-        assert optimizer.param_groups[0]['lr'] == learning_rate
-
-    @pytest.mark.parametrize('weight_decay', [0.01, 0.00005])
-    def test_kwargs(self, weight_decay):
-        optimizer = _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], 'Adam', 1e-3, {'weight_decay': weight_decay})
-        assert optimizer.param_groups[0]['weight_decay'] == weight_decay
-
-    def test_learning_rate_with_kwargs(self):
-        optimizer = _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], 'Adam', 10, {'weight_decay': 0.01, 'lr': 0.01})
-        assert optimizer.param_groups[0]['lr'] == 10
-
-        optimizer = _initialize_optimizer([torch.nn.Parameter(torch.randn(3, 3, requires_grad=True))], 'Adam', 10, {'weight_decay': 0.01})
-        assert optimizer.param_groups[0]['lr'] == 10
-
-
-class TestInitializeDataLoader:
-
-    def test(self):
-        dataset = torch.utils.data.TensorDataset(torch.empty((10, 3)), torch.empty((10,)))
-        data_loader = _initialize_data_loader(
-            dataset=dataset,
-            batch_size=32,
-            data_loader_kwargs=None
-        )
-        assert data_loader.dataset == dataset
-        assert data_loader.batch_size == 32
-
-    @pytest.mark.parametrize('drop_last', [True, False])
-    def test_kwargs(self, drop_last):
-        data_loader = _initialize_data_loader(
-            dataset=torch.utils.data.TensorDataset(torch.empty((10, 3)), torch.empty((10,))),
-            batch_size=32,
-            data_loader_kwargs={'drop_last': drop_last}
-        )
-        assert data_loader.drop_last == drop_last
-
-    def test_kwargs_and_batch_size(self):
-        data_loader = _initialize_data_loader(
-            dataset=torch.utils.data.TensorDataset(torch.empty((10, 3)), torch.empty((10,))),
-            batch_size=32,
-            data_loader_kwargs={'batch_size': 64}
-        )
-        assert data_loader.batch_size == 32
+class TestBuildDataLoader:
 
     @pytest.mark.parametrize('cls', [
         detector_cls
         for detector_cls in utils.all_classes('anomaly-detector', return_names=False)
-        if issubclass(detector_cls, NeuralBaseDetector)
+        if issubclass(detector_cls, BaseNeuralDetector)
     ])
-    def test_initialize_dataset(self, cls, multivariate_time_series):
-        detector = cls(window_size=12)
+    @pytest.mark.parametrize('univariate', [True, False])
+    def test(self, cls, univariate, univariate_time_series, multivariate_time_series):
+        detector = cls(window_size=8)
+        X = univariate_time_series if univariate else multivariate_time_series
 
-        dataset = detector._initialize_dataset(multivariate_time_series)
-        sample = dataset[0]
-        assert len(sample) == 2  # Contains target and data
+        # Build the data loader
+        detector.window_size_ = detector.window_size
+        data_loader = detector._build_data_loader(detector._build_dataset(X))
+        batch = next(iter(data_loader))
+        print(batch[0].shape)
+        print(len(batch))
+        assert batch[0].shape[0] == detector.batch_size
 
-        data_loader = _initialize_data_loader(dataset, 8, None)
-        data, targets = next(iter(data_loader))
-        assert data.shape[0] == 8
-        assert data.shape[1:] == sample[0].shape
-        assert targets.shape[0] == 8
-        assert targets.shape[1:] == sample[1].shape
+        detector.window_size_ = detector.window_size
+        detector.neural_network_ = detector._build_architecture(utils.get_dimension(X))
+        detector.optimizer_ = detector._build_optimizer(detector.neural_network_.parameters())
+
+        # Test if can be trained
+        detector._train_batch(batch)
+
+        # Test if can be evaluated
+        detector._evaluate_batch(batch)
+
+    @pytest.mark.parametrize('drop_last', [True, False])
+    def test_kwargs(self, drop_last, univariate_time_series):
+        detector = MultilayerPerceptron(window_size=1, data_loader_kwargs={'drop_last': drop_last})
+        detector.window_size_ = detector.window_size
+        data_loader = detector._build_data_loader(detector._build_dataset(univariate_time_series))
+        assert data_loader.drop_last == drop_last
+
+    def test_kwargs_and_batch_size(self, univariate_time_series):
+        detector = MultilayerPerceptron(window_size=1, batch_size=32, data_loader_kwargs={'batch_size': 64})
+        detector.window_size_ = detector.window_size
+        data_loader = detector._build_data_loader(detector._build_dataset(univariate_time_series))
+        assert data_loader.batch_size == 32
+        assert detector.data_loader_kwargs['batch_size'] == 64
+
+    @pytest.mark.parametrize('forced_shuffle', [True, False])
+    def test_shuffle_no_given_kwargs(self, univariate_time_series, forced_shuffle):
+        detector = MultilayerPerceptron(window_size=1)
+        detector.window_size_ = detector.window_size
+        data_loader = detector._build_data_loader(detector._build_dataset(univariate_time_series), shuffle=forced_shuffle)
+        is_shuffled = isinstance(data_loader.sampler, torch.utils.data.RandomSampler)
+        assert is_shuffled == forced_shuffle
+
+    @pytest.mark.parametrize('forced_shuffle', [True, False])
+    @pytest.mark.parametrize('given_shuffle', [True, False])
+    def test_shuffle_given_kwargs(self, univariate_time_series, forced_shuffle, given_shuffle):
+        detector = MultilayerPerceptron(window_size=1, data_loader_kwargs={'shuffle': given_shuffle})
+        detector.window_size_ = detector.window_size
+        data_loader = detector._build_data_loader(detector._build_dataset(univariate_time_series), shuffle=forced_shuffle)
+        is_shuffled = isinstance(data_loader.sampler, torch.utils.data.RandomSampler)
+        assert is_shuffled == forced_shuffle
+        assert detector.data_loader_kwargs['shuffle'] == given_shuffle
 
 
-class TestInitializeActivationFunction:
+class TestBuildActivationFunction:
 
-    @pytest.mark.parametrize('activation_name,expected_cls', [
-        ('linear', torch.nn.Identity),
-        ('relu', torch.nn.ReLU),
-        ('sigmoid', torch.nn.Sigmoid),
-        ('tanh', torch.nn.Tanh),
-        ('leaky-relu', torch.nn.LeakyReLU),
-    ])
-    def test(self, activation_name, expected_cls):
-        assert isinstance(_initialize_activation_function(activation_name), expected_cls)
+    @pytest.mark.parametrize('activation_function,cls', BaseNeuralDetector._ACTIVATION_FUNCTIONS.items())
+    def test(self, activation_function, cls):
+        assert isinstance(BaseNeuralDetector._build_activation_function(activation_function), cls)
 
     def test_invalid(self):
         with pytest.raises(ValueError):
-            _initialize_activation_function('invalid')
+            BaseNeuralDetector._build_activation_function('invalid')
 
 
-class TestInitializeMLP:
+class TestBuildOptimizer:
 
-    def test_base(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[8],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
+    @pytest.mark.parametrize('optimizer,cls', BaseNeuralDetector._OPTIMIZERS.items())
+    def test(self, optimizer, cls):
+        detector = MultilayerPerceptron(window_size=1, optimizer=optimizer)
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        assert isinstance(detector._build_optimizer(architecture.parameters()), cls)
 
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_no_hidden_layers(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_multiple_hidden_layers(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_activation_multiple_values(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[8],
-            activation_function=['sigmoid', 'tanh'],
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'sigmoid')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'tanh')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_activation_invalid_nb_values(self):
+    def test_invalid_optimizer(self):
+        detector = MultilayerPerceptron(window_size=1, optimizer='adam')
+        detector.window_size_ = detector.window_size
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        detector.optimizer = 'invalid'
         with pytest.raises(ValueError):
-            _initialize_mlp(
-                input_dimension=16,
-                output_dimension=4,
-                hidden_layer_dimension=[8],
-                activation_function=['relu', 'tanh', 'sigmoid'],
-                batch_normalization=True,
-                batch_normalization_first_layer=True,
-                batch_normalization_last_layer=True,
-                dropout_rate=0.2,
-                dropout_first_layer=True,
-                dropout_last_layer=True
-            )
+            detector._build_optimizer(architecture.parameters())
 
-    def test_batch_normalization_multiple_values(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[8],
-            activation_function='relu',
-            batch_normalization=[False, True],
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
+    @pytest.mark.parametrize('learning_rate', [0.01, 0.00005])
+    def test_learning_rate(self, learning_rate):
+        detector = MultilayerPerceptron(window_size=1, learning_rate=learning_rate)
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        optimizer = detector._build_optimizer(architecture.parameters())
+        assert optimizer.param_groups[0]['lr'] == learning_rate
 
-        assert is_sequential(next(modules))
+    def test_learning_rate_with_kwargs(self):
+        detector = MultilayerPerceptron(window_size=1, learning_rate=10)
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        optimizer = detector._build_optimizer(architecture.parameters())
+        assert optimizer.param_groups[0]['lr'] == 10
 
-        assert is_linear(next(modules), 16, 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
+        detector = MultilayerPerceptron(window_size=1, learning_rate=10, optimizer_kwargs={'lr': 0.01})
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        optimizer = detector._build_optimizer(architecture.parameters())
+        assert optimizer.param_groups[0]['lr'] == 10
+        assert detector.optimizer_kwargs['lr'] == 0.01
 
-        assert is_linear(next(modules), 8, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_batch_normalization_invalid_nb_values(self):
-        with pytest.raises(ValueError):
-            _initialize_mlp(
-                input_dimension=16,
-                output_dimension=4,
-                hidden_layer_dimension=[8],
-                activation_function='relu',
-                batch_normalization=[True, True, False],
-                batch_normalization_first_layer=True,
-                batch_normalization_last_layer=True,
-                dropout_rate=0.2,
-                dropout_first_layer=True,
-                dropout_last_layer=True
-            )
-
-    def test_dropout_rate_multiple_values(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[8],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=[0.2, 0.3],
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.3)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_dropout_rate_invalid_nb_values(self):
-        with pytest.raises(ValueError):
-            _initialize_mlp(
-                input_dimension=16,
-                output_dimension=4,
-                hidden_layer_dimension=[8],
-                activation_function='relu',
-                batch_normalization=True,
-                batch_normalization_first_layer=True,
-                batch_normalization_last_layer=True,
-                dropout_rate=[0.2, 0.3, 0.4],
-                dropout_first_layer=True,
-                dropout_last_layer=True
-            )
-
-    def test_no_batch_normalization_first_layer(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=False,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_no_batch_normalization_last_layer(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=False,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_no_dropout_first_layer(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=False,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_no_dropout_last_layer(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.2,
-            dropout_first_layer=True,
-            dropout_last_layer=False
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_zero_dropout_all(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=0.0,
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-
-        with pytest.raises(StopIteration):
-            next(modules)
-
-    def test_zero_dropout_some(self):
-        mlp = _initialize_mlp(
-            input_dimension=16,
-            output_dimension=4,
-            hidden_layer_dimension=[12, 8, 6],
-            activation_function='relu',
-            batch_normalization=True,
-            batch_normalization_first_layer=True,
-            batch_normalization_last_layer=True,
-            dropout_rate=[0.0, 0.2, 0.0, 0.3],
-            dropout_first_layer=True,
-            dropout_last_layer=True
-        )
-        modules = mlp.modules()
-
-        assert is_sequential(next(modules))
-
-        assert is_linear(next(modules), 16, 12)
-        assert is_batch_normalization(next(modules), 12)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 12, 8)
-        assert is_batch_normalization(next(modules), 8)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.2)
-
-        assert is_linear(next(modules), 8, 6)
-        assert is_batch_normalization(next(modules), 6)
-        assert is_activation(next(modules), 'relu')
-
-        assert is_linear(next(modules), 6, 4)
-        assert is_batch_normalization(next(modules), 4)
-        assert is_activation(next(modules), 'relu')
-        assert is_dropout(next(modules), 0.3)
-
-        with pytest.raises(StopIteration):
-            next(modules)
+    @pytest.mark.parametrize('kwargs', [
+        {'weight_decay': 0.01, 'eps': 0.01},
+        {'eps': 0.0001},
+        {'weight_decay': 0.0001},
+    ])
+    def test_kwargs(self, kwargs):
+        detector = MultilayerPerceptron(window_size=1, optimizer='adam', optimizer_kwargs=kwargs)
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        optimizer = detector._build_optimizer(architecture.parameters())
+        for key, value in kwargs.items():
+            assert optimizer.param_groups[0][key] == value
 
 
-class TestEdgeCasesFitting:  # Special cases of fitting that are not tested by default
+class TestCompile:
 
-    def test_no_validation(self, univariate_time_series):
-        auto_encoder = AutoEncoder(window_size=12, validation_size=0.0, n_epochs=1)
-        auto_encoder.fit(univariate_time_series)
-        auto_encoder.decision_function(univariate_time_series)
-
-    def test_data_loader_kwargs_given(self, univariate_time_series):
-        auto_encoder = AutoEncoder(window_size=12, n_epochs=1, data_loader_kwargs={'batch_size': 16})
-        auto_encoder.fit(univariate_time_series)
-        auto_encoder.decision_function(univariate_time_series)
-
-    def test_data_loader_kwargs_with_shuffle(self, univariate_time_series):
-        auto_encoder = AutoEncoder(window_size=12, n_epochs=1, data_loader_kwargs={'shuffle': True})
-
-        auto_encoder.fit(univariate_time_series)
-        auto_encoder.decision_function(univariate_time_series)
-
-        assert auto_encoder.data_loader_kwargs['shuffle']  # Check if shuffle is still true
+    @pytest.mark.parametrize('compile_mode', ["default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"])
+    def test(self, compile_mode, univariate_time_series):
+        detector = MultilayerPerceptron(window_size=12, compile_model=True, compile_mode=compile_mode)
+        detector.fit(univariate_time_series)
+        detector.decision_function(univariate_time_series)
 
 
 class TestRandomState:
@@ -845,13 +338,272 @@ class TestRandomState:
     @pytest.mark.parametrize('cls', [
         detector_cls
         for detector_cls in utils.all_classes('anomaly-detector', return_names=False)
-        if issubclass(detector_cls, NeuralBaseDetector)
+        if issubclass(detector_cls, BaseNeuralDetector)
     ])
     def test(self, cls, univariate_time_series):
-        y_pred1 = cls(window_size=12, random_state=0, n_epochs=1)\
+        y_pred1 = cls(window_size=12, seed=0, n_epochs=1)\
             .fit(univariate_time_series)\
             .decision_function(univariate_time_series)
-        y_pred2 = cls(window_size=12, random_state=0, n_epochs=1)\
+        y_pred2 = cls(window_size=12, seed=0, n_epochs=1)\
             .fit(univariate_time_series)\
             .decision_function(univariate_time_series)
-        assert np.array_equal(y_pred1, y_pred2)
+        assert np.allclose(y_pred1, y_pred2)
+
+
+class TestForecastDataset:
+
+    def test(self):
+        dataset = ForecastDataset(
+            np.arange(17),
+            5, 1,
+            False, 'cpu',
+            1
+        )
+        assert len(dataset) == 17-5-1+1
+        for i in range(12):
+            history, future = dataset[i]
+            assert np.array_equal(history, np.arange(5)+i)
+            assert np.array_equal(future, np.arange(1)+5+i)
+
+    def test_multivariate(self):
+        dataset = ForecastDataset(
+            np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T,
+            2, 1,
+            False, 'cpu',
+            1
+        )
+        assert len(dataset) == 4
+        assert np.array_equal(dataset[0][0], [1, 1, 2, 2])
+        assert np.array_equal(dataset[0][1], [3, 3])
+        assert np.array_equal(dataset[1][0], [2, 2, 3, 3])
+        assert np.array_equal(dataset[1][1], [4, 4])
+        assert np.array_equal(dataset[2][0], [3, 3, 4, 4])
+        assert np.array_equal(dataset[2][1], [5, 5])
+        assert np.array_equal(dataset[3][0], [4, 4, 5, 5])
+        assert np.array_equal(dataset[3][1], [6, 6])
+
+    def test_stride_2(self):
+        dataset = ForecastDataset(
+            np.arange(17),
+            5, 2,
+            False, 'cpu',
+            1
+        )
+        """
+        0 4 5
+        2 6 7
+        4 8 9
+        6 10 11
+        8 12 13
+        10 14 15
+        12 16 17 -> 11 15 16
+        """
+        assert len(dataset) == 7
+
+        history, future = dataset[0]
+        assert np.array_equal(history, np.arange(5))
+        assert np.array_equal(future, np.arange(1) + 5)
+
+        history, future = dataset[1]
+        assert np.array_equal(history, np.arange(5) + 2)
+        assert np.array_equal(future, np.arange(1) + 5 + 2)
+
+        history, future = dataset[2]
+        assert np.array_equal(history, np.arange(5) + 4)
+        assert np.array_equal(future, np.arange(1) + 5 + 4)
+
+        history, future = dataset[3]
+        assert np.array_equal(history, np.arange(5) + 6)
+        assert np.array_equal(future, np.arange(1) + 5 + 6)
+
+        history, future = dataset[4]
+        assert np.array_equal(history, np.arange(5) + 8)
+        assert np.array_equal(future, np.arange(1) + 5 + 8)
+
+        history, future = dataset[5]
+        assert np.array_equal(history, np.arange(5) + 10)
+        assert np.array_equal(future, np.arange(1) + 5 + 10)
+
+        history, future = dataset[6]
+        assert np.array_equal(history, np.arange(5) + 11)
+        assert np.array_equal(future, np.arange(1) + 5 + 11)
+
+    def test_stride_3(self):
+        dataset = ForecastDataset(
+            np.arange(17),
+            5, 3,
+            False, 'cpu',
+            1
+        )
+        """
+        0 4 5
+        3 7 8
+        6 10 11
+        9 13 14
+        12 16 17 -> 11 15 16
+        """
+        assert len(dataset) == 5
+
+        history, future = dataset[0]
+        assert np.array_equal(history, np.arange(5))
+        assert np.array_equal(future, np.arange(1) + 5)
+
+        history, future = dataset[1]
+        assert np.array_equal(history, np.arange(5) + 3)
+        assert np.array_equal(future, np.arange(1) + 5 + 3)
+
+        history, future = dataset[2]
+        assert np.array_equal(history, np.arange(5) + 6)
+        assert np.array_equal(future, np.arange(1) + 5 + 6)
+
+        history, future = dataset[3]
+        assert np.array_equal(history, np.arange(5) + 9)
+        assert np.array_equal(future, np.arange(1) + 5 + 9)
+
+        history, future = dataset[4]
+        assert np.array_equal(history, np.arange(5) + 11)
+        assert np.array_equal(future, np.arange(1) + 5 + 11)
+
+    def test_scaling(self):
+        dataset = ForecastDataset(
+            np.array([5, 10, 15, 9, 15, 10]),
+            2, 3,
+            True, 'cpu',
+            1
+        )
+        assert np.allclose(dataset[0][0], np.array([-1.22474487, 0]))
+        assert np.allclose(dataset[0][1], np.array([1.22474487]))
+        assert np.allclose(dataset[1][0], np.array([-0.88900089, 1.3970014]))
+        assert np.allclose(dataset[1][1], np.array([-0.50800051]))
+
+        dataset = ForecastDataset(
+            np.array([5, 10, 15, 9, 15, 10]),
+            2, 3,
+            False, 'cpu',
+            1
+        )
+        assert np.array_equal(dataset[0][0], np.array([5, 10]))
+        assert np.array_equal(dataset[0][1], np.array([15]))
+        assert np.array_equal(dataset[1][0], np.array([9, 15]))
+        assert np.array_equal(dataset[1][1], np.array([10]))
+
+    def test_scaling_multivariate(self):
+        dataset = ForecastDataset(
+            np.array([[5, 10, 15, 5, 10, 15], [9, 15, 10, 9, 15, 10]]).T,
+            2, 3,
+            True, 'cpu',
+            1
+        )
+        assert len(dataset) == 2
+        for i in range(2):
+            assert np.allclose(dataset[i][0], [-1.22474487, -0.88900089, 0, 1.3970014])
+            assert np.allclose(dataset[i][1], [1.22474487, -0.50800051])
+
+    def test_forecast_length(self):
+        dataset = ForecastDataset(
+            np.arange(17),
+            5, 1,
+            False, 'cpu',
+            3
+        )
+        assert len(dataset) == 10
+        for i in range(10):
+            history, future = dataset[i]
+            assert np.array_equal(history, np.arange(5)+i)
+            assert np.array_equal(future, np.arange(3)+5+i)
+
+
+class TestReconstructionDataset:
+
+    def test(self):
+        dataset = ReconstructionDataset(
+            np.arange(17),
+            5, 1,
+            False, 'cpu',
+        )
+        assert len(dataset) == 13
+        for i in range(13):
+            assert np.array_equal(dataset[i][0], np.arange(5)+i)
+
+    def test_multivariate(self):
+        dataset = ReconstructionDataset(
+            np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T,
+            3, 1,
+            False, 'cpu',
+        )
+        assert len(dataset) == 4
+        assert np.array_equal(dataset[0][0], [1, 1, 2, 2, 3, 3])
+        assert np.array_equal(dataset[1][0], [2, 2, 3, 3, 4, 4])
+        assert np.array_equal(dataset[2][0], [3, 3, 4, 4, 5, 5])
+        assert np.array_equal(dataset[3][0], [4, 4, 5, 5, 6, 6])
+
+    def test_stride_2(self):
+        dataset = ReconstructionDataset(
+            np.arange(17),
+            6, 2,
+            False, 'cpu',
+        )
+        """
+        0 5
+        2 7
+        4 9
+        6 11
+        8 13
+        10 15
+        12 17 -> 11 16
+        """
+        assert len(dataset) == 7
+        assert np.array_equal(dataset[0][0], np.arange(6))
+        assert np.array_equal(dataset[1][0], np.arange(6) + 2)
+        assert np.array_equal(dataset[2][0], np.arange(6) + 4)
+        assert np.array_equal(dataset[3][0], np.arange(6) + 6)
+        assert np.array_equal(dataset[4][0], np.arange(6) + 8)
+        assert np.array_equal(dataset[5][0], np.arange(6) + 10)
+        assert np.array_equal(dataset[6][0], np.arange(6) + 11)
+
+    def test_stride_3(self):
+        dataset = ReconstructionDataset(
+            np.arange(17),
+            6, 3,
+            False, 'cpu',
+        )
+        """
+        0 5
+        3 8
+        6 11
+        9 14
+        12 17 -> 11 16
+        """
+        assert len(dataset) == 5
+        assert np.array_equal(dataset[0][0], np.arange(6))
+        assert np.array_equal(dataset[1][0], np.arange(6) + 3)
+        assert np.array_equal(dataset[2][0], np.arange(6) + 6)
+        assert np.array_equal(dataset[3][0], np.arange(6) + 9)
+        assert np.array_equal(dataset[4][0], np.arange(6) + 11)
+
+    def test_scaling(self):
+        dataset = ReconstructionDataset(
+            np.array([5, 10, 15, 9, 15, 10]),
+            3, 3,
+            False, 'cpu',
+        )
+        assert np.allclose(dataset[0], np.array([5, 10, 15]))
+        assert np.allclose(dataset[1], np.array([9, 15, 10]))
+
+        dataset = ReconstructionDataset(
+            np.array([5, 10, 15, 9, 15, 10]),
+            3, 3,
+            True, 'cpu',
+        )
+        assert np.allclose(dataset[0][0], np.array([-1.22474487, 0, 1.22474487]))
+        assert np.allclose(dataset[1][0], np.array([-0.88900089, 1.3970014, -0.50800051]))
+
+    def test_scaling_multivariate(self):
+        dataset = ReconstructionDataset(
+            np.array([[5, 10, 15, 5, 10, 15], [9, 15, 10, 9, 15, 10]]).T,
+            3, 3,
+            True, 'cpu',
+        )
+        assert len(dataset) == 2
+        for i in range(2):
+            assert np.allclose(dataset[i][0], [-1.22474487, -0.88900089, 0, 1.3970014, 1.22474487, -0.50800051])
