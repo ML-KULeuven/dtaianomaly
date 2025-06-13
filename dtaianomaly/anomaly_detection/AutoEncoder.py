@@ -1,6 +1,5 @@
-from typing import Literal
+from typing import Callable, Literal
 
-import numpy as np
 import torch
 
 from dtaianomaly import utils
@@ -8,15 +7,17 @@ from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.BaseNeuralDetector import (
     _ACTIVATION_FUNCTION_TYPE,
     _COMPILE_MODE_TYPE,
+    _MODEL_PARAMETERS_TYPE,
     _OPTIMIZER_TYPE,
-    BaseNeuralDetector,
-    ReconstructionDataset,
+)
+from dtaianomaly.anomaly_detection.BaseNeuralDetector_utils import (
+    BaseNeuralReconstructionDetector,
 )
 
 
-class AutoEncoder(BaseNeuralDetector):
+class AutoEncoder(BaseNeuralReconstructionDetector):
     """
-    Use an AutoEncoder to detect anomalies :cite:`sakurada2014anomaly`.
+    Use an auto encoder to detect anomalies :cite:`sakurada2014anomaly`.
 
     An auto encoder is a neural network that consists of two parts: an encoder
     and a decoder. The encoder maps the input features to a lower dimensional
@@ -27,24 +28,79 @@ class AutoEncoder(BaseNeuralDetector):
     reconstructing the time series data and measuring the deviation of the
     reconstruction from the original data.
 
+    The architecture of the autoencoder consists of blocks, in which each block
+    applies the following operations: fully-connected layer :math:`\\rightarrow`
+    batch normalization :math:`\\rightarrow` activation function :math:`\\rightarrow`
+    dropout layer. The first layer of the encoder has no batch normalization,
+    and the final layer of the decoder has no batch normalization nor dropout.
+
     Parameters
     ----------
     window_size: int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
+    error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
+        The error measure between the reconstructed window and the original window.
+    encoder_dimensions: list of ints, default=[64]
+        The number of neurons in each layer of the encoder. If an empty list is given, then
+        the input of the encoder is directly connected to the latent space in a fully-connected
+        manner.
+    latent_space_dimension: int default=32
+        The dimension of the latent space.
+    decoder_dimensions: list of ints, default=[64]
+        The number of neurons in each layer of the decoder. If an empty list is given, then
+        the latent space is directly connected to the output in a fully-connected manner.
+    dropout_rate: float in interval [0, 1[, default=0.2
+        The dropout rate for the dropout layers. If the dropout rate is 0, no dropout layers
+        will be added to the auto encoder.
+    activation_function: {"linear", "relu", "sigmoid", "tanh"} default="relu"
+        The activation function to use at the end of each layer.
+    batch_normalization: bool = True,
+        Whether to add batch normalization after each layer or not.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    error_metric: {'mean-absolute-error', 'mean-squared-error'}, default='mean-absolute-error'
-        Used metric for computing the distance between the actual given data and the
-        reconstructed data.
-    TODO ...
+    standard_scaling: bool, default=True
+        Whether to standard scale each window independently, before feeding it to the network.
+    batch_size: int, default=32
+        The size of the batches to feed to the network.
+    data_loader_kwargs: dictionary, default=None
+        Additional kwargs to be passed to the data loader.
+        For more information, see: https://docs.pytorch.org/docs/stable/data.html
+    optimizer: {"adam", "sgd"} or callable default="adam"
+        The optimizer to use for learning the weights. If "adam" is given,
+        then the torch.optim.Adam optimizer will be used. If "sgd" is given,
+        then the torch.optim.SGD optimizer will be used. Otherwise, a callable
+        should be given, which takes as input the network parameters, and then
+        creates an optimizer.
+    learning_rate: float, default=1e-3
+        The learning rate to use for training the network. Has no effect
+        if optimize is a callable.
+    compile_model: bool, default=False
+        Whether the network architecture should be compiled or not before
+        training the weights.
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
+    compile_mode: {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
+        Method to compile the architecture.
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
+    n_epochs: int, default=10
+        The number of epochs for which the neural network should be trained.
+    loss_function: torch.nn.Module, default=torch.nn.MSELoss()
+        The loss function to use for updating the weights.
+    device: str, default="cpu"
+        The device on which te neural network should be trained.
+        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
+    seed: int, default=None
+        The seed used for training the model. This seed will update the torch
+        and numpy seed at the beginning of the fit method.
 
     Attributes
     ----------
     window_size_: int
-        The effectively used window size for this anomaly detector
+        The effectively used window size for this anomaly detector.
     optimizer_: torch.optim.Optimizer
+        The optimizer used for learning the weights of the network.
     neural_network_: torch.nn.Module
+        The PyTorch network architecture.
 
     Examples
     --------
@@ -54,9 +110,14 @@ class AutoEncoder(BaseNeuralDetector):
     >>> auto_encoder = AutoEncoder(10, seed=0).fit(x)
     >>> auto_encoder.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.59210092, 0.56707534, 0.56629006, ..., 0.58380051, 0.5808109 , 0.54450774]...)
+
+    See also
+    --------
+    BaseNeuralForecastingDetector: Use a neural network to forecast the time
+        series, and detect anomalies by measuring the difference with the
+        actual observations.
     """
 
-    error_metric: Literal["mean-absolute-error", "mean-squared-error"]
     encoder_dimensions: list[int]
     latent_space_dimension: int
     decoder_dimensions: list[int]
@@ -68,7 +129,7 @@ class AutoEncoder(BaseNeuralDetector):
         self,
         window_size: str | int,
         error_metric: Literal[
-            "mean-absolute-erro", "mean-squared-error"
+            "mean-absolute-error", "mean-squared-error"
         ] = "mean-absolute-error",
         encoder_dimensions: list[int] = (64,),
         latent_space_dimension: int = 32,
@@ -80,9 +141,10 @@ class AutoEncoder(BaseNeuralDetector):
         standard_scaling: bool = True,
         batch_size: int = 32,
         data_loader_kwargs: dict[str, any] = None,
-        optimizer: _OPTIMIZER_TYPE = "adam",
+        optimizer: (
+            _OPTIMIZER_TYPE | Callable[[_MODEL_PARAMETERS_TYPE], torch.optim.Optimizer]
+        ) = "adam",
         learning_rate: float = 1e-3,
-        optimizer_kwargs: dict[str, any] = None,
         compile_model: bool = False,
         compile_mode: _COMPILE_MODE_TYPE = "default",
         n_epochs: int = 10,
@@ -92,6 +154,7 @@ class AutoEncoder(BaseNeuralDetector):
     ):
         super().__init__(
             supervision=Supervision.SEMI_SUPERVISED,
+            error_metric=error_metric,
             window_size=window_size,
             stride=stride,
             standard_scaling=standard_scaling,
@@ -99,7 +162,6 @@ class AutoEncoder(BaseNeuralDetector):
             data_loader_kwargs=data_loader_kwargs,
             optimizer=optimizer,
             learning_rate=learning_rate,
-            optimizer_kwargs=optimizer_kwargs,
             compile_model=compile_model,
             compile_mode=compile_mode,
             n_epochs=n_epochs,
@@ -107,13 +169,6 @@ class AutoEncoder(BaseNeuralDetector):
             device=device,
             seed=seed,
         )
-
-        if not isinstance(error_metric, str):
-            raise TypeError("`error_metric` should be a string")
-        if error_metric not in ["mean-squared-error", "mean-absolute-error"]:
-            raise ValueError(
-                f"Unknown error_metric '{error_metric}'. Valid options are ['mean-squared-error', 'mean-absolute-error']"
-            )
 
         if not utils.is_valid_list(encoder_dimensions, int):
             raise TypeError("`encoder_dimensions` should be a list of integer")
@@ -140,7 +195,7 @@ class AutoEncoder(BaseNeuralDetector):
             raise TypeError("`activation_function` should be a string")
         if activation_function not in self._ACTIVATION_FUNCTIONS:
             raise ValueError(
-                f"Unknown `activation_function` '{error_metric}'. Valid options are {list(self._ACTIVATION_FUNCTIONS.keys())}"
+                f"Unknown `activation_function` '{activation_function}'. Valid options are {list(self._ACTIVATION_FUNCTIONS.keys())}"
             )
 
         if not isinstance(batch_normalization, bool):
@@ -151,7 +206,6 @@ class AutoEncoder(BaseNeuralDetector):
         if not 0.0 <= dropout_rate < 1.0:
             raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
 
-        self.error_metric = error_metric
         self.encoder_dimensions = encoder_dimensions
         self.latent_space_dimension = latent_space_dimension
         self.decoder_dimensions = decoder_dimensions
@@ -159,61 +213,10 @@ class AutoEncoder(BaseNeuralDetector):
         self.activation_function = activation_function
         self.batch_normalization = batch_normalization
 
-    def _build_dataset(self, X: np.ndarray) -> torch.utils.data.Dataset:
-        return ReconstructionDataset(
-            X=X,
-            window_size=self.window_size_,
-            stride=self.stride,
-            standard_scaling=self.standard_scaling,
-            device=self.device,
-        )
-
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
         return _AutoEncoderArchitecture(
             encoder=self._build_encoder(n_attributes * self.window_size_),
             decoder=self._build_decoder(n_attributes * self.window_size_),
-        )
-
-    def _train_batch(self, batch: list[torch.Tensor]) -> float:
-
-        # Set the type of the batch
-        data = batch[0].to(self.device).float()
-
-        # Initialize the gradients to zero
-        self.optimizer_.zero_grad()
-
-        # Feed the data to the neural network
-        reconstructed = self.neural_network_(data)
-
-        # Compute the loss
-        loss = self.loss_function(reconstructed, data)
-
-        # Compute the gradients of the loss
-        loss.backward()
-
-        # Update the weights of the neural network
-        self.optimizer_.step()
-
-        # Return the loss
-        return loss.item()
-
-    def _evaluate_batch(self, batch: list[torch.Tensor]) -> torch.Tensor:
-
-        # Set the type of the batch
-        data = batch[0].to(self.device).float()
-
-        # Reconstruct the batch
-        reconstructed = self.neural_network_(data)
-
-        # Compute the difference with the given data
-        if self.error_metric == "mean-squared-error":
-            return torch.mean((reconstructed - data) ** 2, dim=1)
-        if self.error_metric == "mean-absolute-error":
-            return torch.mean(torch.abs(reconstructed - data), dim=1)
-
-        # Raise an error if invalid metric is given
-        raise ValueError(
-            f"Unknown error_metric '{self.error_metric}'. Valid options are ['mean-squared-error', 'mean-absolute-error']"
         )
 
     def _build_encoder(self, input_size: int) -> torch.nn.Module:

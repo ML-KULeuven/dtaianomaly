@@ -15,8 +15,6 @@ jobs:
       matrix:
         notebook: [
           "Anomaly-detection.ipynb",
-          "Custom-models.ipynb",
-          "Quantitative-evaluation.ipynb",
         ]
 
     steps:

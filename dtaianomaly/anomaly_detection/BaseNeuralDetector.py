@@ -1,9 +1,8 @@
 import abc
-from typing import Literal, Optional
+from typing import Callable, Literal
 
 import numpy as np
 import torch
-from sklearn.preprocessing import scale
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
@@ -11,29 +10,96 @@ from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
     compute_window_size,
     reverse_sliding_window,
-    sliding_window,
 )
 
-_OPTIMIZER_TYPE = Literal["adam", "sgd", "adamgrad", "rmsprop"]
+_OPTIMIZER_TYPE = Literal["adam", "sgd"]
 _COMPILE_MODE_TYPE = Literal[
     "default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"
 ]
 _ACTIVATION_FUNCTION_TYPE = Literal["linear", "relu", "sigmoid", "tanh"]
+_MODEL_PARAMETERS_TYPE = any
+
+
+####################################################################
+# BASE NEURAL DETECTOR
+####################################################################
 
 
 class BaseNeuralDetector(BaseDetector, abc.ABC):
     """
-    Base class for neural networks. This class includes the functionality
-    for initializing models with pytorch, and includes the general configuration
-    of the neural networks such as preprocessing, data loading, optimizer, etc.
-    Essentially all the functionality except for the architecture.
+    Base class for neural anomaly detectors, based on PyTorch.
+
+    This class implements the main functionality for training a model and
+    detecting anomalies, including building the data loader, building the
+    optimizer, and implementing the main train and evaluation loops. Extensions
+    of this class should also implement methods to build the data set,
+    the neural architecture, and how to train and evaluate on a single batch.
+
+    Parameters
+    ----------
+    supervision: Supervision
+        The type of supervision this anomaly detector requires.
+    window_size: int or str
+        The window size to use for extracting sliding windows from the time series. This
+        value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
+    stride: int, default=1
+        The stride, i.e., the step size for extracting sliding windows from the time series.
+    standard_scaling: bool, default=True
+        Whether to standard scale each window independently, before feeding it to the network.
+    batch_size: int, default=32
+        The size of the batches to feed to the network.
+    data_loader_kwargs: dictionary, default=None
+        Additional kwargs to be passed to the data loader.
+        For more information, see: https://docs.pytorch.org/docs/stable/data.html
+    optimizer: {"adam", "sgd"} or callable default="adam"
+        The optimizer to use for learning the weights. If "adam" is given,
+        then the torch.optim.Adam optimizer will be used. If "sgd" is given,
+        then the torch.optim.SGD optimizer will be used. Otherwise, a callable
+        should be given, which takes as input the network parameters, and then
+        creates an optimizer.
+    learning_rate: float, default=1e-3
+        The learning rate to use for training the network. Has no effect
+        if optimize is a callable.
+    compile_model: bool, default=False
+        Whether the network architecture should be compiled or not before
+        training the weights.
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
+    compile_mode: {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
+        Method to compile the architecture.
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
+    n_epochs: int, default=10
+        The number of epochs for which the neural network should be trained.
+    loss_function: torch.nn.Module, default=torch.nn.MSELoss()
+        The loss function to use for updating the weights.
+    device: str, default="cpu"
+        The device on which te neural network should be trained.
+        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
+    seed: int, default=None
+        The seed used for training the model. This seed will update the torch
+        and numpy seed at the beginning of the fit method.
+
+    Attributes
+    ----------
+    window_size_: int
+        The effectively used window size for this anomaly detector.
+    optimizer_: torch.optim.Optimizer
+        The optimizer used for learning the weights of the network.
+    neural_network_: torch.nn.Module
+        The PyTorch network architecture.
+
+    See also
+    --------
+    BaseNeuralForecastingDetector: Use a neural network to forecast the time
+        series, and detect anomalies by measuring the difference with the
+        actual observations.
+    BaseNeuralReconstructionDetector: Use a neural network to reconstruct
+        windows in the time series, and detect anomalies as windows that
+        are incorrectly reconstructed.
     """
 
     _OPTIMIZERS: dict[_OPTIMIZER_TYPE, type[torch.optim.Optimizer]] = {
         "adam": torch.optim.Adam,
         "sgd": torch.optim.SGD,
-        "adagrad": torch.optim.Adagrad,
-        "rmsprop": torch.optim.RMSprop,
     }
     _ACTIVATION_FUNCTIONS: dict[_ACTIVATION_FUNCTION_TYPE, type[torch.nn.Module]] = {
         "linear": torch.nn.Identity,
@@ -50,9 +116,10 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
     batch_size: int
     data_loader_kwargs: dict[str, any] | None
     # Optimizer related parameters
-    optimizer: _OPTIMIZER_TYPE
+    optimizer: (
+        _OPTIMIZER_TYPE | Callable[[_MODEL_PARAMETERS_TYPE], torch.optim.Optimizer]
+    )
     learning_rate: float
-    optimizer_kwargs: dict[str, any] | None
     # Model compilation
     compile_model: bool
     compile_mode: _COMPILE_MODE_TYPE
@@ -66,24 +133,26 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
     # Learned parameters
     window_size_: int
     optimizer_: torch.optim.Optimizer
+    neural_network_: torch.nn.Module
 
     def __init__(
         self,
         supervision: Supervision,
         window_size: str | int,
-        stride: int,
-        standard_scaling: bool,
-        batch_size: int,
-        data_loader_kwargs: dict[str, any] | None,
-        optimizer: _OPTIMIZER_TYPE,
-        learning_rate: float,
-        optimizer_kwargs: dict[str, any] | None,
-        compile_model: bool,
-        compile_mode: _COMPILE_MODE_TYPE,
-        n_epochs: int,
-        loss_function: torch.nn.Module,
-        device: str,
-        seed: int | None,
+        stride: int = 1,
+        standard_scaling: bool = True,
+        batch_size: int = 32,
+        data_loader_kwargs: dict[str, any] = None,
+        optimizer: (
+            _OPTIMIZER_TYPE | Callable[[_MODEL_PARAMETERS_TYPE], torch.optim.Optimizer]
+        ) = "adam",
+        learning_rate: float = 1e-3,
+        compile_model: bool = False,
+        compile_mode: _COMPILE_MODE_TYPE = "default",
+        n_epochs: int = 10,
+        loss_function: torch.nn.Module = torch.nn.MSELoss(),
+        device: str = "cpu",
+        seed: int = None,
     ):
         super().__init__(supervision)
 
@@ -106,9 +175,9 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
                 raise TypeError("`data_loader_kwargs` should be a dictionary")
 
         # Check the optimizer related parameters
-        if not isinstance(optimizer, str):
-            raise TypeError("`optimizer` should be a string")
-        if optimizer not in self._OPTIMIZERS:
+        if not (isinstance(optimizer, str) or callable(optimizer)):
+            raise TypeError("`optimizer` should be a string or callable")
+        if optimizer not in self._OPTIMIZERS and not callable(optimizer):
             raise ValueError(
                 f"Invalid value for `optimizer` given: '{optimizer}'. Valid options are {list(self._OPTIMIZERS.keys())}"
             )
@@ -118,9 +187,6 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
             raise TypeError("`learning_rate` should be numerical")
         if learning_rate <= 0:
             raise ValueError("`learning_rate` should be strictly positive")
-        if optimizer_kwargs is not None:
-            if not isinstance(optimizer_kwargs, dict):
-                raise TypeError("`optimizer_kwargs` should be a dictionary")
 
         # Check the training related parameters
         if not isinstance(loss_function, torch.nn.Module):
@@ -172,7 +238,6 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         self.data_loader_kwargs = data_loader_kwargs
         self.optimizer = optimizer
         self.learning_rate = learning_rate
-        self.optimizer_kwargs = optimizer_kwargs
         self.loss_function = loss_function
         self.compile_model = compile_model
         self.compile_mode = compile_mode
@@ -228,15 +293,17 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
             f"Invalid activation function given: '{activation_function}'. Valid options are {list(BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys())}"
         )
 
-    def _build_optimizer(self, model_parameters) -> torch.optim.Optimizer:
+    def _build_optimizer(
+        self, model_parameters: _MODEL_PARAMETERS_TYPE
+    ) -> torch.optim.Optimizer:
+        if callable(self.optimizer):
+            return self.optimizer(model_parameters)
         if self.optimizer in self._OPTIMIZERS:
-            kwargs = (
-                {} if self.optimizer_kwargs is None else self.optimizer_kwargs.copy()
+            return self._OPTIMIZERS[self.optimizer](
+                model_parameters, lr=self.learning_rate
             )
-            kwargs["lr"] = self.learning_rate
-            return self._OPTIMIZERS[self.optimizer](model_parameters, **kwargs)
         raise ValueError(
-            f"Invalid optimizer given: '{self.optimizer}'. Value values are {list(self._OPTIMIZERS.keys())}"
+            f"Invalid optimizer given: '{self.optimizer}'. Value values are {list(self._OPTIMIZERS.keys())} or a callable."
         )
 
     def _train(self, data_loader: torch.utils.data.DataLoader) -> None:
@@ -284,7 +351,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         # Return the computed decision score
         return decision_scores
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         # Set the seed
         self._set_seed()
 
@@ -321,102 +388,3 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
 
         # Return the decision scores
         return decision_scores
-
-
-class TimeSeriesDataset(torch.utils.data.Dataset):
-
-    X: np.ndarray
-    window_size: int
-    stride: int
-    standard_scaling: bool
-    device: str
-
-    def __init__(
-        self,
-        X: np.ndarray,
-        window_size: int,
-        stride: int,
-        standard_scaling: bool,
-        device: str,
-    ):
-        self.X = X
-        self.window_size = window_size
-        self.stride = stride
-        self.standard_scaling = standard_scaling
-        self.device = device
-
-    def _scale(self, window: np.ndarray) -> np.ndarray:
-        if self.standard_scaling:
-            window = scale(window)
-        return window
-
-
-class ForecastDataset(TimeSeriesDataset):
-
-    forecast_length: int
-
-    def __init__(
-        self,
-        X: np.ndarray,
-        window_size: int,
-        stride: int,
-        standard_scaling: bool,
-        device: str,
-        forecast_length: int,
-    ):
-        super().__init__(X, window_size, stride, standard_scaling, device)
-        self.forecast_length = forecast_length
-
-    def __len__(self) -> int:
-        return (
-            int(
-                np.ceil(
-                    (self.X.shape[0] - self.forecast_length - self.window_size)
-                    / self.stride
-                )
-            )
-            + 1
-        )
-
-    def __getitem__(self, idx: int) -> list[torch.Tensor]:
-        # Find the indices
-        start = idx * self.stride
-        end = start + self.window_size + self.forecast_length
-
-        # Handle the last window
-        if end >= self.X.shape[0]:
-            end = self.X.shape[0]
-            start = end - self.window_size - self.forecast_length
-
-        # Retrieve the window
-        window = self._scale(self.X[start:end])
-
-        # Split in history and future
-        history = window[: self.window_size].reshape(-1)
-        future = window[-self.forecast_length :].reshape(-1)
-
-        # Return the data
-        return torch.Tensor(history).to(self.device), torch.Tensor(future).to(
-            self.device
-        )
-
-
-class ReconstructionDataset(TimeSeriesDataset):
-
-    def __len__(self) -> int:
-        return int(np.ceil((self.X.shape[0] - self.window_size) / self.stride)) + 1
-
-    def __getitem__(self, idx: int) -> list[torch.Tensor]:
-        start = idx * self.stride
-        end = start + self.window_size
-
-        # Handle the last window
-        if end >= self.X.shape[0]:
-            end = self.X.shape[0]
-            start = end - self.window_size
-
-        # Retrieve the window
-        window = self._scale(self.X[start:end]).reshape(-1)
-
-        # Return the data
-        return [torch.Tensor(window).to(self.device)]

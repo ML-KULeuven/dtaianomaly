@@ -1,8 +1,7 @@
 
 import pytest
-import numpy as np
 
-from dtaianomaly.anomaly_detection import MultilayerPerceptron, BaseNeuralDetector, Supervision, ForecastDataset
+from dtaianomaly.anomaly_detection import MultilayerPerceptron, BaseNeuralDetector, Supervision
 from conftest import (
     is_sequential,
     is_activation,
@@ -10,8 +9,6 @@ from conftest import (
     is_dropout,
     is_linear
 )
-
-_VALID_ERROR_METRICS = ["mean-absolute-error", "mean-squared-error"]
 
 
 class TestMultilayerPerceptron:
@@ -27,48 +24,18 @@ class TestMultilayerPerceptron:
 
 class TestInitialize:
 
-    @pytest.mark.parametrize('error_metric', _VALID_ERROR_METRICS)
-    def test_error_metric_valid(self, error_metric):
-        detector = MultilayerPerceptron(window_size=16, error_metric=error_metric)
-        assert detector.error_metric == error_metric
-
-    @pytest.mark.parametrize('error_metric', [32, 16.0, True])
-    def test_error_metric_invalid_type(self, error_metric):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, error_metric=error_metric)
-
-    @pytest.mark.parametrize('error_metric', ['invalid'])
-    def test_error_metric_invalid_value(self, error_metric):
-        with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, error_metric=error_metric)
-
-    @pytest.mark.parametrize('forecast_length', [32, 16, 8])
-    def test_forecast_length_valid(self, forecast_length):
-        detector = MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
-        assert detector.forecast_length == forecast_length
-
-    @pytest.mark.parametrize('forecast_length', ['32', 16.0, True])
-    def test_forecast_length_invalid_type(self, forecast_length):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
-
-    @pytest.mark.parametrize('forecast_length', [0, -1, -16])
-    def test_forecast_length_invalid_value(self, forecast_length):
-        with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
-
     @pytest.mark.parametrize('dimensions', [[32], [32, 16], [32, 16, 8], [8, 16, 32]])
-    def test_encoder_dimensions_valid(self, dimensions):
+    def test_hidden_layers_valid(self, dimensions):
         detector = MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
         assert detector.hidden_layers == dimensions
 
     @pytest.mark.parametrize('dimensions', [32, ['32', 16, 8]])
-    def test_encoder_dimensions_invalid_type(self, dimensions):
+    def test_hidden_layers_invalid_type(self, dimensions):
         with pytest.raises(TypeError):
             MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
 
     @pytest.mark.parametrize('dimensions', [[32, -16, 8]])
-    def test_encoder_dimensions_invalid_value(self, dimensions):
+    def test_hidden_layers_invalid_value(self, dimensions):
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
 
@@ -117,53 +84,6 @@ class TestInitialize:
         with pytest.raises(TypeError):
             MultilayerPerceptron(window_size='fft', batch_normalization=batch_normalization)
             
-
-class TestErrorMetric:
-
-    @pytest.mark.parametrize('error_metric', _VALID_ERROR_METRICS)
-    @pytest.mark.parametrize('forecast_length', [1, 4, 8])
-    def test(self, error_metric, forecast_length, univariate_time_series):
-        detector = MultilayerPerceptron(window_size=12, forecast_length=forecast_length, error_metric=error_metric, n_epochs=1)
-        detector.fit(univariate_time_series)
-        detector.decision_function(univariate_time_series)
-
-    @pytest.mark.parametrize('error_metric', _VALID_ERROR_METRICS)
-    @pytest.mark.parametrize('forecast_length', [1, 4, 8])
-    def test_multivariate(self, error_metric, forecast_length, multivariate_time_series):
-        detector = MultilayerPerceptron(window_size=12, forecast_length=forecast_length, error_metric=error_metric, n_epochs=1, data_loader_kwargs={'drop_last': True})
-        detector.fit(multivariate_time_series)
-        detector.decision_function(multivariate_time_series)
-
-    def test_update_after_initialization(self, univariate_time_series):
-        detector = MultilayerPerceptron(window_size=12, error_metric='mean-absolute-error', n_epochs=1)
-        detector.fit(univariate_time_series)
-
-        detector.error_metric = 'invalid'
-        with pytest.raises(ValueError):
-            detector.decision_function(univariate_time_series)
-
-
-class TestBuildDataset:
-
-    @pytest.mark.parametrize('seed', [0])
-    @pytest.mark.parametrize('window_size', [1, 8])
-    @pytest.mark.parametrize('forecast_length', [1, 4])
-    def test(self, seed, window_size, forecast_length):
-        rng = np.random.default_rng(seed)
-        t = rng.integers(100, 1000)
-        n = rng.integers(1, 10)
-        X = rng.uniform(size=(t, n))
-
-        detector = MultilayerPerceptron(window_size=window_size, forecast_length=forecast_length, standard_scaling=False)
-        detector.window_size_ = detector.window_size
-        dataset = detector._build_dataset(X)
-        assert isinstance(dataset, ForecastDataset)
-        assert len(dataset) == t - window_size - forecast_length + 1
-        for i in range(t - window_size - forecast_length + 1):
-            history, future = dataset[i]
-            assert np.allclose(history.numpy(), X[i:i+detector.window_size_].reshape(-1))
-            assert np.allclose(future.numpy(), X[i+detector.window_size_:i+detector.window_size_+detector.forecast_length].reshape(-1))
-
 
 class TestBuildArchitecture:
 

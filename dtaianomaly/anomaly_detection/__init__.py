@@ -11,8 +11,10 @@ for more information regarding detecting anomalies using ``dtaianomaly``.
 from .AutoEncoder import AutoEncoder
 from .BaseDetector import BaseDetector, Supervision, load_detector
 from .baselines import AlwaysAnomalous, AlwaysNormal, RandomDetector
-from .BaseNeuralDetector import (
-    BaseNeuralDetector,
+from .BaseNeuralDetector import BaseNeuralDetector
+from .BaseNeuralDetector_utils import (
+    BaseNeuralForecastingDetector,
+    BaseNeuralReconstructionDetector,
     ForecastDataset,
     ReconstructionDataset,
     TimeSeriesDataset,
@@ -80,4 +82,6 @@ __all__ = [
     "ForecastDataset",
     "ReconstructionDataset",
     "TimeSeriesDataset",
+    "BaseNeuralForecastingDetector",
+    "BaseNeuralReconstructionDetector",
 ]

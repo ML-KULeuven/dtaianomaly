@@ -18,10 +18,11 @@ and :py:class:`~dtaianomaly.workflow.Workflow` - as if it were a native part of 
 
 Below, we illustrate how you can implement your own
 (1) :ref:`anomaly detector <custom-anomaly-detector>`,
-(2) :ref:`dataloader <custom-dataloader>`,
-(3) :ref:`preprocessor <custom-preprocessor>`,
-(4) :ref:`thresholding <custom-thresholding>`, and
-(5) :ref:`evaluation <custom-evaluation>`.
+(2) :ref:`neural anomaly detector <custom-neural-anomaly-detector>`,
+(3) :ref:`dataloader <custom-dataloader>`,
+(4) :ref:`preprocessor <custom-preprocessor>`,
+(5) :ref:`thresholding <custom-thresholding>`, and
+(6) :ref:`evaluation <custom-evaluation>`.
 
 .. _custom-anomaly-detector:
 
@@ -30,16 +31,16 @@ Custom anomaly detector
 
 The core functionality of ``dtaianomaly`` - time series anomaly detection - is extended
 by implementing the :py:class:`~dtaianomaly.anomaly_detection.BaseDetector`. To achieve
-this, you need to implement the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()`,
-and :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()`
+this, you need to implement the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._fit()`,
+and :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._decision_function()`
 methods. Below, we implement an anomaly detector that detects anomalies when the distance
 between an observation and the mean value exceeds a specified number of standard deviations
-(also known as the `3-sigma rule <https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule>`_.
+(also known as the `3-sigma rule <https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule>`_).
 The methods have the following functionality:
 
-1. :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.fit()`: learn the mean and standard
+1. :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._fit()`: learn the mean and standard
    deviation of the training data. These values are stored in the attributes ``mean_`` and ``std_``.
-2. :py:func:`~dtaianomaly.anomaly_detection.BaseDetector.decision_function()`: compute the values
+2. :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._decision_function()`: compute the values
    that have distance larger than ``nb_sigmas`` times the learned standard deviation from the learned
    mean. These values are considered anomalies.
 
@@ -67,6 +68,59 @@ The methods have the following functionality:
     ...         return np.abs(X - self.mean_) > self.nb_sigmas * self.std_
     >>>
     >>> detector = NbSigmaAnomalyDetector()
+
+.. _custom-neural-anomaly-detector:
+
+Custom neural anomaly detector
+------------------------------
+
+While above API also allows to implement neural methods, ``dtaianomaly`` offers
+several approaches to simplify this process. Specifically, you can implement one
+of the following classes, depending on how you want your neural net to detect
+anomalies:
+
+1. :py:class:`~dtaianomaly.anomaly_detection.BaseNeuralForecastingDetector`: detect
+   anomalies by forecasting the data, and measuring the difference between the predicted
+   values and the actual observations. An example is :py:class:`~dtaianomaly.anomaly_detection.MultilayerPerceptron`.
+2. :py:class:`~dtaianomaly.anomaly_detection.BaseNeuralReconstructionDetector`: reconstruct
+   windows of the data, and the instances that are more difficult to reconstruct were not
+   seen in the data, and thus anomalies. An example is :py:class:`~dtaianomaly.anomaly_detection.AutoEncoder`.
+
+Whatever strategy you choose, you only need to implement the :py:class:`~dtaianomaly.anomaly_detection.BaseNeuralDetector._build_architecture()`
+function. This function receives the input dimension of the time series, and returns
+the architecture of your neural network as a ``torch.nn.Module``.
+
+Below code shows a very simple example of this: detect anomalies using a perceptron. We will
+train a perceptron to forecast the data and then measure the deviation, hence we will extend
+the :py:class:`~dtaianomaly.anomaly_detection.BaseNeuralForecastingDetector` class. Specifically,
+given a time series with :math:`D` attributes and a window size of :math:`w`, the input is a
+flattened :math:`(D \cdot w)`-array. If we want to forecast :math:`h` values in the future
+(i.e., the parameter ``forecast_length``), then the output of the perceptron is a
+:math:`(D \cdot h)`-array. The implementation is given below:
+
+.. doctest::
+
+    >>> import torch
+    >>> from dtaianomaly.anomaly_detection import BaseNeuralForecastingDetector
+    >>>
+    >>> class Perceptron(BaseNeuralForecastingDetector):
+    ...
+    ...    def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
+    ...        return torch.nn.Linear(
+    ...            in_features=n_attributes * self.window_size_,
+    ...           out_features=n_attributes * self.forecast_length
+    ...        )
+    >>>
+    >>> perceptron = Perceptron(window_size=16, forecast_length=1)
+
+If you want more flexibility over your network, you can also directly implement
+:py:class:`~dtaianomaly.anomaly_detection.BaseNeuralDetector`, in which you must
+also implement the creation of a ``torch.utils.data.DataSet`` and the evaluation
+and training on a single batch. It is also possible to further customize the training
+process by overwriting some of the already implemented methods, or by extending the
+:py:class:`~dtaianomaly.anomaly_detection.BaseDetector` and implement your network
+from scratch!
+
 
 .. _custom-dataloader:
 

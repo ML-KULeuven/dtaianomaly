@@ -10,9 +10,16 @@ Added
 ^^^^^
 - Implemented affiliation-based metrics.
 - Implemented range-based metrics.
+- Implemented ``BaseNeuralDetector``, ``BaseNeuralForecastingDetector`` and
+  ``BaseNeuralReconstructionDetector``, base classes for neural anomaly detectors.
+- Implemented ``MultilayerPerceptron`` anomaly detector.
+- Implemented ``AutoEncoder`` anomaly detector.
 
 Changed
 ^^^^^^^
+- Removed unnecessary notebooks (from ./notebooks), which were already
+  discussed in the documentation (under ./docs/getting_started/examples)
+  to avoid redundancy.
 
 Fixed
 ^^^^^
