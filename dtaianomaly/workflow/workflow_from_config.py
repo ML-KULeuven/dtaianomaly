@@ -418,6 +418,9 @@ def detector_entry(entry):
     elif detector_type == "AutoEncoder":
         return anomaly_detection.AutoEncoder(**entry_without_type)
 
+    elif detector_type == "MultilayerPerceptron":
+        return anomaly_detection.MultilayerPerceptron(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 
