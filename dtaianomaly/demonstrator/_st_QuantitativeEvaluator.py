@@ -14,7 +14,9 @@ class StQualitativeEvaluator:
         all_evaluation_metrics: List[Tuple[str, type]],
         default_evaluation_metric: Type[Metric],
     ):
-        self.default_evaluation_metric = default_evaluation_metric()  # TODO?
+        self.default_evaluation_metric = (
+            default_evaluation_metric()
+        )  # TODO? -> also with a config
         self.all_evaluation_metrics = all_evaluation_metrics
 
     def show_evaluation_metrics(self):

@@ -2,11 +2,11 @@ import streamlit as st
 
 from dtaianomaly.anomaly_detection import IsolationForest
 from dtaianomaly.data import DemonstrationTimeSeriesLoader
-from dtaianomaly.demonstrator._footer import footer
-from dtaianomaly.demonstrator._header import header
+from dtaianomaly.demonstrator._configuration import load_configuration
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetectorLoader
 from dtaianomaly.demonstrator._st_DataLoader import StDataLoader
 from dtaianomaly.demonstrator._st_QualitativeEvaluator import StQualitativeEvaluator
+from dtaianomaly.demonstrator._utils import error_no_detectors, write_code_lines
 from dtaianomaly.utils import all_classes
 
 ###################################################################
@@ -23,24 +23,23 @@ st.logo(
     link="https://github.com/ML-KULeuven/dtaianomaly",
     icon_image="https://raw.githubusercontent.com/ML-KULeuven/dtaianomaly/main/docs/logo/favicon.svg",
 )
-header()
-footer()
 
 
 ###################################################################
 # SESSION STATE CONFIGURATION
 ###################################################################
 
-
+if "configuration" not in st.session_state:
+    st.session_state.configuration = load_configuration()
 if "st_data_loader" not in st.session_state:
     st.session_state.st_data_loader = StDataLoader(
         all_data_loaders=all_classes("data-loader", return_names=True),
-        default_data_loader=DemonstrationTimeSeriesLoader(),
+        configuration=st.session_state.configuration["data-loader"],
     )
 if "st_anomaly_detector_loader" not in st.session_state:
     st.session_state.st_anomaly_detector_loader = StAnomalyDetectorLoader(
         all_anomaly_detectors=all_classes("anomaly-detector", return_names=True),
-        default_anomaly_detector=IsolationForest,
+        configuration=st.session_state.configuration["detector"],
     )
 if "loaded_detectors" not in st.session_state:
     st.session_state.loaded_detectors = [
@@ -52,29 +51,19 @@ if "loaded_detectors" not in st.session_state:
 
 
 ###################################################################
-# UTILITIES
+# INTRODUCTION
 ###################################################################
 
-
-def write_code_lines(lines):
-    if len(lines) == 0:
-        return
-    with st.expander("Show code for ``dtaianomaly``", icon="💻"):
-        st.code(body="\n".join(lines), language="python", line_numbers=True)
-
-
-###################################################################
-# APPLICATION
-###################################################################
-
-# Introduction
 st.title("Welcome to the ``dtaianomaly`` Demonstrator!")
 st.warning("**TODO** Write a short, general introduction", icon="✒️")
 st.warning(
     "**TODO** Maybe also include some general advertisement (i.e., KU Leuven, DTAI, M-group, our publication, ...?) -> in header/footer?"
 )
 
-# Data
+###################################################################
+# DATA LOADING
+###################################################################
+
 st.header("Time series data")
 st.warning("**TODO** Write a short introduction about loading data", icon="✒️")
 data_updated = st.session_state.st_data_loader.select_data_loader()
@@ -86,7 +75,10 @@ if data_updated:
     for detector in st.session_state.loaded_detectors:
         detector.fit_predict(st.session_state.st_data_loader.data_set)
 
-# Anomaly detection
+###################################################################
+# ANOMALY DETECTION
+###################################################################
+
 st.header("Anomaly detection")
 st.warning("**TODO** Write a short introduction about anomaly detection", icon="✒️")
 new_detector = st.session_state.st_anomaly_detector_loader.select_anomaly_detector()
@@ -95,19 +87,27 @@ if new_detector is not None:
     st.session_state.loaded_detectors.append(new_detector)
     new_detector.fit_predict(st.session_state.st_data_loader.data_set)
 
+if len(st.session_state.loaded_detectors) == 0:
+    error_no_detectors()
+
 for i, detector in enumerate(st.session_state.loaded_detectors):
     remove_detector = detector.show_anomaly_detector()
     if remove_detector:
         del st.session_state.loaded_detectors[i]
         st.rerun()  # To make sure that the detector is effectively removed
 
-# Numeric analysis
-st.header("Numerical analysis of the anomaly detectors")
-st.warning(
-    "**TODO** Write a short introduction", icon="✒️"
-)  # TODO probably similar to anomaly detectors?
+###################################################################
+# NUMERICAL ANALYSIS
+###################################################################
 
-# Visual analysis
+st.header("Numerical analysis of the anomaly detectors")
+st.warning("**TODO** Write a short introduction", icon="✒️")
+
+
+###################################################################
+# VISUAL ANALYSIS
+###################################################################
+
 st.header("Visual analysis of the anomaly scores")
 st.markdown(
     """

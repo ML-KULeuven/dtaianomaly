@@ -1,0 +1,26 @@
+{
+    "data-loader": {
+        "default": "DemonstrationTimeSeriesLoader",
+        "to-remove": []
+    },
+    "detector": {
+        "default": "IsolationForest",
+        "to-remove": [
+            "MultivariateDetector"
+        ],
+        "parameters": {
+            "required": {
+                "window_size": 64,
+                "neighborhood_size_before": 64
+            },
+            "optional": {
+                "window_size": {
+                    "type": "number_input",
+                    "min_value": 1,
+                    "step": 1,
+                    "value": 64
+                }
+            }
+        }
+    }
+}

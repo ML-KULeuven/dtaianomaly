@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import streamlit as st
 
+from dtaianomaly.anomaly_detection import Supervision
 from dtaianomaly.data import DataSet, LazyDataLoader, PathDataLoader
 from dtaianomaly.demonstrator._visualization import plot_data
 
@@ -17,15 +18,18 @@ class StDataLoader:
     def __init__(
         self,
         all_data_loaders: List[Tuple[str, type]],
-        default_data_loader: LazyDataLoader,
+        configuration: dict,
     ):
-        self.all_data_loaders = all_data_loaders
-        self.data_loader = default_data_loader
-        self.data_set = default_data_loader.load()
-        for i, (_, cls) in enumerate(all_data_loaders):
-            if cls == default_data_loader.__class__:
+        self.all_data_loaders = []
+        for i, (name, cls) in enumerate(all_data_loaders):
+            if name not in configuration["to-remove"]:
+                self.all_data_loaders.append((name, cls))
+            if name == configuration["default"]:
                 self.initial_index = i
-                break
+                self.data_loader = cls()
+                self.data_set = self.data_loader.load()
+
+        self.configuration = configuration
 
     def select_data_loader(self) -> bool:
         col_selection, col_configuration, col_button = st.columns([1, 0.5, 0.5])
@@ -105,11 +109,21 @@ class StDataLoader:
             st.plotly_chart(figs["test"], key="loaded-data-test")
 
     def get_code_lines(self) -> List[str]:
-        return [
+        code_lines = [
             f"from dtaianomaly.data import {self.data_loader.__class__.__name__}",
-            "from dtaianomaly.visualization import plot_demarcated_anomalies",
             f"data_loader = {self.data_loader}",
             "data_set = data_loader.load()",
-            "X, y = data_set.X_test, data_set.y_test",
-            "plot_demarcated_anomalies(X, y)",
         ]
+
+        # Add the train data, depending on the data
+        compatible_supervision = self.data_set.compatible_supervision()
+        if Supervision.SUPERVISED in compatible_supervision:
+            code_lines += ["X_train, y_train = data_set.X_train, data_set.y_train"]
+        elif Supervision.SEMI_SUPERVISED in compatible_supervision:
+            code_lines += ["X_train = data_set.X_train"]
+
+        # Add the test data
+        code_lines += ["X_test, y_test = data_set.X_test, data_set.y_test"]
+
+        # Return the code lines
+        return code_lines
