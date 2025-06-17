@@ -1,7 +1,6 @@
 import pandas as pd
 
-from data import DataSet
-from dtaianomaly.data import PathDataLoader
+from dtaianomaly.data import DataSet, PathDataLoader
 
 
 class TimeEvalDataLoader(PathDataLoader):

@@ -4,6 +4,7 @@ import streamlit as st
 
 from dtaianomaly.data import DataSet
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetector
+from dtaianomaly.demonstrator._utils import error_no_detectors
 from dtaianomaly.demonstrator._visualization import (
     plot_anomaly_scores,
     plot_detected_anomalies,
@@ -64,9 +65,9 @@ class StQualitativeEvaluator:
 
             Instead of just showing which observations are flagged as an anomaly, we divide the
             observations into three categories:
-            - **TP (True Positives):** the predicted anomalies that are actually anomalies.
-            - **FP (False Positives):** the predicted anomalies that are no real anomalies but normal!
-            - **FN (False Negatives):** the real anomalies that were not detected!
+            - **True Positives (TP):** the predicted anomalies that are actually anomalies.
+            - **False Positives (FP):** the predicted anomalies that are no real anomalies but normal!
+            - **False Negatives (FN):** the real anomalies that were not detected!
             """
         )
 
@@ -102,9 +103,9 @@ class StQualitativeEvaluator:
                 label_visibility="collapsed",
             )
 
-        # Optimize the threshold
-        with st.expander("Optimize the threshold", icon="🧮"):
-            st.warning("WIP", icon="💡")  # TODO
+        # # Optimize the threshold
+        # with st.expander("Optimize the threshold", icon="🧮"):
+        #     st.warning("WIP", icon="💡")  # TODO
 
         # Compute the binary decisions
         y_pred = FixedCutoff(cutoff=cutoff).threshold(
@@ -141,7 +142,7 @@ class StQualitativeEvaluator:
             if hasattr(anomaly_detector, "decision_function_")
         }
         if len(decision_functions) == 0:
-            st.error("There are no anomaly scors available to show!", icon="🚨")
+            error_no_detectors()
             return
 
         # Normalize the anomaly scores
