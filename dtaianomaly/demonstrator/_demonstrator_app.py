@@ -67,8 +67,8 @@ st.warning(
 st.header("Time series data")
 st.warning("**TODO** Write a short introduction about loading data", icon="✒️")
 data_updated = st.session_state.st_data_loader.select_data_loader()
-st.session_state.st_data_loader.show_data()
 write_code_lines(st.session_state.st_data_loader.get_code_lines())
+st.session_state.st_data_loader.show_data()
 
 # Retrain the anomaly detectors if the data was updated
 if data_updated:
@@ -81,6 +81,9 @@ if data_updated:
 
 st.header("Anomaly detection")
 st.warning("**TODO** Write a short introduction about anomaly detection", icon="✒️")
+st.warning(
+    "**TODO** Is this the best possible layout? Maybe we can do something similar as with the data loader?"
+)
 new_detector = st.session_state.st_anomaly_detector_loader.select_anomaly_detector()
 
 if new_detector is not None:
@@ -91,18 +94,15 @@ if len(st.session_state.loaded_detectors) == 0:
     error_no_detectors()
 
 for i, detector in enumerate(st.session_state.loaded_detectors):
-    remove_detector = detector.show_anomaly_detector()
+    updated_detector, remove_detector = detector.show_anomaly_detector()
+    write_code_lines(detector.get_code_lines())
+
     if remove_detector:
         del st.session_state.loaded_detectors[i]
         st.rerun()  # To make sure that the detector is effectively removed
 
-###################################################################
-# NUMERICAL ANALYSIS
-###################################################################
-
-st.header("Numerical analysis of the anomaly detectors")
-st.warning("**TODO** Write a short introduction", icon="✒️")
-
+    if updated_detector:
+        detector.fit_predict(st.session_state.st_data_loader.data_set)
 
 ###################################################################
 # VISUAL ANALYSIS
@@ -134,3 +134,13 @@ with tab_predicted_anomalies:
             st_anomaly_detectors=st.session_state.loaded_detectors,
         )
     )
+
+###################################################################
+# NUMERICAL ANALYSIS
+###################################################################
+
+st.header("Numerical analysis of the anomaly detectors")
+st.warning("**TODO** Write a short introduction", icon="✒️")
+st.warning(
+    "Do we want to select the evaluation metrics, or just show all? Selecting would be nice, but also more complex ... "
+)

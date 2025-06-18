@@ -6,7 +6,10 @@
     "detector": {
         "default": "IsolationForest",
         "to-remove": [
-            "MultivariateDetector"
+            "MultivariateDetector",
+            "AlwaysNormal",
+            "AlwaysAnomalous",
+            "RandomDetector"
         ],
         "parameters": {
             "required": {
@@ -15,10 +18,20 @@
             },
             "optional": {
                 "window_size": {
+                    "label": "Manual window size",
                     "type": "number_input",
                     "min_value": 1,
                     "step": 1,
-                    "value": 64
+                    "value": 64,
+                    "help": "The manually-set size of the sliding window."
+                },
+                "stride": {
+                    "label": "Stride",
+                    "type": "number_input",
+                    "min_value": 1,
+                    "step": 1,
+                    "value": 1,
+                    "help": "The stride of a sliding window is the number of steps the window moves forward each time."
                 }
             }
         }

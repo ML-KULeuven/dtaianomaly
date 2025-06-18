@@ -17,12 +17,14 @@ def write_code_lines(lines, use_expander: bool = True):
         st.code(body="\n".join(lines), language="python", line_numbers=True)
 
 
-def get_class_summary(cls):
+def get_class_summary(cls) -> str | None:
     doc = cls.__doc__
     if not doc:
         return None
     # Split by blank lines to get the first paragraph
     paragraphs = doc.split("\n\n")
+    if len(paragraphs) < 2:
+        return None
     return paragraphs[1] if paragraphs else doc
 
 
@@ -48,4 +50,4 @@ def get_parameters(cls):
         ):
             required_params.append(name)
 
-    return required_params, required_params
+    return params, required_params

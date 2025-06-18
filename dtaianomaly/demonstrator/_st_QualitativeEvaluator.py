@@ -127,7 +127,7 @@ class StQualitativeEvaluator:
             "from dtaianomaly.thresholding import FixedCutoff",
             "from dtaianomaly.visualization import plot_time_series_anomalies",
             f"y_pred_bin = FixedCutoff(cutoff={cutoff}).threshold(y_pred)",
-            "plot_time_series_anomalies(X, y, y_pred_bin)",
+            "plot_time_series_anomalies(X, y, y_pred_bin)",  # TODO X_test and X_train and ...
         ]
 
     @staticmethod

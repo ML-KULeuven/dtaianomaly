@@ -34,67 +34,154 @@ class StAnomalyDetector:
             }
         )
 
-    def show_anomaly_detector(self) -> bool:
-        # TODO maybe add a button to actually update the parameters (and refit), instead of continuously updating them?
-        #   Then also check if the detector actually changed, to avoid wasting resources
-        col_remove, col_detector = st.columns([1, 6], vertical_alignment="center")
+    def show_anomaly_detector(self) -> (bool, bool):
 
-        with col_detector.expander(f"{self.detector}"):
-            st.write(
-                get_class_summary(self.detector)
-            )  # TODO this could maybe be in some kind of nice box or highlight?
-            self.show_hyperparameters()
-            write_code_lines(self.get_code_lines(), use_expander=False)
+        # Save some space for the header
+        header = st.container()
 
-        remove_detector = col_remove.button(
-            label="Remove",
+        # Show an explanation of the detector
+        self.show_explanation()
+
+        # Select the hyperparameters, and update the detector if necessary
+        col_select_hyperparameters, col_update_hyperparameters, col3 = st.columns(3)
+        with col_select_hyperparameters.popover(
+            label="Configure", icon=":material/settings:", use_container_width=True
+        ):
+            hyperparameters = self.select_hyperparameters()
+        updated_hyperparameters = self.filter_updated_hyperparameters(hyperparameters)
+        do_update = (
+            col_update_hyperparameters.button(
+                label="Update hyperparameters",
+                key=f"update-hyperparameters-{self.counter}",
+                use_container_width=True,
+            )
+            and len(updated_hyperparameters) > 0
+        )
+        if do_update:
+            self.set_hyperparameters(updated_hyperparameters)
+
+        # Add a button to remove the detecor
+        remove_detector = col3.button(
+            label="Remove detector",
             icon="❌",
             key=f"remove_detector_{self.counter}",
             use_container_width=True,
         )
 
-        return remove_detector
+        # Update the header at the end, to make sure that the parameters are correctly formatted
+        header.markdown(f"##### {self.detector}")
 
-    def show_hyperparameters(self):
-        # Put the window size first
-        if "window_size" in self.parameters:
-            window_sizes = {
-                "Manual": "manual",
-                "Dominant Fourier Frequency": "fft",
-                "Highest Autocorrelation": "acf",
-                "Summary Statistics Subsequence": "suss",
-                "Multi-Window-Finder": "mwf",
-            }
-            index = 0
-            for i, window_size in enumerate(window_sizes.values()):
-                if self.detector.window_size == window_size:
-                    index = i
-            col1, col2 = st.columns(2)
-            option = col1.selectbox(
-                label="Window size",
-                options=window_sizes,
-                index=index,
-                key=f"window_size_select_{self.counter}",
-            )
-            value = col2.number_input(
-                label="Manual window size",
-                min_value=self.parameters["window_size"]["min_value"],
-                step=self.parameters["window_size"]["step"],
-                value=self.parameters["window_size"]["value"],
-                disabled=option != "Manual",
-                key=f"window_size_number_{self.counter}",
-            )
-            if option == "Manual":
-                self.detector.window_size = value
-            else:
-                self.detector.window_size = window_sizes[option]
+        return do_update, remove_detector
+
+    def show_explanation(self) -> None:
+        st.markdown(get_class_summary(self.detector))
+
+    def select_hyperparameters(self) -> dict[str, any]:
+
+        # Method for selecting the input widget
+        def _input_widget_hyperparameter(
+            **kwargs,
+        ) -> any:  # TODO add the parameters to the config
+            if config["type"] == "number_input":
+                return st.number_input(**kwargs)
+            elif config["type"] == "select_slider":
+                return st.select_slider(**kwargs)
+            elif config["type"] == "toggle":
+                return st.toggle(**kwargs)
+            elif config["type"] == "number_input":
+                return st.checkbox(**kwargs)
+            elif config["type"] == "number_input":
+                return st.pills(**kwargs)
+            elif config["type"] == "number_input":
+                return st.segmented_control(**kwargs)
+            elif config["type"] == "number_input":
+                return st.selectbox(**kwargs)
+
+        # A dictionary for the selected hyperparameters
+        selected_hyperparameters = {}
 
         # Add the other parameters
         for parameter, config in self.parameters.items():
-            if parameter == "window_size":
-                continue
 
-            # TODO
+            # Format the kwargs for the widget
+            input_widget_kwargs = {
+                key: value for key, value in config.items() if key != "type"
+            }
+            input_widget_kwargs["key"] = "-".join(
+                [parameter, str(self.counter), config["type"]]
+            )
+            if "label" not in input_widget_kwargs:
+                input_widget_kwargs["label"] = parameter
+
+            # For the window size, we add some additional logic
+            if parameter == "window_size":
+                window_size_options = [
+                    (
+                        "Manual",
+                        "Manual",
+                        "Manually set the window size to a specific size.",
+                    ),
+                    (
+                        "Dominant Fourier Frequency",
+                        "fft",
+                        "Use the window size which corresponds to the dominant frequency in the Fourier domain.",
+                    ),
+                    (
+                        "Highest Autocorrelation",
+                        "acf",
+                        "Use the window size which corresponds to maximum autocorrelation.",
+                    ),
+                    ("Summary Statistics Subsequence", "suss", "help suss"),  # TODO
+                    ("Multi-Window-Finder", "mwf", "help mwf"),  # TODO
+                ]
+                # Select the way in which the window size is computed
+                col_select, col_value = st.columns(2)
+                _, selected_window_size, _ = col_select.selectbox(
+                    label="Window size",
+                    options=window_size_options,
+                    format_func=lambda t: t[0],
+                    key=f"window_size_select_{self.counter}",
+                    help="\n".join(
+                        ["The used method for setting the window size:"]
+                        + [
+                            f"- **{full_name}:** {help_description}"
+                            for full_name, _, help_description in window_size_options
+                        ]
+                    ),
+                )
+                input_widget_kwargs["disabled"] = selected_window_size != "Manual"
+
+                # Select the manual window size
+                with col_value:
+                    selected_window_size_integer = _input_widget_hyperparameter(
+                        **input_widget_kwargs
+                    )
+
+                # Add the value to the dictionary of selected hyperparameters
+                if selected_window_size == "Manual":
+                    selected_hyperparameters[parameter] = selected_window_size_integer
+                else:
+                    selected_hyperparameters[parameter] = selected_window_size
+
+            else:
+                selected_hyperparameters[parameter] = _input_widget_hyperparameter(
+                    **input_widget_kwargs
+                )
+
+        return selected_hyperparameters
+
+    def filter_updated_hyperparameters(
+        self, hyperparameters: dict[str, any]
+    ) -> dict[str, any]:
+        return {
+            param: value
+            for param, value in hyperparameters.items()
+            if getattr(self.detector, param) != value
+        }
+
+    def set_hyperparameters(self, hyperparameters: dict[str, any]) -> None:
+        for param, value in hyperparameters.items():
+            setattr(self.detector, param, value)
 
     def fit_predict(self, data_set: DataSet):
         with st.spinner(f"Fitting {self.detector}"):
