@@ -115,15 +115,20 @@ class StDataLoader:
             "data_set = data_loader.load()",
         ]
 
-        # Add the train data, depending on the data
+        # Load the data arrays
         compatible_supervision = self.data_set.compatible_supervision()
         if Supervision.SUPERVISED in compatible_supervision:
-            code_lines += ["X_train, y_train = data_set.X_train, data_set.y_train"]
+            code_lines += [
+                "X_train, y_train = data_set.X_train, data_set.y_train",
+                "X_test, y_test = data_set.X_test, data_set.y_test",
+            ]
         elif Supervision.SEMI_SUPERVISED in compatible_supervision:
-            code_lines += ["X_train = data_set.X_train"]
-
-        # Add the test data
-        code_lines += ["X_test, y_test = data_set.X_test, data_set.y_test"]
+            code_lines += [
+                "X_train = data_set.X_train",
+                "X_test, y_test = data_set.X_test, data_set.y_test",
+            ]
+        else:
+            code_lines += ["X, y = data_set.X_test, data_set.y_test"]
 
         # Return the code lines
         return code_lines

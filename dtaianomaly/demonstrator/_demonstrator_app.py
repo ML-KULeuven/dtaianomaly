@@ -1,12 +1,19 @@
+import pandas as pd
 import streamlit as st
 
-from dtaianomaly.anomaly_detection import IsolationForest
-from dtaianomaly.data import DemonstrationTimeSeriesLoader
 from dtaianomaly.demonstrator._configuration import load_configuration
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetectorLoader
 from dtaianomaly.demonstrator._st_DataLoader import StDataLoader
 from dtaianomaly.demonstrator._st_QualitativeEvaluator import StQualitativeEvaluator
-from dtaianomaly.demonstrator._utils import error_no_detectors, write_code_lines
+from dtaianomaly.demonstrator._st_QuantitativeEvaluator import (
+    StEvaluationScores,
+    StQualitativeEvaluationLoader,
+)
+from dtaianomaly.demonstrator._utils import (
+    error_no_detectors,
+    error_no_metrics,
+    write_code_lines,
+)
 from dtaianomaly.utils import all_classes
 
 ###################################################################
@@ -42,13 +49,26 @@ if "st_anomaly_detector_loader" not in st.session_state:
         configuration=st.session_state.configuration["detector"],
     )
 if "loaded_detectors" not in st.session_state:
-    st.session_state.loaded_detectors = [
+    st.session_state.loaded_detectors = (
         st.session_state.st_anomaly_detector_loader.select_default_anomaly_detector()
-    ]
-    st.session_state.loaded_detectors[0].fit_predict(
-        st.session_state.st_data_loader.data_set
     )
-
+    for st_detector in st.session_state.loaded_detectors:
+        st_detector.fit_predict(st.session_state.st_data_loader.data_set)
+if "st_metric_loader" not in st.session_state:
+    st.session_state.st_metric_loader = StQualitativeEvaluationLoader(
+        all_metrics=all_classes("metric", return_names=True),
+        configuration=st.session_state.configuration["metric"],
+    )
+if "loaded_metrics" not in st.session_state:
+    st.session_state.loaded_metrics = (
+        st.session_state.st_metric_loader.select_default_metrics()
+    )
+if "st_evaluation_scores" not in st.session_state:
+    st.session_state.st_evaluation_scores = StEvaluationScores(
+        detectors=st.session_state.loaded_detectors,
+        metrics=st.session_state.loaded_metrics,
+        y_test=st.session_state.st_data_loader.data_set.y_test,
+    )
 
 ###################################################################
 # INTRODUCTION
@@ -74,6 +94,10 @@ st.session_state.st_data_loader.show_data()
 if data_updated:
     for detector in st.session_state.loaded_detectors:
         detector.fit_predict(st.session_state.st_data_loader.data_set)
+        for metric in st.session_state.loaded_metrics:
+            st.session_state.st_evaluation_scores.add(
+                detector, metric, st.session_state.st_data_loader.data_set.y_test
+            )
 
 ###################################################################
 # ANOMALY DETECTION
@@ -89,20 +113,30 @@ new_detector = st.session_state.st_anomaly_detector_loader.select_anomaly_detect
 if new_detector is not None:
     st.session_state.loaded_detectors.append(new_detector)
     new_detector.fit_predict(st.session_state.st_data_loader.data_set)
+    for metric in st.session_state.loaded_metrics:
+        st.session_state.st_evaluation_scores.add(
+            new_detector, metric, st.session_state.st_data_loader.data_set.y_test
+        )
 
 if len(st.session_state.loaded_detectors) == 0:
     error_no_detectors()
 
 for i, detector in enumerate(st.session_state.loaded_detectors):
-    updated_detector, remove_detector = detector.show_anomaly_detector()
-    write_code_lines(detector.get_code_lines())
+    updated_detector, remove_detector, old_detector = detector.show_anomaly_detector()
+    write_code_lines(detector.get_code_lines(st.session_state.st_data_loader.data_set))
 
     if remove_detector:
+        st.session_state.st_evaluation_scores.remove_detector(detector)
         del st.session_state.loaded_detectors[i]
         st.rerun()  # To make sure that the detector is effectively removed
 
     if updated_detector:
+        st.session_state.st_evaluation_scores.remove_detector(old_detector)
         detector.fit_predict(st.session_state.st_data_loader.data_set)
+        for metric in st.session_state.loaded_metrics:
+            st.session_state.st_evaluation_scores.add(
+                detector, metric, st.session_state.st_data_loader.data_set.y_test
+            )
 
 ###################################################################
 # VISUAL ANALYSIS
@@ -141,6 +175,38 @@ with tab_predicted_anomalies:
 
 st.header("Numerical analysis of the anomaly detectors")
 st.warning("**TODO** Write a short introduction", icon="✒️")
-st.warning(
-    "Do we want to select the evaluation metrics, or just show all? Selecting would be nice, but also more complex ... "
-)
+new_metric = st.session_state.st_metric_loader.select_metric()
+
+# Add a new metric
+if new_metric is not None:
+    st.session_state.loaded_metrics.append(new_metric)
+    for detector in st.session_state.loaded_detectors:
+        st.session_state.st_evaluation_scores.add(
+            detector, new_metric, st.session_state.st_data_loader.data_set.y_test
+        )
+
+# Cope with issues
+if len(st.session_state.loaded_detectors) == 0:
+    error_no_detectors()
+if len(st.session_state.loaded_metrics) == 0:
+    error_no_metrics()
+
+# Show all the metrics
+for i, metric in enumerate(st.session_state.loaded_metrics):
+    update_metric, remove_metric, old_name_metric = metric.show_metric()
+    write_code_lines(metric.get_code_lines(st.session_state.st_data_loader.data_set))
+
+    if remove_metric:
+        st.session_state.st_evaluation_scores.remove_metric(metric)
+        del st.session_state.loaded_metrics[i]
+        st.rerun()  # To make sure that the metric is effectively removed
+
+    if update_metric:
+        st.session_state.st_evaluation_scores.remove_metric(old_name_metric)
+        for detector in st.session_state.loaded_detectors:
+            st.session_state.st_evaluation_scores.add(
+                detector, metric, st.session_state.st_data_loader.data_set.y_test
+            )
+
+# Show the scores
+st.session_state.st_evaluation_scores.show_scores()
