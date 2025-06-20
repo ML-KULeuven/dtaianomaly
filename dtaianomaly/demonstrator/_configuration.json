@@ -33,6 +33,64 @@
                     "value": 1,
                     "help": "The stride of a sliding window is the number of steps the window moves forward each time."
                 }
+            },
+            "window_size_selection": {
+                "label": "Window size",
+                "options": [
+                    [
+                        "Manual",
+                        "Manual"
+                    ],
+                    [
+                        "Dominant Fourier Frequency",
+                        "fft"
+                    ],
+                    [
+                        "Highest Autocorrelation",
+                        "acf"
+                    ],
+                    [
+                        "Summary Statistics Subsequence",
+                        "suss"
+                    ],
+                    [
+                        "Multi-Window-Finder",
+                        "mwf"
+                    ]
+                ],
+                "help": "The used method for setting the window size. Options are:\n\n- **Manual:** Manually set the window size to a specific size.\n- **Dominant Fourier Frequency:** Use the window size which corresponds to the dominant frequency in the Fourier domain.\n- **Highest Autocorrelation:** Use the window size which corresponds to maximum autocorrelation.\n- **Summary Statistics Subsequence:** Find a window size such that the statics of that window are similar to those of the full time series. \n- **Multi-Window-Finder:** Find a window size such that the moving average is small. "
+            }
+        }
+    },
+    "metric": {
+        "default": [
+            "FBeta",
+            "AreaUnderROC",
+            "VolumeUnderROC"
+        ],
+        "to-remove": [
+            "BestThresholdMetric",
+            "ThresholdMetric"
+        ],
+        "parameters": {
+            "default_threshold": 0.9,
+            "required": {},
+            "optional": {
+                "cutoff": {
+                    "type": "slider",
+                    "help": "The cutoff for converting the anomaly scores to a binary prediction. The cutoff is done on the predicted anomaly scores after min-max scaling.",
+                    "min_value": 0.0,
+                    "max_value": 1.0,
+                    "step": 0.01
+                },
+                "beta": {
+                    "type": "number_input",
+                    "label": "Beta",
+                    "min_value": 0.0,
+                    "step": 0.01,
+                    "value": 1.0,
+                    "help": "The beta value... "
+                }
             }
         }
     }

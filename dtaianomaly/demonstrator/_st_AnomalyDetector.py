@@ -1,12 +1,20 @@
+import copy
+
 import numpy as np
 import streamlit as st
 
-from dtaianomaly.anomaly_detection import BaseDetector
+from dtaianomaly.anomaly_detection import (
+    BaseDetector,
+    Supervision,
+    check_is_valid_window_size,
+)
 from dtaianomaly.data import DataSet
 from dtaianomaly.demonstrator._utils import (
-    get_class_summary,
     get_parameters,
-    write_code_lines,
+    input_widget_hyperparameter,
+    show_class_summary,
+    show_small_header,
+    update_object,
 )
 
 
@@ -33,186 +41,166 @@ class StAnomalyDetector:
                 if key in required_parameters
             }
         )
+        if "window_size" in self.parameters:
+            self.parameters["window_size_selection"] = configuration[
+                "window_size_selection"
+            ]
 
-    def show_anomaly_detector(self) -> (bool, bool):
+    def show_anomaly_detector(self) -> (bool, bool, "StAnomalyDetector"):
+
+        old_detector = copy.deepcopy(self)
 
         # Save some space for the header
         header = st.container()
 
         # Show an explanation of the detector
-        self.show_explanation()
+        show_class_summary(self.detector)
 
         # Select the hyperparameters, and update the detector if necessary
-        col_select_hyperparameters, col_update_hyperparameters, col3 = st.columns(3)
+        col_select_hyperparameters, col_update_hyperparameters, remove_col = st.columns(
+            3
+        )
         with col_select_hyperparameters.popover(
             label="Configure", icon=":material/settings:", use_container_width=True
         ):
             hyperparameters = self.select_hyperparameters()
-        updated_hyperparameters = self.filter_updated_hyperparameters(hyperparameters)
-        do_update = (
-            col_update_hyperparameters.button(
-                label="Update hyperparameters",
-                key=f"update-hyperparameters-{self.counter}",
-                use_container_width=True,
-            )
-            and len(updated_hyperparameters) > 0
+
+        # Update the model if requested
+        do_update = col_update_hyperparameters.button(
+            label="Update hyperparameters",
+            key=f"update-detector-hyperparameters-{self.counter}",
+            use_container_width=True,
         )
         if do_update:
-            self.set_hyperparameters(updated_hyperparameters)
+            do_update = update_object(self.detector, hyperparameters)
 
         # Add a button to remove the detecor
-        remove_detector = col3.button(
+        remove_detector = remove_col.button(
             label="Remove detector",
             icon="❌",
             key=f"remove_detector_{self.counter}",
             use_container_width=True,
         )
 
-        # Update the header at the end, to make sure that the parameters are correctly formatted
-        header.markdown(f"##### {self.detector}")
+        with header:
+            show_small_header(self.detector)
 
-        return do_update, remove_detector
-
-    def show_explanation(self) -> None:
-        st.markdown(get_class_summary(self.detector))
+        return do_update, remove_detector, old_detector
 
     def select_hyperparameters(self) -> dict[str, any]:
-
-        # Method for selecting the input widget
-        def _input_widget_hyperparameter(
-            **kwargs,
-        ) -> any:  # TODO add the parameters to the config
-            if config["type"] == "number_input":
-                return st.number_input(**kwargs)
-            elif config["type"] == "select_slider":
-                return st.select_slider(**kwargs)
-            elif config["type"] == "toggle":
-                return st.toggle(**kwargs)
-            elif config["type"] == "number_input":
-                return st.checkbox(**kwargs)
-            elif config["type"] == "number_input":
-                return st.pills(**kwargs)
-            elif config["type"] == "number_input":
-                return st.segmented_control(**kwargs)
-            elif config["type"] == "number_input":
-                return st.selectbox(**kwargs)
 
         # A dictionary for the selected hyperparameters
         selected_hyperparameters = {}
 
         # Add the other parameters
         for parameter, config in self.parameters.items():
+            if parameter == "window_size_selection":
+                continue
 
             # Format the kwargs for the widget
             input_widget_kwargs = {
                 key: value for key, value in config.items() if key != "type"
             }
             input_widget_kwargs["key"] = "-".join(
-                [parameter, str(self.counter), config["type"]]
+                [parameter, str(self.counter), config["type"], "detector"]
             )
             if "label" not in input_widget_kwargs:
                 input_widget_kwargs["label"] = parameter
 
             # For the window size, we add some additional logic
             if parameter == "window_size":
-                window_size_options = [
-                    (
-                        "Manual",
-                        "Manual",
-                        "Manually set the window size to a specific size.",
-                    ),
-                    (
-                        "Dominant Fourier Frequency",
-                        "fft",
-                        "Use the window size which corresponds to the dominant frequency in the Fourier domain.",
-                    ),
-                    (
-                        "Highest Autocorrelation",
-                        "acf",
-                        "Use the window size which corresponds to maximum autocorrelation.",
-                    ),
-                    ("Summary Statistics Subsequence", "suss", "help suss"),  # TODO
-                    ("Multi-Window-Finder", "mwf", "help mwf"),  # TODO
-                ]
                 # Select the way in which the window size is computed
                 col_select, col_value = st.columns(2)
-                _, selected_window_size, _ = col_select.selectbox(
-                    label="Window size",
-                    options=window_size_options,
+                _, selected_window_size = col_select.selectbox(
                     format_func=lambda t: t[0],
                     key=f"window_size_select_{self.counter}",
-                    help="\n".join(
-                        ["The used method for setting the window size:"]
-                        + [
-                            f"- **{full_name}:** {help_description}"
-                            for full_name, _, help_description in window_size_options
-                        ]
-                    ),
+                    **self.parameters["window_size_selection"],
                 )
-                input_widget_kwargs["disabled"] = selected_window_size != "Manual"
+                try:
+                    check_is_valid_window_size(selected_window_size)
+                    valid_window_size = True
+                except:
+                    valid_window_size = False
+
+                input_widget_kwargs["disabled"] = valid_window_size
 
                 # Select the manual window size
                 with col_value:
-                    selected_window_size_integer = _input_widget_hyperparameter(
-                        **input_widget_kwargs
+                    selected_window_size_integer = input_widget_hyperparameter(
+                        config["type"], **input_widget_kwargs
                     )
 
                 # Add the value to the dictionary of selected hyperparameters
-                if selected_window_size == "Manual":
+                if not valid_window_size:
                     selected_hyperparameters[parameter] = selected_window_size_integer
                 else:
                     selected_hyperparameters[parameter] = selected_window_size
 
             else:
-                selected_hyperparameters[parameter] = _input_widget_hyperparameter(
-                    **input_widget_kwargs
+                selected_hyperparameters[parameter] = input_widget_hyperparameter(
+                    config["type"], **input_widget_kwargs
                 )
 
         return selected_hyperparameters
 
-    def filter_updated_hyperparameters(
-        self, hyperparameters: dict[str, any]
-    ) -> dict[str, any]:
-        return {
-            param: value
-            for param, value in hyperparameters.items()
-            if getattr(self.detector, param) != value
-        }
-
-    def set_hyperparameters(self, hyperparameters: dict[str, any]) -> None:
-        for param, value in hyperparameters.items():
-            setattr(self.detector, param, value)
-
     def fit_predict(self, data_set: DataSet):
+        # Check for compatibility
+        if not data_set.is_compatible(self.detector):
+            st.warning(
+                f"Anomaly detector {self.detector} is not compatible with the data!"
+            )
+            self.decision_function_ = np.zeros_like(data_set.y_test)
+            return
+
+        # Retrieve the correct data
+        if Supervision.SEMI_SUPERVISED in data_set.compatible_supervision():
+            X_train, y_train = data_set.X_train, data_set.y_train
+        else:
+            X_train, y_train = data_set.X_test, data_set.y_test
+
+        # Fit the detector
         with st.spinner(f"Fitting {self.detector}"):
-            self.detector.fit(
-                data_set.X_test, data_set.y_test
-            )  # TODO use train data if possible?
+            self.detector.fit(X_train, y_train)
+
+        # Compute the decision scores
         with st.spinner(f"Detecting anomalies with {self.detector}"):
             self.decision_function_ = self.detector.decision_function(data_set.X_test)
 
-    def get_code_lines(self) -> list[str]:
-        return [  # TODO depends on the detector and the dataset
+    def get_code_lines(self, data_set: DataSet) -> list[str]:
+
+        compatible_supervision = data_set.compatible_supervision()
+        if Supervision.SUPERVISED in compatible_supervision:
+            train_data = "X_train, y_train"
+            test_data = "X_test"
+        elif Supervision.SEMI_SUPERVISED in compatible_supervision:
+            train_data = "X_train"
+            test_data = "X_test"
+        else:
+            train_data = "X"
+            test_data = "X"
+
+        return [
             f"from dtaianomaly.anomaly_detection import {self.detector.__class__.__name__}",
-            f"detector = {self.detector}.fit(X_train)",  # TODO does not work if dataset is unsupervised (+ for supervised models add training labels y_train)
-            "y_pred = detector.predict_proba(X_test)",
+            f"detector = {self.detector}.fit({train_data})",
+            f"y_pred = detector.predict_proba({test_data})",
         ]
 
 
 class StAnomalyDetectorLoader:
 
     counter: int = 0
-    default_anomaly_detector: type[BaseDetector]
+    default_detectors: list[type[BaseDetector]]
     all_anomaly_detectors: list[(str, type[BaseDetector])]
     configuration: dict
 
     def __init__(self, all_anomaly_detectors: list[(str, type)], configuration: dict):
         self.all_anomaly_detectors = []
+        self.default_detectors = []
         for name, cls in all_anomaly_detectors:
             if name not in configuration["to-remove"]:
                 self.all_anomaly_detectors.append((name, cls))
-            if name == configuration["default"]:
-                self.default_anomaly_detector = cls
+            if name in configuration["default"] or name == configuration["default"]:
+                self.default_detectors.append(cls)
 
         self.configuration = configuration
 
@@ -231,8 +219,8 @@ class StAnomalyDetectorLoader:
         if button_clicked and selected_detector is not None:
             return self._load_detector(selected_detector[1])
 
-    def select_default_anomaly_detector(self) -> StAnomalyDetector:
-        return self._load_detector(self.default_anomaly_detector)
+    def select_default_anomaly_detector(self) -> list[StAnomalyDetector]:
+        return [self._load_detector(detector) for detector in self.default_detectors]
 
     def _load_detector(
         self, anomaly_detector: type[BaseDetector]

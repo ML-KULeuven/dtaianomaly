@@ -2,6 +2,7 @@ from typing import List
 
 import streamlit as st
 
+from dtaianomaly.anomaly_detection import Supervision
 from dtaianomaly.data import DataSet
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetector
 from dtaianomaly.demonstrator._utils import error_no_detectors
@@ -47,7 +48,7 @@ class StQualitativeEvaluator:
 
         return [
             "from dtaianomaly.visualization import plot_anomaly_scores",
-            "plot_anomaly_scores(X, y, y_pred)",
+            f"plot_anomaly_scores({StQualitativeEvaluator._get_used_data(data_set)}, y_pred)",
         ]
 
     @staticmethod
@@ -103,10 +104,6 @@ class StQualitativeEvaluator:
                 label_visibility="collapsed",
             )
 
-        # # Optimize the threshold
-        # with st.expander("Optimize the threshold", icon="🧮"):
-        #     st.warning("WIP", icon="💡")  # TODO
-
         # Compute the binary decisions
         y_pred = FixedCutoff(cutoff=cutoff).threshold(
             decision_functions[selected_detector]
@@ -123,12 +120,26 @@ class StQualitativeEvaluator:
             )
         )
 
+        # Load the data arrays
+        compatible_supervision = data_set.compatible_supervision()
+        if Supervision.SEMI_SUPERVISED in compatible_supervision:
+            ground_truth = "y_test"
+        else:
+            ground_truth = "y"
+
         return [
             "from dtaianomaly.thresholding import FixedCutoff",
             "from dtaianomaly.visualization import plot_time_series_anomalies",
             f"y_pred_bin = FixedCutoff(cutoff={cutoff}).threshold(y_pred)",
-            "plot_time_series_anomalies(X, y, y_pred_bin)",  # TODO X_test and X_train and ...
+            f"plot_time_series_anomalies({StQualitativeEvaluator._get_used_data(data_set)}, y_pred_bin)",
         ]
+
+    @staticmethod
+    def _get_used_data(data_set: DataSet) -> str:
+        if Supervision.SEMI_SUPERVISED in data_set.compatible_supervision():
+            return "y_test"
+        else:
+            return "y"
 
     @staticmethod
     def _get_decision_functions(
