@@ -1,0 +1,81 @@
+import json
+import pathlib
+import sys
+import warnings
+
+import torch
+from streamlit.web import cli as stcli
+
+from dtaianomaly.anomaly_detection import BaseDetector
+from dtaianomaly.data import LazyDataLoader
+from dtaianomaly.evaluation import Metric
+from dtaianomaly.workflow.utils import convert_to_list
+
+torch.classes.__path__ = []  # To avoid torch-warning
+
+
+def run(
+    custom_data_loaders: type[LazyDataLoader] | list[type[LazyDataLoader]] = None,
+    custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
+    custom_metrics: type[Metric] | list[type[Metric]] = None,
+):
+    # Retrieve the path of this file
+    path = pathlib.Path(__file__).parent
+
+    # Save the custom models
+    with open(path / "_custom_models.json", "w") as f:
+        custom_model_config = _custom_model_config(
+            custom_data_loaders=custom_data_loaders,
+            custom_anomaly_detectors=custom_anomaly_detectors,
+            custom_metrics=custom_metrics,
+        )
+        json.dump(custom_model_config, f)
+
+    # Run the applications
+    sys.argv = [
+        "streamlit",
+        "run",
+        path / "_demonstrator_app.py",
+    ]
+    sys.exit(stcli.main())
+
+
+def _custom_model_config(
+    custom_data_loaders: type[LazyDataLoader] | list[type[LazyDataLoader]] = None,
+    custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
+    custom_metrics: type[Metric] | list[type[Metric]] = None,
+) -> dict[str, list[str]]:
+
+    def _is_valid(cls: type) -> bool:
+        # In case the model is defined in __main__
+        if cls.__module__ == "__main__":
+            warnings.warn(
+                "Including a custom model in the demonstrator which is defined in the "
+                "same file from which the demonstrator is started leads to run-time issues."
+                "Please define these models in a separate .py file and import them into "
+                f"your main script. The model {cls.__qualname__} will be ignored."
+            )
+            return False
+        else:
+            return True
+
+    def _format(cls: type) -> str:
+        return f"{cls.__module__}.{cls.__qualname__}"
+
+    return {
+        "data_loaders": [
+            _format(data_loader)
+            for data_loader in convert_to_list(custom_data_loaders or [])
+            if _is_valid(data_loader)
+        ],
+        "anomaly_detectors": [
+            _format(anomaly_detector)
+            for anomaly_detector in convert_to_list(custom_anomaly_detectors or [])
+            if _is_valid(anomaly_detector)
+        ],
+        "metrics": [
+            _format(metric)
+            for metric in convert_to_list(custom_metrics or [])
+            if _is_valid(metric)
+        ],
+    }

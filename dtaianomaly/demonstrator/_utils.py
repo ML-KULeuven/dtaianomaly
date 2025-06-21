@@ -1,4 +1,7 @@
+import importlib
 import inspect
+import json
+import pathlib
 
 import streamlit as st
 
@@ -33,7 +36,9 @@ def get_class_summary(cls) -> str | None:
 
 
 def show_class_summary(cls) -> None:
-    st.markdown(get_class_summary(cls))
+    summary = get_class_summary(cls)
+    if summary is not None:
+        st.markdown(summary)
 
 
 def show_small_header(o) -> None:
@@ -111,3 +116,25 @@ def input_widget_hyperparameter(widget_type: str, **kwargs) -> any:
         return st.selectbox(**kwargs)
     elif widget_type == "slider":
         return st.slider(**kwargs)
+
+
+def load_custom_models():
+
+    def _load_cls(class_path: str) -> (str, type):
+        module_path, class_name = class_path.rsplit(".", 1)
+        module = importlib.import_module(module_path)
+        return class_name, getattr(module, class_name)
+
+    with open(pathlib.Path(__file__).parent / "_custom_models.json", "r") as f:
+        str_config = json.load(f)
+
+    return {
+        "data_loaders": [
+            _load_cls(data_loader) for data_loader in str_config["data_loaders"]
+        ],
+        "anomaly_detectors": [
+            _load_cls(anomaly_detector)
+            for anomaly_detector in str_config["anomaly_detectors"]
+        ],
+        "metrics": [_load_cls(metric) for metric in str_config["metrics"]],
+    }

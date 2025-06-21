@@ -12,7 +12,7 @@ def set_configuration(configuration: dict) -> None:
 
 
 def reset_configuration() -> None:
-    with open(f"{_current_path()}/_default_configuration.json", "r") as f:
+    with open(f"{_current_path()}/_configuration_default.json", "r") as f:
         set_configuration(json.load(f))
 
 

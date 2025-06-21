@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 
 from dtaianomaly.demonstrator._configuration import load_configuration
@@ -12,6 +11,7 @@ from dtaianomaly.demonstrator._st_QuantitativeEvaluator import (
 from dtaianomaly.demonstrator._utils import (
     error_no_detectors,
     error_no_metrics,
+    load_custom_models,
     write_code_lines,
 )
 from dtaianomaly.utils import all_classes
@@ -38,14 +38,18 @@ st.logo(
 
 if "configuration" not in st.session_state:
     st.session_state.configuration = load_configuration()
+if "custom_models" not in st.session_state:
+    st.session_state.custom_models = load_custom_models()
 if "st_data_loader" not in st.session_state:
     st.session_state.st_data_loader = StDataLoader(
-        all_data_loaders=all_classes("data-loader", return_names=True),
+        all_data_loaders=all_classes("data-loader", return_names=True)
+        + st.session_state.custom_models["data_loaders"],
         configuration=st.session_state.configuration["data-loader"],
     )
 if "st_anomaly_detector_loader" not in st.session_state:
     st.session_state.st_anomaly_detector_loader = StAnomalyDetectorLoader(
-        all_anomaly_detectors=all_classes("anomaly-detector", return_names=True),
+        all_anomaly_detectors=all_classes("anomaly-detector", return_names=True)
+        + st.session_state.custom_models["anomaly_detectors"],
         configuration=st.session_state.configuration["detector"],
     )
 if "loaded_detectors" not in st.session_state:
@@ -56,7 +60,8 @@ if "loaded_detectors" not in st.session_state:
         st_detector.fit_predict(st.session_state.st_data_loader.data_set)
 if "st_metric_loader" not in st.session_state:
     st.session_state.st_metric_loader = StQualitativeEvaluationLoader(
-        all_metrics=all_classes("metric", return_names=True),
+        all_metrics=all_classes("metric", return_names=True)
+        + st.session_state.custom_models["metrics"],
         configuration=st.session_state.configuration["metric"],
     )
 if "loaded_metrics" not in st.session_state:
@@ -69,6 +74,7 @@ if "st_evaluation_scores" not in st.session_state:
         metrics=st.session_state.loaded_metrics,
         y_test=st.session_state.st_data_loader.data_set.y_test,
     )
+
 
 ###################################################################
 # INTRODUCTION
