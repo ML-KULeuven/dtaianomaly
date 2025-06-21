@@ -1,11 +1,11 @@
 {
     "data-loader": {
         "default": "DemonstrationTimeSeriesLoader",
-        "to-remove": []
+        "exclude": []
     },
     "detector": {
         "default": "IsolationForest",
-        "to-remove": [
+        "exclude": [
             "MultivariateDetector",
             "AlwaysNormal",
             "AlwaysAnomalous",
@@ -53,7 +53,7 @@
             "AreaUnderROC",
             "VolumeUnderROC"
         ],
-        "to-remove": [
+        "exclude": [
             "BestThresholdMetric",
             "ThresholdMetric"
         ],

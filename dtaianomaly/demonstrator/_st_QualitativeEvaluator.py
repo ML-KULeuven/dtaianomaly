@@ -137,9 +137,9 @@ class StQualitativeEvaluator:
     @staticmethod
     def _get_used_data(data_set: DataSet) -> str:
         if Supervision.SEMI_SUPERVISED in data_set.compatible_supervision():
-            return "y_test"
+            return "X_test, y_test"
         else:
-            return "y"
+            return "X, y"
 
     @staticmethod
     def _get_decision_functions(

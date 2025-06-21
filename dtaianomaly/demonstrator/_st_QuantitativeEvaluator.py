@@ -146,7 +146,8 @@ class StMetric:
         if isinstance(self.thresholding, FixedCutoff):
             return [
                 f"from dtaianomaly.thresholding import {self.thresholding.__class__.__name__}",
-                f"from dtaianomaly.evaluation import {self.metric.__class__.__name__}, ThresholdMetric",
+                f"from dtaianomaly.evaluation import ThresholdMetric",
+                f"from {self.metric.__module__} import {self.metric.__class__.__name__}",
                 f"metric = ThresholdMetric(",
                 f"  thresholder={self.thresholding}",
                 f"  metric={self.metric}",
@@ -155,7 +156,7 @@ class StMetric:
             ]
         else:
             return [
-                f"from dtaianomaly.evaluation import {self.metric.__class__.__name__}",
+                f"from {self.metric.__module__}  import {self.metric.__class__.__name__}",
                 f"metric = {self.metric}",
                 f"score = metric.compute({ground_truth}, y_pred)",
             ]
@@ -172,10 +173,11 @@ class StQualitativeEvaluationLoader:
         self.all_metrics = []
         self.default_metrics = []
         for name, cls in all_metrics:
-            if name not in configuration["to-remove"]:
+            if name not in configuration["exclude"]:
                 self.all_metrics.append((name, cls))
             if name in configuration["default"] or name == configuration["default"]:
                 self.default_metrics.append(cls)
+        self.all_metrics = sorted(self.all_metrics, key=lambda x: x[0])
 
         self.configuration = configuration
 
@@ -236,6 +238,7 @@ class StEvaluationScores:
             ignore_index=False, var_name="Metric", value_name="value"
         )
         df_melted["x"] = df_melted.index
+
         fig = px.bar(df_melted, x="x", y="value", color="Metric", barmode="group")
         fig.update_layout(
             height=300, xaxis_title=None, yaxis_title=None, legend_title_text=None

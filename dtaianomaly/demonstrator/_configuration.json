@@ -1,11 +1,11 @@
 {
     "data-loader": {
         "default": "DemonstrationTimeSeriesLoader",
-        "to-remove": []
+        "exclude": []
     },
     "detector": {
         "default": "IsolationForest",
-        "to-remove": [
+        "exclude": [
             "MultivariateDetector",
             "AlwaysNormal",
             "AlwaysAnomalous",
@@ -68,7 +68,7 @@
             "AreaUnderROC",
             "VolumeUnderROC"
         ],
-        "to-remove": [
+        "exclude": [
             "BestThresholdMetric",
             "ThresholdMetric"
         ],
@@ -81,7 +81,8 @@
                     "help": "The cutoff for converting the anomaly scores to a binary prediction. The cutoff is done on the predicted anomaly scores after min-max scaling.",
                     "min_value": 0.0,
                     "max_value": 1.0,
-                    "step": 0.01
+                    "step": 0.01,
+                    "value": 0.9
                 },
                 "beta": {
                     "type": "number_input",

@@ -1,5 +1,4 @@
 import tempfile
-from typing import List, Tuple
 
 import streamlit as st
 
@@ -13,21 +12,29 @@ class StDataLoader:
     data_set: DataSet
     initial_index: int
     data_loader: LazyDataLoader
-    all_data_loaders: List[Tuple[str, type]]
+    all_data_loaders: list[(str, type[LazyDataLoader])]
 
     def __init__(
         self,
-        all_data_loaders: List[Tuple[str, type]],
+        all_data_loaders: list[(str, type[LazyDataLoader])],
         configuration: dict,
     ):
         self.all_data_loaders = []
-        for i, (name, cls) in enumerate(all_data_loaders):
-            if name not in configuration["to-remove"]:
+        for name, cls in all_data_loaders:
+            if name not in configuration["exclude"]:
                 self.all_data_loaders.append((name, cls))
+        self.all_data_loaders = sorted(self.all_data_loaders, key=lambda x: x[0])
+
+        # Get the index of the default detector
+        self.initial_index = 0
+        for i, (name, _) in enumerate(self.all_data_loaders):
             if name == configuration["default"]:
                 self.initial_index = i
-                self.data_loader = cls()
-                self.data_set = self.data_loader.load()
+                break
+
+        # Set-up the default data and data loader
+        self.data_loader = self.all_data_loaders[self.initial_index][1]()
+        self.data_set = self.data_loader.load()
 
         self.configuration = configuration
 
@@ -108,9 +115,9 @@ class StDataLoader:
         else:
             st.plotly_chart(figs["test"], key="loaded-data-test")
 
-    def get_code_lines(self) -> List[str]:
+    def get_code_lines(self) -> list[str]:
         code_lines = [
-            f"from dtaianomaly.data import {self.data_loader.__class__.__name__}",
+            f"from {self.data_loader.__module__} import {self.data_loader.__class__.__name__}",
             f"data_loader = {self.data_loader}",
             "data_set = data_loader.load()",
         ]

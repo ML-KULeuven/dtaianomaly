@@ -47,7 +47,6 @@ class StAnomalyDetector:
             ]
 
     def show_anomaly_detector(self) -> (bool, bool, "StAnomalyDetector"):
-
         old_detector = copy.deepcopy(self)
 
         # Save some space for the header
@@ -180,7 +179,7 @@ class StAnomalyDetector:
             test_data = "X"
 
         return [
-            f"from dtaianomaly.anomaly_detection import {self.detector.__class__.__name__}",
+            f"from {self.detector.__module__} import {self.detector.__class__.__name__}",
             f"detector = {self.detector}.fit({train_data})",
             f"y_pred = detector.predict_proba({test_data})",
         ]
@@ -193,15 +192,22 @@ class StAnomalyDetectorLoader:
     all_anomaly_detectors: list[(str, type[BaseDetector])]
     configuration: dict
 
-    def __init__(self, all_anomaly_detectors: list[(str, type)], configuration: dict):
+    def __init__(
+        self,
+        all_anomaly_detectors: list[(str, type[BaseDetector])],
+        configuration: dict,
+    ):
         self.all_anomaly_detectors = []
         self.default_detectors = []
         for name, cls in all_anomaly_detectors:
-            if name not in configuration["to-remove"]:
+            if name not in configuration["exclude"]:
                 self.all_anomaly_detectors.append((name, cls))
             if name in configuration["default"] or name == configuration["default"]:
                 self.default_detectors.append(cls)
 
+        self.all_anomaly_detectors = sorted(
+            self.all_anomaly_detectors, key=lambda x: x[0]
+        )
         self.configuration = configuration
 
     def select_anomaly_detector(self) -> StAnomalyDetector | None:
@@ -226,7 +232,9 @@ class StAnomalyDetectorLoader:
         self, anomaly_detector: type[BaseDetector]
     ) -> "StAnomalyDetector":
         st_anomaly_detector = StAnomalyDetector(
-            self.counter, anomaly_detector, self.configuration["parameters"]
+            counter=self.counter,
+            detector=anomaly_detector,
+            configuration=self.configuration["parameters"],
         )
         self.counter += 1
         return st_anomaly_detector
