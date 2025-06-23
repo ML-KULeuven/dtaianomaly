@@ -106,13 +106,13 @@ def input_widget_hyperparameter(widget_type: str, **kwargs) -> any:
         return st.select_slider(**kwargs)
     elif widget_type == "toggle":
         return st.toggle(**kwargs)
-    elif widget_type == "number_input":
+    elif widget_type == "checkbox":
         return st.checkbox(**kwargs)
-    elif widget_type == "number_input":
+    elif widget_type == "pills":
         return st.pills(**kwargs)
-    elif widget_type == "number_input":
+    elif widget_type == "segmented_control":
         return st.segmented_control(**kwargs)
-    elif widget_type == "number_input":
+    elif widget_type == "selectbox":
         return st.selectbox(**kwargs)
     elif widget_type == "slider":
         return st.slider(**kwargs)
