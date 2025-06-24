@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
 import numpy as np
+import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -95,9 +96,18 @@ def plot_anomaly_scores(
     )
 
     # Plot the anomaly scores
+    cmap = get_detector_color_map(anomaly_scores.keys())
     for name, score in anomaly_scores.items():
         fig.add_trace(
-            go.Scatter(x=time_steps, y=score, mode="lines", name=name), row=2, col=1
+            go.Scatter(
+                x=time_steps,
+                y=score,
+                mode="lines",
+                name=name,
+                line=dict(color=cmap[name]),
+            ),
+            row=2,
+            col=1,
         )
 
     return fig
@@ -170,3 +180,11 @@ def plot_detected_anomalies(
         )
 
     return fig
+
+
+def get_detector_color_map(detectors):
+    detectors = sorted(detectors)
+    colors = px.colors.qualitative.Safe
+    return {
+        detector: colors[j % len(detectors)] for j, detector in enumerate(detectors)
+    }

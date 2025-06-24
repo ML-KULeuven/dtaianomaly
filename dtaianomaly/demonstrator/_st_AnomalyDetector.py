@@ -212,6 +212,7 @@ class StAnomalyDetectorLoader:
 
     def select_anomaly_detector(self) -> StAnomalyDetector | None:
         col_selection, col_button = st.columns([3, 1])
+
         selected_detector = col_selection.selectbox(
             label="Select anomaly detector",
             options=self.all_anomaly_detectors,
@@ -219,6 +220,10 @@ class StAnomalyDetectorLoader:
             format_func=lambda t: t[0],
             label_visibility="collapsed",
         )
+
+        if selected_detector is not None:
+            show_class_summary(selected_detector[1])
+
         button_clicked = col_button.button(
             label="Load detector", use_container_width=True
         )

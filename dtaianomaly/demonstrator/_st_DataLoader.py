@@ -4,6 +4,7 @@ import streamlit as st
 
 from dtaianomaly.anomaly_detection import Supervision
 from dtaianomaly.data import DataSet, LazyDataLoader, PathDataLoader
+from dtaianomaly.demonstrator._utils import show_class_summary
 from dtaianomaly.demonstrator._visualization import plot_data
 
 
@@ -49,6 +50,9 @@ class StDataLoader:
             format_func=lambda t: t[0],
             label_visibility="collapsed",
         )
+
+        # Show the summary of the selected data loader
+        show_class_summary(data_loader_cls)
 
         # Configure the data loader
         # At this point, we only care about a loaders that use a file and no other parameters (as other ones don't exist as of now)

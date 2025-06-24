@@ -15,6 +15,7 @@ from dtaianomaly.demonstrator._utils import (
     show_small_header,
     update_object,
 )
+from dtaianomaly.demonstrator._visualization import get_detector_color_map
 from dtaianomaly.evaluation import Metric, ProbaMetric, ThresholdMetric
 from dtaianomaly.preprocessing import MinMaxScaler
 from dtaianomaly.thresholding import FixedCutoff
@@ -190,6 +191,10 @@ class StQualitativeEvaluationLoader:
             format_func=lambda t: t[0],
             label_visibility="collapsed",
         )
+
+        if selected_metric is not None:
+            show_class_summary(selected_metric[1])
+
         button_clicked = col_button.button(
             label="Load metric", use_container_width=True
         )
@@ -233,13 +238,23 @@ class StEvaluationScores:
 
     def show_scores(self) -> None:
 
+        # Define a color map
+        color_map = get_detector_color_map(self.scores.index)
+
         # Show the scores in a bar-plot
         df_melted = self.scores.T.melt(
             ignore_index=False, var_name="Metric", value_name="value"
         )
         df_melted["x"] = df_melted.index
 
-        fig = px.bar(df_melted, x="x", y="value", color="Metric", barmode="group")
+        fig = px.bar(
+            df_melted,
+            x="x",
+            y="value",
+            color="Metric",
+            barmode="group",
+            color_discrete_map=color_map,
+        )
         fig.update_layout(
             height=300, xaxis_title=None, yaxis_title=None, legend_title_text=None
         )

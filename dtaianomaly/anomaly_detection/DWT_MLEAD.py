@@ -49,7 +49,7 @@ class DWT_MLEAD(BaseDetector):
     -----
     The implementation is based on `aeon <https://github.com/aeon-toolkit/aeon/blob/main/aeon/anomaly_detection/distribution_based/_dwt_mlead.py>`_
     and `TimeEval <https://github.com/TimeEval/TimeEval-algorithms/blob/main/dwt_mlead/dwt_mlead.py>`_.
-    These made the following modifications compared to original paper [thill2017time]_:
+    These made the following modifications compared to original paper :cite:`thill2017time`:
 
     - We use window sizes for the DWT coefficients that decrease with the level number
       because otherwise we would have too few items to slide the window over.
