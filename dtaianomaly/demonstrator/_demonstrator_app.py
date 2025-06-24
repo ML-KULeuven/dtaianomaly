@@ -12,6 +12,7 @@ from dtaianomaly.demonstrator._utils import (
     error_no_detectors,
     error_no_metrics,
     load_custom_models,
+    show_section_description,
     write_code_lines,
 )
 from dtaianomaly.utils import all_classes
@@ -80,18 +81,36 @@ if "st_evaluation_scores" not in st.session_state:
 # INTRODUCTION
 ###################################################################
 
-st.title("Welcome to the ``dtaianomaly`` Demonstrator!")
-st.warning("**TODO** Write a short, general introduction", icon="✒️")
-st.warning(
-    "**TODO** Maybe also include some general advertisement (i.e., KU Leuven, DTAI, M-group, our publication, ...?) -> in header/footer?"
+st.title("Welcome to the ``dtaianomaly`` demonstrator!")
+show_section_description(
+    """
+    [``dtaianomaly``](https://github.com/ML-KULeuven/dtaianomaly) is an easy-to-use
+    Python package for time series anomaly detection, offering a simple interface to apply
+    state-of-the-art models. This demonstrator builds on ``dtaianomaly`` to let you detect
+    anomalies without writing any code, making it possible to quickly explore and compare
+    different models. Once you’ve identified suitable models for your data, you can switch
+    to Python for more in-depth validation. To help with this transition, code snippets are
+    provided throughout this demonstrator (marked with a 💻) and can be copy-pasted directly
+    in your code-base.
+    """
 )
+with st.expander("What is anomaly detection?", expanded=True, icon="💡"):
+    st.warning("**TODO** (and also set expanded=False)", icon="✒️")
+
 
 ###################################################################
 # DATA LOADING
 ###################################################################
 
 st.header("Time series data")
-st.warning("**TODO** Write a short introduction about loading data", icon="✒️")
+show_section_description(
+    """
+    To get started, load a time series into the demonstrator. You can either use one of
+    the built-in data loaders or upload your own data. The time series will be shown
+    immediately to help you understand its structure. Once you're familiar with the data,
+    you can begin detecting anomalies.
+    """
+)
 data_updated = st.session_state.st_data_loader.select_data_loader()
 write_code_lines(st.session_state.st_data_loader.get_code_lines())
 st.session_state.st_data_loader.show_data()
@@ -110,10 +129,17 @@ if data_updated:
 ###################################################################
 
 st.header("Anomaly detection")
-st.warning("**TODO** Write a short introduction about anomaly detection", icon="✒️")
-st.warning(
-    "**TODO** Is this the best possible layout? Maybe we can do something similar as with the data loader?"
+show_section_description(
+    """
+    Over the years, many anomaly detection models have been developed. Each of these
+    models detects anomalies in a different manner, based on different assumptions
+    of what constitutes to an anomaly. Below you can select and configure one or
+    more anomaly detectors to apply on the time series. All the hyperparameters are
+    filled in by default, but you can tune these in order to better detect the
+    anomalies or to analyze their effect on the performance.
+    """
 )
+
 new_detector = st.session_state.st_anomaly_detector_loader.select_anomaly_detector()
 
 if new_detector is not None:
@@ -149,7 +175,7 @@ for i, detector in enumerate(st.session_state.loaded_detectors):
 ###################################################################
 
 st.header("Visual analysis of the anomaly scores")
-st.markdown(
+show_section_description(
     """
     The advantage of time series is that they are inherently visual. Because of this,
     we can easily verify models by simply plotting the data and the predicted
@@ -180,7 +206,15 @@ with tab_predicted_anomalies:
 ###################################################################
 
 st.header("Numerical analysis of the anomaly detectors")
-st.warning("**TODO** Write a short introduction", icon="✒️")
+show_section_description(
+    """
+    While visual inspection gives a good idea of how well a model performs, it's often
+    useful to summarize performance with a single score, a task made easy by ``dtaianomaly``.
+    Below, you can choose various evaluation metrics, configure them to fit your application,
+    and quantitatively assess each anomaly detector. At the bottom, you'll find both the raw
+    scores of each metric and model, but also a bar plot for a quick comparison of model performance.
+    """
+)
 new_metric = st.session_state.st_metric_loader.select_metric()
 
 # Add a new metric
@@ -216,3 +250,35 @@ for i, metric in enumerate(st.session_state.loaded_metrics):
 
 # Show the scores
 st.session_state.st_evaluation_scores.show_scores()
+
+###################################################################
+# NUMERICAL ANALYSIS
+###################################################################
+
+st.header("Acknowledgements")
+st.write(
+    "If you find ``dtaianomaly`` or this demonstrator useful for your work, we would appreciate the following [citation](https://arxiv.org/abs/2502.14381):"
+)
+st.code(
+    """
+    @article{carpentier2025dtaianomaly,
+          title={{dtaianomaly: A Python library for time series anomaly detection}},
+          author={Louis Carpentier and Nick Seeuws and Wannes Meert and Mathias Verbeke},
+          year={2025},
+          eprint={2502.14381},
+          archivePrefix={arXiv},
+          primaryClass={cs.LG},
+          url={https://arxiv.org/abs/2502.14381},
+    }
+    """,
+    language="bibtex",
+)
+st.markdown(
+    "> Carpentier, L., Seeuws, N., Meert, W., Verbeke, M.: dtaianomaly: A Python library for time series anomaly detection (2025), https://arxiv.org/abs/2502.14381"
+)
+
+cols = st.columns(5, vertical_alignment="bottom")
+cols[1].image("https://upload.wikimedia.org/wikipedia/commons/4/49/KU_Leuven_logo.svg")
+cols[3].image(
+    "https://raw.githubusercontent.com/FHannes/dtai-logo/master/DTAI_Logo.svg"
+)

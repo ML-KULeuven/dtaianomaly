@@ -45,6 +45,10 @@ def show_small_header(o) -> None:
     st.markdown(f"##### {o}")
 
 
+def show_section_description(s) -> None:
+    st.markdown(s)
+
+
 def get_parameters(cls):
     signature = inspect.signature(cls.__init__)
     params = []
