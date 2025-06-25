@@ -27,7 +27,8 @@ dependencies = [
     "statsmodels>=0.6",
     "pyod>=2.0.0",
     "tslearn>=0.6.3",
-    "toml"
+    "toml",
+    "torch>=1.8.0",
 ]
 
 [project.readme]
@@ -43,6 +44,9 @@ repository = "https://github.com/ML-KULeuven/dtaianomaly"
 changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
+[project.scripts]
+run-demonstrator = "dtaianomaly.demonstrator:run"
+
 [build-system]
 requires = ["setuptools", "wheel", "build"]
 build-backend = "setuptools.build_meta"
@@ -50,6 +54,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additional*"]`
 namespaces = false
+
+[tool.setuptools.package-data]
+"dtaianomaly.demonstrator" = ["_configuration_default.json"]
 
 [project.optional-dependencies]
 all = [  # All the optional dependencies

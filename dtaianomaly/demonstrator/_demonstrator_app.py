@@ -111,6 +111,11 @@ with st.expander("What is anomaly detection?", expanded=False, icon="💡"):
         **Time series anomaly detection** is the task of automatically identifying these unexpected
         patterns. The automated detection of anomalies helps to maintain system health, to reduce
         downtime, and to improve reliability.
+
+        Typically, an anomaly detection model will compute continuous **anomaly scores**: a
+        numeric value for each observation in the time series which indicates how anomalous that
+        observation is. For anomalous measurements, the anomaly score will be large, while the
+        score will be small for normal observations.
         """
     )
 
