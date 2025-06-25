@@ -94,8 +94,25 @@ show_section_description(
     in your code-base.
     """
 )
-with st.expander("What is anomaly detection?", expanded=True, icon="💡"):
-    st.warning("**TODO** (and also set expanded=False)", icon="✒️")
+with st.expander("What is anomaly detection?", expanded=False, icon="💡"):
+    show_section_description(
+        """
+        A **time series** is an ordered sequence of observations measured over time.
+        For example, the CPU usage of a server recorded every minute. A time series
+        is **univariate** if it tracks only a single variable (e.g., just CPU usage), or
+        **multivariate** if it tracks 2 or more variables simultaneously (e.g., CPU usage,
+        memory load, network traffic, ...).
+
+        An **anomaly** in a time series is an observation or a sequence of observations that
+        deviate from the normal behavior, from the expected. For example, high CPU usage in
+        off-peak hours may indicate a security breach. Anomalies can signal system malfunctioning
+        or other critical issues that need to be resolved.
+
+        **Time series anomaly detection** is the task of automatically identifying these unexpected
+        patterns. The automated detection of anomalies helps to maintain system health, to reduce
+        downtime, and to improve reliability.
+        """
+    )
 
 
 ###################################################################
