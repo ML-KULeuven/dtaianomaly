@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 
 
@@ -19,3 +20,7 @@ def reset_configuration() -> None:
 def load_configuration() -> dict:
     with open(f"{_current_path()}/_configuration.json", "r") as f:
         return json.load(f)
+
+
+def configuration_exists() -> bool:
+    return os.path.isfile(f"{_current_path()}/_configuration.json")

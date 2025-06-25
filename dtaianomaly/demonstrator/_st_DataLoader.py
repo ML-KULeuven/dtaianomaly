@@ -120,8 +120,13 @@ class StDataLoader:
             st.plotly_chart(figs["test"], key="loaded-data-test")
 
     def get_code_lines(self) -> list[str]:
+
+        module = self.data_loader.__module__
+        if module.startswith("dtaianomaly.data."):
+            module = "dtaianomaly.data"
+
         code_lines = [
-            f"from {self.data_loader.__module__} import {self.data_loader.__class__.__name__}",
+            f"from {module} import {self.data_loader.__class__.__name__}",
             f"data_loader = {self.data_loader}",
             "data_set = data_loader.load()",
         ]

@@ -8,6 +8,10 @@ from streamlit.web import cli as stcli
 
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
+from dtaianomaly.demonstrator._configuration import (
+    configuration_exists,
+    reset_configuration,
+)
 from dtaianomaly.evaluation import Metric
 from dtaianomaly.workflow.utils import convert_to_list
 
@@ -19,8 +23,24 @@ def run(
     custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
     custom_metrics: type[Metric] | list[type[Metric]] = None,
 ):
+    """
+    Start up the demonstrator for ``dtaianomaly``.
+
+    Parameters
+    ----------
+    custom_data_loaders: LazyDataLoader object or list of LazyDataLoader objects, default=None
+        Additional data loaders which must be available within the demonstrator.
+    custom_anomaly_detectors: BaseDetector object or list of BaseDetector objects, default=None
+            Additional anomaly detectors which must be available within the demonstrator.
+    custom_metrics: Metric object or list of Metric objects, default=None
+            Additional evaluation metrics which must be available within the demonstrator.
+    """
     # Retrieve the path of this file
     path = pathlib.Path(__file__).parent
+
+    # Ensure that at least the default configuration is known
+    if not configuration_exists():
+        reset_configuration()
 
     # Save the custom models
     with open(path / "_custom_models.json", "w") as f:

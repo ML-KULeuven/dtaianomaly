@@ -34,7 +34,7 @@ class StMetric:
         parameters, required_parameters = get_parameters(metric)
         self.parameters = {
             key: value
-            for key, value in configuration["optional"].items()
+            for key, value in configuration["parameters-optional"].items()
             if key in parameters
         }
 
@@ -42,15 +42,17 @@ class StMetric:
         self.metric = metric(
             **{
                 key: value
-                for key, value in configuration["required"].items()
+                for key, value in configuration["parameters-required"].items()
                 if key in required_parameters
             }
         )
 
         # Initialize the thresholding if no proba metric is given
         if not issubclass(metric, ProbaMetric):
-            self.thresholding = FixedCutoff(configuration["default_threshold"])
-            self.parameters["cutoff"] = configuration["optional"]["cutoff"]
+            self.thresholding = FixedCutoff(
+                configuration["parameters-required"]["cutoff"]
+            )
+            self.parameters["cutoff"] = configuration["parameters-optional"]["cutoff"]
         else:
             self.thresholding = None
 
@@ -143,21 +145,39 @@ class StMetric:
         else:
             ground_truth = "y"
 
-        # Optional import of thresholding
-        if isinstance(self.thresholding, FixedCutoff):
-            return [
-                f"from dtaianomaly.thresholding import {self.thresholding.__class__.__name__}",
-                f"from dtaianomaly.evaluation import ThresholdMetric",
-                f"from {self.metric.__module__} import {self.metric.__class__.__name__}",
-                f"metric = ThresholdMetric(",
-                f"  thresholder={self.thresholding}",
-                f"  metric={self.metric}",
-                f")",
-                "score = metric.compute(y_test, y_pred)",
+        if self.metric.__module__.startswith("dtaianomaly.evaluation."):
+            imports = [
+                f"from dtaianomaly.evaluation import {self.metric.__class__.__name__}, ThresholdMetric"
             ]
         else:
+            imports = [
+                f"from dtaianomaly.evaluation import ThresholdMetric",
+                f"from {self.metric.__module__} import {self.metric.__class__.__name__}",
+            ]
+
+        # Optional import of thresholding
+        if isinstance(self.thresholding, FixedCutoff):
+            return (
+                [
+                    f"from dtaianomaly.thresholding import {self.thresholding.__class__.__name__}",
+                ]
+                + imports
+                + [
+                    f"metric = ThresholdMetric(",
+                    f"  thresholder={self.thresholding}",
+                    f"  metric={self.metric}",
+                    f")",
+                    "score = metric.compute(y_test, y_pred)",
+                ]
+            )
+        else:
+
+            module = self.metric.__module__
+            if module.startswith("dtaianomaly.evaluation."):
+                module = "dtaianomaly.evaluation"
+
             return [
-                f"from {self.metric.__module__}  import {self.metric.__class__.__name__}",
+                f"from {module}  import {self.metric.__class__.__name__}",
                 f"metric = {self.metric}",
                 f"score = metric.compute({ground_truth}, y_pred)",
             ]
@@ -211,7 +231,7 @@ class StQualitativeEvaluationLoader:
         st_metric = StMetric(
             counter=self.counter,
             metric=metric,
-            configuration=self.configuration["parameters"],
+            configuration=self.configuration,
         )
 
         # Update the counter and return the metric

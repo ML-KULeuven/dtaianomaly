@@ -31,20 +31,20 @@ class StAnomalyDetector:
         parameters, required_parameters = get_parameters(detector)
         self.parameters = {
             key: value
-            for key, value in configuration["optional"].items()
+            for key, value in configuration["parameters-optional"].items()
             if key in parameters
         }
         self.detector = detector(
             **{
                 key: value
-                for key, value in configuration["required"].items()
+                for key, value in configuration["parameters-required"].items()
                 if key in required_parameters
             }
         )
         if "window_size" in self.parameters:
             self.parameters["window_size_selection"] = configuration[
-                "window_size_selection"
-            ]
+                "parameters-optional"
+            ]["window_size_selection"]
 
     def show_anomaly_detector(self) -> (bool, bool, "StAnomalyDetector"):
         old_detector = copy.deepcopy(self)
@@ -178,8 +178,12 @@ class StAnomalyDetector:
             train_data = "X"
             test_data = "X"
 
+        module = self.detector.__module__
+        if module.startswith("dtaianomaly.anomaly_detection."):
+            module = "dtaianomaly.anomaly_detection"
+
         return [
-            f"from {self.detector.__module__} import {self.detector.__class__.__name__}",
+            f"from {module} import {self.detector.__class__.__name__}",
             f"detector = {self.detector}.fit({train_data})",
             f"y_pred = detector.predict_proba({test_data})",
         ]
@@ -239,7 +243,7 @@ class StAnomalyDetectorLoader:
         st_anomaly_detector = StAnomalyDetector(
             counter=self.counter,
             detector=anomaly_detector,
-            configuration=self.configuration["parameters"],
+            configuration=self.configuration,
         )
         self.counter += 1
         return st_anomaly_detector
