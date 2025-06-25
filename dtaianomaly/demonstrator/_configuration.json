@@ -1,11 +1,4 @@
 {
-    "acknowledgement-logos": {
-        "width": 200,
-        "paths": [
-            "https://upload.wikimedia.org/wikipedia/commons/4/49/KU_Leuven_logo.svg",
-            "https://raw.githubusercontent.com/FHannes/dtai-logo/master/DTAI_Logo.svg"
-        ]
-    },
     "data-loader": {
         "default": "DemonstrationTimeSeriesLoader",
         "exclude": []

@@ -64,7 +64,9 @@ all = [  # All the optional dependencies
     "pre-commit",
     "black",
     "isort",
-    'tqdm'
+    'tqdm',
+    "streamlit",
+    "plotly"
 ]
 tests = [  # For testing
     "pytest",
@@ -87,4 +89,8 @@ lint = [
     "pre-commit",
     "black",
     "isort"
+]
+demonstrator = [
+    "streamlit",
+    "plotly"
 ]
