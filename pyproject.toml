@@ -56,7 +56,7 @@ include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additi
 namespaces = false
 
 [tool.setuptools.package-data]
-"dtaianomaly.demonstrator" = ["_configuration_default.json"]
+"dtaianomaly.demonstrator" = ["_default_configuration.json"]
 
 [project.optional-dependencies]
 all = [  # All the optional dependencies
