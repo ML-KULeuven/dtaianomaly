@@ -1,4 +1,3 @@
-import json
 import pathlib
 import sys
 import warnings
@@ -91,14 +90,3 @@ def _custom_model_config(
             if _is_valid(metric)
         ],
     }
-
-
-def load_configuration(path: str = None) -> dict:
-    if path is None:
-        with open(
-            f"{pathlib.Path(__file__).parent}/_default_configuration.json", "r"
-        ) as f:
-            return json.load(f)
-    else:
-        with open(path, "r") as f:
-            return json.load(f)
