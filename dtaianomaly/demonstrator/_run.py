@@ -8,10 +8,6 @@ from streamlit.web import cli as stcli
 
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
-from dtaianomaly.demonstrator._configuration import (
-    configuration_exists,
-    reset_configuration,
-)
 from dtaianomaly.evaluation import Metric
 from dtaianomaly.workflow.utils import convert_to_list
 
@@ -19,6 +15,7 @@ torch.classes.__path__ = []  # To avoid torch-warning
 
 
 def run(
+    configuration_path: str = None,
     custom_data_loaders: type[LazyDataLoader] | list[type[LazyDataLoader]] = None,
     custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
     custom_metrics: type[Metric] | list[type[Metric]] = None,
@@ -28,6 +25,9 @@ def run(
 
     Parameters
     ----------
+    configuration_path: str, default=None
+        The path to the configuration file for the demonstrator. The configuration file
+        must be in a json format.
     custom_data_loaders: LazyDataLoader object or list of LazyDataLoader objects, default=None
         Additional data loaders which must be available within the demonstrator.
     custom_anomaly_detectors: BaseDetector object or list of BaseDetector objects, default=None
@@ -37,10 +37,6 @@ def run(
     """
     # Retrieve the path of this file
     path = pathlib.Path(__file__).parent
-
-    # Ensure that at least the default configuration is known
-    if not configuration_exists():
-        reset_configuration()
 
     # Save the custom models
     with open(path / "_custom_models.json", "w") as f:
@@ -56,6 +52,7 @@ def run(
         "streamlit",
         "run",
         path / "_demonstrator_app.py",
+        configuration_path or "default",
     ]
     sys.exit(stcli.main())
 
@@ -99,3 +96,14 @@ def _custom_model_config(
             if _is_valid(metric)
         ],
     }
+
+
+def load_configuration(path: str = None) -> dict:
+    if path is None:
+        with open(
+            f"{pathlib.Path(__file__).parent}/_default_configuration.json", "r"
+        ) as f:
+            return json.load(f)
+    else:
+        with open(path, "r") as f:
+            return json.load(f)

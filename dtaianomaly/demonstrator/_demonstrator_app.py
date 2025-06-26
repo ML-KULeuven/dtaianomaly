@@ -1,6 +1,10 @@
+import os.path
+import sys
+import warnings
+
 import streamlit as st
 
-from dtaianomaly.demonstrator._configuration import load_configuration
+from dtaianomaly.demonstrator._run import load_configuration
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetectorLoader
 from dtaianomaly.demonstrator._st_DataLoader import StDataLoader
 from dtaianomaly.demonstrator._st_QualitativeEvaluator import StQualitativeEvaluator
@@ -38,6 +42,15 @@ st.logo(
 ###################################################################
 
 if "configuration" not in st.session_state:
+    config_path = sys.argv[1]
+    if config_path == "default":
+        config = load_configuration()
+    elif not os.path.isfile(config_path):
+        warnings.warn(
+            f"The given configuration file does not exist: '{config_path}'. Using the default configuration."
+        )
+    else:
+        config = load_configuration(config_path)
     st.session_state.configuration = load_configuration()
 if "custom_models" not in st.session_state:
     st.session_state.custom_models = load_custom_models()

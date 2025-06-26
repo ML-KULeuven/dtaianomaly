@@ -96,8 +96,10 @@ Each of the three components has the following subitmes
   other items in the parameter configuration are passed to that specific
   component.
 
-you can manipulate the configuration through the following methods:
+To change the configuration, you can load the default configuration
+file using the :py:meth:`~dtaianomaly.demonstrator.load_configuration`
+method, but without providing any arguments. Then, you can adapt this
+file to your needs, save it locally, and pass the path to the
+:py:meth:`~dtaianomaly.demonstrator.run` method.
 
 .. autofunction:: dtaianomaly.demonstrator.load_configuration
-.. autofunction:: dtaianomaly.demonstrator.set_configuration
-.. autofunction:: dtaianomaly.demonstrator.reset_configuration
