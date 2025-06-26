@@ -53,7 +53,7 @@ if "configuration" not in st.session_state:
         config = load_configuration(config_path)
     st.session_state.configuration = load_configuration()
 if "custom_models" not in st.session_state:
-    st.session_state.custom_models = load_custom_models()
+    st.session_state.custom_models = load_custom_models(sys.argv[2])
 if "st_data_loader" not in st.session_state:
     st.session_state.st_data_loader = StDataLoader(
         all_data_loaders=all_classes("data-loader", return_names=True)

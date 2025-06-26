@@ -35,24 +35,19 @@ def run(
     custom_metrics: Metric object or list of Metric objects, default=None
             Additional evaluation metrics which must be available within the demonstrator.
     """
-    # Retrieve the path of this file
-    path = pathlib.Path(__file__).parent
-
-    # Save the custom models
-    with open(path / "_custom_models.json", "w") as f:
-        custom_model_config = _custom_model_config(
-            custom_data_loaders=custom_data_loaders,
-            custom_anomaly_detectors=custom_anomaly_detectors,
-            custom_metrics=custom_metrics,
-        )
-        json.dump(custom_model_config, f)
-
     # Run the applications
     sys.argv = [
         "streamlit",
         "run",
-        path / "_demonstrator_app.py",
+        pathlib.Path(__file__).parent / "_demonstrator_app.py",
         configuration_path or "default",
+        str(
+            _custom_model_config(
+                custom_data_loaders=custom_data_loaders,
+                custom_anomaly_detectors=custom_anomaly_detectors,
+                custom_metrics=custom_metrics,
+            )
+        ),
     ]
     sys.exit(stcli.main())
 
