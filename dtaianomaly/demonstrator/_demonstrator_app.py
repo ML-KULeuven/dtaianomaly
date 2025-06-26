@@ -4,7 +4,7 @@ import warnings
 
 import streamlit as st
 
-from dtaianomaly.demonstrator._run import load_configuration
+from dtaianomaly.demonstrator._configuration import load_configuration
 from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetectorLoader
 from dtaianomaly.demonstrator._st_DataLoader import StDataLoader
 from dtaianomaly.demonstrator._st_QualitativeEvaluator import StQualitativeEvaluator

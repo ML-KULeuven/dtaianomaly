@@ -54,9 +54,6 @@ build-backend = "setuptools.build_meta"
 include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additional*"]`
 namespaces = false
 
-[tool.setuptools.package-data]
-"dtaianomaly.demonstrator" = ["_default_configuration.json"]
-
 [project.optional-dependencies]
 all = [  # All the optional dependencies
     "sphinx",
