@@ -39,7 +39,7 @@ def run(
     sys.argv = [
         "streamlit",
         "run",
-        pathlib.Path(__file__).parent / "_demonstrator_app.py",
+        str(pathlib.Path(__file__).parent / "_demonstrator_app.py"),
         configuration_path or "default",
         str(
             _custom_model_config(
