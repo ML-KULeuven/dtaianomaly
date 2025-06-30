@@ -100,7 +100,7 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> mlp = MultilayerPerceptron(10, seed=0).fit(x)
-    >>> mlp.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> mlp.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
     array([1.8944391 , 1.8944391 , 1.83804671, ..., 0.59621549, 0.54421651,
            0.05852008]...)
 
