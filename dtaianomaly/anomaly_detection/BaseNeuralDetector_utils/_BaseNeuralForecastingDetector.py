@@ -187,7 +187,7 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
         history, future = batch
 
         # Forecast the data
-        forecast = self.neural_network_(history)
+        forecast = self.neural_network_(history).reshape(future.shape)
 
         # Compute the difference with the given data
         if self.error_metric == "mean-squared-error":
