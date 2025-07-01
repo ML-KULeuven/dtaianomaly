@@ -83,5 +83,5 @@ class TestBuildDataset:
         assert len(dataset) == t - window_size - forecast_length + 1
         for i in range(t - window_size - forecast_length + 1):
             history, future = dataset[i]
-            assert np.allclose(history.numpy(), X[i:i + detector.window_size_].reshape(-1))
-            assert np.allclose(future.numpy(), X[i + detector.window_size_:i + detector.window_size_ + detector.forecast_length].reshape(-1))
+            assert np.allclose(history.numpy(), X[i:i + detector.window_size_])
+            assert np.allclose(future.numpy(), X[i + detector.window_size_:i + detector.window_size_ + detector.forecast_length])

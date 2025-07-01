@@ -72,8 +72,8 @@ class ForecastDataset(TimeSeriesDataset):
         window = self._scale(self.X[start:end])
 
         # Split in history and future
-        history = window[: self.window_size].reshape(-1)
-        future = window[-self.forecast_length :].reshape(-1)
+        history = window[: self.window_size]
+        future = window[-self.forecast_length :]
 
         # Return the data
         return [
@@ -97,7 +97,7 @@ class ReconstructionDataset(TimeSeriesDataset):
             start = end - self.window_size
 
         # Retrieve the window
-        window = self._scale(self.X[start:end]).reshape(-1)
+        window = self._scale(self.X[start:end])
 
         # Return the data
         return [torch.Tensor(window).to(self.device)]

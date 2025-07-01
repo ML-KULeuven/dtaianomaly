@@ -180,9 +180,13 @@ class BaseNeuralReconstructionDetector(BaseNeuralDetector, abc.ABC):
 
         # Compute the difference with the given data
         if self.error_metric == "mean-squared-error":
-            return torch.mean((reconstructed - data) ** 2, dim=1)
+            return torch.mean(
+                (reconstructed - data) ** 2, dim=tuple(range(1, reconstructed.ndim))
+            )
         if self.error_metric == "mean-absolute-error":
-            return torch.mean(torch.abs(reconstructed - data), dim=1)
+            return torch.mean(
+                torch.abs(reconstructed - data), dim=tuple(range(1, reconstructed.ndim))
+            )
 
         # Raise an error if invalid metric is given
         raise ValueError(

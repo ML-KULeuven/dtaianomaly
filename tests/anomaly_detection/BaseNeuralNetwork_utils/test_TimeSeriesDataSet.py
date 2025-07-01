@@ -28,14 +28,14 @@ class TestForecastDataset:
             1
         )
         assert len(dataset) == 4
-        assert np.array_equal(dataset[0][0], [1, 1, 2, 2])
-        assert np.array_equal(dataset[0][1], [3, 3])
-        assert np.array_equal(dataset[1][0], [2, 2, 3, 3])
-        assert np.array_equal(dataset[1][1], [4, 4])
-        assert np.array_equal(dataset[2][0], [3, 3, 4, 4])
-        assert np.array_equal(dataset[2][1], [5, 5])
-        assert np.array_equal(dataset[3][0], [4, 4, 5, 5])
-        assert np.array_equal(dataset[3][1], [6, 6])
+        assert np.array_equal(dataset[0][0], [[1, 1], [2, 2]])
+        assert np.array_equal(dataset[0][1], [[3, 3]])
+        assert np.array_equal(dataset[1][0], [[2, 2], [3, 3]])
+        assert np.array_equal(dataset[1][1], [[4, 4]])
+        assert np.array_equal(dataset[2][0], [[3, 3], [4, 4]])
+        assert np.array_equal(dataset[2][1], [[5, 5]])
+        assert np.array_equal(dataset[3][0], [[4, 4], [5, 5]])
+        assert np.array_equal(dataset[3][1], [[6, 6]])
 
     def test_stride_2(self):
         dataset = ForecastDataset(
@@ -151,8 +151,8 @@ class TestForecastDataset:
         )
         assert len(dataset) == 2
         for i in range(2):
-            assert np.allclose(dataset[i][0], [-1.22474487, -0.88900089, 0, 1.3970014])
-            assert np.allclose(dataset[i][1], [1.22474487, -0.50800051])
+            assert np.allclose(dataset[i][0], [[-1.22474487, -0.88900089], [0, 1.3970014]])
+            assert np.allclose(dataset[i][1], [[1.22474487, -0.50800051]])
 
     def test_forecast_length(self):
         dataset = ForecastDataset(
@@ -187,10 +187,10 @@ class TestReconstructionDataset:
             False, 'cpu',
         )
         assert len(dataset) == 4
-        assert np.array_equal(dataset[0][0], [1, 1, 2, 2, 3, 3])
-        assert np.array_equal(dataset[1][0], [2, 2, 3, 3, 4, 4])
-        assert np.array_equal(dataset[2][0], [3, 3, 4, 4, 5, 5])
-        assert np.array_equal(dataset[3][0], [4, 4, 5, 5, 6, 6])
+        assert np.array_equal(dataset[0][0], [[1, 1], [2, 2], [3, 3]])
+        assert np.array_equal(dataset[1][0], [[2, 2], [3, 3], [4, 4]])
+        assert np.array_equal(dataset[2][0], [[3, 3], [4, 4], [5, 5]])
+        assert np.array_equal(dataset[3][0], [[4, 4], [5, 5], [6, 6]])
 
     def test_stride_2(self):
         dataset = ReconstructionDataset(
@@ -261,5 +261,5 @@ class TestReconstructionDataset:
         )
         assert len(dataset) == 2
         for i in range(2):
-            assert np.allclose(dataset[i][0], [-1.22474487, -0.88900089, 0, 1.3970014, 1.22474487, -0.50800051])
+            assert np.allclose(dataset[i][0], [[-1.22474487, -0.88900089], [0, 1.3970014], [1.22474487, -0.50800051]])
 

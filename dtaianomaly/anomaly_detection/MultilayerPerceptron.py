@@ -189,12 +189,13 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         self.batch_normalization = batch_normalization
 
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
+        # Initialize the MLP
+        mlp = torch.nn.Sequential()
+        mlp.add_module("flatten", torch.nn.Flatten())
+
         # Initialize layer inputs and outputs
         inputs = [n_attributes * self.window_size_, *self.hidden_layers]
         outputs = [*self.hidden_layers, n_attributes * self.forecast_length]
-
-        # Initialize the encoder
-        mlp = torch.nn.Sequential()
 
         # Add all the layers
         for i in range(len(inputs)):
@@ -215,6 +216,11 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             # Add the dropout layer
             if self.dropout_rate > 0 and i < len(inputs) - 1:
                 mlp.add_module(f"dropout-{i}", torch.nn.Dropout(self.dropout_rate))
+
+        # Restore the dimensions of the window
+        mlp.add_module(
+            "unflatten", torch.nn.Unflatten(1, (self.forecast_length, n_attributes))
+        )
 
         # Return the encoder
         return mlp

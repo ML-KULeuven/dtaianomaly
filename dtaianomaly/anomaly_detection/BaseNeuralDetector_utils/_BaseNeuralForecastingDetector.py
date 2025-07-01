@@ -167,7 +167,7 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
         self.optimizer_.zero_grad()
 
         # Feed the data to the neural network
-        forecast = self.neural_network_(history)
+        forecast = self.neural_network_(history).reshape(future.shape)
 
         # Compute the loss
         loss = self.loss_function(forecast, future)
@@ -191,9 +191,13 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
 
         # Compute the difference with the given data
         if self.error_metric == "mean-squared-error":
-            return torch.mean((forecast - future) ** 2, dim=1)
+            return torch.mean(
+                (forecast - future) ** 2, dim=tuple(range(1, forecast.ndim))
+            )
         if self.error_metric == "mean-absolute-error":
-            return torch.mean(torch.abs(forecast - future), dim=1)
+            return torch.mean(
+                torch.abs(forecast - future), dim=tuple(range(1, forecast.ndim))
+            )
 
         # Raise an error if invalid metric is given
         raise ValueError(

@@ -215,18 +215,19 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
 
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
         return _AutoEncoderArchitecture(
-            encoder=self._build_encoder(n_attributes * self.window_size_),
-            decoder=self._build_decoder(n_attributes * self.window_size_),
+            encoder=self._build_encoder(n_attributes),
+            decoder=self._build_decoder(n_attributes),
         )
 
-    def _build_encoder(self, input_size: int) -> torch.nn.Module:
-
-        # Initialize layer inputs and outputs
-        inputs = [input_size, *self.encoder_dimensions]
-        outputs = [*self.encoder_dimensions, self.latent_space_dimension]
+    def _build_encoder(self, n_attributes: int) -> torch.nn.Module:
 
         # Initialize the encoder
         encoder = torch.nn.Sequential()
+        encoder.add_module("flatten", torch.nn.Flatten())
+
+        # Initialize layer inputs and outputs
+        inputs = [n_attributes * self.window_size_, *self.encoder_dimensions]
+        outputs = [*self.encoder_dimensions, self.latent_space_dimension]
 
         # Add all the layers
         for i in range(len(inputs)):
@@ -251,14 +252,14 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
         # Return the encoder
         return encoder
 
-    def _build_decoder(self, input_size: int) -> torch.nn.Module:
-
-        # Initialize layer inputs and outputs
-        inputs = [self.latent_space_dimension, *self.decoder_dimensions]
-        outputs = [*self.decoder_dimensions, input_size]
+    def _build_decoder(self, n_attributes: int) -> torch.nn.Module:
 
         # Initialize the decoder
         decoder = torch.nn.Sequential()
+
+        # Initialize layer inputs and outputs
+        inputs = [self.latent_space_dimension, *self.decoder_dimensions]
+        outputs = [*self.decoder_dimensions, n_attributes * self.window_size_]
 
         # Add all the layers
         for i in range(len(inputs)):
@@ -280,6 +281,11 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
             if self.dropout_rate > 0 and i < len(inputs) - 1:
                 decoder.add_module(f"dropout-{i}", torch.nn.Dropout(self.dropout_rate))
 
+        # Restore the dimensions of the window
+        decoder.add_module(
+            "unflatten", torch.nn.Unflatten(1, (self.window_size_, n_attributes))
+        )
+
         # Return the decoder
         return decoder
 
@@ -295,4 +301,4 @@ class _AutoEncoderArchitecture(torch.nn.Module):
         self.decoder = decoder
 
     def forward(self, x):
-        return self.decoder(self.encoder(x))
+        return self.decoder(self.encoder(x)).reshape(x.shape)

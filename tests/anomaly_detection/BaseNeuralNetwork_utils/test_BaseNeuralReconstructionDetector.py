@@ -64,4 +64,4 @@ class TestBuildDataset:
         assert isinstance(dataset, ReconstructionDataset)
         assert len(dataset) == t - window_size + 1
         for i in range(t - window_size + 1):
-            assert np.allclose(dataset[i][0].numpy(), X[i:i + detector.window_size_].reshape(-1))
+            assert np.allclose(dataset[i][0].numpy(), X[i:i + detector.window_size_])

@@ -27,3 +27,13 @@ def is_dropout(module, p):
     if isinstance(module, torch.nn.Dropout):
         return module.p == p
     return False
+
+
+def is_flatten(module):
+    return isinstance(module, torch.nn.Flatten)
+
+
+def is_un_flatten(module):
+    if isinstance(module, torch.nn.Unflatten):
+        return True
+    return False

@@ -8,7 +8,9 @@ from conftest import (
     is_activation,
     is_batch_normalization,
     is_dropout,
-    is_linear
+    is_linear,
+    is_flatten,
+    is_un_flatten
 )
 
 
@@ -126,6 +128,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -145,6 +148,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -169,6 +174,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         dimensions = [128, *encoder_dimensions, 8]
         for d, d_ in zip(dimensions[:-1], dimensions[1:]):
@@ -182,6 +188,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -198,6 +206,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -217,6 +226,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -241,6 +252,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -255,6 +267,8 @@ class TestBuildArchitecture:
             assert is_linear(next(modules), d, d_)
             assert is_activation(next(modules), 'relu')
 
+        assert is_un_flatten(next(modules))
+
         with pytest.raises(StopIteration):
             next(modules)
 
@@ -268,6 +282,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -285,6 +300,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -301,6 +318,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), activation_function)
@@ -320,6 +338,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), activation_function)
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -336,6 +356,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -355,6 +376,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
@@ -370,6 +393,7 @@ class TestBuildArchitecture:
         assert isinstance(next(modules), _AutoEncoderArchitecture)
 
         assert is_sequential(next(modules))  # Encoder
+        assert is_flatten(next(modules))
 
         assert is_linear(next(modules), 128, 64)
         assert is_activation(next(modules), 'relu')
@@ -386,6 +410,8 @@ class TestBuildArchitecture:
 
         assert is_linear(next(modules), 64, 128)
         assert is_activation(next(modules), 'relu')
+
+        assert is_un_flatten(next(modules))
 
         with pytest.raises(StopIteration):
             next(modules)
