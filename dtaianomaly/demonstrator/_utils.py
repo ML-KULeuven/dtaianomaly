@@ -140,4 +140,7 @@ def load_custom_models(custom_models_str: str) -> dict[str, list[(str, type)]]:
             for anomaly_detector in custom_models["anomaly_detectors"]
         ],
         "metrics": [_load_cls(metric) for metric in custom_models["metrics"]],
+        "custom_visualizers": [
+            _load_cls(visualizer) for visualizer in custom_models["custom_visualizers"]
+        ],
     }

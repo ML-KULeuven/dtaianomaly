@@ -56,14 +56,20 @@ if "custom_models" not in st.session_state:
     st.session_state.custom_models = load_custom_models(sys.argv[2])
 if "st_data_loader" not in st.session_state:
     st.session_state.st_data_loader = StDataLoader(
-        all_data_loaders=all_classes("data-loader", return_names=True)
+        all_data_loaders=all_classes(type_filter="data-loader", return_names=True)
         + st.session_state.custom_models["data_loaders"],
         configuration=st.session_state.configuration["data-loader"],
     )
 if "st_anomaly_detector_loader" not in st.session_state:
     st.session_state.st_anomaly_detector_loader = StAnomalyDetectorLoader(
-        all_anomaly_detectors=all_classes("anomaly-detector", return_names=True)
+        all_anomaly_detectors=all_classes(
+            type_filter="anomaly-detector", return_names=True
+        )
         + st.session_state.custom_models["anomaly_detectors"],
+        all_custom_detector_visualizers=all_classes(
+            type_filter="custom-demonstrator-visualizers", return_names=True
+        )
+        + st.session_state.custom_models["custom_visualizers"],
         configuration=st.session_state.configuration["detector"],
     )
 if "loaded_detectors" not in st.session_state:
@@ -74,7 +80,7 @@ if "loaded_detectors" not in st.session_state:
         st_detector.fit_predict(st.session_state.st_data_loader.data_set)
 if "st_metric_loader" not in st.session_state:
     st.session_state.st_metric_loader = StQualitativeEvaluationLoader(
-        all_metrics=all_classes("metric", return_names=True)
+        all_metrics=all_classes(type_filter="metric", return_names=True)
         + st.session_state.custom_models["metrics"],
         configuration=st.session_state.configuration["metric"],
     )
@@ -190,7 +196,6 @@ if len(st.session_state.loaded_detectors) == 0:
 
 for i, detector in enumerate(st.session_state.loaded_detectors):
     updated_detector, remove_detector, old_detector = detector.show_anomaly_detector()
-    write_code_lines(detector.get_code_lines(st.session_state.st_data_loader.data_set))
 
     if remove_detector:
         st.session_state.st_evaluation_scores.remove_detector(detector)
@@ -204,6 +209,10 @@ for i, detector in enumerate(st.session_state.loaded_detectors):
             st.session_state.st_evaluation_scores.add(
                 detector, metric, st.session_state.st_data_loader.data_set.y_test
             )
+
+    detector.show_custom_visualizations()
+    write_code_lines(detector.get_code_lines(st.session_state.st_data_loader.data_set))
+
 
 ###################################################################
 # VISUAL ANALYSIS

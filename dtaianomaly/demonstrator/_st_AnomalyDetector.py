@@ -16,6 +16,7 @@ from dtaianomaly.demonstrator._utils import (
     show_small_header,
     update_object,
 )
+from dtaianomaly.demonstrator.CustomDetectorVisualizer import CustomDetectorVisualizer
 
 
 class StAnomalyDetector:
@@ -23,10 +24,18 @@ class StAnomalyDetector:
     counter: int
     detector: BaseDetector
     parameters: dict
+    custom_visualizers: list[CustomDetectorVisualizer]
     decision_function_: np.array
 
-    def __init__(self, counter: int, detector: type[BaseDetector], configuration: dict):
+    def __init__(
+        self,
+        counter: int,
+        detector: type[BaseDetector],
+        custom_visualizers: list[CustomDetectorVisualizer],
+        configuration: dict,
+    ):
         self.counter = counter
+        self.custom_visualizers = custom_visualizers
 
         parameters, required_parameters = get_parameters(detector)
         self.parameters = {
@@ -188,17 +197,25 @@ class StAnomalyDetector:
             f"y_pred = detector.predict_proba({test_data})",
         ]
 
+    def show_custom_visualizations(self):
+        # Show the custom visualizations
+        for visualizer in self.custom_visualizers:
+            with st.expander(label=visualizer.name, icon=visualizer.icon):
+                visualizer.show_custom_visualization(self.detector)
+
 
 class StAnomalyDetectorLoader:
 
     counter: int = 0
     default_detectors: list[type[BaseDetector]]
     all_anomaly_detectors: list[(str, type[BaseDetector])]
+    all_custom_detector_visualizers: list[CustomDetectorVisualizer]
     configuration: dict
 
     def __init__(
         self,
         all_anomaly_detectors: list[(str, type[BaseDetector])],
+        all_custom_detector_visualizers: list[(str, type[CustomDetectorVisualizer])],
         configuration: dict,
     ):
         self.all_anomaly_detectors = []
@@ -212,6 +229,10 @@ class StAnomalyDetectorLoader:
         self.all_anomaly_detectors = sorted(
             self.all_anomaly_detectors, key=lambda x: x[0]
         )
+
+        self.all_custom_detector_visualizers = [
+            visualizer() for _, visualizer in all_custom_detector_visualizers
+        ]
         self.configuration = configuration
 
     def select_anomaly_detector(self) -> StAnomalyDetector | None:
@@ -243,6 +264,11 @@ class StAnomalyDetectorLoader:
         st_anomaly_detector = StAnomalyDetector(
             counter=self.counter,
             detector=anomaly_detector,
+            custom_visualizers=[
+                visualizer
+                for visualizer in self.all_custom_detector_visualizers
+                if visualizer.is_compatible(anomaly_detector)
+            ],
             configuration=self.configuration,
         )
         self.counter += 1
