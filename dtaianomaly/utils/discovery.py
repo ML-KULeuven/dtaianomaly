@@ -88,24 +88,33 @@ def _is_abstract(cls):
 def _has_valid_type(cls: type):
     from dtaianomaly.anomaly_detection import BaseDetector
     from dtaianomaly.data import LazyDataLoader
+    from dtaianomaly.demonstrator import CustomDetectorVisualizer
     from dtaianomaly.evaluation import Metric
     from dtaianomaly.preprocessing import Preprocessor
     from dtaianomaly.thresholding import Thresholding
 
     return any(
         issubclass(cls, v)
-        for v in [BaseDetector, LazyDataLoader, Metric, Preprocessor, Thresholding]
+        for v in [
+            BaseDetector,
+            LazyDataLoader,
+            Metric,
+            Preprocessor,
+            Thresholding,
+            CustomDetectorVisualizer,
+        ]
     )
 
 
 def _filter_types(
     types: Union[str, type, List[str], List[type]], classes: List[Tuple[str, type]]
 ):
-    from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
-    from dtaianomaly.data.LazyDataLoader import LazyDataLoader
-    from dtaianomaly.evaluation.metrics import BinaryMetric, Metric, ProbaMetric
-    from dtaianomaly.preprocessing.Preprocessor import Preprocessor
-    from dtaianomaly.thresholding.thresholding import Thresholding
+    from dtaianomaly.anomaly_detection import BaseDetector
+    from dtaianomaly.data import LazyDataLoader
+    from dtaianomaly.demonstrator import CustomDetectorVisualizer
+    from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric
+    from dtaianomaly.preprocessing import Preprocessor
+    from dtaianomaly.thresholding import Thresholding
 
     _TYPE_FILTERS = {
         "anomaly-detector": BaseDetector,
@@ -115,6 +124,7 @@ def _filter_types(
         "proba-metric": ProbaMetric,
         "preprocessor": Preprocessor,
         "thresholder": Thresholding,
+        "custom-demonstrator-visualizers": CustomDetectorVisualizer,
     }
 
     if not isinstance(types, list):

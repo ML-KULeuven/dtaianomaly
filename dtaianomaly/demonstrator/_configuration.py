@@ -31,7 +31,12 @@ def load_default_configuration() -> dict:
                         ["Summary Statistics Subsequence", "suss"],
                         ["Multi-Window-Finder", "mwf"],
                     ],
-                    "help": "The used method for setting the window size. Options are:\n\n- **Manual:** Manually set the window size to a specific size.\n- **Dominant Fourier Frequency:** Use the window size which corresponds to the dominant frequency in the Fourier domain.\n- **Highest Autocorrelation:** Use the window size which corresponds to maximum autocorrelation.\n- **Summary Statistics Subsequence:** Find a window size such that the statics of that window are similar to those of the full time series. \n- **Multi-Window-Finder:** Find a window size such that the moving average is small. ",
+                    "help": "The used method for setting the window size. Options are:\n\n"
+                    "- **Manual:** Manually set the window size to a specific size.\n"
+                    "- **Dominant Fourier Frequency:** Use the window size which corresponds to the dominant frequency in the Fourier domain.\n"
+                    "- **Highest Autocorrelation:** Use the window size which corresponds to maximum autocorrelation.\n"
+                    "- **Summary Statistics Subsequence:** Find a window size such that the statics of that window are similar to those of the full time series. \n"
+                    "- **Multi-Window-Finder:** Find a window size such that the moving average is small. ",
                 },
                 "window_size": {
                     "label": "Manual window size",
@@ -71,13 +76,15 @@ def load_default_configuration() -> dict:
                     "label": "Padding",
                     "options": ["wrap", "symmetric"],
                     "index": 0,
-                    "help": "How the time series is padded:\n-**wrap:** Use the first values to pad at the end and the last values to pad at the beginning.\n- **symmetric:** Pads with the reflection of the time series.",
+                    "help": "How the time series is padded:"
+                    "\n-**wrap:** Use the first values to pad at the end and the last values to pad at the beginning."
+                    "\n- **symmetric:** Pads with the reflection of the time series.",
                 },
                 "sequence_length_multiplier": {
                     "type": "number_input",
                     "label": "Sequence length multiplier",
-                    "min_value": 1,
-                    "value": 4,
+                    "min_value": 1.0,
+                    "value": 4.0,
                     "step": 0.1,
                     "help": "The amount by which the window size should be multiplied to create sliding windows for clustering the data using KShape.",
                 },
@@ -153,7 +160,7 @@ def load_default_configuration() -> dict:
             },
         },
         "metric": {
-            "default": ["FBeta", "AreaUnderROC", "VolumeUnderROC"],
+            "default": ["EventWiseFBeta"],
             "exclude": ["BestThresholdMetric", "ThresholdMetric"],
             "parameters-required": {"cutoff": 0.9},
             "parameters-optional": {
@@ -186,7 +193,11 @@ def load_default_configuration() -> dict:
                     "type": "toggle",
                     "label": "Use original version",
                     "value": False,
-                    "help": "Whether to use the originally proposed version of this metric or the implementation of TimeEval:\n- For the recall (FPR) existence reward, anomalies are counted as separate events, even if the added slopes overlap;\n- Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each point in the ground truth is maximized;\n- The original slopes are asymmetric: the slopes at the end of anomalies are a single point shorter than the ones at the beginning of anomalies. Symmetric slopes are used, with the same size for the beginning and end of anomalies;\n- A linear approximation of the slopes is used instead of the convex slope shape presented in the paper.",
+                    "help": "Whether to use the originally proposed version of this metric or the implementation of TimeEval:"
+                    "\n- For the recall (FPR) existence reward, anomalies are counted as separate events, even if the added slopes overlap;"
+                    "\n- Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each point in the ground truth is maximized;"
+                    "\n- The original slopes are asymmetric: the slopes at the end of anomalies are a single point shorter than the ones at the beginning of anomalies. Symmetric slopes are used, with the same size for the beginning and end of anomalies;"
+                    "\n- A linear approximation of the slopes is used instead of the convex slope shape presented in the paper.",
                 },
                 "max_samples": {
                     "type": "number_input",
@@ -210,14 +221,20 @@ def load_default_configuration() -> dict:
                     "label": "Delta",
                     "options": ["flat", "front", "back", "middle"],
                     "index": 0,
-                    "help": "Bias for the position of the predicted anomaly in the ground truth anomalous range:\n- **flat:** Equal bias towards all positions in the ground truth anomalous range.\n- **front:** Predictions that are near the front of the ground truth anomaly (i.e. early detection) have a higher weight.\n- **back:** Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.\n- **middle:** Predictions that are near the center of the ground truth anomaly have a higher weight.\n",
+                    "help": "Bias for the position of the predicted anomaly in the ground truth anomalous range:"
+                    "\n- **flat:** Equal bias towards all positions in the ground truth anomalous range."
+                    "\n- **front:** Predictions that are near the front of the ground truth anomaly (i.e. early detection) have a higher weight."
+                    "\n- **back:** Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight."
+                    "\n- **middle:** Predictions that are near the center of the ground truth anomaly have a higher weight.",
                 },
                 "gamma": {
                     "type": "selectbox",
                     "label": "Gamma",
                     "options": ["one", "reciprocal"],
                     "index": 0,
-                    "help": "Penalization approach for detecting multiple ranges with a single range: - **one:** Fragmented detection should not be penalized.\n- **reciprocal:** Weight fragmented detection of $N$ ranges with as single range by a factor of $1/N$.",
+                    "help": "Penalization approach for detecting multiple ranges with a single range: "
+                    "\n- **one:** Fragmented detection should not be penalized."
+                    "\n- **reciprocal:** Weight fragmented detection of $N$ ranges with as single range by a factor of $1/N$.",
                 },
                 "max_buffer_size": {
                     "type": "number_input",

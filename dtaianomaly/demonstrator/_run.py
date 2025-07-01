@@ -7,6 +7,7 @@ from streamlit.web import cli as stcli
 
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
+from dtaianomaly.demonstrator import CustomDetectorVisualizer
 from dtaianomaly.evaluation import Metric
 from dtaianomaly.workflow.utils import convert_to_list
 
@@ -18,6 +19,9 @@ def run(
     custom_data_loaders: type[LazyDataLoader] | list[type[LazyDataLoader]] = None,
     custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
     custom_metrics: type[Metric] | list[type[Metric]] = None,
+    custom_visualizers: (
+        type[CustomDetectorVisualizer] | list[type[CustomDetectorVisualizer]]
+    ) = None,
 ):
     """
     Start up the demonstrator for ``dtaianomaly``.
@@ -30,9 +34,11 @@ def run(
     custom_data_loaders: LazyDataLoader object or list of LazyDataLoader objects, default=None
         Additional data loaders which must be available within the demonstrator.
     custom_anomaly_detectors: BaseDetector object or list of BaseDetector objects, default=None
-            Additional anomaly detectors which must be available within the demonstrator.
+        Additional anomaly detectors which must be available within the demonstrator.
     custom_metrics: Metric object or list of Metric objects, default=None
-            Additional evaluation metrics which must be available within the demonstrator.
+        Additional evaluation metrics which must be available within the demonstrator.
+    custom_visualizers: CustomDetectorVisualizer object or list of CustomDetectorVisualizer objects, default=None
+        Additional custom visualizations for certain anomaly detectors.
     """
     # Run the applications
     sys.argv = [
@@ -45,6 +51,7 @@ def run(
                 custom_data_loaders=custom_data_loaders,
                 custom_anomaly_detectors=custom_anomaly_detectors,
                 custom_metrics=custom_metrics,
+                custom_visualizers=custom_visualizers,
             )
         ),
     ]
@@ -55,6 +62,9 @@ def _custom_model_config(
     custom_data_loaders: type[LazyDataLoader] | list[type[LazyDataLoader]] = None,
     custom_anomaly_detectors: type[BaseDetector] | list[type[BaseDetector]] = None,
     custom_metrics: type[Metric] | list[type[Metric]] = None,
+    custom_visualizers: (
+        type[CustomDetectorVisualizer] | list[type[CustomDetectorVisualizer]]
+    ) = None,
 ) -> dict[str, list[str]]:
 
     def _is_valid(cls: type) -> bool:
@@ -88,5 +98,10 @@ def _custom_model_config(
             _format(metric)
             for metric in convert_to_list(custom_metrics or [])
             if _is_valid(metric)
+        ],
+        "custom_visualizers": [
+            _format(visualizer)
+            for visualizer in convert_to_list(custom_visualizers or [])
+            if _is_valid(visualizer)
         ],
     }

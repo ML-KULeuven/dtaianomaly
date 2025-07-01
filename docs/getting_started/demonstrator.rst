@@ -59,13 +59,38 @@ pass the class to the :py:meth:`~dtaianomaly.demonstrator.run` method.
 
 Below code illustrates how this can be done, in which we assume that detector
 ``NbSigmaAnomalyDetector`` as implemented :ref:`here <custom-anomaly-detector>`
-is avaiable in the file ``NbSigmaAnomalyDetector.py``:
+is available in the file ``NbSigmaAnomalyDetector.py``:
 
 .. code-block:: python
 
     from dtaianomaly import demonstrator
     from NbSigmaAnomalyDetector import NbSigmaAnomalyDetector
     demonstrator.run(custom_anomaly_detectors=NbSigmaAnomalyDetector)
+
+Custom visualizations
+---------------------
+
+For some detectors, it is possible to show additional information besides
+the anomaly scores. This information is specific to the anomaly detector.
+For example, :py:class:`~dtaianomaly.anomaly_detection.KMeansAnomalyDetector` and
+:py:class:`~dtaianomaly.anomaly_detection.KShapeAnomalyDetector` use
+cluster-centroids to detect anomalies. These cluster centers indicate
+the normal behavior, and is useful to understand how the model
+detects anomalies.
+
+While some custom visualizations are already available, it is also possible
+to add custom visualizations to the demonstrator. For this, you only need
+to implement the :py:class:`~dtaianomaly.demonstrator.CustomDetectorVisualizer`.
+This class has two methods: (1) :py:meth:`~dtaianomaly.demonstrator.CustomDetectorVisualizer.is_compatible`
+which checks whether the visualization can be applied to the given anomaly
+detector, and (2) :py:meth:`~dtaianomaly.demonstrator.CustomDetectorVisualizer.show_custom_visualization`
+which effectively shows the visualization in a streamlit-application. Then,
+similarly as above, you can pass this class to the :py:meth:`~dtaianomaly.demonstrator.run`
+method, and your custom visualization will be included in the demonstrator.
+
+.. autoclass:: dtaianomaly.demonstrator.CustomDetectorVisualizer
+   :inherited-members:
+   :members:
 
 Configuration
 -------------
@@ -79,7 +104,8 @@ keys: (1)``'data-loader'``, (2) ``'detector'``, and (3) ``'metric'``. The
 corresponding values configure the data loaders, the anomaly detectors and
 the evaluation metrics respectively.
 
-Each of the three components has the following subitmes
+Each of the three components has the following subitems:
+
 - ``'default'``: the component to load upon starting the demonstrator.
   For the anomaly detectors and evaluation metrics, this can also be a
   list of multiple components to load.
