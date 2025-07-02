@@ -50,6 +50,14 @@ class CentroidVisualizer(CustomDetectorVisualizer):
             margin=dict(l=0, r=0, t=20, b=0),
             showlegend=False,
         )
+
+        # Show the data
+        st.markdown(
+            "Below, you can see the centroids of the different clusters. These "
+            "represent the different normal behaviors. If a subsequence has a "
+            "large distance to all these subsequences, then it is different from"
+            "the normal behaviors, and consequently an anomaly."
+        )
         st.plotly_chart(fig)
 
     @staticmethod
