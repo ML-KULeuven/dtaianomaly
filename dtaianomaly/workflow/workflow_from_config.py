@@ -421,6 +421,15 @@ def detector_entry(entry):
     elif detector_type == "MultilayerPerceptron":
         return anomaly_detection.MultilayerPerceptron(**entry_without_type)
 
+    elif detector_type == "ConvolutionalNeuralNetwork":
+        return anomaly_detection.ConvolutionalNeuralNetwork(**entry_without_type)
+
+    elif detector_type == "LongShortTermMemoryNetwork":
+        return anomaly_detection.LongShortTermMemoryNetwork(**entry_without_type)
+
+    elif detector_type == "Transformer":
+        return anomaly_detection.Transformer(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

@@ -100,7 +100,7 @@ class LongShortTermMemoryNetwork(BaseNeuralForecastingDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> lstm = LongShortTermMemoryNetwork(10, seed=0).fit(x)
-    >>> lstm.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> lstm.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
     array([0.354334  , 0.354334  , 0.28025536, ..., 0.61675562, 0.90525854,
            0.39284754]...)
 

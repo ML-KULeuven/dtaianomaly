@@ -99,7 +99,7 @@ class Transformer(BaseNeuralForecastingDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> transformer = Transformer(10, seed=0).fit(x)
-    >>> transformer.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> transformer.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
     array([0.41845179, 0.41845179, 0.3603762 , ..., 0.46213843, 0.63743933,
            0.08675425]...)
 

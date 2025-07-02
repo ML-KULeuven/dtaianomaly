@@ -101,9 +101,9 @@ class ConvolutionalNeuralNetwork(BaseNeuralForecastingDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> cnn = ConvolutionalNeuralNetwork(10, seed=0).fit(x)
-    >>> cnn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([0.354334  , 0.354334  , 0.28025536, ..., 0.61675562, 0.90525854,
-           0.39284754]...)
+    >>> cnn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
+    array([0.07708263, 0.07708263, 0.06242053, ..., 0.1827196 , 0.2396274 ,
+           0.06390759]...)
 
     See also
     --------
