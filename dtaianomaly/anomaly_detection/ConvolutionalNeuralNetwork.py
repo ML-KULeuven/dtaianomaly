@@ -1,5 +1,6 @@
 from typing import Callable, Literal
 
+import numpy as np
 import torch
 
 from dtaianomaly import utils
@@ -15,22 +16,24 @@ from dtaianomaly.anomaly_detection.BaseNeuralDetector_utils import (
 )
 
 
-class MultilayerPerceptron(BaseNeuralForecastingDetector):
+class ConvolutionalNeuralNetwork(BaseNeuralForecastingDetector):
     """
-    Use a multilayer perceptron to detect anomalies.
+    Use a convolutional neural network to detect anomalies.
 
-    The multilayer perceptron is a fully connected neural network which
-    will detect anomalies based on forecasting. Given a subsequence in the
-    time series, the network will learn to forecast the future values. Because
-    anomalies are unexpected events, they are difficult to forecast. Hence,
-    by computing the difference between the forecasted value and the actually
-    observed values, the neural network can detect anomalies.
+    The Convolutional Neural Network (CNN) is a  neural network consisting
+    of convolutional layers, each consisting of multiple kernels. Given some
+    input, the convolutional layer computes the convolution of the input with
+    each kernel to create an output. The input sequences are fed through
+    multiple such convolutional layers, and the task is to forecast the
+    time series. Hence, by computing the difference between the forecasted
+    value and the actually observed values, the neural network can detect
+    anomalies.
 
-    The architecture of the multilayer perceptron consists of blocks, in which each
-    block applies the following operations: fully-connected layer :math:`\\rightarrow`
-    batch normalization :math:`\\rightarrow` activation function :math:`\\rightarrow`
-    dropout layer. The first and final layers of the network has no batch normalization,
-    the final layer of the network has no dropout.
+    The architecture of the CNN consists of blocks, in which each block applies
+    the following operations: convolutional layer :math:`\\rightarrow` batch
+    normalization :math:`\\rightarrow` activation function :math:`\\rightarrow`
+    average pooling. The first and final layers of the network has no batch
+    normalization.
 
     Parameters
     ----------
@@ -39,16 +42,14 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
         The error measure between the reconstructed window and the original window.
+    kernel_size: int, default=3
+        The size of the kernels in the convolutional layers.
     hidden_layers: list of ints, default=[64, 32]
-        The number of neurons in each hidden layer. If an empty list is given, then the input
-        layer is directly connected to the output layer.
-    dropout_rate: float in interval [0, 1[, default=0.2
-        The dropout rate for the dropout layers. If the dropout rate is 0, no dropout layers
-        will be added to the auto encoder.
+        The number of kernels in each hidden layer. Must contain at least 1 value.
     activation_function: {"linear", "relu", "sigmoid", "tanh"} default="relu"
-        The activation function to use at the end of each layer.
+        The activation function to use at the end of each convolutional layer.
     batch_normalization: bool = True,
-        Whether to add batch normalization after each layer or not.
+        Whether to add batch normalization after each convolutional layer or not.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
     standard_scaling: bool, default=True
@@ -96,13 +97,13 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import MultilayerPerceptron
+    >>> from dtaianomaly.anomaly_detection import ConvolutionalNeuralNetwork
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> mlp = MultilayerPerceptron(10, seed=0).fit(x)
-    >>> mlp.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
-    array([1.8944391 , 1.8944391 , 1.83804671, ..., 0.59621549, 0.54421651,
-           0.05852008]...)
+    >>> cnn = ConvolutionalNeuralNetwork(10, seed=0).fit(x)
+    >>> cnn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.354334  , 0.354334  , 0.28025536, ..., 0.61675562, 0.90525854,
+           0.39284754]...)
 
     See also
     --------
@@ -123,8 +124,8 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             "mean-absolute-error", "mean-squared-error"
         ] = "mean-absolute-error",
         forecast_length: int = 1,
+        kernel_size: int = 3,
         hidden_layers: list[int] = (64, 32),
-        dropout_rate: float = 0.2,
         activation_function: _ACTIVATION_FUNCTION_TYPE = "relu",
         batch_normalization: bool = True,
         stride: int = 1,
@@ -161,12 +162,19 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             seed=seed,
         )
 
+        if not isinstance(kernel_size, int) or isinstance(kernel_size, bool):
+            raise TypeError("`kernel_size` should be integer")
+        if kernel_size < 1:
+            raise ValueError("`kernel_size` should be strictly positive")
+
         if not utils.is_valid_list(hidden_layers, int):
             raise TypeError("`hidden_layers` should be a list of integer")
         if any(map(lambda x: x <= 0, hidden_layers)):
             raise ValueError(
                 "All values in `hidden_layers` should be strictly positive"
             )
+        if len(hidden_layers) == 0:
+            raise ValueError("There should at least be one hidden layer!")
 
         if not isinstance(activation_function, str):
             raise TypeError("`activation_function` should be a string")
@@ -178,49 +186,75 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         if not isinstance(batch_normalization, bool):
             raise TypeError("`batch_normalization` should be a bool")
 
-        if not isinstance(dropout_rate, (float, int)) or isinstance(dropout_rate, bool):
-            raise TypeError("`dropout_rate` should be a float")
-        if not 0.0 <= dropout_rate < 1.0:
-            raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
-
+        self.kernel_size = kernel_size
         self.hidden_layers = hidden_layers
-        self.dropout_rate = dropout_rate
         self.activation_function = activation_function
         self.batch_normalization = batch_normalization
 
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
-        # Initialize the MLP
-        mlp = torch.nn.Sequential()
-        mlp.add_module("flatten", torch.nn.Flatten())
+        # Initialize the CNN
+        cnn = torch.nn.Sequential()
+        padding = int((self.kernel_size - 1) / 2)
 
         # Initialize layer inputs and outputs
-        inputs = [n_attributes * self.window_size_, *self.hidden_layers]
+        inputs = [n_attributes, *self.hidden_layers]
         outputs = [*self.hidden_layers, n_attributes * self.forecast_length]
 
-        # Add all the layers
-        for i in range(len(inputs)):
+        for i in range(len(inputs) - 1):
 
-            # Add the linear layer
-            mlp.add_module(f"linear-{i}", torch.nn.Linear(inputs[i], outputs[i]))
+            # Add the convolutional layer
+            cnn.add_module(
+                f"conv-{i}",
+                torch.nn.Conv1d(
+                    in_channels=inputs[i],
+                    out_channels=outputs[i],
+                    kernel_size=self.kernel_size,
+                    stride=1,
+                    padding=padding,
+                ),
+            )
 
             # Add batch normalization
             if self.batch_normalization and 0 < i < len(inputs) - 1:
-                mlp.add_module(f"batch-norm-{i}", torch.nn.BatchNorm1d(outputs[i]))
+                cnn.add_module(f"batch-norm-{i}", torch.nn.BatchNorm1d(outputs[i]))
 
             # Add the activation function
-            mlp.add_module(
+            cnn.add_module(
                 f"activation-{i}",
                 self._build_activation_function(self.activation_function),
             )
 
-            # Add the dropout layer
-            if self.dropout_rate > 0 and i < len(inputs) - 1:
-                mlp.add_module(f"dropout-{i}", torch.nn.Dropout(self.dropout_rate))
+            # Add a pooling layer
+            cnn.add_module(f"pool-{i}", torch.nn.AvgPool1d(kernel_size=2))
 
-        # Restore the dimensions of the window
-        mlp.add_module(
-            "unflatten", torch.nn.Unflatten(1, (self.forecast_length, n_attributes))
+        # Add a linear layer
+        cnn.add_module("flatten", torch.nn.Flatten())
+        channel_correction_term = int(
+            np.floor(self.window_size_ / 2 ** len(self.hidden_layers))
+        )
+        cnn.add_module(
+            "linear",
+            torch.nn.Linear(
+                in_features=inputs[-1] * channel_correction_term,
+                out_features=outputs[-1],
+            ),
         )
 
-        # Return the MLP
-        return mlp
+        # Return the CNN
+        return _CNN(n_attributes, cnn)
+
+
+class _CNN(torch.nn.Module):
+
+    n_attributes: int
+    cnn: torch.nn.Sequential
+
+    def __init__(self, n_attributes: int, cnn: torch.nn.Sequential):
+        super().__init__()
+        self.n_attributes = n_attributes
+        self.cnn = cnn
+
+    def forward(self, x):
+        x = x.view(x.shape[0], self.n_attributes, -1)
+        x = self.cnn(x)
+        return x

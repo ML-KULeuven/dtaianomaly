@@ -14,6 +14,9 @@ Added
   ``BaseNeuralReconstructionDetector``, base classes for neural anomaly detectors.
 - Implemented ``MultilayerPerceptron`` anomaly detector.
 - Implemented ``AutoEncoder`` anomaly detector.
+- Implemented ``LongShortTermMemory`` anomaly detector.
+- Implemented ``ConvolutionalNeuralNetwork`` anomaly detector.
+- Implemented ``Transformer`` anomaly detector.
 
 Changed
 ^^^^^^^

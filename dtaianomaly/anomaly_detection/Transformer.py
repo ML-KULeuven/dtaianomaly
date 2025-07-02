@@ -2,7 +2,6 @@ from typing import Callable, Literal
 
 import torch
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.BaseNeuralDetector import (
     _ACTIVATION_FUNCTION_TYPE,
@@ -15,22 +14,20 @@ from dtaianomaly.anomaly_detection.BaseNeuralDetector_utils import (
 )
 
 
-class MultilayerPerceptron(BaseNeuralForecastingDetector):
+class Transformer(BaseNeuralForecastingDetector):
     """
-    Use a multilayer perceptron to detect anomalies.
+    Use a transformer to detect anomalies :cite:`vaswani2017attention`.
 
-    The multilayer perceptron is a fully connected neural network which
-    will detect anomalies based on forecasting. Given a subsequence in the
-    time series, the network will learn to forecast the future values. Because
-    anomalies are unexpected events, they are difficult to forecast. Hence,
-    by computing the difference between the forecasted value and the actually
-    observed values, the neural network can detect anomalies.
+    A transformer anomaly detector first forecasts the time series, and
+    then detects anomalies by measuring the deviation from the forecasted
+    values to the actual observations. A transformer is a neural network
+    consisting of only attention-layers: all you need is attention. The
+    forecasting network therefore consists first of a transformer-encoder,
+    which is connected to a linear layer to forecast the time series.
 
-    The architecture of the multilayer perceptron consists of blocks, in which each
-    block applies the following operations: fully-connected layer :math:`\\rightarrow`
-    batch normalization :math:`\\rightarrow` activation function :math:`\\rightarrow`
-    dropout layer. The first and final layers of the network has no batch normalization,
-    the final layer of the network has no dropout.
+    The architecture of the transformer consists of 2 blocks: (1) a transformer
+    -decoder consisting of one or more attention-layers, and (2) a single linear
+    layer.
 
     Parameters
     ----------
@@ -39,16 +36,18 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
         The error measure between the reconstructed window and the original window.
-    hidden_layers: list of ints, default=[64, 32]
-        The number of neurons in each hidden layer. If an empty list is given, then the input
-        layer is directly connected to the output layer.
-    dropout_rate: float in interval [0, 1[, default=0.2
-        The dropout rate for the dropout layers. If the dropout rate is 0, no dropout layers
-        will be added to the auto encoder.
+    num_heads: int, default=12
+        The number of heads in each attention layer.
+    num_transformer_layers: int, default=1
+        The number of attention layers.
+    dimension_feedforward: int, default=32,
+        The dimension of the linear layer at the end of each attention layer.
+    bias: bool, default=True
+        Whether to use bias weights in each layer of the LSTM block.
+    dropout_rate: float in interval [0, 1[, default=0.0
+        The dropout rate to put on each attention layer.
     activation_function: {"linear", "relu", "sigmoid", "tanh"} default="relu"
-        The activation function to use at the end of each layer.
-    batch_normalization: bool = True,
-        Whether to add batch normalization after each layer or not.
+        The activation function to use at the end of each attention layer.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
     standard_scaling: bool, default=True
@@ -96,13 +95,13 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import MultilayerPerceptron
+    >>> from dtaianomaly.anomaly_detection import Transformer
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> mlp = MultilayerPerceptron(10, seed=0).fit(x)
-    >>> mlp.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
-    array([1.8944391 , 1.8944391 , 1.83804671, ..., 0.59621549, 0.54421651,
-           0.05852008]...)
+    >>> transformer = Transformer(10, seed=0).fit(x)
+    >>> transformer.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.41845179, 0.41845179, 0.3603762 , ..., 0.46213843, 0.63743933,
+           0.08675425]...)
 
     See also
     --------
@@ -111,10 +110,12 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         actual observations.
     """
 
-    hidden_layers: list[int]
+    num_heads: int
+    num_transformer_layers: int
+    dimension_feedforward: int
+    bias: bool
     dropout_rate: float
     activation_function: _ACTIVATION_FUNCTION_TYPE
-    batch_normalization: bool
 
     def __init__(
         self,
@@ -123,10 +124,12 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             "mean-absolute-error", "mean-squared-error"
         ] = "mean-absolute-error",
         forecast_length: int = 1,
-        hidden_layers: list[int] = (64, 32),
-        dropout_rate: float = 0.2,
+        num_heads: int = 12,
+        num_transformer_layers: int = 1,
+        dimension_feedforward: int = 32,
+        bias: bool = True,
+        dropout_rate: float = 0.0,
         activation_function: _ACTIVATION_FUNCTION_TYPE = "relu",
-        batch_normalization: bool = True,
         stride: int = 1,
         standard_scaling: bool = True,
         batch_size: int = 32,
@@ -161,12 +164,32 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             seed=seed,
         )
 
-        if not utils.is_valid_list(hidden_layers, int):
-            raise TypeError("`hidden_layers` should be a list of integer")
-        if any(map(lambda x: x <= 0, hidden_layers)):
-            raise ValueError(
-                "All values in `hidden_layers` should be strictly positive"
-            )
+        if not isinstance(num_heads, int) or isinstance(num_heads, bool):
+            raise TypeError("`num_heads` should be integer")
+        if num_heads < 1:
+            raise ValueError("`num_heads` should be strictly positive")
+
+        if not isinstance(num_transformer_layers, int) or isinstance(
+            num_transformer_layers, bool
+        ):
+            raise TypeError("`num_transformer_layers` should be integer")
+        if num_transformer_layers < 1:
+            raise ValueError("`num_transformer_layers` should be strictly positive")
+
+        if not isinstance(dimension_feedforward, int) or isinstance(
+            dimension_feedforward, bool
+        ):
+            raise TypeError("`dimension_feedforward` should be integer")
+        if dimension_feedforward < 1:
+            raise ValueError("`dimension_feedforward` should be strictly positive")
+
+        if not isinstance(bias, bool):
+            raise TypeError("`bias` should be a bool")
+
+        if not isinstance(dropout_rate, (float, int)) or isinstance(dropout_rate, bool):
+            raise TypeError("`dropout_rate` should be a list of floats or a float")
+        if not 0.0 <= dropout_rate < 1.0:
+            raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
 
         if not isinstance(activation_function, str):
             raise TypeError("`activation_function` should be a string")
@@ -175,52 +198,73 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
                 f"Unknown `activation_function` '{activation_function}'. Valid options are {list(self._ACTIVATION_FUNCTIONS.keys())}"
             )
 
-        if not isinstance(batch_normalization, bool):
-            raise TypeError("`batch_normalization` should be a bool")
-
-        if not isinstance(dropout_rate, (float, int)) or isinstance(dropout_rate, bool):
-            raise TypeError("`dropout_rate` should be a float")
-        if not 0.0 <= dropout_rate < 1.0:
-            raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
-
-        self.hidden_layers = hidden_layers
+        self.num_heads = num_heads
+        self.num_transformer_layers = num_transformer_layers
+        self.dimension_feedforward = dimension_feedforward
+        self.bias = bias
         self.dropout_rate = dropout_rate
         self.activation_function = activation_function
-        self.batch_normalization = batch_normalization
 
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
-        # Initialize the MLP
-        mlp = torch.nn.Sequential()
-        mlp.add_module("flatten", torch.nn.Flatten())
 
-        # Initialize layer inputs and outputs
-        inputs = [n_attributes * self.window_size_, *self.hidden_layers]
-        outputs = [*self.hidden_layers, n_attributes * self.forecast_length]
+        transformer = torch.nn.Sequential()
+        transformer.add_module("flatten", torch.nn.Flatten())
 
-        # Add all the layers
-        for i in range(len(inputs)):
+        d_model = n_attributes * self.window_size_
+        nhead = _adjust_nhead(d_model, self.num_heads)
 
-            # Add the linear layer
-            mlp.add_module(f"linear-{i}", torch.nn.Linear(inputs[i], outputs[i]))
-
-            # Add batch normalization
-            if self.batch_normalization and 0 < i < len(inputs) - 1:
-                mlp.add_module(f"batch-norm-{i}", torch.nn.BatchNorm1d(outputs[i]))
-
-            # Add the activation function
-            mlp.add_module(
-                f"activation-{i}",
-                self._build_activation_function(self.activation_function),
-            )
-
-            # Add the dropout layer
-            if self.dropout_rate > 0 and i < len(inputs) - 1:
-                mlp.add_module(f"dropout-{i}", torch.nn.Dropout(self.dropout_rate))
-
-        # Restore the dimensions of the window
-        mlp.add_module(
-            "unflatten", torch.nn.Unflatten(1, (self.forecast_length, n_attributes))
+        transformer.add_module(
+            "transformer",
+            torch.nn.TransformerEncoder(
+                encoder_layer=torch.nn.TransformerEncoderLayer(
+                    d_model=d_model,
+                    nhead=nhead,
+                    dim_feedforward=self.dimension_feedforward,
+                    dropout=self.dropout_rate,
+                    activation=self._build_activation_function(
+                        self.activation_function
+                    ),
+                    batch_first=True,
+                    bias=self.bias,
+                ),
+                num_layers=self.num_transformer_layers,
+                enable_nested_tensor=(nhead % 2) == 0,
+            ),
         )
 
-        # Return the MLP
-        return mlp
+        transformer.add_module(
+            "linear",
+            torch.nn.Linear(
+                in_features=n_attributes * self.window_size_,
+                out_features=n_attributes * self.forecast_length,
+            ),
+        )
+
+        return transformer
+
+
+def _adjust_nhead(d_model, nhead) -> int:
+    """
+    Computes a valid nhead for the given parameters, such that the constraint
+
+        (d_model // nhead) * nhead == d_model
+
+    is satisfied. This is done by finding the value closest to nhead which
+    satisfies the constraint. This value can thus be larger or smaller.
+    """
+    if d_model % nhead == 0:
+        return nhead  # Already valid
+
+    # Search for closest valid nhead
+    lower = nhead - 1
+    upper = nhead + 1
+
+    while lower > 0 or upper <= d_model:
+        if lower > 0 and d_model % lower == 0:
+            return lower
+        if upper <= d_model and d_model % upper == 0:
+            return upper
+        lower -= 1
+        upper += 1
+
+    return 1

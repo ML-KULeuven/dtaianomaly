@@ -113,9 +113,9 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
 
     See also
     --------
-    BaseNeuralForecastingDetector: Use a neural network to forecast the time
-        series, and detect anomalies by measuring the difference with the
-        actual observations.
+    BaseNeuralReconstructionDetector: Use a neural network to reconstruct
+        windows in the time series, and detect anomalies as windows that
+        are incorrectly reconstructed.
     """
 
     encoder_dimensions: list[int]
@@ -199,10 +199,10 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
             )
 
         if not isinstance(batch_normalization, bool):
-            raise TypeError("`batch_normalization` should be a list of bools or a bool")
+            raise TypeError("`batch_normalization` should be a bool")
 
         if not isinstance(dropout_rate, (float, int)) or isinstance(dropout_rate, bool):
-            raise TypeError("`dropout_rate` should be a list of floats or a float")
+            raise TypeError("`dropout_rate` should be a float")
         if not 0.0 <= dropout_rate < 1.0:
             raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
 

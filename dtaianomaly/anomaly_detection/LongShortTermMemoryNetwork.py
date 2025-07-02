@@ -2,10 +2,8 @@ from typing import Callable, Literal
 
 import torch
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.BaseNeuralDetector import (
-    _ACTIVATION_FUNCTION_TYPE,
     _COMPILE_MODE_TYPE,
     _MODEL_PARAMETERS_TYPE,
     _OPTIMIZER_TYPE,
@@ -15,22 +13,26 @@ from dtaianomaly.anomaly_detection.BaseNeuralDetector_utils import (
 )
 
 
-class MultilayerPerceptron(BaseNeuralForecastingDetector):
+class LongShortTermMemoryNetwork(BaseNeuralForecastingDetector):
     """
-    Use a multilayer perceptron to detect anomalies.
+    Use an LSTM to detect anomalies :cite:`malhotra2015long`.
 
-    The multilayer perceptron is a fully connected neural network which
-    will detect anomalies based on forecasting. Given a subsequence in the
-    time series, the network will learn to forecast the future values. Because
-    anomalies are unexpected events, they are difficult to forecast. Hence,
-    by computing the difference between the forecasted value and the actually
-    observed values, the neural network can detect anomalies.
+    The Long-Short Term Memory (LSTM) anomaly detector combines a decoder
+    with LSTM layers with a liner layer to forecast the time series, given
+    a subsequence. The anomalies are then detected by measuring the deviation
+    between the forecasted values and the actual observations. The LSTM-
+    decoder reads each subsequence sequentially, and constructs a hidden
+    representation at each time point. The hidden representation at each
+    time step is based on the observations at that time step, but also
+    on the hidden state at the previous step. The LSTM units include
+    learnable gates, which guide the information flow to avoid issues
+    with gradients as faced in RNN networks. Once the complete sequence
+    is processed, the output is fed to a linear layer, which will forecast
+    the data.
 
-    The architecture of the multilayer perceptron consists of blocks, in which each
-    block applies the following operations: fully-connected layer :math:`\\rightarrow`
-    batch normalization :math:`\\rightarrow` activation function :math:`\\rightarrow`
-    dropout layer. The first and final layers of the network has no batch normalization,
-    the final layer of the network has no dropout.
+    The architecture of the LSTM consists of 2 blocks: (1) an LSTM-decoder
+    consisting of one or more LST-layers with multiple LSTM-units, and (2)
+    a single linear layer.
 
     Parameters
     ----------
@@ -39,16 +41,14 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
         The error measure between the reconstructed window and the original window.
-    hidden_layers: list of ints, default=[64, 32]
-        The number of neurons in each hidden layer. If an empty list is given, then the input
-        layer is directly connected to the output layer.
-    dropout_rate: float in interval [0, 1[, default=0.2
-        The dropout rate for the dropout layers. If the dropout rate is 0, no dropout layers
-        will be added to the auto encoder.
-    activation_function: {"linear", "relu", "sigmoid", "tanh"} default="relu"
-        The activation function to use at the end of each layer.
-    batch_normalization: bool = True,
-        Whether to add batch normalization after each layer or not.
+    hidden_units: int, default=8
+        The number of hidden unit in each LSTM layer.
+    num_lstm_layers: int, default=1
+        The number of LSTM layers in the LSTM-block.
+    dropout_rate: float in interval [0, 1[, default=0.0
+        The dropout rate to put on each layer in the LSTM block.
+    bias: bool, default=True
+        Whether to use bias weights in each layer of the LSTM block.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
     standard_scaling: bool, default=True
@@ -96,13 +96,13 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import MultilayerPerceptron
+    >>> from dtaianomaly.anomaly_detection import LongShortTermMemoryNetwork
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> mlp = MultilayerPerceptron(10, seed=0).fit(x)
-    >>> mlp.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
-    array([1.8944391 , 1.8944391 , 1.83804671, ..., 0.59621549, 0.54421651,
-           0.05852008]...)
+    >>> lstm = LongShortTermMemoryNetwork(10, seed=0).fit(x)
+    >>> lstm.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.354334  , 0.354334  , 0.28025536, ..., 0.61675562, 0.90525854,
+           0.39284754]...)
 
     See also
     --------
@@ -111,10 +111,8 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
         actual observations.
     """
 
-    hidden_layers: list[int]
-    dropout_rate: float
-    activation_function: _ACTIVATION_FUNCTION_TYPE
-    batch_normalization: bool
+    hidden_units: int
+    num_lstm_layers: int
 
     def __init__(
         self,
@@ -123,10 +121,10 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             "mean-absolute-error", "mean-squared-error"
         ] = "mean-absolute-error",
         forecast_length: int = 1,
-        hidden_layers: list[int] = (64, 32),
-        dropout_rate: float = 0.2,
-        activation_function: _ACTIVATION_FUNCTION_TYPE = "relu",
-        batch_normalization: bool = True,
+        hidden_units: int = 8,
+        num_lstm_layers: int = 1,
+        bias: bool = True,
+        dropout_rate: float = 0.0,
         stride: int = 1,
         standard_scaling: bool = True,
         batch_size: int = 32,
@@ -161,66 +159,66 @@ class MultilayerPerceptron(BaseNeuralForecastingDetector):
             seed=seed,
         )
 
-        if not utils.is_valid_list(hidden_layers, int):
-            raise TypeError("`hidden_layers` should be a list of integer")
-        if any(map(lambda x: x <= 0, hidden_layers)):
-            raise ValueError(
-                "All values in `hidden_layers` should be strictly positive"
-            )
+        if not isinstance(hidden_units, int) or isinstance(hidden_units, bool):
+            raise TypeError("`hidden_units` should be integer")
+        if hidden_units < 1:
+            raise ValueError("`hidden_units` should be strictly positive")
 
-        if not isinstance(activation_function, str):
-            raise TypeError("`activation_function` should be a string")
-        if activation_function not in self._ACTIVATION_FUNCTIONS:
-            raise ValueError(
-                f"Unknown `activation_function` '{activation_function}'. Valid options are {list(self._ACTIVATION_FUNCTIONS.keys())}"
-            )
+        if not isinstance(num_lstm_layers, int) or isinstance(num_lstm_layers, bool):
+            raise TypeError("`num_lstm_layers` should be integer")
+        if num_lstm_layers < 1:
+            raise ValueError("`num_lstm_layers` should be strictly positive")
 
-        if not isinstance(batch_normalization, bool):
-            raise TypeError("`batch_normalization` should be a bool")
+        if not isinstance(bias, bool):
+            raise TypeError("`bias` should be a bool")
 
         if not isinstance(dropout_rate, (float, int)) or isinstance(dropout_rate, bool):
-            raise TypeError("`dropout_rate` should be a float")
+            raise TypeError("`dropout_rate` should be a list of floats or a float")
         if not 0.0 <= dropout_rate < 1.0:
             raise ValueError(f"`dropout_rate` should be in interval [0, 1[.")
 
-        self.hidden_layers = hidden_layers
+        self.hidden_units = hidden_units
+        self.num_lstm_layers = num_lstm_layers
+        self.bias = bias
         self.dropout_rate = dropout_rate
-        self.activation_function = activation_function
-        self.batch_normalization = batch_normalization
 
     def _build_architecture(self, n_attributes: int) -> torch.nn.Module:
-        # Initialize the MLP
-        mlp = torch.nn.Sequential()
-        mlp.add_module("flatten", torch.nn.Flatten())
-
-        # Initialize layer inputs and outputs
-        inputs = [n_attributes * self.window_size_, *self.hidden_layers]
-        outputs = [*self.hidden_layers, n_attributes * self.forecast_length]
-
-        # Add all the layers
-        for i in range(len(inputs)):
-
-            # Add the linear layer
-            mlp.add_module(f"linear-{i}", torch.nn.Linear(inputs[i], outputs[i]))
-
-            # Add batch normalization
-            if self.batch_normalization and 0 < i < len(inputs) - 1:
-                mlp.add_module(f"batch-norm-{i}", torch.nn.BatchNorm1d(outputs[i]))
-
-            # Add the activation function
-            mlp.add_module(
-                f"activation-{i}",
-                self._build_activation_function(self.activation_function),
-            )
-
-            # Add the dropout layer
-            if self.dropout_rate > 0 and i < len(inputs) - 1:
-                mlp.add_module(f"dropout-{i}", torch.nn.Dropout(self.dropout_rate))
-
-        # Restore the dimensions of the window
-        mlp.add_module(
-            "unflatten", torch.nn.Unflatten(1, (self.forecast_length, n_attributes))
+        return _LSTM(
+            n_attributes=n_attributes,
+            lstm=torch.nn.LSTM(
+                input_size=n_attributes,
+                hidden_size=self.hidden_units * self.forecast_length,
+                num_layers=self.num_lstm_layers,
+                bias=self.bias,
+                batch_first=True,
+                dropout=self.dropout_rate,
+            ),
+            linear=torch.nn.Linear(
+                in_features=self.window_size_
+                * self.hidden_units
+                * self.forecast_length,
+                out_features=n_attributes * self.forecast_length,
+            ),
         )
 
-        # Return the MLP
-        return mlp
+
+class _LSTM(torch.nn.Module):
+
+    n_attributes: int
+    lstm: torch.nn.LSTM
+    flatten: torch.nn.Flatten
+    linear: torch.nn.Module
+
+    def __init__(self, n_attributes: int, lstm: torch.nn.LSTM, linear: torch.nn.Linear):
+        super().__init__()
+        self.n_attributes = n_attributes
+        self.lstm = lstm
+        self.flatten = torch.nn.Flatten(start_dim=1)
+        self.linear = linear
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.view(x.shape[0], -1, self.n_attributes)
+        x, _ = self.lstm(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        return x
