@@ -112,8 +112,8 @@ class ConvolutionalNeuralNetwork(BaseNeuralForecastingDetector):
         actual observations.
     """
 
+    kernel_size: int
     hidden_layers: list[int]
-    dropout_rate: float
     activation_function: _ACTIVATION_FUNCTION_TYPE
     batch_normalization: bool
 
@@ -215,7 +215,7 @@ class ConvolutionalNeuralNetwork(BaseNeuralForecastingDetector):
             )
 
             # Add batch normalization
-            if self.batch_normalization and 0 < i < len(inputs) - 1:
+            if self.batch_normalization and 0 < i:
                 cnn.add_module(f"batch-norm-{i}", torch.nn.BatchNorm1d(outputs[i]))
 
             # Add the activation function
