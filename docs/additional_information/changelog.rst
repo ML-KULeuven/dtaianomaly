@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 Latest
 ------
 
+.. warning::
+   We ended the support for Python version 3.9
+
 Added
 ^^^^^
 - Implemented affiliation-based metrics.
