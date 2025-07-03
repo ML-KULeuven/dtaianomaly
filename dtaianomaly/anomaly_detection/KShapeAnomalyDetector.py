@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple, Union
-
 import numpy as np
 import stumpy
 from scipy.spatial.distance import pdist, squareform
@@ -71,19 +69,19 @@ class KShapeAnomalyDetector(BaseDetector):
     KshapeAD only handles univariate time series.
     """
 
-    window_size: Union[str, int]
+    window_size: str | int
     sequence_length_multiplier: float
     overlap_rate: float
     kwargs: dict
 
     window_size_: int
-    centroids_: List[np.array]
+    centroids_: list[np.array]
     weights_: np.array
     kshape_: KShape
 
     def __init__(
         self,
-        window_size: Union[str, int],
+        window_size: str | int,
         sequence_length_multiplier: float = 4,
         overlap_rate: float = 0.5,
         **kwargs,
@@ -114,7 +112,7 @@ class KShapeAnomalyDetector(BaseDetector):
         self.overlap_rate = overlap_rate
         self.kwargs = kwargs
 
-    def theta_(self) -> List[Tuple[np.array, float]]:
+    def theta_(self) -> list[(np.array, float)]:
         """
         Computes :math:`\\Theta = \\{(C_0, w_0), \\dots, (C_k, w_k)\\}`, the normal
         behavior consisting of  :math:`k` clusters.
@@ -129,7 +127,7 @@ class KShapeAnomalyDetector(BaseDetector):
         self.check_is_fitted()
         return list(zip(self.centroids_, self.weights_))
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         # Make sure the data is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")

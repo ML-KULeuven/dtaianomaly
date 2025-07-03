@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple, Union
-
 import numpy as np
 
 from dtaianomaly import utils
@@ -20,9 +18,9 @@ class ChainedPreprocessor(Preprocessor):
         list argument or as multiple independent arguments to the constructor.
     """
 
-    base_preprocessors: List[Preprocessor]
+    base_preprocessors: list[Preprocessor]
 
-    def __init__(self, *base_preprocessors: Union[Preprocessor, List[Preprocessor]]):
+    def __init__(self, *base_preprocessors: Preprocessor | list[Preprocessor]):
         # Format the base processors
         if len(base_preprocessors) == 1 and isinstance(base_preprocessors[0], list):
             base_preprocessors = base_preprocessors[0]
@@ -36,22 +34,22 @@ class ChainedPreprocessor(Preprocessor):
             raise ValueError("Expected a list of Preprocessors")
         self.base_preprocessors = base_preprocessors
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
         for preprocessor in self.base_preprocessors:
             preprocessor._fit(X, y)
             X, y = preprocessor._transform(X, y)
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         for preprocessor in self.base_preprocessors:
             X, y = preprocessor._transform(X, y)
         return X, y
 
     def fit_transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         check_preprocessing_inputs(X, y)
         for preprocessor in self.base_preprocessors:
             preprocessor._fit(X, y)

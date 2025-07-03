@@ -87,8 +87,9 @@ class TestInterpretConfig:
     def test(self, valid_config):
         workflow = interpret_config(valid_config)
         assert len(workflow.dataloaders) > 0
-        assert len(workflow.pipelines) == 4
-        assert len(workflow.pipelines[0].metrics) == 5
+        assert len(workflow.detectors) * len(workflow.preprocessors) == 4
+        assert len(workflow.jobs) == 4 * len(workflow.dataloaders)
+        assert len(workflow.metrics) == 5
         assert workflow.n_jobs == 4
         assert workflow.trace_memory
 
@@ -96,8 +97,9 @@ class TestInterpretConfig:
         del valid_config['n_jobs']
         workflow = interpret_config(valid_config)
         assert len(workflow.dataloaders) > 0
-        assert len(workflow.pipelines) == 4
-        assert len(workflow.pipelines[0].metrics) == 5
+        assert len(workflow.detectors) * len(workflow.preprocessors) == 4
+        assert len(workflow.jobs) == 4 * len(workflow.dataloaders)
+        assert len(workflow.metrics) == 5
         assert workflow.n_jobs == 1
         assert workflow.trace_memory
 
@@ -105,8 +107,9 @@ class TestInterpretConfig:
         del valid_config['trace_memory']
         workflow = interpret_config(valid_config)
         assert len(workflow.dataloaders) > 0
-        assert len(workflow.pipelines) == 4
-        assert len(workflow.pipelines[0].metrics) == 5
+        assert len(workflow.detectors) * len(workflow.preprocessors) == 4
+        assert len(workflow.jobs) == 4 * len(workflow.dataloaders)
+        assert len(workflow.metrics) == 5
         assert workflow.n_jobs == 4
         assert not workflow.trace_memory
 

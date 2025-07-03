@@ -4,16 +4,15 @@ import pkgutil
 from importlib import import_module
 from operator import itemgetter
 from pathlib import Path
-from typing import List, Tuple, Union
 
 _MODULES_TO_IGNORE = ("pipeline", "utils", "visualisation", "workflow")
 
 
 def all_classes(
-    type_filter: Union[str, type, List[str], List[type]] = None,
-    exclude_types: Union[str, type, List[str], List[type]] = None,
+    type_filter: str | type | list[str] | list[type] = None,
+    exclude_types: str | type | list[str] | list[type] = None,
     return_names: bool = True,
-) -> Union[List[type], List[Tuple[str, type]]]:
+) -> list[type] | list[(str, type)]:
     """
     Discover all the classes from ``dtaianomaly`` by crawling the package. This
     method will only return the ``BaseDetector``, ``LazyDataLoader``, ``Metric``,
@@ -99,7 +98,7 @@ def _has_valid_type(cls: type):
 
 
 def _filter_types(
-    types: Union[str, type, List[str], List[type]], classes: List[Tuple[str, type]]
+    types: str | type | list[str] | list[type], classes: list[(str, type)]
 ):
     from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
     from dtaianomaly.data.LazyDataLoader import LazyDataLoader

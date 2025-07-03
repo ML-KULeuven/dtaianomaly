@@ -1,17 +1,17 @@
 import abc
-from typing import Callable, List, Optional, Tuple, Union
+from collections.abc import Callable
 
 import numpy as np
 
 from dtaianomaly.evaluation._common import FBetaBase, make_intervals
 from dtaianomaly.evaluation.metrics import BinaryMetric
 
-_IntervalType = Tuple[int, int]
-_DeltaType = Union[str, Callable[[int, int], float]]
-_GammaType = Union[str, Callable[[int], float]]
+_IntervalType = tuple[int, int]
+_DeltaType = str | Callable[[int, int], float]
+_GammaType = str | Callable[[int], float]
 
 
-def _interval_overlap(a: _IntervalType, b: _IntervalType) -> Optional[_IntervalType]:
+def _interval_overlap(a: _IntervalType, b: _IntervalType) -> _IntervalType | None:
     start = max(a[0], b[0])
     end = min(a[1], b[1])
     return (start, end) if start < end else None
@@ -19,7 +19,7 @@ def _interval_overlap(a: _IntervalType, b: _IntervalType) -> Optional[_IntervalT
 
 def _omega(
     anomaly_range: _IntervalType,
-    overlap_set: Optional[_IntervalType],
+    overlap_set: _IntervalType | None,
     delta: _DeltaType,
 ) -> float:
     # Figure 2.a
@@ -60,7 +60,7 @@ def _gamma(gamma: _GammaType, nb_overlapping_intervals: int) -> float:
 
 
 def _existence_reward(
-    interval: _IntervalType, other_intervals: List[_IntervalType]
+    interval: _IntervalType, other_intervals: list[_IntervalType]
 ) -> float:
     # Equation (5)
     for other_interval in other_intervals:
@@ -71,7 +71,7 @@ def _existence_reward(
 
 def _overlap_reward(
     interval: _IntervalType,
-    other_intervals: List[_IntervalType],
+    other_intervals: list[_IntervalType],
     delta: _DeltaType,
     gamma: _GammaType,
 ) -> float:
@@ -85,7 +85,7 @@ def _overlap_reward(
 
 
 def _cardinality_factor(
-    interval: _IntervalType, other_intervals: List[_IntervalType], gamma: _GammaType
+    interval: _IntervalType, other_intervals: list[_IntervalType], gamma: _GammaType
 ) -> float:
     # Equation (7)
     nb_overlapping_intervals = 0
@@ -99,7 +99,7 @@ def _cardinality_factor(
 
 def _precision_interval(
     interval: _IntervalType,
-    ground_truth_intervals: List[_IntervalType],
+    ground_truth_intervals: list[_IntervalType],
     delta: _DeltaType,
     gamma: _GammaType,
 ) -> float:
@@ -109,7 +109,7 @@ def _precision_interval(
 
 def _recall_interval(
     interval: _IntervalType,
-    predicted_intervals: List[_IntervalType],
+    predicted_intervals: list[_IntervalType],
     alpha: float,
     delta: _DeltaType,
     gamma: _GammaType,

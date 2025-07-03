@@ -1,5 +1,4 @@
 import math
-from typing import Union
 
 import numpy as np
 import scipy
@@ -99,7 +98,7 @@ def reverse_sliding_window(
     return scores_time
 
 
-def check_is_valid_window_size(window_size: Union[int, str]) -> None:
+def check_is_valid_window_size(window_size: int | str) -> None:
     """
     Checks if the given window size is valid or not. If the window size
     is not valid, a ValueError will be raised. Valid window sizes include:
@@ -129,7 +128,7 @@ def check_is_valid_window_size(window_size: Union[int, str]) -> None:
 
 def compute_window_size(
     X: np.ndarray,
-    window_size: Union[int, str],
+    window_size: int | str,
     lower_bound: int = 10,
     relative_lower_bound: float = 0.0,
     upper_bound: int = 1000,

@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
@@ -89,7 +87,7 @@ class RobustScaler(Preprocessor):
             )
         self.quantile_range = quantile_range
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "RobustScaler":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "RobustScaler":
         if get_dimension(X) == 1:
             # univariate case
             self.center_ = np.array([np.nanmedian(X)])
@@ -105,8 +103,8 @@ class RobustScaler(Preprocessor):
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if not (hasattr(self, "center_") and hasattr(self, "scale_")):
             raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
         if not (

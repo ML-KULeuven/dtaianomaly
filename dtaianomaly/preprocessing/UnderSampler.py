@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -25,14 +23,12 @@ class SamplingRateUnderSampler(Preprocessor):
             raise ValueError("Sampling rate should be strictly positive.")
         self.sampling_rate = sampling_rate
 
-    def _fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> "SamplingRateUnderSampler":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "SamplingRateUnderSampler":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if self.sampling_rate >= X.shape[0]:
             raise ValueError(
                 f"The sampling rate ('{self.sampling_rate}') is too large for a time series of shape {X.shape}!"
@@ -62,14 +58,12 @@ class NbSamplesUnderSampler(Preprocessor):
             raise ValueError("Number of samples should be at least 2.")
         self.nb_samples = nb_samples
 
-    def _fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> "NbSamplesUnderSampler":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "NbSamplesUnderSampler":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if self.nb_samples >= X.shape[0]:
             return X, y
         indices = np.linspace(

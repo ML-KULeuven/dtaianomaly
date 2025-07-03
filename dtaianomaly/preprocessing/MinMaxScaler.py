@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
@@ -38,7 +36,7 @@ class MinMaxScaler(Preprocessor):
     min_: np.array
     max_: np.array
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "MinMaxScaler":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "MinMaxScaler":
         if len(X.shape) == 1 or X.shape[1] == 1:
             # univariate case
             self.min_ = np.array([np.nanmin(X)])
@@ -56,8 +54,8 @@ class MinMaxScaler(Preprocessor):
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if not (hasattr(self, "min_") and hasattr(self, "max_")):
             raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
         if not (

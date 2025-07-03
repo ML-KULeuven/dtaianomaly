@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 from sklearn.cluster import KMeans
 
@@ -50,13 +48,13 @@ class KMeansAnomalyDetector(BaseDetector):
     array([0.50321076, 0.5753145 , 0.61938076, ..., 0.29794485, 0.30720306, 0.29857479]...)
     """
 
-    window_size: Union[int, str]
+    window_size: int | str
     stride: int
     kwargs: dict
     window_size_: int
     k_means_: KMeans
 
-    def __init__(self, window_size: Union[int, str], stride: int = 1, **kwargs):
+    def __init__(self, window_size: int | str, stride: int = 1, **kwargs):
         super().__init__(Supervision.UNSUPERVISED)
 
         check_is_valid_window_size(window_size)
@@ -70,7 +68,7 @@ class KMeansAnomalyDetector(BaseDetector):
         self.kwargs = kwargs
         KMeans(**self.kwargs)  # Check if KMeans can be initialized
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         self.k_means_ = KMeans(**self.kwargs)
         self.k_means_.fit(sliding_window(X, self.window_size_, self.stride))

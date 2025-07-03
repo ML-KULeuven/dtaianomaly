@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -32,12 +30,12 @@ class MovingAverage(Preprocessor):
             raise ValueError("Window size must be strictly positive")
         self.window_size = window_size
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "MovingAverage":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "MovingAverage":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         # Add nan values at the beginning and end of the given array
         extend_front = np.full(self.window_size // 2, np.nan)
         extend_back = np.full(

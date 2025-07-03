@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import ConnectionPatch
@@ -11,7 +9,7 @@ def plot_time_series_colored_by_score(
     X: np.ndarray,
     y: np.ndarray,
     time_steps: np.array = None,
-    feature_names: List[str] = None,
+    feature_names: list[str] = None,
     ax: plt.Axes = None,
     nb_colors: int = 100,
     **kwargs,
@@ -83,7 +81,7 @@ def plot_time_series_anomalies(
     y: np.ndarray,
     y_pred: np.ndarray,
     time_steps: np.array = None,
-    feature_names: List[str] = None,
+    feature_names: list[str] = None,
     ax: plt.Axes = None,
     **kwargs,
 ) -> plt.Figure:
@@ -165,7 +163,7 @@ def plot_demarcated_anomalies(
     y: np.array,
     ax: plt.Axes = None,
     time_steps: np.array = None,
-    feature_names: List[str] = None,
+    feature_names: list[str] = None,
     color_anomaly: str = "red",
     alpha_anomaly: float = 0.2,
     **kwargs,
@@ -254,7 +252,7 @@ def plot_with_zoom(
     y: np.array = None,
     y_pred: np.array = None,
     time_steps: np.array = None,
-    feature_names: List[str] = None,
+    feature_names: list[str] = None,
     method_to_plot=plot_demarcated_anomalies,
     color: str = "blue",
     linewidth: float = 3,
@@ -370,7 +368,7 @@ def plot_anomaly_scores(
     y: np.array,
     y_pred: np.array,
     time_steps: np.array = None,
-    feature_names: List[str] = None,
+    feature_names: list[str] = None,
     method_to_plot=plot_demarcated_anomalies,
     confidence: np.array = None,
     **kwargs,
@@ -440,7 +438,7 @@ def plot_anomaly_scores(
     return fig
 
 
-def format_time_steps(time_steps: Optional[np.array], n_samples: int) -> np.array:
+def format_time_steps(time_steps: np.ndarray | None, n_samples: int) -> np.array:
     """
     Format the given time steps, to ensure that fixed time steps are
     provided in case they are ``None``. These fixed time steps will
