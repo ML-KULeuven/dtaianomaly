@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pyod.models.ocsvm import OCSVM
 
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
@@ -21,6 +23,8 @@ class OneClassSupportVectorMachine(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
+    kernel: {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}, default='rbf'
+        The kernel to use for PCA.
     **kwargs:
         Arguments to be passed to the PyOD OC-SVM
 
@@ -44,6 +48,26 @@ class OneClassSupportVectorMachine(PyODAnomalyDetector):
     -----
     The OC-SVM inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
     """
+
+    kernel: Literal["linear", "poly", "rbf", "sigmoid", "cosine"]
+
+    def __init__(
+        self,
+        window_size: int | str,
+        stride: int = 1,
+        kernel: Literal["linear", "poly", "rbf", "sigmoid", "cosine"] = "rbf",
+        **kwargs,
+    ):
+        if not isinstance(kernel, str):
+            raise TypeError("`kernel` should be a string!")
+        if kernel not in ["linear", "poly", "rbf", "sigmoid", "cosine"]:
+            raise ValueError(
+                "`kernel` should be one of {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}"
+            )
+
+        self.kernel = kernel
+
+        super().__init__(window_size, stride, **kwargs)
 
     def _initialize_detector(self, **kwargs) -> OCSVM:
         return OCSVM(**kwargs)

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pyod.models.kpca import KPCA
 
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
@@ -21,6 +23,10 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
+    n_components: int, default=None
+        The number of components to use. If None, all non-zero components are kept.
+    kernel: {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}, default='rbf'
+        The kernel to use for PCA.
     **kwargs:
         Arguments to be passed to the PyOD PCA.
 
@@ -45,8 +51,38 @@ class KernelPrincipalComponentAnalysis(PyODAnomalyDetector):
     KPCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
     """
 
+    n_components: int | None
+    kernel: Literal["linear", "poly", "rbf", "sigmoid", "cosine"]
+
+    def __init__(
+        self,
+        window_size: int | str,
+        stride: int = 1,
+        n_components: int = None,
+        kernel: Literal["linear", "poly", "rbf", "sigmoid", "cosine"] = "rbf",
+        **kwargs,
+    ):
+
+        if n_components is not None:
+            if not isinstance(n_components, int) or isinstance(n_components, bool):
+                raise TypeError("`n_components` should be integer")
+            if n_components < 1:
+                raise ValueError("`n_components` should be strictly positive")
+
+        if not isinstance(kernel, str):
+            raise TypeError("`kernel` should be a string!")
+        if kernel not in ["linear", "poly", "rbf", "sigmoid", "cosine"]:
+            raise ValueError(
+                "`kernel` should be one of {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}"
+            )
+
+        self.n_components = n_components
+        self.kernel = kernel
+
+        super().__init__(window_size, stride, **kwargs)
+
     def _initialize_detector(self, **kwargs) -> KPCA:
-        return KPCA(**kwargs)
+        return KPCA(n_components=self.n_components, kernel=self.kernel, **kwargs)
 
     def _supervision(self):
         return Supervision.SEMI_SUPERVISED

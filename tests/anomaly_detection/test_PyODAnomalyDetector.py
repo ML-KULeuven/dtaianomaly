@@ -1,38 +1,10 @@
 
 import pytest
 from dtaianomaly import anomaly_detection
+from dtaianomaly.utils import all_classes
 
 
-@pytest.mark.parametrize('detector_class,kwargs', [
-    (anomaly_detection.ClusterBasedLocalOutlierFactor, {'n_clusters': 4, 'alpha': 0.75, 'beta': 5}),
-    # (anomaly_detection.CopulaBasedOutlierDetector, {}),  # Parameter-free
-    (anomaly_detection.HistogramBasedOutlierScore, {'n_bins': 'auto', 'alpha': 0.5}),
-    (anomaly_detection.IsolationForest, {'n_estimators': 42, 'max_samples': 'auto'}),
-    (anomaly_detection.KernelPrincipalComponentAnalysis, {'kernel': 'poly', 'n_components': 0.5}),
-    (anomaly_detection.KNearestNeighbors, {'n_neighbors': 42, 'metric': 'euclidean'}),
-    (anomaly_detection.LocalOutlierFactor, {'n_neighbors': 3}),
-    (anomaly_detection.OneClassSupportVectorMachine, {'kernel': 'poly'}),
-    (anomaly_detection.PrincipalComponentAnalysis, {'n_components': 0.5}),
-])
-class TestPyodAnomalyDetectorAdditionalArgs:
-
-    def test(self, detector_class, kwargs):
-        detector = detector_class(window_size='fft', **kwargs)
-        for key, value in kwargs.items():
-            assert detector.kwargs[key] == value
-
-
-@pytest.mark.parametrize('detector_class', [
-    anomaly_detection.ClusterBasedLocalOutlierFactor,
-    anomaly_detection.CopulaBasedOutlierDetector,
-    anomaly_detection.HistogramBasedOutlierScore,
-    anomaly_detection.IsolationForest,
-    anomaly_detection.KernelPrincipalComponentAnalysis,
-    anomaly_detection.KNearestNeighbors,
-    anomaly_detection.LocalOutlierFactor,
-    anomaly_detection.OneClassSupportVectorMachine,
-    anomaly_detection.PrincipalComponentAnalysis,
-])
+@pytest.mark.parametrize('detector_class', all_classes(anomaly_detection.PyODAnomalyDetector, return_names=False))
 class TestPyodAnomalyDetector:
 
     def test_initialize_too_small_window_size(self, detector_class):

@@ -17,15 +17,21 @@ Added
 - Implemented ``LongShortTermMemory`` anomaly detector.
 - Implemented ``ConvolutionalNeuralNetwork`` anomaly detector.
 - Implemented ``Transformer`` anomaly detector.
+- #83: Added ``Job`` and ``JobBasedWorkflow`` for more fine-grained setting of the workflows
+- #122: Added option to plot multiple anomaly scores in ``plot_anomaly_scores``.
 
 Changed
 ^^^^^^^
 - Removed unnecessary notebooks (from ./notebooks), which were already
   discussed in the documentation (under ./docs/getting_started/examples)
   to avoid redundancy.
+- #119: Removed deprecated dependency on typing.
+- #121: Added most important parameters of PyOD detectors explicitly in the class, rather
+  than including them in the kwargs.
 
 Fixed
 ^^^^^
+- #99: Removed ``EvaluationPipeline``, which was only used for the ``Workflow``.
 
 [0.4.1] - 2025-05-22
 --------------------

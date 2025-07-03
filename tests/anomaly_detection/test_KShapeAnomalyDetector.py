@@ -28,6 +28,23 @@ class TestKShapeAnomalyDetector:
         KShapeAnomalyDetector(100)
         KShapeAnomalyDetector('fft')
 
+    def test_n_clusters(self):
+        KShapeAnomalyDetector(15, n_clusters=2)
+        KShapeAnomalyDetector(15, n_clusters=4)
+        KShapeAnomalyDetector(15, n_clusters=8)
+        with pytest.raises(TypeError):
+            KShapeAnomalyDetector(15, n_clusters='6')
+        with pytest.raises(TypeError):
+            KShapeAnomalyDetector(15, n_clusters=6.0)
+        with pytest.raises(TypeError):
+            KShapeAnomalyDetector(15, n_clusters=True)
+        with pytest.raises(ValueError):
+            KShapeAnomalyDetector(15, n_clusters=0)
+        with pytest.raises(ValueError):
+            KShapeAnomalyDetector(15, n_clusters=-1)
+        with pytest.raises(ValueError):
+            KShapeAnomalyDetector(15, n_clusters=1)
+
     def test_initialize_non_float_sequence_length_multiplier(self):
         with pytest.raises(TypeError):
             KShapeAnomalyDetector(window_size=15, sequence_length_multiplier=True)
