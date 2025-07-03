@@ -250,7 +250,12 @@ def _adjust_nhead(d_model, nhead) -> int:
         (d_model // nhead) * nhead == d_model
 
     is satisfied. This is done by finding the value closest to nhead which
-    satisfies the constraint. This value can thus be larger or smaller.
+    satisfies the constraint. This value can thus be larger or smaller. If
+    the constraint is not satisfied by the given values, and there are
+    two values equally far from nhead that satisfy the constraint, then the
+    smaller value is returned (e.g., the constraint is not satisfied if
+    d_model=100 and nhead=3, but it is satisfied for both 2 and 4, but 2
+    will be returned since it is lower).
     """
     if d_model % nhead == 0:
         return nhead  # Already valid
@@ -259,10 +264,10 @@ def _adjust_nhead(d_model, nhead) -> int:
     lower = nhead - 1
     upper = nhead + 1
 
-    while lower > 0 or upper <= d_model:
-        if lower > 0 and d_model % lower == 0:
+    while lower > 1 and upper <= d_model:
+        if d_model % lower == 0:
             return lower
-        if upper <= d_model and d_model % upper == 0:
+        if d_model % upper == 0:
             return upper
         lower -= 1
         upper += 1

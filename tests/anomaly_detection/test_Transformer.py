@@ -236,6 +236,7 @@ class TestAdjustNhead:
         (17, 8, 1),  # prime number d_model
         (120, 15, 15),  # already valid
         (128, 12, 8),
+        (5, 3, 1),
     ])
     def test(self, d_model, nhead, expected):
         assert _adjust_nhead(d_model, nhead) == expected
