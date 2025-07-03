@@ -24,7 +24,7 @@ class LocalOutlierFactor(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_neighbors: int, default=5
+    n_neighbors: int, default=20
         The number of neighbors to use for the nearest neighbor queries.
     metric: str, default='minkowski'
         Distance metric for distance computations. any metric of scikit-learn and
@@ -60,7 +60,7 @@ class LocalOutlierFactor(PyODAnomalyDetector):
         self,
         window_size: int | str,
         stride: int = 1,
-        n_neighbors: int = 5,
+        n_neighbors: int = 20,
         metric: str = "minkowski",
         **kwargs,
     ):
