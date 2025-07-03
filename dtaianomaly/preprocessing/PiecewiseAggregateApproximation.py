@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -42,12 +40,12 @@ class PiecewiseAggregateApproximation(Preprocessor):
 
         self.n = n
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if X.shape[0] <= self.n:
             return X, y
 

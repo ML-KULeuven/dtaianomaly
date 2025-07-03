@@ -69,6 +69,21 @@ Visualization module
    >>> from dtaianomaly.visualization import plot_anomaly_scores, plot_time_series_colored_by_score
    >>> from dtaianomaly.anomaly_detection import IsolationForest
    >>> X, y = demonstration_time_series()
+   >>> y_pred = {
+   ...     'iForest (w=32)': IsolationForest(window_size=32).fit(X).predict_proba(X),
+   ...     'iForest (w=64)': IsolationForest(window_size=64).fit(X).predict_proba(X),
+   ...     'iForest (w=100)': IsolationForest(window_size=100).fit(X).predict_proba(X),
+   ... }
+   >>> fig = plot_anomaly_scores(X, y, y_pred, figsize=(10, 3), method_to_plot=plot_time_series_colored_by_score)
+   >>> fig.suptitle("Example of 'plot_anomaly_scores' with multiple models")  # doctest: +SKIP
+
+.. plot::
+   :context: close-figs
+
+   >>> from dtaianomaly.data import demonstration_time_series
+   >>> from dtaianomaly.visualization import plot_anomaly_scores, plot_time_series_colored_by_score
+   >>> from dtaianomaly.anomaly_detection import IsolationForest
+   >>> X, y = demonstration_time_series()
    >>> detector = IsolationForest(window_size=100).fit(X)
    >>> y_pred = detector.predict_proba(X)
    >>> confidence = detector.predict_confidence(X)

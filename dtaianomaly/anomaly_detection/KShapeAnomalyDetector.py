@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple, Union
-
 import numpy as np
 import stumpy
 from scipy.spatial.distance import pdist, squareform
@@ -34,6 +32,8 @@ class KShapeAnomalyDetector(BaseDetector):
     window_size: int or str
         The window size, the length of the subsequences that will be detected as anomalies. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
+    n_clusters: int, default=3
+        The number of clusters to use for KShape clustering.
     sequence_length_multiplier: float, default=4
         The amount by which the window size should be multiplied to create
         sliding windows for clustering the data using KShape. Should be
@@ -71,19 +71,21 @@ class KShapeAnomalyDetector(BaseDetector):
     KshapeAD only handles univariate time series.
     """
 
-    window_size: Union[str, int]
+    window_size: str | int
+    n_clusters: int
     sequence_length_multiplier: float
     overlap_rate: float
     kwargs: dict
 
     window_size_: int
-    centroids_: List[np.array]
+    centroids_: list[np.array]
     weights_: np.array
     kshape_: KShape
 
     def __init__(
         self,
-        window_size: Union[str, int],
+        window_size: str | int,
+        n_clusters: int = 3,
         sequence_length_multiplier: float = 4,
         overlap_rate: float = 0.5,
         **kwargs,
@@ -91,6 +93,11 @@ class KShapeAnomalyDetector(BaseDetector):
         super().__init__(Supervision.UNSUPERVISED)
 
         check_is_valid_window_size(window_size)
+
+        if not isinstance(n_clusters, int) or isinstance(n_clusters, bool):
+            raise TypeError("`n_clusters` should be integer")
+        if n_clusters <= 1:
+            raise ValueError("`n_clusters` should be at least 2")
 
         if not isinstance(sequence_length_multiplier, (float, int)) or isinstance(
             sequence_length_multiplier, bool
@@ -107,14 +114,15 @@ class KShapeAnomalyDetector(BaseDetector):
             raise ValueError("`overlap_rate` should be at larger than 0 and at most 1")
 
         # Check if KShape can be initialized
-        KShape(**kwargs)
+        KShape(n_clusters=n_clusters, **kwargs)
 
         self.window_size = window_size
+        self.n_clusters = n_clusters
         self.sequence_length_multiplier = sequence_length_multiplier
         self.overlap_rate = overlap_rate
         self.kwargs = kwargs
 
-    def theta_(self) -> List[Tuple[np.array, float]]:
+    def theta_(self) -> list[(np.array, float)]:
         """
         Computes :math:`\\Theta = \\{(C_0, w_0), \\dots, (C_k, w_k)\\}`, the normal
         behavior consisting of  :math:`k` clusters.
@@ -129,7 +137,7 @@ class KShapeAnomalyDetector(BaseDetector):
         self.check_is_fitted()
         return list(zip(self.centroids_, self.weights_))
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         # Make sure the data is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
@@ -144,7 +152,7 @@ class KShapeAnomalyDetector(BaseDetector):
         windows = sliding_window(X, sequence_length, stride)
 
         # Apply K-Shape clustering
-        self.kshape_ = KShape(**self.kwargs)
+        self.kshape_ = KShape(n_clusters=self.n_clusters, **self.kwargs)
         cluster_labels = self.kshape_.fit_predict(windows)
 
         # Extract the centroids

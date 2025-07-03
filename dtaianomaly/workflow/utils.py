@@ -1,32 +1,14 @@
-from typing import Dict, List, TypeVar, Union
+from typing import TypeVar
 
-from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
-from dtaianomaly.pipeline import EvaluationPipeline
-from dtaianomaly.preprocessing import Preprocessor
 from dtaianomaly.thresholding import Thresholding
 
 T = TypeVar("T")
 
 
-def build_pipelines(
-    preprocessors: List[Preprocessor],
-    detectors: List[BaseDetector],
-    metrics: List[ProbaMetric],
-) -> List[EvaluationPipeline]:
-    """The given lists are assumed to be non-empty."""
-    return [
-        EvaluationPipeline(
-            preprocessor=preprocessor, detector=detector, metrics=metrics
-        )
-        for preprocessor in preprocessors
-        for detector in detectors
-    ]
-
-
 def convert_to_proba_metrics(
-    metrics: List[Metric], thresholds: List[Thresholding]
-) -> List[ProbaMetric]:
+    metrics: list[Metric], thresholds: list[Thresholding]
+) -> list[ProbaMetric]:
     """The given lists are assumed to be non-empty."""
     proba_metrics = []
     for metric in metrics:
@@ -40,7 +22,7 @@ def convert_to_proba_metrics(
     return proba_metrics
 
 
-def convert_to_list(value: Union[T, List[T]]) -> List[T]:
+def convert_to_list(value: T | list[T]) -> list[T]:
     """If a list is given, it is assumed to be non-empty."""
     if not isinstance(value, list):
         return [

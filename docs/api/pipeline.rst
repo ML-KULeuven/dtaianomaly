@@ -6,6 +6,3 @@ Pipeline module
 
 .. autoclass:: dtaianomaly.pipeline.Pipeline
    :members:
-
-.. autoclass:: dtaianomaly.pipeline.EvaluationPipeline
-   :members:

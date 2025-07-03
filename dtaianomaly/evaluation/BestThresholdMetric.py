@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from dtaianomaly.evaluation.metrics import BinaryMetric, ProbaMetric
@@ -59,7 +57,7 @@ class BestThresholdMetric(ProbaMetric):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        thresholds: Optional[np.array] = None,
+        thresholds: np.array = None,
     ) -> float:
         """
         Effectively compute the score corresponding to the best threshold.

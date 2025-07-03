@@ -10,9 +10,9 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
 
     CBLOF is a cluster-based LOF which uses the distance to
     clusters in the data to compute an outlier score. Specifically, CBLOF first
-    clusters the data using some clustering algorithm (by default K-means). Next,
-    the clusters are separated in the so-called 'large clusters' $LC$ and 'small
-    clusters' $SC$, depending on the parameters :math:`\\alpha` and :math:`\\beta`.
+    clusters the data using some clustering algorithm (K-means in this implemention). Next,
+    the clusters are separated in the so-called 'large clusters' :math:`LC` and 'small
+    clusters' :math:`SC`, depending on the parameters :math:`\\alpha` and :math:`\\beta`.
     Then, the Cluster-based Local outlier Factor of an observation :math:`o` belonging
     to cluster :math:`C_i` is computed as follows:
 
@@ -38,6 +38,15 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
+    n_clusters: int, default=8
+        The number of clusters to form and the number of centroids to generate.
+    alpha: float in [0.5, 1.0], default=0.9
+        The ratio for deciding small and large clusters. :math:`\\alpha` equals the ratio of number
+        of samlples in large clusters to the number of samples in small clusters.
+    beta: float, default=5.0
+        The ratio for deciding small and large clusters. :math:`\\beta` equals a cutoff for
+        the small and large clusters, such that for clusters ordered by size, we have that
+        :math:`\\lvert C_k \\rvert / \\lvert C_{k+1} \\rvert = \\beta`.
     **kwargs
         Arguments to be passed to the PyOD CBLOF.
 
@@ -62,8 +71,44 @@ class ClusterBasedLocalOutlierFactor(PyODAnomalyDetector):
     CBLOF inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
     """
 
+    n_clusters: int
+    alpha: float
+    beta: float
+
+    def __init__(
+        self,
+        window_size: int | str,
+        stride: int = 1,
+        n_clusters: int = 8,
+        alpha: float = 0.9,
+        beta: float = 5.0,
+        **kwargs,
+    ):
+        if not isinstance(n_clusters, int) or isinstance(n_clusters, bool):
+            raise TypeError("`n_clusters` should be integer")
+        if n_clusters <= 1:
+            raise ValueError("`n_clusters` should be at least 2")
+
+        if not isinstance(alpha, (float, int)) or isinstance(alpha, bool):
+            raise TypeError("`alpha` should be numeric")
+        if alpha < 0.5 or alpha > 1:
+            raise ValueError("`alpha` must be in [0.5, 1]")
+
+        if not isinstance(beta, (float, int)) or isinstance(beta, bool):
+            raise TypeError("`beta` should be numeric")
+        if beta < 1.0:
+            raise ValueError("`beta` must be at least 1")
+
+        self.n_clusters = n_clusters
+        self.alpha = alpha
+        self.beta = beta
+
+        super().__init__(window_size, stride, **kwargs)
+
     def _initialize_detector(self, **kwargs) -> CBLOF:
-        return CBLOF(**kwargs)
+        return CBLOF(
+            n_clusters=self.n_clusters, alpha=self.alpha, beta=self.beta, **kwargs
+        )
 
     def _supervision(self):
         return Supervision.UNSUPERVISED

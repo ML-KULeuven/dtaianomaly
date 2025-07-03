@@ -1,3 +1,7 @@
+from typing import Literal
+
+import numpy as np
+import scipy
 from pyod.models.knn import KNN
 
 from dtaianomaly.anomaly_detection.BaseDetector import Supervision
@@ -23,6 +27,18 @@ class KNearestNeighbors(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
+    n_neighbors: int, default=5
+        The number of neighbors to use for the nearest neighbor queries.
+    method: {'largest', 'mean', 'median'}, default='largest'
+        How to compute the outlier scores given the nearest neighbors:
+
+        - ``'largest'``: Use the distance to the kth neighbor.
+        - ``'mean'``: Use the mean distance to the k nearest neighbors.
+        - ``'median'``: Use the median distance to the k nearest neighbors.
+
+    metric: str, default='minkowski'
+        Distance metric for distance computations. any metric of scikit-learn and
+        scipy.spatial.distance can be used.
     **kwargs
         Arguments to be passed to the PyOD isolation forest.
 
@@ -47,8 +63,48 @@ class KNearestNeighbors(PyODAnomalyDetector):
     The K-nearest neighbors inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
     """
 
+    n_neighbors: int
+    method: Literal["largest", "mean", "median"]
+    metric: str
+
+    def __init__(
+        self,
+        window_size: int | str,
+        stride: int = 1,
+        n_neighbors: int = 5,
+        method: Literal["largest", "mean", "median"] = "largest",
+        metric: str = "minkowski",
+        **kwargs,
+    ):
+
+        if not isinstance(n_neighbors, int) or isinstance(n_neighbors, bool):
+            raise TypeError("`n_neighbors` should be integer")
+        if n_neighbors < 1:
+            raise ValueError("`n_neighbors` should be at least 1")
+
+        if not isinstance(method, str):
+            raise TypeError("`method` must be a string")
+        if method not in ["largest", "mean", "median"]:
+            raise ValueError("`method` must be one of ['largest', 'mean', 'median']")
+
+        if not isinstance(metric, str):
+            raise TypeError("`metric` must be a string")
+
+        scipy.spatial.distance.pdist(np.array([[0, 0], [1, 1]]), metric=metric)
+
+        self.n_neighbors = n_neighbors
+        self.method = method
+        self.metric = metric
+
+        super().__init__(window_size, stride, **kwargs)
+
     def _initialize_detector(self, **kwargs) -> KNN:
-        return KNN(**kwargs)
+        return KNN(
+            n_neighbors=self.n_neighbors,
+            method=self.method,
+            metric=self.metric,
+            **kwargs,
+        )
 
     def _supervision(self):
         return Supervision.UNSUPERVISED

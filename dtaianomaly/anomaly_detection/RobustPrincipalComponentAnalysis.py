@@ -1,7 +1,5 @@
 """This function is adapted from TSB-AD"""
 
-from typing import Optional, Union
-
 import numpy as np
 from sklearn.decomposition import PCA
 
@@ -72,7 +70,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     time series can be obtained by setting ``window_size = 1``.
     """
 
-    window_size: Union[int, str]
+    window_size: int | str
     stride: int
     max_iter: int
     kwargs: dict
@@ -81,7 +79,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
 
     def __init__(
         self,
-        window_size: Union[str, int],
+        window_size: int | str,
         stride: int = 1,
         max_iter: int = 1000,
         **kwargs,
@@ -102,7 +100,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         self.max_iter = max_iter
         self.kwargs = kwargs
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         # Compute the windows
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         sliding_windows = sliding_window(X, self.window_size_, self.stride)

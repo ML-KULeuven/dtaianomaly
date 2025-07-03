@@ -4,7 +4,6 @@ import os.path
 import pickle
 from collections import ChainMap
 from pathlib import Path
-from typing import Optional, Union
 
 import numpy as np
 import scipy
@@ -51,9 +50,7 @@ class BaseDetector(utils.PrettyPrintable):
             raise TypeError("'supervision' should be a valid 'Supervision' type!")
         self.supervision = supervision
 
-    def fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs
-    ) -> "BaseDetector":
+    def fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> "BaseDetector":
         """
         Abstract method, fit this detector to the given data.
 
@@ -80,7 +77,7 @@ class BaseDetector(utils.PrettyPrintable):
         return self
 
     @abc.abstractmethod
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         """Effectively fit this detector."""
 
     def is_fitted(self) -> bool:
@@ -298,7 +295,7 @@ class BaseDetector(utils.PrettyPrintable):
 
         return exWise_conf
 
-    def save(self, path: Union[str, Path]) -> None:
+    def save(self, path: str | Path) -> None:
         """
         Save detector to disk as a pickle file with extension `.dtai`. If the given
         path consists of multiple subdirectories, then the not existing subdirectories
@@ -322,7 +319,7 @@ class BaseDetector(utils.PrettyPrintable):
             pickle.dump(self, f)
 
 
-def load_detector(path: Union[str, Path]) -> BaseDetector:
+def load_detector(path: str | Path) -> BaseDetector:
     """
     Load a detector from disk.
 

@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -44,12 +42,12 @@ class Differencing(Preprocessor):
         self.order = order
         self.window_size = window_size
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "Preprocessor":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         X_ = X
         for _ in range(self.order):
             concat = np.concatenate([X_[: self.window_size], X_])

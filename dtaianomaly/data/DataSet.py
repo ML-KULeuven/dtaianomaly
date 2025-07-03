@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import numpy as np
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
@@ -46,11 +44,11 @@ class DataSet:
 
     X_test: np.ndarray
     y_test: np.array
-    X_train: Optional[np.ndarray]
-    y_train: Optional[np.array]
-    feature_names: Optional[List[str]]
-    time_steps_test: Optional[np.array]
-    time_steps_train: Optional[np.array]
+    X_train: np.ndarray | None
+    y_train: np.ndarray | None
+    feature_names: list[str] | None
+    time_steps_test: np.ndarray | None
+    time_steps_train: np.ndarray | None
 
     def __init__(
         self,
@@ -58,7 +56,7 @@ class DataSet:
         y_test: np.array,
         X_train: np.ndarray = None,
         y_train: np.array = None,
-        feature_names: List[str] = None,
+        feature_names: list[str] = None,
         time_steps_test: np.array = None,
         time_steps_train: np.array = None,
     ):
@@ -110,8 +108,8 @@ class DataSet:
     def check_is_valid(
         X_test: np.ndarray,
         y_test: np.ndarray,
-        X_train: Optional[np.ndarray],
-        y_train: Optional[np.ndarray],
+        X_train: np.ndarray | None,
+        y_train: np.ndarray | None,
     ) -> None:
         """
         Checks if the given elements refer o a valid ``DataSet``. If the elements
@@ -218,7 +216,7 @@ class DataSet:
         except ValueError:
             return False
 
-    def compatible_supervision(self) -> List[Supervision]:
+    def compatible_supervision(self) -> list[Supervision]:
         """
         Get the compatible supervision types for this data set.
 

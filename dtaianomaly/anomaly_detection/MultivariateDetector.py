@@ -1,6 +1,5 @@
 import copy
 import warnings
-from typing import List, Optional
 
 import numpy as np
 
@@ -52,7 +51,7 @@ class MultivariateDetector(BaseDetector):
     detector: BaseDetector
     aggregation: str
     raise_warning_for_univariate: bool
-    fitted_detectors_: List[BaseDetector]
+    fitted_detectors_: list[BaseDetector]
 
     def __init__(
         self,
@@ -80,7 +79,7 @@ class MultivariateDetector(BaseDetector):
         self.aggregation = aggregation
         self.raise_warning_for_univariate = raise_warning_for_univariate
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
 
         # Raise a warning if fitted on univariate data
         if utils.is_univariate(X):

@@ -1,5 +1,3 @@
-from typing import List, Optional, Union
-
 import numpy as np
 
 from dtaianomaly.anomaly_detection import BaseDetector
@@ -31,7 +29,7 @@ class Pipeline(BaseDetector):
 
     def __init__(
         self,
-        preprocessor: Union[Preprocessor, List[Preprocessor]],
+        preprocessor: Preprocessor | list[Preprocessor],
         detector: BaseDetector,
     ):
         if not (
@@ -51,7 +49,7 @@ class Pipeline(BaseDetector):
             self.preprocessor = preprocessor
         self.detector = detector
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         X, y = self.preprocessor.fit_transform(X=X, y=y)
         self.detector.fit(X=X, y=y, **kwargs)
 

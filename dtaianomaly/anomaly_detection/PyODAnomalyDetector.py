@@ -1,5 +1,4 @@
 import abc
-from typing import Optional, Union
 
 import numpy as np
 from pyod.models.base import BaseDetector as PyODBaseDetector
@@ -41,13 +40,13 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
         The PyOD anomaly detector
     """
 
-    window_size: Union[int, str]
+    window_size: int | str
     stride: int
     kwargs: dict
     window_size_: int
     pyod_detector_: PyODBaseDetector
 
-    def __init__(self, window_size: Union[str, int], stride: int = 1, **kwargs):
+    def __init__(self, window_size: int | str, stride: int = 1, **kwargs):
         super().__init__(self._supervision())
 
         check_is_valid_window_size(window_size)
@@ -91,7 +90,7 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
             The supervision of this PyOD anomaly detector.
         """
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         self.pyod_detector_ = self._initialize_detector(**self.kwargs)
         self.pyod_detector_.fit(sliding_window(X, self.window_size_, self.stride))

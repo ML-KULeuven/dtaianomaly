@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
@@ -47,7 +45,7 @@ class StandardScaler(Preprocessor):
     def __init__(self, min_std: float = 1e-9):
         self.min_std = min_std
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "StandardScaler":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "StandardScaler":
         if len(X.shape) == 1 or X.shape[1] == 1:
             # univariate case
             self.mean_ = np.array([np.nanmean(X)])
@@ -60,8 +58,8 @@ class StandardScaler(Preprocessor):
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         if not (hasattr(self, "mean_") and hasattr(self, "std_")):
             raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
         if not (

@@ -1,5 +1,4 @@
 from abc import ABC
-from typing import Optional, Tuple
 
 import numba as nb
 import numpy as np
@@ -13,13 +12,13 @@ class RangeAucMetric(ProbaMetric, ABC):
     the confusion matrix.
     """
 
-    buffer_size: Optional[int]
+    buffer_size: int | None
     compatibility_mode: bool
     max_samples: int
 
     def __init__(
         self,
-        buffer_size: Optional[int] = None,
+        buffer_size: int = None,
         compatibility_mode: bool = False,
         max_samples: int = 250,
     ):
@@ -42,7 +41,7 @@ class RangeAucMetric(ProbaMetric, ABC):
         self.max_samples = max_samples
 
     @staticmethod
-    def _anomaly_bounds(y_true: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _anomaly_bounds(y_true: np.ndarray) -> (np.ndarray, np.ndarray):
         """corresponds to range_convers_new"""
         # convert to boolean/binary
         labels = y_true > 0
@@ -54,9 +53,7 @@ class RangeAucMetric(ProbaMetric, ABC):
         ends = index[labels == -1]
         return starts, ends
 
-    def _extend_anomaly_labels(
-        self, y_true: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _extend_anomaly_labels(self, y_true: np.ndarray) -> (np.ndarray, np.ndarray):
         """Extends the anomaly labels with slopes on both ends. Makes the labels continuous instead of binary."""
         starts, ends = self._anomaly_bounds(y_true)
 
@@ -113,7 +110,7 @@ class RangeAucMetric(ProbaMetric, ABC):
 
     def _range_pr_roc_auc_support(
         self, y_true: np.ndarray, y_score: np.ndarray
-    ) -> Tuple[float, float]:
+    ) -> (float, float):
         y_true_cont, anomalies = self._extend_anomaly_labels(y_true)
         thresholds = self._uniform_threshold_sampling(y_score)
         p = np.average([np.sum(y_true), np.sum(y_true_cont)])
@@ -198,7 +195,7 @@ class RangeAreaUnderPR(RangeAucMetric):
 
     def __init__(
         self,
-        buffer_size: Optional[int] = None,
+        buffer_size: int = None,
         compatibility_mode: bool = False,
         max_samples: int = 250,
     ):
@@ -238,7 +235,7 @@ class RangeAreaUnderROC(RangeAucMetric):
 
     def __init__(
         self,
-        buffer_size: Optional[int] = None,
+        buffer_size: int = None,
         compatibility_mode: bool = False,
         max_samples: int = 250,
     ):

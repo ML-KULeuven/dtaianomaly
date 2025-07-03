@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from dtaianomaly import utils
@@ -46,12 +44,12 @@ class MedianMethod(BaseDetector):
     """
 
     neighborhood_size_before: int
-    neighborhood_size_after: Optional[int]
+    neighborhood_size_after: int | None
 
     def __init__(
         self,
         neighborhood_size_before: int,
-        neighborhood_size_after: Optional[int] = None,
+        neighborhood_size_after: int = None,
     ):
         super().__init__(Supervision.UNSUPERVISED)
 
@@ -73,7 +71,7 @@ class MedianMethod(BaseDetector):
         self.neighborhood_size_before = neighborhood_size_before
         self.neighborhood_size_after = neighborhood_size_after
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         """Should not do anything."""
 
     def _decision_function(self, X: np.ndarray) -> np.array:

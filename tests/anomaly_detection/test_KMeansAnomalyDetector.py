@@ -24,3 +24,20 @@ class TestKMeansAnomalyDetector:
         assert str(KMeansAnomalyDetector('fft')) == "KMeansAnomalyDetector(window_size='fft')"
         assert str(KMeansAnomalyDetector(15, 3)) == "KMeansAnomalyDetector(window_size=15,stride=3)"
         assert str(KMeansAnomalyDetector(25, n_clusters=3)) == "KMeansAnomalyDetector(window_size=25,n_clusters=3)"
+
+    def test_n_clusters(self):
+        KMeansAnomalyDetector(15, n_clusters=2)
+        KMeansAnomalyDetector(15, n_clusters=4)
+        KMeansAnomalyDetector(15, n_clusters=8)
+        with pytest.raises(TypeError):
+            KMeansAnomalyDetector(15, n_clusters='6')
+        with pytest.raises(TypeError):
+            KMeansAnomalyDetector(15, n_clusters=6.0)
+        with pytest.raises(TypeError):
+            KMeansAnomalyDetector(15, n_clusters=True)
+        with pytest.raises(ValueError):
+            KMeansAnomalyDetector(15, n_clusters=0)
+        with pytest.raises(ValueError):
+            KMeansAnomalyDetector(15, n_clusters=-1)
+        with pytest.raises(ValueError):
+            KMeansAnomalyDetector(15, n_clusters=1)

@@ -5,13 +5,13 @@ import pytest
 import warnings
 import numpy as np
 
-from dtaianomaly.workflow import Workflow
-from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, demonstration_time_series, PathDataLoader, DemonstrationTimeSeriesLoader
+from dtaianomaly.workflow import Workflow, JobBasedWorkflow
+from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, DemonstrationTimeSeriesLoader
 from dtaianomaly.evaluation import Precision, Recall, AreaUnderROC
 from dtaianomaly.thresholding import TopN, FixedCutoff
 from dtaianomaly.preprocessing import Identity, StandardScaler, Preprocessor
 from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest, LocalOutlierFactor, BaseDetector, Supervision, RandomDetector
-from dtaianomaly.workflow.Workflow import _get_train_test_data
+from dtaianomaly.workflow.JobBasedWorkflow import _get_train_test_data
 
 
 class TestWorkflowInitialization:
@@ -29,8 +29,16 @@ class TestWorkflowInitialization:
             n_jobs=4,
             trace_memory=True
         )
-        assert len(workflow.pipelines) == 4
-        assert workflow.provided_preprocessors
+        assert len(workflow.jobs) == 8
+        assert workflow.provided_preprocessors()
+
+    def test_invalid_jobs(self):
+        with pytest.raises(TypeError):
+            JobBasedWorkflow(
+                jobs=[1, 2, 3],
+                metrics=[Precision(), Recall(), AreaUnderROC()],
+                thresholds=[TopN(10), FixedCutoff(0.5)],
+            )
 
     def test_no_dataloaders(self):
         with pytest.raises(ValueError):
@@ -86,8 +94,8 @@ class TestWorkflowInitialization:
             n_jobs=4,
             trace_memory=True
         )
-        assert all(isinstance(pipeline.pipeline.preprocessor, Identity) for pipeline in workflow.pipelines)
-        assert not workflow.provided_preprocessors
+        assert all(not job.has_preprocessor for job in workflow.jobs)
+        assert not workflow.provided_preprocessors()
 
     def test_empty_preprocessors(self, tmp_path_factory):
         workflow = Workflow(
@@ -102,8 +110,8 @@ class TestWorkflowInitialization:
             n_jobs=4,
             trace_memory=True
         )
-        assert all(isinstance(pipeline.pipeline.preprocessor, Identity) for pipeline in workflow.pipelines)
-        assert not workflow.provided_preprocessors
+        assert all(not job.has_preprocessor for job in workflow.jobs)
+        assert not workflow.provided_preprocessors()
 
     def test_no_thresholds_binary_metrics(self, tmp_path_factory):
         with pytest.raises(ValueError):

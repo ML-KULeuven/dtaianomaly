@@ -1,7 +1,6 @@
 import abc
 import os
 from pathlib import Path
-from typing import List, Type, Union
 
 from dtaianomaly.data.LazyDataLoader import LazyDataLoader
 
@@ -24,7 +23,7 @@ class PathDataLoader(LazyDataLoader, abc.ABC):
 
     path: str
 
-    def __init__(self, path: Union[str, Path], do_caching: bool = False):
+    def __init__(self, path: str | Path, do_caching: bool = False):
         super().__init__(do_caching)
         if not (Path(path).is_file() or Path(path).is_dir()):
             raise FileNotFoundError(f"No such file or directory: {path}")
@@ -32,8 +31,8 @@ class PathDataLoader(LazyDataLoader, abc.ABC):
 
 
 def from_directory(
-    directory: Union[str, Path], dataloader: Type[PathDataLoader], **kwargs
-) -> List[PathDataLoader]:
+    directory: str | Path, dataloader: type[PathDataLoader], **kwargs
+) -> list[PathDataLoader]:
     """
     Construct a `PathDataLoader` instance for every file in the given `directory`
 

@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 
 from dtaianomaly.preprocessing.Preprocessor import Preprocessor
@@ -31,14 +29,12 @@ class ExponentialMovingAverage(Preprocessor):
             raise ValueError("Alpha must be in the open interval ]0, 1[")
         self.alpha = alpha
 
-    def _fit(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> "ExponentialMovingAverage":
+    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "ExponentialMovingAverage":
         return self
 
     def _transform(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        self, X: np.ndarray, y: np.ndarray = None
+    ) -> (np.ndarray, np.ndarray | None):
         X_ = (
             np.frompyfunc(lambda a, b: self.alpha * a + (1 - self.alpha) * b, 2, 1)
             .accumulate(X)

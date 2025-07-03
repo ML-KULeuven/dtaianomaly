@@ -24,11 +24,18 @@ archive, and compute the area under the ROC and PR curves:
 ...     metrics=[AreaUnderROC(), AreaUnderPR()]
 ... )
 
-We refer to the `documentation <https://dtaianomaly.readthedocs.io/en/stable/getting_started/quantitative_evaluation.html>`_
+We refer to the `documentation <https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/quantitative_evaluation.html>`_
 for more information regarding the configuration and use of a Workflow.
 """
 
+from .JobBasedWorkflow import Job, JobBasedWorkflow
 from .Workflow import Workflow
 from .workflow_from_config import interpret_config, workflow_from_config
 
-__all__ = ["Workflow", "workflow_from_config", "interpret_config"]
+__all__ = [
+    "Workflow",
+    "Job",
+    "JobBasedWorkflow",
+    "workflow_from_config",
+    "interpret_config",
+]

@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 import stumpy
 
@@ -62,7 +60,7 @@ class MatrixProfileDetector(BaseDetector):
     for each dimension separately and then summed up.
     """
 
-    window_size: Union[int, str]
+    window_size: int | str
     normalize: bool
     p: float
     k: int
@@ -72,7 +70,7 @@ class MatrixProfileDetector(BaseDetector):
 
     def __init__(
         self,
-        window_size: Union[int, str],
+        window_size: int | str,
         normalize: bool = True,
         p: float = 2.0,
         k: int = 1,
@@ -104,7 +102,7 @@ class MatrixProfileDetector(BaseDetector):
         self.k = k
         self.novelty = novelty
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         if self.novelty:
             self.X_reference_ = np.asarray(X)

@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 
 import numba as nb
 import numpy as np
@@ -126,7 +126,7 @@ class DWT_MLEAD(BaseDetector):
         self.quantile_epsilon = quantile_epsilon
         self.padding_mode = padding_mode
 
-    def _fit(self, X: np.ndarray, y: Optional[np.ndarray] = None, **kwargs) -> None:
+    def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         """Should not do anything."""
 
     def _decision_function(self, X: np.ndarray) -> np.array:
@@ -179,7 +179,7 @@ class DWT_MLEAD(BaseDetector):
 
     def _multilevel_dwt(
         self, X: np.ndarray, max_level: int
-    ) -> Tuple[np.ndarray, List[np.ndarray], List[np.ndarray]]:
+    ) -> (np.ndarray, list[np.ndarray], list[np.ndarray]):
         ls_ = np.arange(self.start_level - 1, max_level - 1, dtype=np.int_) + 1
         as_, ds_ = _multilevel_haar_transform(X, max_level - 1)
         as_ = as_[self.start_level :]
@@ -236,7 +236,7 @@ class DWT_MLEAD(BaseDetector):
 
     @staticmethod
     def _push_anomaly_counts_down_to_points(
-        coef_anomaly_counts: List[np.ndarray], m: int, n: int
+        coef_anomaly_counts: list[np.ndarray], m: int, n: int
     ) -> np.ndarray:
         # sum up counters of detail coeffs (orig. D^l) and approx coeffs (orig. C^l)
         anomaly_counts = coef_anomaly_counts[0::2] + coef_anomaly_counts[1::2]
@@ -250,7 +250,7 @@ class DWT_MLEAD(BaseDetector):
         return counter[:n]
 
 
-def _pad_series(x: np.ndarray, padding_mode) -> Tuple[np.ndarray, int, int]:
+def _pad_series(x: np.ndarray, padding_mode) -> (np.ndarray, int, int):
     """Pad input signal to the next power of 2."""
     n = x.shape[0]
     exp = np.ceil(np.log2(n))
@@ -258,7 +258,7 @@ def _pad_series(x: np.ndarray, padding_mode) -> Tuple[np.ndarray, int, int]:
     return np.pad(x, (0, m - n), mode=padding_mode), n, m
 
 
-def _combine_alternating(xs: List[Any], ys: List[Any]) -> Iterable[Any]:
+def _combine_alternating(xs: list, ys: list) -> Iterable:
     """Combine two lists by alternating their elements."""
     for x, y in zip(xs, ys):
         yield x
@@ -267,7 +267,7 @@ def _combine_alternating(xs: List[Any], ys: List[Any]) -> Iterable[Any]:
 
 def _multilevel_haar_transform(
     x: np.ndarray, levels: int = 1
-) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+) -> (list[np.ndarray], list[np.ndarray]):
     """Perform the multilevel discrete Haar wavelet transform on a given signal.
 
     Captures the approximate and detail coefficients per level. The approximate
@@ -299,7 +299,7 @@ def _multilevel_haar_transform(
 @nb.njit(cache=True, fastmath=True)
 def _haar_transform_iterative(
     x: np.ndarray, levels: int
-) -> Tuple[nb_List[np.ndarray], nb_List[np.ndarray]]:
+) -> (nb_List[np.ndarray], nb_List[np.ndarray]):
     # initialize
     l_approx = nb_List()
     l_approx.append(x)

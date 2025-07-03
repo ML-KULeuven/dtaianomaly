@@ -22,6 +22,13 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride: int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
+    n_components: int or float, default=None
+        The number of components to keep.
+
+        - if ``int``: Use the specified number of components.
+        - if ``float``: Use the percentage of components.
+        - if ``None``: Use all components.
+
     **kwargs:
         Arguments to be passed to the PyOD PCA.
 
@@ -46,8 +53,34 @@ class PrincipalComponentAnalysis(PyODAnomalyDetector):
     PCA inherets from :py:class:`~dtaianomaly.anomaly_detection.PyodAnomalyDetector`.
     """
 
+    n_components: int | float | None
+
+    def __init__(
+        self,
+        window_size: int | str,
+        stride: int = 1,
+        n_components: int | float = None,
+        **kwargs,
+    ):
+
+        if n_components is not None:
+            if not isinstance(n_components, (int, float)) or isinstance(
+                n_components, bool
+            ):
+                raise TypeError("`n_components` should be integer or 'auto'")
+            if isinstance(n_components, int) and n_components < 1:
+                raise ValueError("`n_components` should be strictly positive")
+            if isinstance(n_components, float) and (
+                n_components <= 0 or n_components > 1
+            ):
+                raise ValueError("`n_components` between 0 and 1")
+
+        self.n_components = n_components
+
+        super().__init__(window_size, stride, **kwargs)
+
     def _initialize_detector(self, **kwargs) -> PCA:
-        return PCA(**kwargs)
+        return PCA(n_components=self.n_components, **kwargs)
 
     def _supervision(self):
         return Supervision.SEMI_SUPERVISED

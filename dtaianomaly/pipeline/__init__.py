@@ -1,6 +1,6 @@
 """
-This module contains functionality to combine preprocessing, anomaly detection,
-and evaluation in a single wrapped object.
+This module contains functionality to combine preprocessing and anomaly detection
+ in a single wrapped object.
 
 >>> from dtaianomaly import pipeline
 
@@ -11,7 +11,6 @@ better achieved by implementing the :py:class:`dtaianomaly.preprocessing.Preproc
 :py:class:`dtaianomaly.evaluation.Metric` objects.
 """
 
-from .EvaluationPipeline import EvaluationPipeline
 from .Pipeline import Pipeline
 
-__all__ = ["Pipeline", "EvaluationPipeline"]
+__all__ = ["Pipeline"]
