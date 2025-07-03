@@ -365,8 +365,8 @@ def plot_with_zoom(
 
 def plot_anomaly_scores(
     X: np.array,
-    y: np.array,
-    y_pred: np.array,
+    y: np.ndarray,
+    y_pred: np.ndarray | dict[str, np.ndarray],
     time_steps: np.array = None,
     feature_names: list[str] = None,
     method_to_plot=plot_demarcated_anomalies,
@@ -381,10 +381,14 @@ def plot_anomaly_scores(
     ----------
     X: np.ndarray of shape (n_samples, n_attributes)
         The time series to plot
-    y: np.array of shape (n_samples)
+    y: np.ndarray of shape (n_samples)
         The binary anomaly scores.
-    y_pred: np.array of shape (n_samples)
-        The predicted anomaly scores to plot.
+    y_pred: np.ndarray of shape (n_samples) or dict mapping strings on np.ndarray of shape (n_samples)
+        The predicted anomaly scores to plot. If an array is given, then only
+        one prediction will be plotted. If a dictionary is given, then all
+        values in the dictionary are predicted anomaly scores, which will
+        all be plotted. In this case, the corresponding key will be added
+        in the legend.
     time_steps: np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
@@ -397,7 +401,9 @@ def plot_anomaly_scores(
         (the time steps at which there was an observation) and ``ax``
         (the axis on which the plot should be made).
     confidence: np.array of shape (n_samples), default=None
-        The confidence of the anomaly scores.
+        The confidence of the anomaly scores. If the predictions ``y_pred`` is
+        a dictionary, then the confidence must be ``None`` to ensure that the
+        figure remains clear.
     **kwargs:
         Arguments to be passed to plt.subplots().
 
@@ -406,6 +412,11 @@ def plot_anomaly_scores(
     fig: plt.Figure
         The figure containing the plotted data.
     """
+    if confidence is not None and isinstance(y_pred, dict):
+        raise ValueError(
+            "Confidence can only be given for a model, but multiple sets of anomaly scores were given!"
+        )
+
     # Create the figure
     fig, (ax_data, ax_pred) = plt.subplots(nrows=2, ncols=1, sharex=True, **kwargs)
 
@@ -418,21 +429,27 @@ def plot_anomaly_scores(
         X=X, y=y, ax=ax_data, time_steps=time_steps, feature_names=feature_names
     )
 
-    # Plot the anomaly scores
     ax_pred.set_title("Predicted anomaly scores")
-    ax_pred.plot(time_steps, y_pred, label="Anomaly scores")
-
-    # Predict the confidence interval
-    if confidence is not None:
-        ax_pred.fill_between(
-            time_steps,
-            y_pred - (1 - confidence),
-            y_pred + (1 - confidence),
-            color="gray",
-            alpha=0.5,
-            label="Confidence range",
-        )
+    if isinstance(y_pred, dict):
+        # Plot the anomaly scores
+        for label, predictions in y_pred.items():
+            ax_pred.plot(time_steps, predictions, label=label)
         ax_pred.legend()
+    else:
+        # Plot the anomaly scores
+        ax_pred.plot(time_steps, y_pred, label="Anomaly scores")
+
+        # Predict the confidence interval
+        if confidence is not None:
+            ax_pred.fill_between(
+                time_steps,
+                y_pred - (1 - confidence),
+                y_pred + (1 - confidence),
+                color="gray",
+                alpha=0.5,
+                label="Confidence range",
+            )
+            ax_pred.legend()
 
     # Return the figure
     return fig
