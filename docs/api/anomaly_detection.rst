@@ -48,13 +48,27 @@ Implemented anomaly detectors
    anomaly_detection_algorithms/*
 
 
+.. autoclass:: dtaianomaly.anomaly_detection.Supervision
+
+
 BaseDetector
 ------------
 
 .. autoclass:: dtaianomaly.anomaly_detection.BaseDetector
    :members:
 
-.. autoclass:: dtaianomaly.anomaly_detection.Supervision
+
+BaseNeuralDetector
+------------------
+
+.. autoclass:: dtaianomaly.anomaly_detection.BaseNeuralDetector
+   :members:
+
+.. autoclass:: dtaianomaly.anomaly_detection.BaseNeuralForecastingDetector
+   :members:
+
+.. autoclass:: dtaianomaly.anomaly_detection.BaseNeuralReconstructionDetector
+   :members:
 
 
 Utilities

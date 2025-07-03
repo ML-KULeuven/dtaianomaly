@@ -24,6 +24,11 @@ anomaly_detectors = [
     anomaly_detection.PrincipalComponentAnalysis,
     anomaly_detection.RobustPrincipalComponentAnalysis,
     anomaly_detection.DWT_MLEAD,
+    anomaly_detection.AutoEncoder,
+    anomaly_detection.MultilayerPerceptron,
+    anomaly_detection.ConvolutionalNeuralNetwork,
+    anomaly_detection.LongShortTermMemoryNetwork,
+    anomaly_detection.Transformer,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

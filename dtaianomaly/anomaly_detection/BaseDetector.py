@@ -2,6 +2,7 @@ import abc
 import enum
 import os.path
 import pickle
+from collections import ChainMap
 from pathlib import Path
 from typing import Optional, Union
 
@@ -92,8 +93,20 @@ class BaseDetector(utils.PrettyPrintable):
             True if and only if this detector is fitted, and can be
             used for detecting anomalies.
         """
+
+        def all_annotations(obj) -> ChainMap:
+            """Returns a dictionary-like ChainMap that includes annotations for all
+            attributes defined in cls or inherited from superclasses."""
+            return ChainMap(
+                *(
+                    c.__annotations__
+                    for c in type(obj).__mro__
+                    if "__annotations__" in c.__dict__
+                )
+            )
+
         return all(
-            hasattr(self, attr) for attr in self.__annotations__ if attr.endswith("_")
+            hasattr(self, attr) for attr in all_annotations(self) if attr.endswith("_")
         )
 
     def check_is_fitted(self) -> None:

@@ -43,10 +43,10 @@ class MultivariateDetector(BaseDetector):
     >>> import numpy as np
     >>> from dtaianomaly.anomaly_detection import MultivariateDetector, IsolationForest
     >>> x = np.array([[4, 8], [1, 2], [0, 1], [6, 5], [1, 4], [4, 3], [0, 9], [8, 2], [4, 5], [8, 3]])
-    >>> detector = MultivariateDetector(IsolationForest(window_size=3), aggregation='mean').fit(x)
+    >>> detector = MultivariateDetector(IsolationForest(window_size=3, random_state=0), aggregation='mean').fit(x)
     >>> detector.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-     array([-0.04516386, -0.05749467, -0.06094672, -0.07195298, -0.06011507,
-               -0.04565163, -0.03210046, -0.03650861, -0.04253266, -0.0475362 ])
+    array([-0.03045931, -0.04993609, -0.05237944, -0.07038518, -0.05778077,
+           -0.0489984 , -0.02691477, -0.02928812, -0.02847268, -0.0387197 ])
     """
 
     detector: BaseDetector

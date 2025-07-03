@@ -21,7 +21,7 @@ def is_valid_list(value, target_type) -> bool:
         True if and only if the given ``value`` is a list and all elements in
         the list are of type ``Type``, otherwise False.
     """
-    return isinstance(value, list) and all(
+    return (isinstance(value, list) or isinstance(value, tuple)) and all(
         isinstance(item, target_type) for item in value
     )
 
