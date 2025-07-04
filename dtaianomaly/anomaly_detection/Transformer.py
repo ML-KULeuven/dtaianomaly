@@ -7,6 +7,7 @@ from dtaianomaly.anomaly_detection.BaseDetector import Supervision
 from dtaianomaly.anomaly_detection.BaseNeuralDetector import (
     _ACTIVATION_FUNCTION_TYPE,
     _COMPILE_MODE_TYPE,
+    _LOSS_TYPE,
     _MODEL_PARAMETERS_TYPE,
     _OPTIMIZER_TYPE,
 )
@@ -76,8 +77,14 @@ class Transformer(BaseNeuralForecastingDetector):
         For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
     n_epochs: int, default=10
         The number of epochs for which the neural network should be trained.
-    loss_function: torch.nn.Module, default=torch.nn.MSELoss()
-        The loss function to use for updating the weights.
+    loss_function: {"mse", "l1", "huber} or torch.nn.Module, default="mse"
+        The loss function to use for updating the weights. Valid options are:
+
+        - ``'mse'``: Use the Mean Squared Error loss.
+        - ``'l1'``: Use the L1-loss or the mean absolute error.
+        - ``'huber'``: Use the huber loss, which smoothly combines the MSE-loss with the L1-loss.
+        - ``torch.nn.Module``: a custom torch module to use for the loss function.
+
     device: str, default="cpu"
         The device on which te neural network should be trained.
         For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
@@ -142,7 +149,7 @@ class Transformer(BaseNeuralForecastingDetector):
         compile_model: bool = False,
         compile_mode: _COMPILE_MODE_TYPE = "default",
         n_epochs: int = 10,
-        loss_function: torch.nn.Module = torch.nn.MSELoss(),
+        loss_function: _LOSS_TYPE | torch.nn.Module = "mse",
         device: str = "cpu",
         seed: int = None,
     ):

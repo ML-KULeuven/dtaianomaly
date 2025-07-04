@@ -154,14 +154,19 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size='fft', n_epochs=n_epochs)
 
-    @pytest.mark.parametrize('loss_function', [torch.nn.MSELoss(), torch.nn.L1Loss()])
+    @pytest.mark.parametrize('loss_function', [torch.nn.MSELoss(), torch.nn.L1Loss()] + list(BaseNeuralDetector._LOSSES.keys()))
     def test_loss_function_valid(self, loss_function):
         detector = MultilayerPerceptron(window_size='fft', loss_function=loss_function)
         assert detector.loss_function == loss_function
 
-    @pytest.mark.parametrize('loss_function', ['torch.nn.MSELoss()', 'MSELoss', 10])
+    @pytest.mark.parametrize('loss_function', [True, 10])
     def test_loss_function_invalid_type(self, loss_function):
         with pytest.raises(TypeError):
+            MultilayerPerceptron(window_size='fft', loss_function=loss_function)
+
+    @pytest.mark.parametrize('loss_function', ['torch.nn.MSELoss()', 'MSELoss'])
+    def test_loss_function_invalid_value(self, loss_function):
+        with pytest.raises(ValueError):
             MultilayerPerceptron(window_size='fft', loss_function=loss_function)
 
     def test_device_cpu(self):
@@ -306,6 +311,25 @@ class TestBuildOptimizer:
         architecture = detector._build_architecture(100)
         optimizer = detector._build_optimizer(architecture.parameters())
         assert optimizer.param_groups[0]['lr'] == 0.1
+
+
+class TestBuildLossFunction:
+
+    @pytest.mark.parametrize('loss_function,cls', BaseNeuralDetector._LOSSES.items())
+    def test_literal(self, loss_function, cls):
+        detector = MultilayerPerceptron(16, loss_function=loss_function)
+        assert isinstance(detector._build_loss_function(), cls)
+
+    @pytest.mark.parametrize('loss_function', [torch.nn.MSELoss(), torch.nn.L1Loss()])
+    def test_module(self, loss_function):
+        detector = MultilayerPerceptron(16, loss_function=loss_function)
+        assert isinstance(detector._build_loss_function(), loss_function.__class__)
+
+    def test_invalid(self):
+        detector = MultilayerPerceptron(16)
+        detector.loss_function = 'MSE'
+        with pytest.raises(ValueError):
+            detector._build_loss_function()
 
 
 class TestCompile:

@@ -114,7 +114,7 @@ Each of the three components has the following subitems:
   These parameters must be given upon initialization of the component
   (e.g., the window size). The keys in this dictionary are the names
   of the parameters and the values are their default value.
-- ``'parameters-adjustable'``: the adjustable hyperparameters. A
+- ``'parameters-optional'``: the adjustable hyperparameters. A
   parameter is defined as an item in an dictionary, with as key the
   name of the parameter and as value a parameter-configuration. This is
   a dictionary with one special key: the ``'type'`` defines what input

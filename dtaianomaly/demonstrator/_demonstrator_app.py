@@ -195,7 +195,9 @@ if len(st.session_state.loaded_detectors) == 0:
     error_no_detectors()
 
 for i, detector in enumerate(st.session_state.loaded_detectors):
-    updated_detector, remove_detector, old_detector = detector.show_anomaly_detector()
+    updated_detector, remove_detector, old_detector, error_container = (
+        detector.show_anomaly_detector()
+    )
 
     if remove_detector:
         st.session_state.st_evaluation_scores.remove_detector(detector)
@@ -210,7 +212,15 @@ for i, detector in enumerate(st.session_state.loaded_detectors):
                 detector, metric, st.session_state.st_data_loader.data_set.y_test
             )
 
-    detector.show_custom_visualizations()
+    if detector.decision_function_ is None:
+        error_message = "Something went wrong while detecting anomalies! No predictions are available."
+        if hasattr(detector, "exception_"):
+            error_message += f"\n\nError message: {detector.exception_}"
+
+        # Handle errors
+        error_container.error(error_message, icon="🚨")
+    else:
+        detector.show_custom_visualizations()
     write_code_lines(detector.get_code_lines(st.session_state.st_data_loader.data_set))
 
 

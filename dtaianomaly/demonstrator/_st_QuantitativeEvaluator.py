@@ -123,6 +123,9 @@ class StMetric:
         return selected_parameters
 
     def compute_score(self, y_true: np.array, y_pred: np.array) -> float:
+        if y_pred is None:  # If no scores are available
+            return np.nan
+
         y_pred = MinMaxScaler().fit_transform(y_pred)[0]
         if self.thresholding is not None:
             return ThresholdMetric(

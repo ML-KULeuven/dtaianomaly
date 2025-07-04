@@ -8,7 +8,7 @@ import streamlit as st
 
 
 def error_no_detectors():
-    st.error("There are no anomaly detectors selected", icon="🚨")
+    st.error("There are no valid anomaly detectors selected", icon="🚨")
 
 
 def error_no_metrics():

@@ -58,7 +58,7 @@ class StDataLoader:
         # At this point, we only care about a loaders that use a file and no other parameters (as other ones don't exist as of now)
         parameters = {}
         with col_configuration.popover(
-            "Configuration", icon=":material/settings:", use_container_width=True
+            "Configuration", icon="⚙️", use_container_width=True
         ):
             if issubclass(data_loader_cls, PathDataLoader):
                 uploaded_file = st.file_uploader("Upload a file")

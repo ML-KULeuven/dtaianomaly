@@ -18,6 +18,7 @@ _COMPILE_MODE_TYPE = Literal[
     "default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"
 ]
 _ACTIVATION_FUNCTION_TYPE = Literal["linear", "relu", "sigmoid", "tanh"]
+_LOSS_TYPE = Literal["mse", "l1", "huber"]
 _MODEL_PARAMETERS_TYPE = any
 
 
@@ -70,8 +71,14 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
     n_epochs: int, default=10
         The number of epochs for which the neural network should be trained.
-    loss_function: torch.nn.Module, default=torch.nn.MSELoss()
-        The loss function to use for updating the weights.
+    loss_function: {"mse", "l1", "huber} or torch.nn.Module, default="mse"
+        The loss function to use for updating the weights. Valid options are:
+
+        - ``'mse'``: Use the Mean Squared Error loss.
+        - ``'l1'``: Use the L1-loss or the mean absolute error.
+        - ``'huber'``: Use the huber loss, which smoothly combines the MSE-loss with the L1-loss.
+        - ``torch.nn.Module``: a custom torch module to use for the loss function.
+
     device: str, default="cpu"
         The device on which te neural network should be trained.
         For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
@@ -108,6 +115,11 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         "sigmoid": torch.nn.Sigmoid,
         "tanh": torch.nn.Tanh,
     }
+    _LOSSES: dict[_LOSS_TYPE, type[torch.nn.Module]] = {
+        "mse": torch.nn.MSELoss,
+        "l1": torch.nn.L1Loss,
+        "huber": torch.nn.SmoothL1Loss,
+    }
 
     # Preprocessing related parameters
     window_size: int | str
@@ -126,7 +138,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
     compile_mode: _COMPILE_MODE_TYPE
     # Training related parameters
     n_epochs: int
-    loss_function: torch.nn.Module
+    loss_function: _LOSS_TYPE | torch.nn.Module
     # General parameters
     device: str
     seed: int | None
@@ -151,7 +163,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         compile_model: bool = False,
         compile_mode: _COMPILE_MODE_TYPE = "default",
         n_epochs: int = 10,
-        loss_function: torch.nn.Module = torch.nn.MSELoss(),
+        loss_function: _LOSS_TYPE | torch.nn.Module = "mse",
         device: str = "cpu",
         seed: int = None,
     ):
@@ -190,8 +202,14 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
             raise ValueError("`learning_rate` should be strictly positive")
 
         # Check the training related parameters
-        if not isinstance(loss_function, torch.nn.Module):
-            raise TypeError("`loss_function` should be a torch.nn.Module")
+        if isinstance(loss_function, str):
+            if loss_function not in self._LOSSES:
+                raise ValueError(
+                    f"Invalid value for `loss_function` given: '{loss_function}'. Valid options are {list(self._LOSSES.keys())}"
+                )
+        else:
+            if not isinstance(loss_function, torch.nn.Module):
+                raise TypeError("`loss_function` should be a torch.nn.Module")
         if not isinstance(n_epochs, int) or isinstance(n_epochs, bool):
             raise TypeError("`n_epochs` should be an integer")
         if n_epochs < 1:
@@ -306,6 +324,13 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         raise ValueError(
             f"Invalid optimizer given: '{self.optimizer}'. Value values are {list(self._OPTIMIZERS.keys())} or a callable."
         )
+
+    def _build_loss_function(self) -> torch.nn.Module:
+        if self.loss_function in self._LOSSES:
+            return self._LOSSES[self.loss_function]()
+        elif isinstance(self.loss_function, torch.nn.Module):
+            return self.loss_function
+        raise ValueError(f"Unknown loss function: '{self.loss_function}'")
 
     def _train(self, data_loader: torch.utils.data.DataLoader) -> None:
         # Set in train mode

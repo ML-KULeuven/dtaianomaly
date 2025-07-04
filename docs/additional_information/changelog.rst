@@ -11,6 +11,7 @@ Added
 
 Changed
 ^^^^^^^
+- Added option to pass a literal ('mse', 'l1', 'huber') as loss function to the neural networks.
 
 Fixed
 ^^^^^

@@ -131,7 +131,7 @@ class StQualitativeEvaluator:
             "from dtaianomaly.thresholding import FixedCutoff",
             "from dtaianomaly.visualization import plot_time_series_anomalies",
             f"y_pred_bin = FixedCutoff(cutoff={cutoff}).threshold(y_pred)",
-            f"plot_time_series_anomalies({StQualitativeEvaluator._get_used_data(data_set)}, y_pred_bin)",
+            f"plot_time_series_anomalies({StQualitativeEvaluator._get_used_data(data_set)}, {ground_truth}, y_pred_bin)",
         ]
 
     @staticmethod
@@ -151,6 +151,7 @@ class StQualitativeEvaluator:
             str(anomaly_detector.detector): anomaly_detector.decision_function_
             for anomaly_detector in st_anomaly_detectors
             if hasattr(anomaly_detector, "decision_function_")
+            and anomaly_detector.decision_function_ is not None
         }
         if len(decision_functions) == 0:
             error_no_detectors()

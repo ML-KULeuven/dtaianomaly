@@ -26,6 +26,7 @@ class StAnomalyDetector:
     parameters: dict
     custom_visualizers: list[CustomDetectorVisualizer]
     decision_function_: np.array
+    exception_: Exception
 
     def __init__(
         self,
@@ -38,11 +39,7 @@ class StAnomalyDetector:
         self.custom_visualizers = custom_visualizers
 
         parameters, required_parameters = get_parameters(detector)
-        self.parameters = {
-            key: value
-            for key, value in configuration["parameters-optional"].items()
-            if key in parameters
-        }
+        self.parameters = load_parameters(parameters, configuration, detector)
         self.detector = detector(
             **{
                 key: value
@@ -50,12 +47,19 @@ class StAnomalyDetector:
                 if key in required_parameters
             }
         )
+        set_parameters = {
+            key: value["value"]
+            for key, value in self.parameters.items()
+            if "value" in value
+        }
+        update_object(self.detector, set_parameters)
+
         if "window_size" in self.parameters:
             self.parameters["window_size_selection"] = configuration[
                 "parameters-optional"
             ]["window_size_selection"]
 
-    def show_anomaly_detector(self) -> (bool, bool, "StAnomalyDetector"):
+    def show_anomaly_detector(self) -> (bool, bool, "StAnomalyDetector", st.container):
         old_detector = copy.deepcopy(self)
 
         # Save some space for the header
@@ -64,12 +68,15 @@ class StAnomalyDetector:
         # Show an explanation of the detector
         show_class_summary(self.detector)
 
+        # Reserve space for a potential error
+        error_container = st.container()
+
         # Select the hyperparameters, and update the detector if necessary
         col_select_hyperparameters, col_update_hyperparameters, remove_col = st.columns(
             3
         )
         with col_select_hyperparameters.popover(
-            label="Configure", icon=":material/settings:", use_container_width=True
+            label="Configure", icon="⚙️", use_container_width=True
         ):
             hyperparameters = self.select_hyperparameters()
 
@@ -93,7 +100,7 @@ class StAnomalyDetector:
         with header:
             show_small_header(self.detector)
 
-        return do_update, remove_detector, old_detector
+        return do_update, remove_detector, old_detector, error_container
 
     def select_hyperparameters(self) -> dict[str, any]:
 
@@ -157,22 +164,33 @@ class StAnomalyDetector:
             st.warning(
                 f"Anomaly detector {self.detector} is not compatible with the data!"
             )
-            self.decision_function_ = np.zeros_like(data_set.y_test)
+            self.decision_function_ = None
             return
 
-        # Retrieve the correct data
-        if Supervision.SEMI_SUPERVISED in data_set.compatible_supervision():
-            X_train, y_train = data_set.X_train, data_set.y_train
-        else:
-            X_train, y_train = data_set.X_test, data_set.y_test
+        try:
+            # Retrieve the correct data
+            if Supervision.SEMI_SUPERVISED in data_set.compatible_supervision():
+                X_train, y_train = data_set.X_train, data_set.y_train
+            else:
+                X_train, y_train = data_set.X_test, data_set.y_test
 
-        # Fit the detector
-        with st.spinner(f"Fitting {self.detector}"):
-            self.detector.fit(X_train, y_train)
+            # Fit the detector
+            with st.spinner(f"Fitting {self.detector}"):
+                self.detector.fit(X_train, y_train)
 
-        # Compute the decision scores
-        with st.spinner(f"Detecting anomalies with {self.detector}"):
-            self.decision_function_ = self.detector.decision_function(data_set.X_test)
+            # Compute the decision scores
+            with st.spinner(f"Detecting anomalies with {self.detector}"):
+                self.decision_function_ = self.detector.decision_function(
+                    data_set.X_test
+                )
+
+            # The exception is no longer relevant
+            if hasattr(self, "exception_"):
+                delattr(self, "exception_")
+
+        except Exception as exception:
+            self.decision_function_ = None
+            self.exception_ = exception
 
     def get_code_lines(self, data_set: DataSet) -> list[str]:
 
@@ -273,3 +291,20 @@ class StAnomalyDetectorLoader:
         )
         self.counter += 1
         return st_anomaly_detector
+
+
+def load_parameters(
+    parameters, configuration: dict, detector: type[BaseDetector]
+) -> dict:
+    all_parameters = {
+        key: value
+        for key, value in configuration["parameters-optional"].items()
+        if key in parameters
+    }
+    ok_parameters = {}
+    for key, value in all_parameters.items():
+        if "type" in value:
+            ok_parameters[key] = value
+        elif detector.__name__ in value and "type" in value[detector.__name__]:
+            ok_parameters[key] = value[detector.__name__]
+    return ok_parameters
