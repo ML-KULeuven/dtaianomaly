@@ -15,6 +15,9 @@ Changed
 Fixed
 ^^^^^
 
+- np.datetime64 are now also valid values in the ``utils.is_valid_array_like``.
+  This was especially necessary for time indexes in a dataset.
+
 [0.4.2] - 2025-07-03
 ------
 
