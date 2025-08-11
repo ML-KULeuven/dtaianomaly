@@ -1,4 +1,5 @@
 import copy
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -22,13 +23,15 @@ from dtaianomaly.thresholding import FixedCutoff
 
 
 class StMetric:
-    counter: int
+    __METRIC_COUNTER: int = 0
+    metric_id: int
     metric: Metric
     parameters: dict
     thresholding: FixedCutoff | None
 
-    def __init__(self, counter: int, metric: type[Metric], configuration: dict):
-        self.counter = counter
+    def __init__(self, metric: type[Metric], configuration: dict):
+        self.metric_id = StMetric.__METRIC_COUNTER
+        StMetric.__METRIC_COUNTER += 1
 
         # Initialize the parameters
         parameters, required_parameters = get_parameters(metric)
@@ -76,7 +79,7 @@ class StMetric:
         # Update the metric if requested
         do_update = col_update_parameters.button(
             label="Update parameters",
-            key=f"update-metric-parameters-{self.counter}",
+            key=f"update-metric-parameters-{self.metric_id}",
             use_container_width=True,
         )
         if do_update:
@@ -91,12 +94,12 @@ class StMetric:
         remove_metric = col_remove.button(
             label="Remove metric",
             icon="❌",
-            key=f"remove_metric_{self.counter}",
+            key=f"remove_metric_{self.metric_id}",
             use_container_width=True,
         )
 
         with header:
-            show_small_header(self.to_str())
+            show_small_header(str(self))
 
         return do_update, remove_metric, old_metric
 
@@ -111,7 +114,7 @@ class StMetric:
                 key: value for key, value in config.items() if key != "type"
             }
             input_widget_kwargs["key"] = "-".join(
-                [parameter, str(self.counter), config["type"], "metric"]
+                [parameter, str(self.metric_id), config["type"], "metric"]
             )
             if "label" not in input_widget_kwargs:
                 input_widget_kwargs["label"] = parameter
@@ -134,7 +137,7 @@ class StMetric:
         else:
             return self.metric.compute(y_true, y_pred)
 
-    def to_str(self):
+    def __str__(self):
         if self.thresholding is None:
             return str(self.metric)
         else:
@@ -188,7 +191,6 @@ class StMetric:
 
 class StQualitativeEvaluationLoader:
 
-    counter: int = 0
     default_metrics: list[type[Metric]]
     all_metrics: list[(str, type[Metric])]
     configuration: dict
@@ -231,18 +233,15 @@ class StQualitativeEvaluationLoader:
         return [self._load_metric(metric) for metric in self.default_metrics]
 
     def _load_metric(self, metric: type[Metric]) -> StMetric:
-        st_metric = StMetric(
-            counter=self.counter,
+        return StMetric(
             metric=metric,
             configuration=self.configuration,
         )
 
-        # Update the counter and return the metric
-        self.counter += 1
-        return st_metric
-
 
 class StEvaluationScores:
+    detectors: dict[int, str]
+    metrics: dict[int, str]
     scores: pd.DataFrame
 
     def __init__(
@@ -251,9 +250,11 @@ class StEvaluationScores:
         metrics: list[StMetric],
         y_test: np.array,
     ):
+        self.detectors = {}
+        self.metrics = {}
         self.scores = pd.DataFrame(
-            index=[str(detector.detector) for detector in detectors],
-            columns=[metric.to_str() for metric in metrics],
+            index=[detector.detector_id for detector in detectors],
+            columns=[metric.metric_id for metric in metrics],
         )
         for detector in detectors:
             for metric in metrics:
@@ -261,11 +262,26 @@ class StEvaluationScores:
 
     def show_scores(self) -> None:
 
+        # Identify duplicated metrics and decide which columns to drop
+        metric_ids = defaultdict(list)
+        for metric_id, metric_name in self.metrics.items():
+            metric_ids[metric_name].append(metric_id)
+        to_drop = []
+        for metric, ids in metric_ids.items():
+            if len(ids) > 1:
+                to_drop.extend(ids[1:])
+                st.warning(
+                    f"Metric '{metric}' is defined {len(ids)} times. The evaluation will only be shown once."
+                )
+        formatted_scores = self.scores.drop(columns=to_drop).rename(
+            columns=self.metrics, index=self.detectors
+        )
+
         # Define a color map
-        color_map = get_detector_color_map(self.scores.index)
+        color_map = get_detector_color_map(formatted_scores.index)
 
         # Show the scores in a bar-plot
-        df_melted = self.scores.T.melt(
+        df_melted = formatted_scores.T.melt(
             ignore_index=False, var_name="Metric", value_name="value"
         )
         df_melted["x"] = df_melted.index
@@ -284,17 +300,30 @@ class StEvaluationScores:
         st.plotly_chart(fig)
 
         # Show the raw scores
-        st.dataframe(self.scores)
+        st.dataframe(formatted_scores)
+
+        # Download the
+        st.download_button(
+            label="Download the scores as a csv-file",
+            data=formatted_scores.to_csv().encode("utf-8"),
+            file_name="scores.csv",
+            mime="text/csv",
+            icon=":material/download:",
+        )
 
     def add(
         self, detector: StAnomalyDetector, metric: StMetric, y_test: np.array
     ) -> None:
-        self.scores.loc[str(detector.detector), metric.to_str()] = metric.compute_score(
+        self.scores.loc[detector.detector_id, metric.metric_id] = metric.compute_score(
             y_test, detector.decision_function_
         )
+        self.detectors[detector.detector_id] = str(detector)
+        self.metrics[metric.metric_id] = str(metric)
 
     def remove_detector(self, detector: StAnomalyDetector) -> None:
-        self.scores = self.scores.drop(index=str(detector.detector))
+        self.scores = self.scores.drop(index=detector.detector_id)
+        self.detectors.pop(detector.detector_id)
 
     def remove_metric(self, metric: StMetric) -> None:
-        self.scores = self.scores.drop(columns=metric.to_str())
+        self.scores = self.scores.drop(columns=metric.metric_id)
+        self.metrics.pop(metric.metric_id)

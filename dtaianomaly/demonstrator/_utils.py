@@ -43,7 +43,7 @@ def show_class_summary(cls) -> None:
 
 
 def show_small_header(o) -> None:
-    st.markdown(f"##### {o}")
+    st.markdown(f"###### {o}")
 
 
 def show_section_description(s) -> None:

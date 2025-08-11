@@ -76,17 +76,18 @@ class StDataLoader:
             try:
                 self.data_loader = data_loader_cls(**parameters)
                 self.data_set = self.data_loader.load()
-                if (
-                    "path" in parameters
-                ):  # This is not recommended in practice, but for showing a nice file (without the temporary path)
+                if "path" in parameters:
+                    # This is not recommended in practice, but for showing a nice file (without the temporary path)
                     self.data_loader.path = file_name
 
             except Exception as e:
-                st.exception(e)
-                st.error(
-                    "Something went wrong, did you correctly configure the data loader?",
-                    icon="🚨",
-                )
+                if "missing 1 required positional argument: 'path'" in str(e):
+                    st.error("Select a file before loading the data!", icon="🚨")
+                else:
+                    st.error(
+                        "Something went wrong, make sure you correctly configure the data loader.",
+                        icon="🚨",
+                    )
 
         # Return whether the data was updated
         return button_clicked

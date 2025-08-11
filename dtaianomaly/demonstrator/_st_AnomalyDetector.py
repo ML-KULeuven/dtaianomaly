@@ -21,7 +21,8 @@ from dtaianomaly.demonstrator.CustomDetectorVisualizer import CustomDetectorVisu
 
 class StAnomalyDetector:
 
-    counter: int
+    __DETECTOR_COUNTER: int = 0
+    detector_id: int
     detector: BaseDetector
     parameters: dict
     custom_visualizers: list[CustomDetectorVisualizer]
@@ -30,12 +31,13 @@ class StAnomalyDetector:
 
     def __init__(
         self,
-        counter: int,
         detector: type[BaseDetector],
         custom_visualizers: list[CustomDetectorVisualizer],
         configuration: dict,
     ):
-        self.counter = counter
+        self.detector_id = StAnomalyDetector.__DETECTOR_COUNTER
+        StAnomalyDetector.__DETECTOR_COUNTER += 1
+
         self.custom_visualizers = custom_visualizers
 
         parameters, required_parameters = get_parameters(detector)
@@ -83,7 +85,7 @@ class StAnomalyDetector:
         # Update the model if requested
         do_update = col_update_hyperparameters.button(
             label="Update hyperparameters",
-            key=f"update-detector-hyperparameters-{self.counter}",
+            key=f"update-detector-hyperparameters-{self.detector_id}",
             use_container_width=True,
         )
         if do_update:
@@ -93,7 +95,7 @@ class StAnomalyDetector:
         remove_detector = remove_col.button(
             label="Remove detector",
             icon="❌",
-            key=f"remove_detector_{self.counter}",
+            key=f"remove_detector_{self.detector_id}",
             use_container_width=True,
         )
 
@@ -117,7 +119,7 @@ class StAnomalyDetector:
                 key: value for key, value in config.items() if key != "type"
             }
             input_widget_kwargs["key"] = "-".join(
-                [parameter, str(self.counter), config["type"], "detector"]
+                [parameter, str(self.detector_id), config["type"], "detector"]
             )
             if "label" not in input_widget_kwargs:
                 input_widget_kwargs["label"] = parameter
@@ -128,7 +130,7 @@ class StAnomalyDetector:
                 col_select, col_value = st.columns(2)
                 _, selected_window_size = col_select.selectbox(
                     format_func=lambda t: t[0],
-                    key=f"window_size_select_{self.counter}",
+                    key=f"window_size_select_{self.detector_id}",
                     **self.parameters["window_size_selection"],
                 )
                 try:
@@ -161,10 +163,22 @@ class StAnomalyDetector:
     def fit_predict(self, data_set: DataSet):
         # Check for compatibility
         if not data_set.is_compatible(self.detector):
-            st.warning(
-                f"Anomaly detector {self.detector} is not compatible with the data!"
+
+            error_message = (
+                f"Anomaly detector {self.detector} is not compatible with the data! "
             )
+            if self.detector.supervision == Supervision.SUPERVISED:
+                error_message += f"{self.detector.__class__.__name__} requires labeled training data with ground truth anomalies, but this is not available."
+
+            elif self.detector.supervision == Supervision.SEMI_SUPERVISED:
+                error_message += f"{self.detector.__class__.__name__} requires normal training, but this is not available."
+            #
+            # st.warning(
+            #     f"Anomaly detector {self.detector} is not compatible with the data!"
+            # )
+
             self.decision_function_ = None
+            self.exception_ = Exception(error_message)
             return
 
         try:
@@ -221,10 +235,12 @@ class StAnomalyDetector:
             with st.expander(label=visualizer.name, icon=visualizer.icon):
                 visualizer.show_custom_visualization(self.detector)
 
+    def __str__(self) -> str:
+        return str(self.detector)
+
 
 class StAnomalyDetectorLoader:
 
-    counter: int = 0
     default_detectors: list[type[BaseDetector]]
     all_anomaly_detectors: list[(str, type[BaseDetector])]
     all_custom_detector_visualizers: list[CustomDetectorVisualizer]
@@ -279,8 +295,7 @@ class StAnomalyDetectorLoader:
     def _load_detector(
         self, anomaly_detector: type[BaseDetector]
     ) -> "StAnomalyDetector":
-        st_anomaly_detector = StAnomalyDetector(
-            counter=self.counter,
+        return StAnomalyDetector(
             detector=anomaly_detector,
             custom_visualizers=[
                 visualizer
@@ -289,8 +304,6 @@ class StAnomalyDetectorLoader:
             ],
             configuration=self.configuration,
         )
-        self.counter += 1
-        return st_anomaly_detector
 
 
 def load_parameters(
