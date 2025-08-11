@@ -1,8 +1,6 @@
 import ast
 import importlib
 import inspect
-import json
-import pathlib
 
 import streamlit as st
 
@@ -40,6 +38,19 @@ def show_class_summary(cls) -> None:
     summary = get_class_summary(cls)
     if summary is not None:
         st.markdown(summary)
+
+
+def show_header(text: str) -> None:
+    background = "#F8F9FB"
+    highlight = "#158237"
+    st.markdown(
+        f"""
+            <div style="background-color:{background}; padding: 0px 10px; border-radius:5px; border-left:5px solid {highlight};">
+            <h2 style="color:{highlight}; margin:0"> {text} </h2>
+            </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_small_header(o) -> None:

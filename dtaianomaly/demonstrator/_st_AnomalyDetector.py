@@ -172,10 +172,6 @@ class StAnomalyDetector:
 
             elif self.detector.supervision == Supervision.SEMI_SUPERVISED:
                 error_message += f"{self.detector.__class__.__name__} requires normal training, but this is not available."
-            #
-            # st.warning(
-            #     f"Anomaly detector {self.detector} is not compatible with the data!"
-            # )
 
             self.decision_function_ = None
             self.exception_ = Exception(error_message)

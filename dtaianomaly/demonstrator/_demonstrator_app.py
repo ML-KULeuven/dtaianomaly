@@ -16,6 +16,7 @@ from dtaianomaly.demonstrator._utils import (
     error_no_detectors,
     error_no_metrics,
     load_custom_models,
+    show_header,
     show_section_description,
     write_code_lines,
 )
@@ -143,7 +144,7 @@ with st.expander("What is anomaly detection?", expanded=False, icon="💡"):
 # DATA LOADING
 ###################################################################
 
-st.header("Time series data")
+show_header("Time series data")
 show_section_description(
     """
     To get started, load a time series into the demonstrator. You can either use one of
@@ -169,7 +170,7 @@ if data_updated:
 # ANOMALY DETECTION
 ###################################################################
 
-st.header("Anomaly detection")
+show_header("Anomaly detection")
 show_section_description(
     """
     Over the years, many anomaly detection models have been developed. Each of these
@@ -228,7 +229,7 @@ for i, detector in enumerate(st.session_state.loaded_detectors):
 # VISUAL ANALYSIS
 ###################################################################
 
-st.header("Visual analysis of the anomaly scores")
+show_header("Visual analysis of the anomaly scores")
 show_section_description(
     """
     The advantage of time series is that they are inherently visual. Because of this,
@@ -259,7 +260,7 @@ with tab_predicted_anomalies:
 # NUMERICAL ANALYSIS
 ###################################################################
 
-st.header("Numerical analysis of the anomaly detectors")
+show_header("Numerical analysis of the anomaly detectors")
 show_section_description(
     """
     While visual inspection gives a good idea of how well a model performs, it's often
@@ -309,7 +310,7 @@ st.session_state.st_evaluation_scores.show_scores()
 # NUMERICAL ANALYSIS
 ###################################################################
 
-st.header("Acknowledgements")
+show_header("Acknowledgements")
 st.write(
     "If you find ``dtaianomaly`` or this demonstrator useful for your work, we would appreciate the following [citation](https://arxiv.org/abs/2502.14381):"
 )
