@@ -55,6 +55,10 @@ class Workflow(JobBasedWorkflow):
         might give additional insights into the models, their runtime
         will be higher due to additional internal bookkeeping.
 
+    anomaly_scores_path: str, default=None
+        The path where the anomaly scores should be saved. If ``None``, the
+        anomaly scores will not be saved.
+
     error_log_path: str, default='./error_logs'
         The path in which the error logs should be saved.
 
@@ -100,6 +104,7 @@ class Workflow(JobBasedWorkflow):
         thresholds: Thresholding | list[Thresholding] = None,
         n_jobs: int = 1,
         trace_memory: bool = False,
+        anomaly_scores_path: str = None,
         error_log_path: str = "./error_logs",
         fit_unsupervised_on_test_data: bool = False,
         fit_semi_supervised_on_test_data: bool = False,
@@ -132,6 +137,7 @@ class Workflow(JobBasedWorkflow):
             thresholds=thresholds,
             n_jobs=n_jobs,
             trace_memory=trace_memory,
+            anomaly_scores_path=anomaly_scores_path,
             error_log_path=error_log_path,
             fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
             fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data,
