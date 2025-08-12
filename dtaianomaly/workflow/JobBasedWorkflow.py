@@ -1,4 +1,6 @@
 import multiprocessing
+import os
+import tempfile
 import time
 import tracemalloc
 import warnings
@@ -100,6 +102,10 @@ class JobBasedWorkflow:
         might give additional insights into the models, their runtime
         will be higher due to additional internal bookkeeping.
 
+    anomaly_scores_path: str, default=None
+        The path where the anomaly scores should be saved. If ``None``, the
+        anomaly scores will not be saved.
+
     error_log_path: str, default='./error_logs'
         The path in which the error logs should be saved.
 
@@ -131,6 +137,7 @@ class JobBasedWorkflow:
     metrics: list[ProbaMetric]
     n_jobs: int
     trace_memory: bool
+    anomaly_scores_path: str | None
     error_log_path: str
     fit_unsupervised_on_test_data: bool
     fit_semi_supervised_on_test_data: bool
@@ -143,6 +150,7 @@ class JobBasedWorkflow:
         thresholds: Thresholding | list[Thresholding] = None,
         n_jobs: int = 1,
         trace_memory: bool = False,
+        anomaly_scores_path: str = None,
         error_log_path: str = "./error_logs",
         fit_unsupervised_on_test_data: bool = False,
         fit_semi_supervised_on_test_data: bool = False,
@@ -179,6 +187,7 @@ class JobBasedWorkflow:
         self.metrics = proba_metrics
         self.n_jobs = n_jobs
         self.trace_memory = trace_memory
+        self.anomaly_scores_path = anomaly_scores_path
         self.error_log_path = error_log_path
         self.fit_unsupervised_on_test_data = fit_unsupervised_on_test_data
         self.fit_semi_supervised_on_test_data = fit_semi_supervised_on_test_data
@@ -223,6 +232,7 @@ class JobBasedWorkflow:
                     job=job,
                     metrics=self.metrics,
                     trace_memory=self.trace_memory,
+                    anomaly_scores_path=self.anomaly_scores_path,
                     error_log_path=self.error_log_path,
                     fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
                     fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
@@ -236,6 +246,7 @@ class JobBasedWorkflow:
                 _single_job,
                 metrics=self.metrics,
                 trace_memory=self.trace_memory,
+                anomaly_scores_path=self.anomaly_scores_path,
                 error_log_path=self.error_log_path,
                 fit_unsupervised_on_test_data=self.fit_unsupervised_on_test_data,
                 fit_semi_supervised_on_test_data=self.fit_semi_supervised_on_test_data,
@@ -300,6 +311,7 @@ def _single_job(
     job: Job,
     metrics: list[ProbaMetric],
     trace_memory: bool,
+    anomaly_scores_path: str,
     error_log_path: str,
     fit_unsupervised_on_test_data: bool,
     fit_semi_supervised_on_test_data: bool,
@@ -371,6 +383,15 @@ def _single_job(
         y_pred = job.pipeline.predict_proba(X_test)
         results["Runtime Predict [s]"] = _end_tracing_runtime(start)
         _end_tracing_memory(trace_memory, results, "Peak Memory Predict [MB]")
+
+        # Save the anomaly scores
+        if anomaly_scores_path is not None:
+            os.makedirs(anomaly_scores_path, exist_ok=True)
+            anomaly_scores_file = tempfile.NamedTemporaryFile(
+                dir=anomaly_scores_path, delete=False, suffix=".txt"
+            )
+            np.savetxt(anomaly_scores_file.name, y_pred)
+            results["Anomaly scores file"] = anomaly_scores_file.name
 
         # Scoring
         _, y_test_ = job.pipeline.preprocessor.transform(X_test, y_test)

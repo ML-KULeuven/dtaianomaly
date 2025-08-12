@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 import warnings
 import numpy as np
+import os
 
 from dtaianomaly.workflow import Workflow, JobBasedWorkflow
 from dtaianomaly.data import UCRLoader, LazyDataLoader, DataSet, DemonstrationTimeSeriesLoader
@@ -189,6 +190,8 @@ class TestWorkflowSuccess:
         assert results.columns[3] == 'Runtime Fit [s]'
         assert results.columns[4] == 'Runtime Predict [s]'
         assert results.columns[5] == 'Runtime [s]'
+        # Check that no anomaly scores are saved
+        assert 'Anomaly scores file' not in results.columns
 
     def test_with_kwargs(self, tmp_path_factory, show_progress):
         workflow = Workflow(
@@ -668,3 +671,72 @@ class TestShowProgress:
         ).run()
 
         mock.assert_not_called()
+
+
+class TestSaveAnomalyScores:
+
+    def test(self, tmp_path_factory):
+        workflow = Workflow(
+            dataloaders=[DemonstrationTimeSeriesLoader()],
+            metrics=[Precision(), Recall(), AreaUnderROC()],
+            thresholds=[TopN(10), FixedCutoff(0.5)],
+            detectors=[LocalOutlierFactor(15), IsolationForest(15)],
+            n_jobs=4,
+            trace_memory=True,
+            anomaly_scores_path=str(tmp_path_factory.mktemp('anomaly-scores')),
+        )
+        results = workflow.run()
+        assert results.shape == (2, 14)
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 2
+        assert results['Detector'].value_counts()['LocalOutlierFactor(window_size=15)'] == 1
+        assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 1
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
+        assert 'Peak Memory [MB]' in results.columns
+        assert not np.any(results == 'Error')
+        assert not results.isna().any().any()
+        # Check the order
+        assert results.columns[0] == 'Dataset'
+        assert results.columns[1] == 'Detector'
+        assert results.columns[2] == 'Runtime Fit [s]'
+        assert results.columns[3] == 'Runtime Predict [s]'
+        assert results.columns[4] == 'Runtime [s]'
+        assert results.columns[5] == 'Peak Memory Fit [MB]'
+        assert results.columns[6] == 'Peak Memory Predict [MB]'
+        assert results.columns[7] == 'Peak Memory [MB]'
+        assert results.columns[-1] == 'Anomaly scores file'
+        assert 'Preprocessor' not in results.columns
+
+        for path in results['Anomaly scores file']:
+            os.path.exists(path)
+
+    def test_with_error(self, tmp_path_factory):
+        workflow = Workflow(
+            dataloaders=[DemonstrationTimeSeriesLoader()],
+            metrics=[Precision(), Recall(), AreaUnderROC()],
+            thresholds=[TopN(10), FixedCutoff(0.5)],
+            detectors=[DetectorError(), IsolationForest(15)],
+            n_jobs=1,
+            trace_memory=True,
+            anomaly_scores_path=str(tmp_path_factory.mktemp('anomaly-scores')),
+            error_log_path=str(tmp_path_factory.mktemp('error-log'))
+        )
+        results = workflow.run()
+        results.to_csv('tmp.csv')
+        assert results.shape == (2, 15)
+        assert results['Dataset'].value_counts()["DemonstrationTimeSeriesLoader()"] == 2
+        assert results['Detector'].value_counts()['DetectorError()'] == 1
+        assert results['Detector'].value_counts()['IsolationForest(window_size=15)'] == 1
+        assert 'Peak Memory Fit [MB]' in results.columns
+        assert 'Peak Memory Predict [MB]' in results.columns
+        assert 'Peak Memory [MB]' in results.columns
+        assert np.any(results == 'Error', axis=0).sum() == 9
+        assert np.any(results == 'Error', axis=1).sum().sum() == 1
+        assert 'Error file' in results.columns
+        assert results['Error file'].isna().sum() == 1
+        assert results['Anomaly scores file'].isna().sum() == 1
+
+        assert results.columns[-1] == 'Anomaly scores file'
+        for path in results['Anomaly scores file']:
+            if isinstance(path, str):
+                os.path.exists(path)
