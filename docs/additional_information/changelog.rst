@@ -9,6 +9,8 @@ Latest
 Added
 ^^^^^
 
+- Option to save the anomaly scores within a workflow.
+
 Changed
 ^^^^^^^
 
