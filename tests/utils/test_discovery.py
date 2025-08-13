@@ -29,6 +29,7 @@ anomaly_detectors = [
     anomaly_detection.ConvolutionalNeuralNetwork,
     anomaly_detection.LongShortTermMemoryNetwork,
     anomaly_detection.Transformer,
+    anomaly_detection.LocalPolynomialApproximation,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

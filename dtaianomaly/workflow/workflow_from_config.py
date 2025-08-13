@@ -430,6 +430,9 @@ def detector_entry(entry):
     elif detector_type == "Transformer":
         return anomaly_detection.Transformer(**entry_without_type)
 
+    elif detector_type == "LocalPolynomialApproximation":
+        return anomaly_detection.LocalPolynomialApproximation(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

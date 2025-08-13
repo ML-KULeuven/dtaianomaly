@@ -30,6 +30,7 @@ from .KMeansAnomalyDetector import KMeansAnomalyDetector
 from .KNearestNeighbors import KNearestNeighbors
 from .KShapeAnomalyDetector import KShapeAnomalyDetector
 from .LocalOutlierFactor import LocalOutlierFactor
+from .LocalPolynomialApproximation import LocalPolynomialApproximation
 from .LongShortTermMemoryNetwork import LongShortTermMemoryNetwork
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
@@ -90,4 +91,5 @@ __all__ = [
     "LongShortTermMemoryNetwork",
     "ConvolutionalNeuralNetwork",
     "Transformer",
+    "LocalPolynomialApproximation",
 ]

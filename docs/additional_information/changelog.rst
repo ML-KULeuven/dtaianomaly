@@ -10,6 +10,7 @@ Added
 ^^^^^
 
 - Option to save the anomaly scores within a workflow.
+- Implement LocalPolynomialApproximation.
 
 Changed
 ^^^^^^^
@@ -21,7 +22,7 @@ Fixed
   This was especially necessary for time indexes in a dataset.
 
 [0.4.2] - 2025-07-03
-------
+--------------------
 
 .. warning::
    We ended the support for Python version 3.9
