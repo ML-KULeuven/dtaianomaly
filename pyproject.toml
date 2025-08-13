@@ -56,7 +56,6 @@ all = [  # All the optional dependencies
     "sphinx",
     "sphinx-rtd-theme",
     "numpydoc",
-    "toml",
     "pytest",
     "pytest-cov",
     "notebook",
@@ -64,7 +63,8 @@ all = [  # All the optional dependencies
     "pre-commit",
     "black",
     "isort",
-    'tqdm'
+    'tqdm',
+    "sphinxcontrib-bibtex"
 ]
 tests = [  # For testing
     "pytest",
