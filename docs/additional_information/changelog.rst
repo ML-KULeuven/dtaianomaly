@@ -10,7 +10,8 @@ Added
 ^^^^^
 
 - Option to save the anomaly scores within a workflow.
-- Implement LocalPolynomialApproximation.
+- Implement ``LocalPolynomialApproximation`` anomaly detector.
+- Implement ``UCRScore`` evaluation metric.
 
 Changed
 ^^^^^^^

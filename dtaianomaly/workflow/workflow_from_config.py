@@ -327,6 +327,9 @@ def metric_entry(entry):
     elif metric_type == "RangeBasedFBeta":
         return evaluation.RangeBasedFBeta(**entry_without_type)
 
+    elif metric_type == "UCRScore":
+        return evaluation.UCRScore(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid metric entry: {entry}")
 

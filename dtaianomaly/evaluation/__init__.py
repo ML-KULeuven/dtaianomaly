@@ -26,6 +26,7 @@ from .point_adjusted_binary_metrics import (
 from .range_based_metrics import RangeBasedFBeta, RangeBasedPrecision, RangeBasedRecall
 from .simple_binary_metrics import FBeta, Precision, Recall
 from .simple_proba_metrics import AreaUnderPR, AreaUnderROC
+from .UCRScore import UCRScore
 from .volume_under_surface import (
     RangeAreaUnderPR,
     RangeAreaUnderROC,
@@ -60,4 +61,5 @@ __all__ = [
     "RangeBasedPrecision",
     "RangeBasedRecall",
     "RangeBasedFBeta",
+    "UCRScore",
 ]
