@@ -12,11 +12,13 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.baselines.AlwaysAnomalous,
     anomaly_detection.baselines.RandomDetector,
     anomaly_detection.DWT_MLEAD,
+    anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.MedianMethod
 ]
 
 DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.DWT_MLEAD,
+    anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.MedianMethod,
     anomaly_detection.KShapeAnomalyDetector
 ]
@@ -53,7 +55,8 @@ def initialize(cls):
         'neighborhood_size_before': 15,
         'detector': anomaly_detection.IsolationForest(window_size=15),
         'preprocessor': preprocessing.Identity(),
-        'n_epochs': 1
+        'n_epochs': 1,
+        'neighborhood': 15
     }
     sig = inspect.signature(cls.__init__)
     accepted_params = set(sig.parameters) - {"self"}
