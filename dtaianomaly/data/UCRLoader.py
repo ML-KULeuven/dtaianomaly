@@ -15,6 +15,15 @@ class UCRLoader(PathDataLoader):
     (3) Mislabeling: the ground truth labels might not be perfectly aligned with the actual anomalies in the data;
     (4) Run-to-failure bias: most anomalies are located near the end of the time series.
 
+    Parameters
+    ----------
+    path: str
+        The path at which the data set is located.
+    do_caching: bool, default=False
+        Whether to cache the loaded data or not
+
+    Notes
+    -----
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:
     ``*_<train-test-split>_<start>_<stop>.txt``.

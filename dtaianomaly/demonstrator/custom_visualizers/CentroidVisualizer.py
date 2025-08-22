@@ -55,7 +55,7 @@ class CentroidVisualizer(CustomDetectorVisualizer):
             # Layout options
             fig.update_layout(
                 title_text=title,
-                height=300,
+                height=150,
                 xaxis_title="Time",
                 margin=dict(l=0, r=0, t=20, b=0),
                 showlegend=False,

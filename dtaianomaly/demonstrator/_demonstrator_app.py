@@ -154,8 +154,8 @@ show_section_description(
     """
 )
 data_updated = st.session_state.st_data_loader.select_data_loader()
-write_code_lines(st.session_state.st_data_loader.get_code_lines())
 st.session_state.st_data_loader.show_data()
+write_code_lines(st.session_state.st_data_loader.get_code_lines())
 
 # Retrain the anomaly detectors if the data was updated
 if data_updated:

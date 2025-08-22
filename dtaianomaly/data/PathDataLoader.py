@@ -14,6 +14,8 @@ class PathDataLoader(LazyDataLoader, abc.ABC):
     ----------
     path: str
         The path at which the data set is located.
+    do_caching: bool, default=False
+        Whether to cache the loaded data or not
 
     Raises
     ------

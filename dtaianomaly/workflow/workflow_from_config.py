@@ -200,6 +200,9 @@ def data_entry(entry, data_root: str = ""):
     elif data_type == "DemonstrationTimeSeriesLoader":
         return data.DemonstrationTimeSeriesLoader(**entry_without_type)
 
+    elif data_type == "CustomDataLoader":
+        return data.CustomDataLoader(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid data entry: {entry}")
 
