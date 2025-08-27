@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from dtaianomaly.data.LazyDataLoader import DataSet, LazyDataLoader
@@ -49,8 +50,8 @@ class CustomDataLoader(LazyDataLoader):
         if test_path is None:
             raise FileNotFoundError(f"The test_path may not be None!")
 
-        self.train_path = str(train_path)
-        self.test_path = str(test_path)
+        self.train_path = train_path
+        self.test_path = test_path
 
     def _load(self) -> DataSet:
 
@@ -73,12 +74,16 @@ class CustomDataLoader(LazyDataLoader):
                 time_steps_train = df_train.pop("time").values
             if "label" in df_train.columns:
                 y_train = df_train.pop("label").values
+                if np.all(y_train == 0):
+                    y_train = None
 
             # Check the features
             features_train = list(df_train.columns)
             if set(features_test) != set(features_train):
                 raise ValueError(
                     "The train and test time series consist of different features!"
+                    f"Train data has features: {features_train}"
+                    f"Test data has features: {features_test}"
                 )
 
             # Make sure the features follow the same order
