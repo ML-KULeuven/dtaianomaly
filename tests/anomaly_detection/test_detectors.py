@@ -20,7 +20,8 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.DWT_MLEAD,
     anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.MedianMethod,
-    anomaly_detection.KShapeAnomalyDetector
+    anomaly_detection.KShapeAnomalyDetector,
+    anomaly_detection.ChronosAnomalyDetector
 ]
 
 

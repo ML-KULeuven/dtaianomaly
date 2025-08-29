@@ -4,6 +4,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
+import torch
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
@@ -94,7 +95,7 @@ class ChronosAnomalyDetector(BaseDetector):
     batch_size: int
     forecast_horizon: int
     do_fine_tuning: bool
-    fine_tune_kwargs: dict[str, any]
+    fine_tune_kwargs: dict[str, any] | None
     device: str
 
     window_size_: int
@@ -141,8 +142,6 @@ class ChronosAnomalyDetector(BaseDetector):
         if not isinstance(do_fine_tuning, bool):
             raise TypeError("`do_fine_tuning` should be a bool")
 
-        import torch
-
         torch.device(device)
 
         self.window_size = window_size
@@ -150,7 +149,7 @@ class ChronosAnomalyDetector(BaseDetector):
         self.batch_size = batch_size
         self.forecast_horizon = forecast_horizon
         self.do_fine_tuning = do_fine_tuning
-        self.fine_tune_kwargs = fine_tune_kwargs or {}
+        self.fine_tune_kwargs = fine_tune_kwargs
         self.device = device
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
@@ -172,7 +171,7 @@ class ChronosAnomalyDetector(BaseDetector):
         # Enable fine-tuning
         if self.do_fine_tuning:
             hyperparameters["fine_tune"] = True
-            hyperparameters.update(self.fine_tune_kwargs)
+            hyperparameters.update(self.fine_tune_kwargs or {})
 
         # Initialize the chronos model
         from autogluon.timeseries import TimeSeriesPredictor

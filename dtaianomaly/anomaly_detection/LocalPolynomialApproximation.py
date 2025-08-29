@@ -38,16 +38,16 @@ class LocalPolynomialApproximation(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import LocalPolynomialApproximation
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> poly = LocalPolynomialApproximation(window_size=50).fit(x)
+    >>> poly = LocalPolynomialApproximation(neighborhood=50).fit(x)
     >>> poly.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 , 1.34704128]...)
+    array([0., 0., 0., ..., 0., 0., 0.]...)
 
     Notes
     -----
     - LocalPolynomialApproximation only handles univariate time series.
     - The original version of :cite:t:`li2007unifying` normalizes the forward and backward scores. Their
       approach requires two additional parameters. Therefore, we did not implement this and leave normalizatin
-      of the (aggregates) scores to post-processing.
+      of the (aggregate) scores to post-processing.
     """
 
     neighborhood: int | str
@@ -177,17 +177,3 @@ def _local_poly_nb_parallel(
         decision_scores[t] = max(forward_score, backward_score)
 
     return decision_scores
-
-
-def main():
-    from dtaianomaly.data import demonstration_time_series
-    from dtaianomaly.visualization import plot_anomaly_scores
-
-    X, y = demonstration_time_series()
-    poly = LocalPolynomialApproximation(neighborhood=256)
-    y_pred = poly.fit(X).decision_function(X)
-    plot_anomaly_scores(X, y, y_pred).show()
-
-
-if __name__ == "__main__":
-    main()
