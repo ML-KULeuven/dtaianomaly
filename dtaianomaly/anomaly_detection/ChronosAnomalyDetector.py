@@ -228,9 +228,3 @@ class ChronosAnomalyDetector(BaseDetector):
         from autogluon.timeseries import TimeSeriesDataFrame
 
         return TimeSeriesDataFrame.from_data_frame(df)
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
