@@ -12,6 +12,7 @@ Added
 - Option to save the anomaly scores within a workflow.
 - Implement ``LocalPolynomialApproximation`` anomaly detector.
 - Implement ``UCRScore`` evaluation metric.
+- Implement ``ChronosAnomalyDetector`` model, with optional dependency ``chronos``
 
 Changed
 ^^^^^^^

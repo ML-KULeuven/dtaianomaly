@@ -19,6 +19,7 @@ from .BaseNeuralDetector_utils import (
     ReconstructionDataset,
     TimeSeriesDataset,
 )
+from .ChronosAnomalyDetector import ChronosAnomalyDetector
 from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
 from .CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
@@ -92,4 +93,5 @@ __all__ = [
     "ConvolutionalNeuralNetwork",
     "Transformer",
     "LocalPolynomialApproximation",
+    "ChronosAnomalyDetector",
 ]

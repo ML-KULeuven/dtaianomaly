@@ -29,6 +29,7 @@ Currently, following subsets are available:
 - ``docs``: Dependencies for generating the documentation.
 - ``notebooks``: Dependencies for using jupyter notebooks.
 - ``lint``: Dependencies for linting the code.
+- ``chronos``: Install autogluon.timeseries, necessary for running Chronos.
 
 To install version ``X.Y.Z``, use the following command:
 
