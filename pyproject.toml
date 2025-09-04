@@ -44,7 +44,7 @@ changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
 [project.scripts]
-run-demonstrator = "dtaianomaly.demonstrator:run"
+run-InTimeAD = "dtaianomaly.in_time_ad:run"
 
 [build-system]
 requires = ["setuptools", "wheel", "build"]

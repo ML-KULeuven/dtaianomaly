@@ -3,9 +3,9 @@ import tempfile
 import streamlit as st
 
 from dtaianomaly.anomaly_detection import Supervision
-from dtaianomaly.data import DataSet, LazyDataLoader, PathDataLoader
-from dtaianomaly.demonstrator._utils import show_class_summary
-from dtaianomaly.demonstrator._visualization import plot_data
+from dtaianomaly.data import CustomDataLoader, DataSet, LazyDataLoader, PathDataLoader
+from dtaianomaly.in_time_ad._utils import show_class_summary
+from dtaianomaly.in_time_ad._visualization import plot_data
 
 
 class StDataLoader:
@@ -63,22 +63,46 @@ class StDataLoader:
             if issubclass(data_loader_cls, PathDataLoader):
                 uploaded_file = st.file_uploader("Upload a file")
                 if uploaded_file is not None:
-                    file_name = uploaded_file.name
+                    file_name_path = uploaded_file.name
                     with tempfile.NamedTemporaryFile(
-                        delete=False, suffix=file_name
+                        delete=False, suffix=file_name_path
                     ) as tmp_file:
                         tmp_file.write(uploaded_file.read())
                         parameters["path"] = tmp_file.name
 
+            if issubclass(data_loader_cls, CustomDataLoader):
+                train_data = st.file_uploader("Upload train data (optional)")
+                if train_data is not None:
+                    file_name_train = train_data.name
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, suffix=file_name_train
+                    ) as tmp_file:
+                        tmp_file.write(train_data.read())
+                        parameters["train_path"] = tmp_file.name
+
+                test_data = st.file_uploader("Upload test data")
+                if test_data is not None:
+                    file_name_test = test_data.name
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, suffix=file_name_test
+                    ) as tmp_file:
+                        tmp_file.write(test_data.read())
+                        parameters["test_path"] = tmp_file.name
+
         # A button to actually load the data
         button_clicked = col_button.button(label="Load data", use_container_width=True)
+
         if button_clicked:
             try:
                 self.data_loader = data_loader_cls(**parameters)
                 self.data_set = self.data_loader.load()
                 if "path" in parameters:
                     # This is not recommended in practice, but for showing a nice file (without the temporary path)
-                    self.data_loader.path = file_name
+                    self.data_loader.path = file_name_path
+                if "test_path" in parameters:
+                    self.data_loader.test_path = file_name_test
+                if "train_path" in parameters:
+                    self.data_loader.train_path = file_name_train
 
             except Exception as e:
                 if "missing 1 required positional argument: 'path'" in str(e):

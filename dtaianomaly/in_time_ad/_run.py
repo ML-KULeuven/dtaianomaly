@@ -7,8 +7,8 @@ from streamlit.web import cli as stcli
 
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
-from dtaianomaly.demonstrator import CustomDetectorVisualizer
 from dtaianomaly.evaluation import Metric
+from dtaianomaly.in_time_ad import CustomDetectorVisualizer
 from dtaianomaly.workflow.utils import convert_to_list
 
 torch.classes.__path__ = []  # To avoid torch-warning
@@ -44,7 +44,7 @@ def run(
     sys.argv = [
         "streamlit",
         "run",
-        str(pathlib.Path(__file__).parent / "_demonstrator_app.py"),
+        str(pathlib.Path(__file__).parent / "_app.py"),
         configuration_path or "default",
         str(
             _custom_model_config(

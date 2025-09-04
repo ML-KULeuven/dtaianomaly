@@ -4,15 +4,15 @@ import warnings
 
 import streamlit as st
 
-from dtaianomaly.demonstrator._configuration import load_configuration
-from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetectorLoader
-from dtaianomaly.demonstrator._st_DataLoader import StDataLoader
-from dtaianomaly.demonstrator._st_QualitativeEvaluator import StQualitativeEvaluator
-from dtaianomaly.demonstrator._st_QuantitativeEvaluator import (
+from dtaianomaly.in_time_ad._configuration import load_configuration
+from dtaianomaly.in_time_ad._st_AnomalyDetector import StAnomalyDetectorLoader
+from dtaianomaly.in_time_ad._st_DataLoader import StDataLoader
+from dtaianomaly.in_time_ad._st_QualitativeEvaluator import StQualitativeEvaluator
+from dtaianomaly.in_time_ad._st_QuantitativeEvaluator import (
     StEvaluationScores,
     StQualitativeEvaluationLoader,
 )
-from dtaianomaly.demonstrator._utils import (
+from dtaianomaly.in_time_ad._utils import (
     error_no_detectors,
     error_no_metrics,
     load_custom_models,
@@ -101,17 +101,19 @@ if "st_evaluation_scores" not in st.session_state:
 # INTRODUCTION
 ###################################################################
 
-st.title("Welcome to the ``dtaianomaly`` demonstrator!")
+st.title("Welcome to ``InTimeAD``!")
+st.subheader("Interactive Time Series Anomaly Detection")
 show_section_description(
     """
-    [``dtaianomaly``](https://github.com/ML-KULeuven/dtaianomaly) is an easy-to-use
-    Python package for time series anomaly detection, offering a simple interface to apply
-    state-of-the-art models. This demonstrator builds on ``dtaianomaly`` to let you detect
-    anomalies without writing any code, making it possible to quickly explore and compare
-    different models. Once you’ve identified suitable models for your data, you can switch
-    to Python for more in-depth validation. To help with this transition, code snippets are
-    provided throughout this demonstrator (marked with a 💻) and can be copy-pasted directly
-    in your code-base.
+    InTimeAD is tool for *In*teractive *Time* Series *A*nomaly *D*etection, which offers a
+    simple webinterface to apply state-of-the-art time series anomaly detection. InTimeAD
+    builds on [``dtaianomaly``](https://github.com/ML-KULeuven/dtaianomaly), an easy-to-use
+    Python package for time series anomaly detection, to let you detect anomalies without
+    writing any code. This makes it possible to quickly explore and compare different
+    models, including on your own data. Once you’ve identified suitable models, you can
+    switch to Python for more in-depth validation. To help with this transition, code
+    snippets are provided throughout this InTimeAD (marked with a "💻") and can be copy-pasted
+    directly in your code-base.
     """
 )
 with st.expander("What is anomaly detection?", expanded=False, icon="💡"):

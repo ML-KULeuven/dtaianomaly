@@ -8,16 +8,16 @@ import streamlit as st
 
 from dtaianomaly.anomaly_detection import Supervision
 from dtaianomaly.data import DataSet
-from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetector
-from dtaianomaly.demonstrator._utils import (
+from dtaianomaly.evaluation import Metric, ProbaMetric, ThresholdMetric
+from dtaianomaly.in_time_ad._st_AnomalyDetector import StAnomalyDetector
+from dtaianomaly.in_time_ad._utils import (
     get_parameters,
     input_widget_hyperparameter,
     show_class_summary,
     show_small_header,
     update_object,
 )
-from dtaianomaly.demonstrator._visualization import get_detector_color_map
-from dtaianomaly.evaluation import Metric, ProbaMetric, ThresholdMetric
+from dtaianomaly.in_time_ad._visualization import get_detector_color_map
 from dtaianomaly.preprocessing import MinMaxScaler
 from dtaianomaly.thresholding import FixedCutoff
 

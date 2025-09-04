@@ -4,9 +4,9 @@ import streamlit as st
 
 from dtaianomaly.anomaly_detection import Supervision
 from dtaianomaly.data import DataSet
-from dtaianomaly.demonstrator._st_AnomalyDetector import StAnomalyDetector
-from dtaianomaly.demonstrator._utils import error_no_detectors
-from dtaianomaly.demonstrator._visualization import (
+from dtaianomaly.in_time_ad._st_AnomalyDetector import StAnomalyDetector
+from dtaianomaly.in_time_ad._utils import error_no_detectors
+from dtaianomaly.in_time_ad._visualization import (
     plot_anomaly_scores,
     plot_detected_anomalies,
 )

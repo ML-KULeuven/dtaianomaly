@@ -19,6 +19,8 @@ def plot_data(
     col: int = 1,
 ) -> go.Figure:
 
+    X = X.squeeze()
+
     if fig is None:
         fig = make_subplots(rows=1, cols=1)
 

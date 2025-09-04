@@ -9,14 +9,14 @@ from dtaianomaly.anomaly_detection import (
     check_is_valid_window_size,
 )
 from dtaianomaly.data import DataSet
-from dtaianomaly.demonstrator._utils import (
+from dtaianomaly.in_time_ad._utils import (
     get_parameters,
     input_widget_hyperparameter,
     show_class_summary,
     show_small_header,
     update_object,
 )
-from dtaianomaly.demonstrator.CustomDetectorVisualizer import CustomDetectorVisualizer
+from dtaianomaly.in_time_ad.CustomDetectorVisualizer import CustomDetectorVisualizer
 
 
 class StAnomalyDetector:

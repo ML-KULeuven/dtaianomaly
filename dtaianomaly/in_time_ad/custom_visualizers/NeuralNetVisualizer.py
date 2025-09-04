@@ -1,7 +1,7 @@
 import streamlit as st
 
 from dtaianomaly.anomaly_detection import BaseDetector, BaseNeuralDetector
-from dtaianomaly.demonstrator.CustomDetectorVisualizer import CustomDetectorVisualizer
+from dtaianomaly.in_time_ad.CustomDetectorVisualizer import CustomDetectorVisualizer
 
 
 class NeuralNetVisualizer(CustomDetectorVisualizer):

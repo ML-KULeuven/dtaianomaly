@@ -87,8 +87,8 @@ def _is_abstract(cls):
 def _has_valid_type(cls: type):
     from dtaianomaly.anomaly_detection import BaseDetector
     from dtaianomaly.data import LazyDataLoader
-    from dtaianomaly.demonstrator import CustomDetectorVisualizer
     from dtaianomaly.evaluation import Metric
+    from dtaianomaly.in_time_ad import CustomDetectorVisualizer
     from dtaianomaly.preprocessing import Preprocessor
     from dtaianomaly.thresholding import Thresholding
 
@@ -110,8 +110,8 @@ def _filter_types(
 ):
     from dtaianomaly.anomaly_detection import BaseDetector
     from dtaianomaly.data import LazyDataLoader
-    from dtaianomaly.demonstrator import CustomDetectorVisualizer
     from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric
+    from dtaianomaly.in_time_ad import CustomDetectorVisualizer
     from dtaianomaly.preprocessing import Preprocessor
     from dtaianomaly.thresholding import Thresholding
 
