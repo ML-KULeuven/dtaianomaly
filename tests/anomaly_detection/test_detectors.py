@@ -23,7 +23,8 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.MedianMethod,
     anomaly_detection.KShapeAnomalyDetector,
     anomaly_detection.ChronosAnomalyDetector,
-    anomaly_detection.SpectralResidual
+    anomaly_detection.SpectralResidual,
+    anomaly_detection.MOMENTAnomalyDetector
 ]
 
 
@@ -68,7 +69,7 @@ def initialize(cls):
     return cls(**filtered_kwargs)
 
 
-@pytest.mark.parametrize('cls', utils.all_classes('anomaly-detector', return_names=False) + [pipeline.Pipeline])
+@pytest.mark.parametrize('cls', utils.all_classes('anomaly-detector', exclude_types=anomaly_detection.MOMENTAnomalyDetector, return_names=False) + [pipeline.Pipeline])
 @decorate_all_test_methods(ignore_specific_error(ValueError, "Could not form valid cluster separation. Please change n_clusters or change clustering method"))
 class TestAnomalyDetectors:
 

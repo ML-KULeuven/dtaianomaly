@@ -442,6 +442,9 @@ def detector_entry(entry):
     elif detector_type == "SpectralResidual":
         return anomaly_detection.SpectralResidual(**entry_without_type)
 
+    elif detector_type == "MOMENTAnomalyDetector":
+        return anomaly_detection.MOMENTAnomalyDetector(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

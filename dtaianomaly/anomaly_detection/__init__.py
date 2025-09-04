@@ -35,6 +35,7 @@ from .LocalPolynomialApproximation import LocalPolynomialApproximation
 from .LongShortTermMemoryNetwork import LongShortTermMemoryNetwork
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
+from .MOMENTAnomalyDetector import MOMENTAnomalyDetector
 from .MultilayerPerceptron import MultilayerPerceptron
 from .MultivariateDetector import MultivariateDetector
 from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
@@ -96,4 +97,5 @@ __all__ = [
     "LocalPolynomialApproximation",
     "ChronosAnomalyDetector",
     "SpectralResidual",
+    "MOMENTAnomalyDetector",
 ]

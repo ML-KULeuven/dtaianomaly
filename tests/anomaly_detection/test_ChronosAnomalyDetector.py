@@ -1,5 +1,9 @@
+
+import builtins
+import sys
+import types
+
 import pytest
-import torch
 
 from dtaianomaly.anomaly_detection import ChronosAnomalyDetector, Supervision
 
@@ -83,3 +87,28 @@ class TestChronosAnomalyDetector:
     def test_do_fine_tuning_invalid_type(self, do_fine_tuning):
         with pytest.raises(TypeError):
             ChronosAnomalyDetector(window_size='fft', do_fine_tuning=do_fine_tuning)
+
+    def test_raises_if_autogluon_missing(self, monkeypatch):
+        # simulate ImportError when trying to import autogluon.timeseries
+        real_import = builtins.__import__
+
+        def fake_import(name, *args, **kwargs):
+            if name == "autogluon.timeseries":
+                raise ImportError("No module named 'autogluon.timeseries'")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", fake_import)
+
+        with pytest.raises(Exception, match="Module 'autogluon.timeseries' is not available"):
+            # call the constructor that runs your code
+            ChronosAnomalyDetector(15)
+
+    def test_no_error_if_autogluon_available(self, monkeypatch):
+        # simulate a dummy autogluon.timeseries module
+        sys.modules["autogluon.timeseries"] = types.ModuleType("autogluon.timeseries")
+
+        # should NOT raise
+        ChronosAnomalyDetector(15)  # just runs, no exception
+
+        # cleanup (avoid side effects on other tests)
+        del sys.modules["autogluon.timeseries"]

@@ -32,6 +32,7 @@ anomaly_detectors = [
     anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.ChronosAnomalyDetector,
     anomaly_detection.SpectralResidual,
+    anomaly_detection.MOMENTAnomalyDetector,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,
