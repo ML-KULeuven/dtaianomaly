@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from dtaianomaly.evaluation._common import make_intervals
@@ -43,10 +45,11 @@ class UCRScore(ProbaMetric):
         # Retrieve the ground truth anomalous interval
         starts, ends = make_intervals(y_true)
         if len(starts) != 1:
-            raise ValueError(
+            warnings.warn(
                 "The 'UCR-score assumes that there is exactly a single anomalous event, "
                 f"but {len(starts)} anomalous events are given."
             )
+            return np.nan
 
         # Retrieve the relevant time points
         t_s = starts[0]

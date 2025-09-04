@@ -369,7 +369,9 @@ def infer_minimal_entry(cls):
         'cutoff': 0.9,
         'contamination_rate': 0.1,
         'base_preprocessors': [{'type': 'Identity'}],
-        'path': DATA_PATH
+        'path': DATA_PATH,
+        'neighborhood': 20,
+        'moving_average_window_size': 5
     }
     sig = inspect.signature(cls.__init__)
     accepted_params = set([

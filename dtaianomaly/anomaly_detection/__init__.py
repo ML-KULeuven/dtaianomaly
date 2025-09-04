@@ -41,6 +41,7 @@ from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .PyODAnomalyDetector import PyODAnomalyDetector
 from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
+from .SpectralResidual import SpectralResidual
 from .Transformer import Transformer
 from .windowing_utils import (
     check_is_valid_window_size,
@@ -94,4 +95,5 @@ __all__ = [
     "Transformer",
     "LocalPolynomialApproximation",
     "ChronosAnomalyDetector",
+    "SpectralResidual",
 ]

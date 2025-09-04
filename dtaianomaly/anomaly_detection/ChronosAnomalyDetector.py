@@ -158,6 +158,9 @@ class ChronosAnomalyDetector(BaseDetector):
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
 
+        # Make sure the time series array has only one dimension
+        X = X.squeeze()
+
         # Compute the window size
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
 
@@ -194,6 +197,9 @@ class ChronosAnomalyDetector(BaseDetector):
         # Check if the given dataset is univariate
         if not utils.is_univariate(X):
             raise ValueError("Input must be univariate!")
+
+        # Make sure the time series array has only one dimension
+        X = X.squeeze()
 
         forecasts = self.make_forecasts(X)
         decision_scores = np.empty(shape=X.shape[0])

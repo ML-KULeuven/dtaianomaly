@@ -100,7 +100,7 @@ class LocalPolynomialApproximation(BaseDetector):
             )
 
         return _local_poly_nb_parallel(
-            X=X,
+            X=X.squeeze(),
             neighborhood=self.neighborhood,
             power=self.power,
             buffer=self.buffer,

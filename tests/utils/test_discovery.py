@@ -30,6 +30,8 @@ anomaly_detectors = [
     anomaly_detection.LongShortTermMemoryNetwork,
     anomaly_detection.Transformer,
     anomaly_detection.LocalPolynomialApproximation,
+    anomaly_detection.ChronosAnomalyDetector,
+    anomaly_detection.SpectralResidual,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,
@@ -59,6 +61,7 @@ metrics = [
     evaluation.RangeBasedPrecision,
     evaluation.RangeBasedRecall,
     evaluation.RangeBasedFBeta,
+    evaluation.UCRScore
 ]
 proba_metrics = [
     evaluation.ThresholdMetric,
@@ -69,6 +72,7 @@ proba_metrics = [
     evaluation.RangeAreaUnderPR,
     evaluation.VolumeUnderROC,
     evaluation.VolumeUnderPR,
+    evaluation.UCRScore
 ]
 binary_metrics = [
     evaluation.Precision,

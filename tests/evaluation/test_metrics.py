@@ -58,7 +58,8 @@ class TestMetrics:
         rng = np.random.default_rng()
         y_true = rng.choice([0, 1], size=1000, replace=True)
         y_pred = rng.choice([0, 1], size=1000, replace=True)
-        assert 0 <= metric.compute(y_true, y_pred) <= 1
+        score = metric.compute(y_true, y_pred)
+        assert 0 <= score <= 1 or np.isnan(score)
 
 
 @pytest.mark.parametrize('cls', binary_metrics)
