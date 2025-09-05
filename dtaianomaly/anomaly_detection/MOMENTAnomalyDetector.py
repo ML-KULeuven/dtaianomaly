@@ -5,12 +5,10 @@ import numpy as np
 import torch
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection import (
-    BaseDetector,
-    Supervision,
+from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
+from dtaianomaly.anomaly_detection.windowing_utils import (
     check_is_valid_window_size,
     compute_window_size,
-    sliding_window,
 )
 
 _MOMENT_MODEL_SIZE_TYPE = Literal["small", "base", "large"]
@@ -48,7 +46,7 @@ class MOMENTAnomalyDetector(BaseDetector):
     nb_epochs: int, default=1
         The number of epochs to finetune MOMENT.
     device: str, default='cpu'
-        The device to use for running Chronos.
+        The device to use.
 
     Attributes
     ----------

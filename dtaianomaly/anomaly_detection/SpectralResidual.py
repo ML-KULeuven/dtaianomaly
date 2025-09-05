@@ -59,7 +59,7 @@ class SpectralResidual(BaseDetector):
             raise TypeError("`epsilon` should be an integer")
         if epsilon <= 0:
             raise ValueError(
-                f"Variable 'epsilon' must be at least 1, received '{epsilon}'!"
+                f"Variable 'epsilon' must be at least 0, received '{epsilon}'!"
             )
 
         self.moving_average_window_size = moving_average_window_size
