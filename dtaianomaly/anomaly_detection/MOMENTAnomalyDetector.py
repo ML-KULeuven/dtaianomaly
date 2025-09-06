@@ -33,7 +33,7 @@ class MOMENTAnomalyDetector(BaseDetector):
     ----------
     window_size: int or str
         The window size to use for extracting sliding windows from the time series. This
-        value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
+        value will be passed to :py:func:`~dtaianomaly.anomaly_detection.windowing_utils.compute_window_size`.
     model_size: {'small', 'base', 'large'}, default='small'
         The MOMENT-model to use.
     batch_size: int, default=16

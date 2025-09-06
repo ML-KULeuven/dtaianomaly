@@ -33,6 +33,7 @@ anomaly_detectors = [
     anomaly_detection.ChronosAnomalyDetector,
     anomaly_detection.SpectralResidual,
     anomaly_detection.MOMENTAnomalyDetector,
+    anomaly_detection.TimeMoEAnomalyDetector,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

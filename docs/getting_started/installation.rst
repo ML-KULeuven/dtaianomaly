@@ -30,6 +30,9 @@ Currently, following subsets are available:
 - ``notebooks``: Dependencies for using jupyter notebooks.
 - ``lint``: Dependencies for linting the code.
 - ``chronos``: Install autogluon.timeseries, necessary for running Chronos.
+- ``moment``: Install momentfm, necessary for running Chronos. **Warning:** Not included when
+  installing ``dtaianomaly[all]`` due to dependency conflicts!
+- ``time_moe``: Install transformers==4.40.1, necessary for running MOMENT.
 
 To install version ``X.Y.Z``, use the following command:
 

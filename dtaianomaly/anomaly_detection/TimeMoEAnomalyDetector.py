@@ -54,8 +54,8 @@ class TimeMoEAnomalyDetector(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> time_moe = TimeMoEAnomalyDetector(10).fit(x)
     >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
-           0.00010728]...)
+    array([6.34949149e-05, 6.34949149e-05, 6.34949149e-05, ...,
+           6.34949149e-05, 6.34949149e-05, 6.34949149e-05]...)
 
     Notes
     -----
@@ -63,7 +63,7 @@ class TimeMoEAnomalyDetector(BaseDetector):
     - The max_position_embeddings for Time-MoE is set to during training.
       This means the maximum sequence length for Time-MoE is 4096. To
       achieve optimal forecasting performance, it is recommended that the
-      sum of window_size_ and prediction_length does not exceed 4096.
+      sum of ``window_size_`` and ``prediction_length`` does not exceed 4096.
     """
 
     window_size: int | str
@@ -159,12 +159,15 @@ class TimeMoEAnomalyDetector(BaseDetector):
 
     def _decision_function(self, X: np.ndarray) -> np.array:
 
+        # Check if the given dataset is univariate
+        if not utils.is_univariate(X):
+            raise ValueError("Input must be univariate!")
+
+        # Make sure the time series array has only one dimension
+        X = X.squeeze()
+
         decision_scores = np.empty(X.shape[0])
-        decision_scores = np.full_like(decision_scores, np.nan)
-
-        batches = self._get_batch_starts(X.shape[0])
-
-        for batch_starts in batches:
+        for batch_starts in self._get_batch_starts(X.shape[0]):
 
             # Create the batch
             batch = torch.tensor(
@@ -227,3 +230,19 @@ class TimeMoEAnomalyDetector(BaseDetector):
                 start_batches.append([])
             start_batches[-1].append(t)
         return start_batches
+
+
+def main():
+    from dtaianomaly.data import demonstration_time_series
+
+    X, y = demonstration_time_series()
+    TimeMoEAnomalyDetector(64).fit(X).decision_function(X)
+
+
+if __name__ == "__main__":
+
+    main()
+
+    import doctest
+
+    doctest.testmod()
