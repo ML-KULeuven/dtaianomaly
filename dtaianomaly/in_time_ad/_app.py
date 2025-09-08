@@ -27,7 +27,7 @@ from dtaianomaly.utils import all_classes
 ###################################################################
 
 st.set_page_config(
-    page_title="dtaianomaly demonstrator",
+    page_title="InTimeAD",
     page_icon="https://raw.githubusercontent.com/ML-KULeuven/dtaianomaly/main/docs/logo/favicon.svg",
     layout="wide",
 )
@@ -149,7 +149,7 @@ with st.expander("What is anomaly detection?", expanded=False, icon="💡"):
 show_header("Time series data")
 show_section_description(
     """
-    To get started, load a time series into the demonstrator. You can either use one of
+    To get started, load a time series into InTimeAD. You can either use one of
     the built-in data loaders or upload your own data. The time series will be shown
     immediately to help you understand its structure. Once you're familiar with the data,
     you can begin detecting anomalies.
@@ -314,7 +314,7 @@ st.session_state.st_evaluation_scores.show_scores()
 
 show_header("Acknowledgements")
 st.write(
-    "If you find ``dtaianomaly`` or this demonstrator useful for your work, we would appreciate the following [citation](https://arxiv.org/abs/2502.14381):"
+    "If you find ``dtaianomaly`` or ``InTimeAD`` useful for your work, we would appreciate the following [citation](https://arxiv.org/abs/2502.14381):"
 )
 st.code(
     """
