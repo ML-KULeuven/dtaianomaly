@@ -309,7 +309,7 @@ for i, metric in enumerate(st.session_state.loaded_metrics):
 st.session_state.st_evaluation_scores.show_scores()
 
 ###################################################################
-# NUMERICAL ANALYSIS
+# ACKNOWLEDGEMENTS
 ###################################################################
 
 show_header("Acknowledgements")
