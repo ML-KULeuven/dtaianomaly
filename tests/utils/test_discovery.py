@@ -34,6 +34,7 @@ anomaly_detectors = [
     anomaly_detection.SpectralResidual,
     anomaly_detection.MOMENTAnomalyDetector,
     anomaly_detection.TimeMoEAnomalyDetector,
+    anomaly_detection.RobustRandomCutForestAnomalyDetector,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

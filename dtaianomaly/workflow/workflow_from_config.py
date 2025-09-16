@@ -448,6 +448,11 @@ def detector_entry(entry):
     elif detector_type == "TimeMoEAnomalyDetector":
         return anomaly_detection.TimeMoEAnomalyDetector(**entry_without_type)
 
+    elif detector_type == "RobustRandomCutForestAnomalyDetector":
+        return anomaly_detection.RobustRandomCutForestAnomalyDetector(
+            **entry_without_type
+        )
+
     else:
         raise ValueError(f"Invalid detector entry: {entry}")
 

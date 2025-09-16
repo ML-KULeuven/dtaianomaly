@@ -42,6 +42,7 @@ from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .PyODAnomalyDetector import PyODAnomalyDetector
 from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
+from .RobustRandomCutForestAnomalyDetector import RobustRandomCutForestAnomalyDetector
 from .SpectralResidual import SpectralResidual
 from .TimeMoEAnomalyDetector import TimeMoEAnomalyDetector
 from .Transformer import Transformer
@@ -100,4 +101,5 @@ __all__ = [
     "SpectralResidual",
     "MOMENTAnomalyDetector",
     "TimeMoEAnomalyDetector",
+    "RobustRandomCutForestAnomalyDetector",
 ]

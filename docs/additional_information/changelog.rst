@@ -13,6 +13,9 @@ Added
 - Implement ``LocalPolynomialApproximation`` anomaly detector.
 - Implement ``UCRScore`` evaluation metric.
 - Implement ``ChronosAnomalyDetector`` model, with optional dependency ``chronos``
+- Implement ``MOMENTAnomalyDetector`` model, with optional dependency ``moment``
+- Implement ``TimeMoEAnomalyDetector`` model, with optional dependency ``time_moe``
+- Implement ``RobustRandomCutForestAnomalyDetector`` model
 
 Changed
 ^^^^^^^
