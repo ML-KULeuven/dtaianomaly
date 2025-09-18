@@ -4,6 +4,8 @@ import inspect
 import json
 import toml
 import pathlib
+import sys
+import types
 
 from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data, utils
 from dtaianomaly.workflow import workflow_from_config, interpret_config, Workflow
@@ -369,7 +371,9 @@ def infer_minimal_entry(cls):
         'cutoff': 0.9,
         'contamination_rate': 0.1,
         'base_preprocessors': [{'type': 'Identity'}],
-        'path': DATA_PATH
+        'path': DATA_PATH,
+        'neighborhood': 20,
+        'moving_average_window_size': 5
     }
     sig = inspect.signature(cls.__init__)
     accepted_params = set([
@@ -391,7 +395,11 @@ def infer_extensive_entry(cls):
 class TestInterpretEntries:
 
     @pytest.mark.parametrize("infer_entry", [infer_minimal_entry, infer_extensive_entry])
-    def test(self, cls, infer_entry):
+    def test(self, cls, infer_entry, monkeypatch):
+        if cls == anomaly_detection.MOMENTAnomalyDetector:
+            monkeypatch.setattr(sys, "version_info", (3, 10, 7, "final", 0))
+            sys.modules["momentfm"] = types.ModuleType("momentfm")
+
         entry_function = infer_entry_function(cls)
         entry = infer_entry(cls)
         read_object = entry_function(entry)
@@ -407,6 +415,9 @@ class TestInterpretEntries:
                 assert getattr(read_object, 'kwargs')[key] == value
             else:
                 pytest.fail(f"Object should either have '{key}' as attribute, or have 'kwargs' as attribute, which in turn has '{key}' as attribute!")
+
+        if cls == anomaly_detection.MOMENTAnomalyDetector:
+            del sys.modules["momentfm"]
 
     def test_invalid_parameter(self, cls):
         entry_function = infer_entry_function(cls)

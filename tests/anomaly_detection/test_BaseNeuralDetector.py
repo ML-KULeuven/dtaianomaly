@@ -4,7 +4,7 @@ import torch
 import numpy as np
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection import MultilayerPerceptron, BaseNeuralDetector, ForecastDataset, ReconstructionDataset, AutoEncoder
+from dtaianomaly.anomaly_detection import MultilayerPerceptron, BaseNeuralDetector
 
 _VALID_ERROR_METRICS = ["mean-absolute-error", "mean-squared-error"]
 

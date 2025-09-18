@@ -330,6 +330,9 @@ def metric_entry(entry):
     elif metric_type == "RangeBasedFBeta":
         return evaluation.RangeBasedFBeta(**entry_without_type)
 
+    elif metric_type == "UCRScore":
+        return evaluation.UCRScore(**entry_without_type)
+
     else:
         raise ValueError(f"Invalid metric entry: {entry}")
 
@@ -432,6 +435,26 @@ def detector_entry(entry):
 
     elif detector_type == "Transformer":
         return anomaly_detection.Transformer(**entry_without_type)
+
+    elif detector_type == "LocalPolynomialApproximation":
+        return anomaly_detection.LocalPolynomialApproximation(**entry_without_type)
+
+    elif detector_type == "ChronosAnomalyDetector":
+        return anomaly_detection.ChronosAnomalyDetector(**entry_without_type)
+
+    elif detector_type == "SpectralResidual":
+        return anomaly_detection.SpectralResidual(**entry_without_type)
+
+    elif detector_type == "MOMENTAnomalyDetector":
+        return anomaly_detection.MOMENTAnomalyDetector(**entry_without_type)
+
+    elif detector_type == "TimeMoEAnomalyDetector":
+        return anomaly_detection.TimeMoEAnomalyDetector(**entry_without_type)
+
+    elif detector_type == "RobustRandomCutForestAnomalyDetector":
+        return anomaly_detection.RobustRandomCutForestAnomalyDetector(
+            **entry_without_type
+        )
 
     else:
         raise ValueError(f"Invalid detector entry: {entry}")

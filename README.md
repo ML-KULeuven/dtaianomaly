@@ -14,6 +14,7 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/dtaianomaly)](https://pypi.python.org/pypi/dtaianomaly/)
 [![PyPI license](https://img.shields.io/pypi/l/dtaianomaly.svg)](https://pypi.python.org/pypi/dtaianomaly/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![InTimeAD UI](https://img.shields.io/badge/InTimeAD-Webpage-blueviolet)](https://intimead.cs.kuleuven.be)
 
 
 A simple-to-use Python package for the development and analysis of time series anomaly 

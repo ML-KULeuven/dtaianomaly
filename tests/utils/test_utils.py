@@ -37,7 +37,13 @@ class TestIsValidArrayLike:
         [[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]],
         [[1.9, 9.1], [2.8, 8.2], [3.7, 7.3], [4.6, 6.4], [5.5, 5.5]],
         [[True, True], [True, False], [False, False], [True, False], [False, True]],
-        [[1.9, 1], [2, False], [True, 3], [4, 6.4], [5.5, True]]
+        [[1.9, 1], [2, False], [True, 3], [4, 6.4], [5.5, True]],
+        [np.datetime64('2005-02-25'), np.datetime64('2005-02-26'), np.datetime64('2005-02-27')],
+        [
+            [np.datetime64('2005-02-25'), np.datetime64('2005-02-25')],
+            [np.datetime64('2005-02-26'), np.datetime64('2005-02-26')],
+            [np.datetime64('2005-02-27'), np.datetime64('2005-02-27')]
+        ]
     ])
     def test_valid(self, value):
         assert is_valid_array_like(value)
@@ -56,6 +62,7 @@ class TestIsValidArrayLike:
     ])
     def test_invalid(self, value):
         assert not is_valid_array_like(value)
+
 
 class TestIsUnivariate:
 

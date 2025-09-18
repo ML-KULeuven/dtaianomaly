@@ -52,6 +52,7 @@ def is_valid_array_like(array) -> bool:
             np.issubdtype(array.dtype, np.number)
             or np.issubdtype(array.dtype, np.floating)
             or np.issubdtype(array.dtype, bool)
+            or np.issubdtype(array.dtype, np.datetime64)
         )
 
     # Check for numerical sequence
@@ -66,12 +67,14 @@ def is_valid_array_like(array) -> bool:
                 isinstance(sample, Sequence)
                 and not isinstance(sample, str)
                 and len(sample) == n_attributes
-                and all(isinstance(item, (int, float)) for item in sample)
+                and all(
+                    isinstance(item, (int, float, np.datetime64)) for item in sample
+                )
                 for sample in array
             )
         else:
             # Univariate case
-            return all(isinstance(item, (int, float)) for item in array)
+            return all(isinstance(item, (int, float, np.datetime64)) for item in array)
 
     # Default case
     return False

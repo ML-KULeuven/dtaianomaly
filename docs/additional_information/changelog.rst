@@ -9,6 +9,14 @@ Latest
 Added
 ^^^^^
 
+- Option to save the anomaly scores within a workflow.
+- Implement ``LocalPolynomialApproximation`` anomaly detector.
+- Implement ``UCRScore`` evaluation metric.
+- Implement ``ChronosAnomalyDetector`` model, with optional dependency ``chronos``
+- Implement ``MOMENTAnomalyDetector`` model, with optional dependency ``moment``
+- Implement ``TimeMoEAnomalyDetector`` model, with optional dependency ``time_moe``
+- Implement ``RobustRandomCutForestAnomalyDetector`` model
+
 Changed
 ^^^^^^^
 - Added option to pass a literal ('mse', 'l1', 'huber') as loss function to the neural networks.
@@ -16,8 +24,11 @@ Changed
 Fixed
 ^^^^^
 
+- np.datetime64 are now also valid values in the ``utils.is_valid_array_like``.
+  This was especially necessary for time indexes in a dataset.
+
 [0.4.2] - 2025-07-03
-------
+--------------------
 
 .. warning::
    We ended the support for Python version 3.9
