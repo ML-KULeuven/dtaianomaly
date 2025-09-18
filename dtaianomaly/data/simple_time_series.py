@@ -6,6 +6,13 @@ from dtaianomaly.data import DataSet, LazyDataLoader
 class DemonstrationTimeSeriesLoader(LazyDataLoader):
     """
     A data loader object to load the demonstration time series.
+
+    The demonstration time series loader is a simple time series
+    which typically follows a sine-wave of length 1400 containing
+    approximately 12 periods. The time series generally follows
+    the typical sine-pattern (including some Gaussian noise), the
+    valley around observation 950 is slightly deeper than the other
+    valleys in the time series, leading to an anomaly.
     """
 
     def _load(self) -> DataSet:

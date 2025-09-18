@@ -21,8 +21,15 @@ described on this page.
 .. _UCR: https://www.cs.ucr.edu/~eamonn/time_series_data_2018/UCR_TimeSeriesAnomalyDatasets2021.zip
 
 .. note::
-    You can also read custom data by implementing a custom :py:class:`~dtaianomaly.data.LazyDataLoader`,
-    as described in the `documentation <https://dtaianomaly.readthedocs.io/en/stable/index.html>`_.
+    You can also create a new data loader by implementing a custom :py:class:`~dtaianomaly.data.LazyDataLoader`,
+    as described in the `documentation <https://dtaianomaly.readthedocs.io/en/stable/index.html>`__.
+
+Custom data
+-----------
+
+``dtaianomaly`` allows to load custom time series data for anomaly detection through the
+:py:class:`dtaianomaly.data.CustomDataLoader`. Check out the `documentation <https://dtaianomaly.readthedocs.io/en/stable/api/data.html#dtaianomaly.data.CustomDataLoader>`__
+for more information.
 
 Synthetic data
 --------------

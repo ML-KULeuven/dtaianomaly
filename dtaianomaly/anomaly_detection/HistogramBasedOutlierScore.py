@@ -31,7 +31,7 @@ class HistogramBasedOutlierScore(PyODAnomalyDetector):
         The number of bins for each feature. If ``'auto'``, the birge-rozenblac method is used
         for automatically selecting the number of bins for each feature.
     alpha: float in [0, 1], default=0.1
-        The regularizer for preventing overlfow.
+        The regularizer for preventing overflow.
     tol: float in [0, 1], default=0.5
         Parameter defining the flexibility for dealing with samples that fall
         outside the bins.

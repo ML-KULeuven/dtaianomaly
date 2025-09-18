@@ -30,3 +30,5 @@ Loading data
 .. autofunction:: dtaianomaly.data.from_directory
 
 .. autoclass:: dtaianomaly.data.UCRLoader
+
+.. autoclass:: dtaianomaly.data.CustomDataLoader
