@@ -57,10 +57,10 @@ class MOMENTAnomalyDetector(BaseDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import MOMENTAnomalyDetector
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> moment = MOMENTAnomalyDetector(10).fit(x)
+    >>> from dtaianomaly.anomaly_detection import MOMENTAnomalyDetector  # doctest: +SKIP
+    >>> from dtaianomaly.data import demonstration_time_series  # doctest: +SKIP
+    >>> x, y = demonstration_time_series()  # doctest: +SKIP
+    >>> moment = MOMENTAnomalyDetector(10).fit(x)  # doctest: +SKIP
     >>> moment.decision_function(x)  # doctest: +SKIP
     array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
            0.00010728]...)

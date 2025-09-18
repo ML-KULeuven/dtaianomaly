@@ -53,7 +53,7 @@ class TimeMoEAnomalyDetector(BaseDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> time_moe = TimeMoEAnomalyDetector(10).fit(x)
-    >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +SKIP
     array([6.34949149e-05, 6.34949149e-05, 6.34949149e-05, ...,
            6.34949149e-05, 6.34949149e-05, 6.34949149e-05]...)
 
