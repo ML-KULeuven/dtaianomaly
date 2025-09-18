@@ -2,7 +2,7 @@
 import pytest
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
-from dtaianomaly.demonstrator import custom_visualizers, CustomDetectorVisualizer
+from dtaianomaly.in_time_ad import custom_visualizers, CustomDetectorVisualizer
 from dtaianomaly.utils.discovery import all_classes
 
 anomaly_detectors = [
@@ -39,7 +39,8 @@ anomaly_detectors = [
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,
-    data.UCRLoader
+    data.UCRLoader,
+    data.CustomDataLoader
 ]
 metrics = [
     evaluation.ThresholdMetric,
@@ -114,7 +115,8 @@ thresholders = [
     thresholding.TopN
 ]
 custom_demonstrator_visualizers = [
-    custom_visualizers.CustomKMeansVisualizer
+    custom_visualizers.CentroidVisualizer,
+    custom_visualizers.NeuralNetVisualizer,
 ]
 everything = anomaly_detectors + data_loaders + metrics + preprocessors + thresholders + custom_demonstrator_visualizers
 
