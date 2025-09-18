@@ -43,9 +43,6 @@ repository = "https://github.com/ML-KULeuven/dtaianomaly"
 changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
-[project.scripts]
-run-InTimeAD = "dtaianomaly.in_time_ad:run"
-
 [build-system]
 requires = ["setuptools", "wheel", "build"]
 build-backend = "setuptools.build_meta"
@@ -67,6 +64,10 @@ all = [  # All the optional dependencies
     "pre-commit",
     "black",
     "isort",
+    'tqdm',
+    "sphinxcontrib-bibtex",
+    "autogluon.timeseries>=1.3.1",
+    "transformers==4.40.1"
     'tqdm',
     "streamlit",
     "plotly"
@@ -93,7 +94,16 @@ lint = [
     "black",
     "isort"
 ]
-demonstrator = [
+chronos = [
+    "autogluon.timeseries>=1.3.1"
+]
+moment = [
+    "momentfm"
+]
+time_moe = [
+    "transformers==4.40.1"
+]
+in_time_ad = [
     "streamlit",
     "plotly"
 ]
