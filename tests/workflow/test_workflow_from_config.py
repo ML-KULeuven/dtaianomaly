@@ -7,7 +7,7 @@ import pathlib
 import sys
 import types
 
-from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data, utils
+from dtaianomaly import preprocessing, anomaly_detection, evaluation, thresholding, data, utils, in_time_ad
 from dtaianomaly.workflow import workflow_from_config, interpret_config, Workflow
 from dtaianomaly.workflow.workflow_from_config import interpret_dataloaders, data_entry
 from dtaianomaly.workflow.workflow_from_config import interpret_detectors, detector_entry
@@ -372,6 +372,8 @@ def infer_minimal_entry(cls):
         'contamination_rate': 0.1,
         'base_preprocessors': [{'type': 'Identity'}],
         'path': DATA_PATH,
+        'test_path': DATA_PATH,
+        'train_path': DATA_PATH,
         'neighborhood': 20,
         'moving_average_window_size': 5
     }
@@ -391,7 +393,7 @@ def infer_extensive_entry(cls):
     return minimal_entry | {parameter: sig.parameters[parameter].default for parameter in optional_parameters}
 
 
-@pytest.mark.parametrize("cls", utils.all_classes(return_names=False))
+@pytest.mark.parametrize("cls", utils.all_classes(return_names=False, exclude_types=in_time_ad.CustomDetectorVisualizer))
 class TestInterpretEntries:
 
     @pytest.mark.parametrize("infer_entry", [infer_minimal_entry, infer_extensive_entry])
