@@ -19,6 +19,7 @@ from .BaseNeuralDetector_utils import (
     ReconstructionDataset,
     TimeSeriesDataset,
 )
+from .ChronosAnomalyDetector import ChronosAnomalyDetector
 from .ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
 from .ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
 from .CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
@@ -30,15 +31,20 @@ from .KMeansAnomalyDetector import KMeansAnomalyDetector
 from .KNearestNeighbors import KNearestNeighbors
 from .KShapeAnomalyDetector import KShapeAnomalyDetector
 from .LocalOutlierFactor import LocalOutlierFactor
+from .LocalPolynomialApproximation import LocalPolynomialApproximation
 from .LongShortTermMemoryNetwork import LongShortTermMemoryNetwork
 from .MatrixProfileDetector import MatrixProfileDetector
 from .MedianMethod import MedianMethod
+from .MOMENTAnomalyDetector import MOMENTAnomalyDetector
 from .MultilayerPerceptron import MultilayerPerceptron
 from .MultivariateDetector import MultivariateDetector
 from .OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from .PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from .PyODAnomalyDetector import PyODAnomalyDetector
 from .RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
+from .RobustRandomCutForestAnomalyDetector import RobustRandomCutForestAnomalyDetector
+from .SpectralResidual import SpectralResidual
+from .TimeMoEAnomalyDetector import TimeMoEAnomalyDetector
 from .Transformer import Transformer
 from .windowing_utils import (
     check_is_valid_window_size,
@@ -90,4 +96,10 @@ __all__ = [
     "LongShortTermMemoryNetwork",
     "ConvolutionalNeuralNetwork",
     "Transformer",
+    "LocalPolynomialApproximation",
+    "ChronosAnomalyDetector",
+    "SpectralResidual",
+    "MOMENTAnomalyDetector",
+    "TimeMoEAnomalyDetector",
+    "RobustRandomCutForestAnomalyDetector",
 ]

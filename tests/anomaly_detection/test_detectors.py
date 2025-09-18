@@ -12,13 +12,22 @@ DETECTORS_WITHOUT_FITTING = [
     anomaly_detection.baselines.AlwaysAnomalous,
     anomaly_detection.baselines.RandomDetector,
     anomaly_detection.DWT_MLEAD,
-    anomaly_detection.MedianMethod
+    anomaly_detection.LocalPolynomialApproximation,
+    anomaly_detection.MedianMethod,
+    anomaly_detection.SpectralResidual
 ]
-
 DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.DWT_MLEAD,
+    anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.MedianMethod,
-    anomaly_detection.KShapeAnomalyDetector
+    anomaly_detection.KShapeAnomalyDetector,
+    anomaly_detection.ChronosAnomalyDetector,
+    anomaly_detection.SpectralResidual,
+    anomaly_detection.MOMENTAnomalyDetector,
+    anomaly_detection.TimeMoEAnomalyDetector
+]
+DETECTORS_TO_EXCLUDE = [
+    anomaly_detection.MOMENTAnomalyDetector,  # Due to dependency conflicts
 ]
 
 
@@ -53,7 +62,9 @@ def initialize(cls):
         'neighborhood_size_before': 15,
         'detector': anomaly_detection.IsolationForest(window_size=15),
         'preprocessor': preprocessing.Identity(),
-        'n_epochs': 1
+        'n_epochs': 1,
+        'neighborhood': 15,
+        'moving_average_window_size': 5
     }
     sig = inspect.signature(cls.__init__)
     accepted_params = set(sig.parameters) - {"self"}
@@ -61,7 +72,7 @@ def initialize(cls):
     return cls(**filtered_kwargs)
 
 
-@pytest.mark.parametrize('cls', utils.all_classes('anomaly-detector', return_names=False) + [pipeline.Pipeline])
+@pytest.mark.parametrize('cls', utils.all_classes('anomaly-detector', exclude_types=DETECTORS_TO_EXCLUDE, return_names=False) + [pipeline.Pipeline])
 @decorate_all_test_methods(ignore_specific_error(ValueError, "Could not form valid cluster separation. Please change n_clusters or change clustering method"))
 class TestAnomalyDetectors:
 
