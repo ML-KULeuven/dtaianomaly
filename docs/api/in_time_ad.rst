@@ -1,5 +1,5 @@
-Demonstrator
-============
+InTimeAD module
+===============
 
 One of the main goals of ``dtaianomaly`` is to offer a simple API for state-of-the-art
 time series anomaly detection models. To further simplify the analysis of multiple
@@ -17,9 +17,9 @@ install ``dtaianomaly``, along with the optional dependencies ``demonstrator``:
 
 .. code-block:: bash
 
-    pip install dtaianomaly[demonstrator]
+    pip install dtaianomaly[in_time_ad]
 
-You can go to the :doc:`installation page <installation>` for more information about how to install ``dtaianomaly``.
+You can go to the :doc:`installation page <../getting_started/installation>` for more information about how to install ``dtaianomaly``.
 
 Starting the demonstrator
 -------------------------
@@ -33,16 +33,16 @@ command line using the following command:
 
 The second option is to start the demonstrator programmatically using ``Python``.
 First, you should import the demonstrator module from ``dtaianomaly``. Then, you
-can call the :py:meth:`~dtaianomaly.demonstrator.run` method to start the demonstrator.
+can call the :py:meth:`~dtaianomaly.in_time_ad.run` method to start the demonstrator.
 Starting the demonstrator from code has the added benefit that you can include
 custom components in the demonstrator, as will be discussed below.
 
 .. code-block:: python
 
-    from dtaianomaly import demonstrator
-    demonstrator.run()
+    from dtaianomaly import in_time_ad
+    in_time_ad.run()
 
-.. autofunction:: dtaianomaly.demonstrator.run
+.. autofunction:: dtaianomaly.in_time_ad.run
 
 Custom components
 -----------------
@@ -54,8 +54,8 @@ a custom
 :py:meth:`~dtaianomaly.anomaly_detection.BaseDetector`, or
 :py:meth:`~dtaianomaly.evaluation.Metric`.
 You first need to implement the classes you want to integrate in the demonstrator,
-as described on :doc:`this page <examples/extensibility>`, and then you can
-pass the class to the :py:meth:`~dtaianomaly.demonstrator.run` method.
+as described on :doc:`this page <../getting_started/examples/extensibility>`, and then you can
+pass the class to the :py:meth:`~dtaianomaly.in_time_ad.run` method.
 
 Below code illustrates how this can be done, in which we assume that detector
 ``NbSigmaAnomalyDetector`` as implemented :ref:`here <custom-anomaly-detector>`
@@ -63,9 +63,9 @@ is available in the file ``NbSigmaAnomalyDetector.py``:
 
 .. code-block:: python
 
-    from dtaianomaly import demonstrator
+    from dtaianomaly import in_time_ad
     from NbSigmaAnomalyDetector import NbSigmaAnomalyDetector
-    demonstrator.run(custom_anomaly_detectors=NbSigmaAnomalyDetector)
+    in_time_ad.run(custom_anomaly_detectors=NbSigmaAnomalyDetector)
 
 Custom visualizations
 ---------------------
@@ -80,15 +80,15 @@ detects anomalies.
 
 While some custom visualizations are already available, it is also possible
 to add custom visualizations to the demonstrator. For this, you only need
-to implement the :py:class:`~dtaianomaly.demonstrator.CustomDetectorVisualizer`.
-This class has two methods: (1) :py:meth:`~dtaianomaly.demonstrator.CustomDetectorVisualizer.is_compatible`
+to implement the :py:class:`~dtaianomaly.in_time_ad.CustomDetectorVisualizer`.
+This class has two methods: (1) :py:meth:`~dtaianomaly.in_time_ad.CustomDetectorVisualizer.is_compatible`
 which checks whether the visualization can be applied to the given anomaly
-detector, and (2) :py:meth:`~dtaianomaly.demonstrator.CustomDetectorVisualizer.show_custom_visualization`
+detector, and (2) :py:meth:`~dtaianomaly.in_time_ad.CustomDetectorVisualizer.show_custom_visualization`
 which effectively shows the visualization in a streamlit-application. Then,
-similarly as above, you can pass this class to the :py:meth:`~dtaianomaly.demonstrator.run`
+similarly as above, you can pass this class to the :py:meth:`~dtaianomaly.in_time_ad.run`
 method, and your custom visualization will be included in the demonstrator.
 
-.. autoclass:: dtaianomaly.demonstrator.CustomDetectorVisualizer
+.. autoclass:: dtaianomaly.in_time_ad.CustomDetectorVisualizer
    :inherited-members:
    :members:
 
@@ -123,9 +123,9 @@ Each of the three components has the following subitems:
   component.
 
 To change the configuration, you can load the default configuration
-file using the :py:meth:`~dtaianomaly.demonstrator.load_configuration`
+file using the :py:meth:`~dtaianomaly.in_time_ad.load_configuration`
 method, but without providing any arguments. Then, you can adapt this
 file to your needs, save it locally, and pass the path to the
-:py:meth:`~dtaianomaly.demonstrator.run` method.
+:py:meth:`~dtaianomaly.in_time_ad.run` method.
 
-.. autofunction:: dtaianomaly.demonstrator.load_configuration
+.. autofunction:: dtaianomaly.in_time_ad.load_configuration
