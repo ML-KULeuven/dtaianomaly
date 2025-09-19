@@ -6,6 +6,8 @@ from statsmodels.tsa.stattools import acf
 
 from dtaianomaly import utils
 
+AUTO_WINDOW_SIZE_COMPUTATION = ["fft", "acf", "mwf", "suss"]
+
 
 def sliding_window(X: np.ndarray, window_size: int, stride: int) -> np.ndarray:
     """
