@@ -1,9 +1,14 @@
 import numpy as np
+import pytest
 
 from dtaianomaly.preprocessing import RobustScaler
 
 
 class TestRobustScaler:
+
+    def test_invalid_quantile_ranges(self):
+        with pytest.raises(ValueError):
+            RobustScaler(75.0, 49.0)
 
     def test_default_quantile_range(self):
         X = np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])

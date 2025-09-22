@@ -1,6 +1,5 @@
 import numpy as np
 
-from dtaianomaly import utils
 from dtaianomaly.preprocessing._Preprocessor import (
     Preprocessor,
     _check_preprocessing_inputs,

@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.preprocessing._Preprocessor import Preprocessor
 
@@ -65,14 +64,12 @@ class MinMaxScaler(Preprocessor):
     def _transform(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
-        if not (hasattr(self, "min_") and hasattr(self, "max_")):
-            raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
         if not (
             (len(X.shape) == 1 and self.min_.shape[0] == 1)
             or X.shape[1] == self.min_.shape[0]
         ):
             raise AttributeError(
-                f"Trying to min max scale a time series with {X.shape[0]} attributes while it was fitted on {self.min_.shape[0]} attributes!"
+                f"Trying to min max scale a time series with {X.shape[1]} attributes while it was fitted on {self.min_.shape[0]} attributes!"
             )
 
         X_ = (X - self.min_) / (self.max_ - self.min_)

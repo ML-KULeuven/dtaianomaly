@@ -3,7 +3,7 @@ import abc
 import numpy as np
 
 from dtaianomaly.type_validation import AttributeValidationMixin
-from dtaianomaly.utils import PrettyPrintable, is_valid_array_like
+from dtaianomaly.utils import CheckIsFittedMixin, PrettyPrintable, is_valid_array_like
 
 __all__ = ["Preprocessor"]
 
@@ -37,7 +37,7 @@ def _check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
             raise ValueError("`X` and `y` have a different number of samples")
 
 
-class Preprocessor(PrettyPrintable, AttributeValidationMixin):
+class Preprocessor(PrettyPrintable, AttributeValidationMixin, CheckIsFittedMixin):
     """
     Base preprocessor class.
     """
@@ -88,6 +88,7 @@ class Preprocessor(PrettyPrintable, AttributeValidationMixin):
             The transformed ground truth. If no ground truth was provided (`y=None`),
             then None will be returned as well.
         """
+        self.check_is_fitted()
         _check_preprocessing_inputs(X, y)
         return self._transform(np.asarray(X), y if y is None else np.asarray(y))
 

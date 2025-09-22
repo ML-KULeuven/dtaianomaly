@@ -3,10 +3,26 @@ Utils module
 
 .. automodule:: dtaianomaly.utils
 
-.. autofunction:: dtaianomaly.utils.is_valid_list
-.. autofunction:: dtaianomaly.utils.is_valid_array_like
-.. autofunction:: dtaianomaly.utils.is_univariate
-.. autofunction:: dtaianomaly.utils.get_dimension
 
-.. autoclass:: dtaianomaly.utils.PrettyPrintable
-   :members:
+Utility classes
+---------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    CheckIsFittedMixin
+    PrettyPrintable
+
+
+Utility functions
+-----------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: function.rst
+
+    is_valid_list
+    is_valid_array_like
+    is_univariate
+    get_dimension

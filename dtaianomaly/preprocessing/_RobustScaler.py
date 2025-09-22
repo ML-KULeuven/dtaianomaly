@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.preprocessing._Preprocessor import Preprocessor
 from dtaianomaly.type_validation import FloatAttribute
@@ -94,8 +93,6 @@ class RobustScaler(Preprocessor):
     def _transform(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
-        if not (hasattr(self, "center_") and hasattr(self, "scale_")):
-            raise NotFittedError(f"Call `fit` before using transform on {str(self)}")
         if not (
             (len(X.shape) == 1 and self.center_.shape[0] == 1)
             or X.shape[1] == self.center_.shape[0]

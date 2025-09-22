@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 import scipy
-from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import utils
 from dtaianomaly.thresholding.thresholding import ContaminationRate
