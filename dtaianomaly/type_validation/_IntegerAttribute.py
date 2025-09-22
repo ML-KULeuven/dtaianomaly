@@ -52,6 +52,12 @@ class IntegerAttribute(BaseAttributeValidation):
                     f"Attribute 'maximum' in class 'IntegerAttribute' must be of type int, but received '{maximum}' of type {type(maximum)}!"
                 )
 
+        if minimum is not None and maximum is not None:
+            if minimum > maximum:
+                raise ValueError(
+                    f"Attribute 'minimum' must be smaller than or equal to attribute 'maximum' in class 'IntegerAttribute'!"
+                )
+
         self._minimum = minimum
         self._maximum = maximum
 

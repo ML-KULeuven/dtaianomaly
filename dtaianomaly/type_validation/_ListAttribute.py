@@ -40,17 +40,32 @@ class ListAttribute(BaseAttributeValidation):
     """
 
     _validator: BaseAttributeValidation
+    _minimum_length: int
 
-    def __init__(self, validator: BaseAttributeValidation):
+    def __init__(self, validator: BaseAttributeValidation, minimum_length: int = 0):
         if not isinstance(validator, BaseAttributeValidation):
             raise TypeError(
-                f"All elements of attribute 'validator' in class 'ListAttribute' must be of type BaseAttributeValidation, but received '{validator}' of type {type(validator)}!"
+                f"Attribute 'validator' in class 'ListAttribute' must be of type BaseAttributeValidation, but received '{validator}' of type {type(validator)}!"
+            )
+
+        if not isinstance(minimum_length, int) or isinstance(minimum_length, bool):
+            raise TypeError(
+                f"Attribute 'minimum_length' in class 'ListAttribute' must be of type int, but received '{minimum_length}' of type {type(minimum_length)}!"
+            )
+        if minimum_length < 0:
+            raise ValueError(
+                "Attribute 'minimum_length' in class 'ListAttribute' must be larger than or equal to 0!"
             )
         self._validator = validator
+        self._minimum_length = minimum_length
 
     @property
     def validator(self) -> BaseAttributeValidation:
         return self._validator
+
+    @property
+    def minimum_length(self) -> int:
+        return self._minimum_length
 
     def _is_valid_type(self, value) -> bool:
         return isinstance(value, list) and all(
@@ -61,7 +76,9 @@ class ListAttribute(BaseAttributeValidation):
         return f"list of {self.validator._get_valid_type_description()}"
 
     def _is_valid_value(self, value) -> bool:
-        return all(self.validator._is_valid_value(element) for element in value)
+        return len(value) >= self.minimum_length and all(
+            self.validator._is_valid_value(element) for element in value
+        )
 
     def _get_valid_value_description(self) -> str:
 

@@ -62,6 +62,12 @@ class FloatAttribute(BaseAttributeValidation):
                     f"Attribute 'maximum' in class 'FloatAttribute' must be of type float, but received '{maximum}' of type {type(maximum)}!"
                 )
 
+        if minimum is not None and maximum is not None:
+            if minimum > maximum:
+                raise ValueError(
+                    f"Attribute 'minimum' must be smaller than or equal to attribute 'maximum' in class 'IntegerAttribute'!"
+                )
+
         if not isinstance(inclusive_minimum, bool):
             raise TypeError(
                 f"Attribute 'inclusive_minimum' in class 'FloatAttribute' must be of type bool, but received '{inclusive_minimum}' of type {type(inclusive_minimum)}!"

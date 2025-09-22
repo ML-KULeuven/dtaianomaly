@@ -6,27 +6,26 @@ Type Validation
 Base Objects
 ------------
 
-.. autoclass:: dtaianomaly.type_validation.AttributeValidationMixin
-    :members:
-.. autoclass:: dtaianomaly.type_validation.BaseAttributeValidation
-    :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    AttributeValidationMixin
+    BaseAttributeValidation
 
 Available Validators
 --------------------
 
-.. autoclass:: dtaianomaly.type_validation.BoolAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.FloatAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.IntegerAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.ListAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.LiteralAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.NoneAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.UnionAttribute
-    :members:
-.. autoclass:: dtaianomaly.type_validation.WindowSizeAttribute
-    :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    BoolAttribute
+    FloatAttribute
+    IntegerAttribute
+    ListAttribute
+    LiteralAttribute
+    NoneAttribute
+    ObjectAttribute
+    UnionAttribute
+    WindowSizeAttribute

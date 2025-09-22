@@ -39,6 +39,17 @@ class TestIntegerAttribute:
         with pytest.raises(AttributeError):
             validator.maximum = 2
 
+    @pytest.mark.parametrize("minimum,maximum", [(0, 5), (4, 5), (5, 5)])
+    def test_minimum_and_maximum_combined_valid(self, minimum, maximum):
+        validator = IntegerAttribute(minimum=minimum, maximum=maximum)
+        assert validator.minimum == minimum
+        assert validator.maximum == maximum
+
+    @pytest.mark.parametrize("minimum,maximum", [(5, 4)])
+    def test_minimum_and_maximum_combined_invalid(self, minimum, maximum):
+        with pytest.raises(ValueError):
+            IntegerAttribute(minimum=minimum, maximum=maximum)
+
     @pytest.mark.parametrize("value,expected", [
         (5, True),
         (1.0, False),

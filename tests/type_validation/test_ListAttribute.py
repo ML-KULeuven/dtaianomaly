@@ -4,6 +4,7 @@ import pytest
 from conftest import ATTRIBUTE_VALIDATION_CONFIGS
 
 from dtaianomaly.type_validation import (
+    AttributeValidationMixin,
     IntegerAttribute,
     LiteralAttribute,
     ListAttribute,
@@ -31,6 +32,25 @@ class TestListAttribute:
         validator = ListAttribute(IntegerAttribute())
         with pytest.raises(AttributeError):
             validator.validator = NoneAttribute()
+
+    @pytest.mark.parametrize('minimum_length', [0, 1, 2, 3, 4, 5])
+    def test_minimum_length_valid(self, minimum_length):
+        assert ListAttribute(IntegerAttribute(), minimum_length).minimum_length == minimum_length
+
+    @pytest.mark.parametrize('minimum_length', [1.0, True, "auto", [0, 1, 2, 2], {'a': 1, 'b': 2}])
+    def test_minimum_length_invalid_type(self, minimum_length):
+        with pytest.raises(TypeError):
+            ListAttribute(IntegerAttribute(), minimum_length)
+
+    @pytest.mark.parametrize('minimum_length', [-1])
+    def test_minimum_length_invalid_value(self, minimum_length):
+        with pytest.raises(ValueError):
+            ListAttribute(IntegerAttribute(), minimum_length)
+
+    def test_minimum_length_immutable(self):
+        validator = ListAttribute(IntegerAttribute())
+        with pytest.raises(AttributeError):
+            validator.minimum_length = 10
 
     @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_is_valid_type(self, config):
@@ -66,6 +86,15 @@ class TestListAttribute:
         one_invalid[3] = config['invalid_value']
         assert not ListAttribute(config['validator'])._is_valid_value(one_invalid)
 
+    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize('minimum_length', [5, 10])
+    def test_is_valid_value_minimum_length(self, config, minimum_length):
+
+        validator = ListAttribute(config['validator'], minimum_length)
+        assert validator._is_valid_value(minimum_length * [config['valid']])
+        assert validator._is_valid_value((minimum_length + 1) * [config['valid']])
+        assert not validator._is_valid_value((minimum_length - 1) * [config['valid']])
+
     @pytest.mark.parametrize('config', ATTRIBUTE_VALIDATION_CONFIGS)
     def test_get_valid_value_description(self, config):
         if isinstance(config['validator'], (NoneAttribute, UnionAttribute)):
@@ -85,3 +114,15 @@ class TestListAttribute:
     def test_get_valid_value_description_union_3(self):
         assert ListAttribute(IntegerAttribute(minimum=5) | LiteralAttribute("auto") | NoneAttribute())._get_valid_value_description() \
                == "list of int greater than or equal to 5, string in {'auto'} or None"
+
+    def test_args(self):
+
+        class MyObject(AttributeValidationMixin):
+            integers: list[int]
+            attribute_validation = {"integers": ListAttribute(IntegerAttribute())}
+
+            def __init__(self, *integers: int):
+                self.integers = list(integers)
+
+        my_object = MyObject(1, 2, 3, 4, 5)
+        assert len(my_object.integers) == 5

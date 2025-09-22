@@ -41,6 +41,17 @@ class TestFloatAttribute:
         with pytest.raises(AttributeError):
             validator.maximum = 2
 
+    @pytest.mark.parametrize("minimum,maximum", [(0.1, 3.14), (3.14, 3.14)])
+    def test_minimum_and_maximum_combined_valid(self, minimum, maximum):
+        validator = FloatAttribute(minimum=minimum, maximum=maximum)
+        assert validator.minimum == minimum
+        assert validator.maximum == maximum
+
+    @pytest.mark.parametrize("minimum,maximum", [(3.15, 3.14)])
+    def test_minimum_and_maximum_combined_invalid(self, minimum, maximum):
+        with pytest.raises(ValueError):
+            FloatAttribute(minimum=minimum, maximum=maximum)
+
     @pytest.mark.parametrize('inclusive_minimum', [True, False])
     def test_inclusive_minimum_valid(self, inclusive_minimum):
         assert FloatAttribute(inclusive_minimum=inclusive_minimum).inclusive_minimum == inclusive_minimum
