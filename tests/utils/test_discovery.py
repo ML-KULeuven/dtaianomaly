@@ -1,8 +1,7 @@
-
 import pytest
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
-from dtaianomaly.in_time_ad import custom_visualizers, CustomDetectorVisualizer
+from dtaianomaly.in_time_ad import CustomDetectorVisualizer, custom_visualizers
 from dtaianomaly.utils.discovery import all_classes
 
 anomaly_detectors = [
@@ -40,7 +39,7 @@ anomaly_detectors = [
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,
     data.UCRLoader,
-    data.CustomDataLoader
+    data.CustomDataLoader,
 ]
 metrics = [
     evaluation.ThresholdMetric,
@@ -66,7 +65,7 @@ metrics = [
     evaluation.RangeBasedPrecision,
     evaluation.RangeBasedRecall,
     evaluation.RangeBasedFBeta,
-    evaluation.UCRScore
+    evaluation.UCRScore,
 ]
 proba_metrics = [
     evaluation.ThresholdMetric,
@@ -77,7 +76,7 @@ proba_metrics = [
     evaluation.RangeAreaUnderPR,
     evaluation.VolumeUnderROC,
     evaluation.VolumeUnderPR,
-    evaluation.UCRScore
+    evaluation.UCRScore,
 ]
 binary_metrics = [
     evaluation.Precision,
@@ -112,27 +111,37 @@ preprocessors = [
 thresholders = [
     thresholding.FixedCutoff,
     thresholding.ContaminationRate,
-    thresholding.TopN
+    thresholding.TopN,
 ]
 custom_demonstrator_visualizers = [
     custom_visualizers.CentroidVisualizer,
     custom_visualizers.NeuralNetVisualizer,
 ]
-everything = anomaly_detectors + data_loaders + metrics + preprocessors + thresholders + custom_demonstrator_visualizers
+everything = (
+    anomaly_detectors
+    + data_loaders
+    + metrics
+    + preprocessors
+    + thresholders
+    + custom_demonstrator_visualizers
+)
 
 
-@pytest.mark.parametrize('return_names', [True, False])
-@pytest.mark.parametrize('type_filter,expected', [
-    (None, everything),
-    (anomaly_detection.BaseDetector, anomaly_detectors),
-    (data.LazyDataLoader, data_loaders),
-    (evaluation.Metric, metrics),
-    (evaluation.ProbaMetric, proba_metrics),
-    (evaluation.BinaryMetric, binary_metrics),
-    (preprocessing.Preprocessor, preprocessors),
-    (thresholding.Thresholding, thresholders),
-    (CustomDetectorVisualizer, custom_demonstrator_visualizers),
-])
+@pytest.mark.parametrize("return_names", [True, False])
+@pytest.mark.parametrize(
+    "type_filter,expected",
+    [
+        (None, everything),
+        (anomaly_detection.BaseDetector, anomaly_detectors),
+        (data.LazyDataLoader, data_loaders),
+        (evaluation.Metric, metrics),
+        (evaluation.ProbaMetric, proba_metrics),
+        (evaluation.BinaryMetric, binary_metrics),
+        (preprocessing.Preprocessor, preprocessors),
+        (thresholding.Thresholding, thresholders),
+        (CustomDetectorVisualizer, custom_demonstrator_visualizers),
+    ],
+)
 class TestAllClasses:
 
     def test(self, type_filter, expected, return_names):
@@ -153,19 +162,23 @@ class TestAllClasses:
 class TestTypeFilter:
 
     def test_str(self):
-        discovered = all_classes(type_filter='anomaly-detector', return_names=False)
+        discovered = all_classes(type_filter="anomaly-detector", return_names=False)
         assert len(discovered) == len(anomaly_detectors)
         for exp in anomaly_detectors:
             assert exp in discovered
 
     def test_type(self):
-        discovered = all_classes(type_filter=anomaly_detection.BaseDetector, return_names=False)
+        discovered = all_classes(
+            type_filter=anomaly_detection.BaseDetector, return_names=False
+        )
         assert len(discovered) == len(anomaly_detectors)
         for exp in anomaly_detectors:
             assert exp in discovered
 
     def test_str_list(self):
-        discovered = all_classes(type_filter=['anomaly-detector', 'data-loader'], return_names=False)
+        discovered = all_classes(
+            type_filter=["anomaly-detector", "data-loader"], return_names=False
+        )
         assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
         for exp in anomaly_detectors:
             assert exp in discovered
@@ -173,7 +186,10 @@ class TestTypeFilter:
             assert exp in discovered
 
     def test_type_list(self):
-        discovered = all_classes(type_filter=[anomaly_detection.BaseDetector, data.LazyDataLoader], return_names=False)
+        discovered = all_classes(
+            type_filter=[anomaly_detection.BaseDetector, data.LazyDataLoader],
+            return_names=False,
+        )
         assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
         for exp in anomaly_detectors:
             assert exp in discovered
@@ -181,7 +197,9 @@ class TestTypeFilter:
             assert exp in discovered
 
     def test_str_type_list(self):
-        discovered = all_classes(type_filter=['anomaly-detector', data.LazyDataLoader], return_names=False)
+        discovered = all_classes(
+            type_filter=["anomaly-detector", data.LazyDataLoader], return_names=False
+        )
         assert len(discovered) == len(anomaly_detectors) + len(data_loaders)
         for exp in anomaly_detectors:
             assert exp in discovered
@@ -190,46 +208,61 @@ class TestTypeFilter:
 
     def test_invalid_type(self):
         with pytest.raises(ValueError):
-            all_classes(type_filter='invalid')
+            all_classes(type_filter="invalid")
 
 
 class TestExcludeType:
 
     def test_str(self):
-        discovered = all_classes(exclude_types='anomaly-detector', return_names=False)
+        discovered = all_classes(exclude_types="anomaly-detector", return_names=False)
         assert len(discovered) == len(everything) - len(anomaly_detectors)
         for exp in everything:
             if exp not in anomaly_detectors:
                 assert exp in discovered
 
     def test_type(self):
-        discovered = all_classes(exclude_types=anomaly_detection.BaseDetector, return_names=False)
+        discovered = all_classes(
+            exclude_types=anomaly_detection.BaseDetector, return_names=False
+        )
         assert len(discovered) == len(everything) - len(anomaly_detectors)
         for exp in everything:
             if exp not in anomaly_detectors:
                 assert exp in discovered
 
     def test_str_list(self):
-        discovered = all_classes(exclude_types=['anomaly-detector', 'data-loader'], return_names=False)
-        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        discovered = all_classes(
+            exclude_types=["anomaly-detector", "data-loader"], return_names=False
+        )
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(
+            data_loaders
+        )
         for exp in everything:
             if not (exp in anomaly_detectors or exp in data_loaders):
                 assert exp in discovered
 
     def test_type_list(self):
-        discovered = all_classes(exclude_types=[anomaly_detection.BaseDetector, data.LazyDataLoader], return_names=False)
-        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        discovered = all_classes(
+            exclude_types=[anomaly_detection.BaseDetector, data.LazyDataLoader],
+            return_names=False,
+        )
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(
+            data_loaders
+        )
         for exp in everything:
             if not (exp in anomaly_detectors or exp in data_loaders):
                 assert exp in discovered
 
     def test_str_type_list(self):
-        discovered = all_classes(exclude_types=['anomaly-detector', data.LazyDataLoader], return_names=False)
-        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(data_loaders)
+        discovered = all_classes(
+            exclude_types=["anomaly-detector", data.LazyDataLoader], return_names=False
+        )
+        assert len(discovered) == len(everything) - len(anomaly_detectors) - len(
+            data_loaders
+        )
         for exp in everything:
             if not (exp in anomaly_detectors or exp in data_loaders):
                 assert exp in discovered
 
     def test_invalid_type(self):
         with pytest.raises(ValueError):
-            all_classes(exclude_types='invalid')
+            all_classes(exclude_types="invalid")

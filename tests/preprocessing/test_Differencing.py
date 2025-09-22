@@ -1,6 +1,6 @@
-
-import pytest
 import numpy as np
+import pytest
+
 from dtaianomaly.preprocessing import Differencing
 
 
@@ -33,25 +33,57 @@ class TestExponentialSmoothingAverage:
     def test_simple_multivariate(self):
         preprocessor = Differencing(1)
 
-        x = np.array([[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]])
+        x = np.array(
+            [[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]]
+        )
         y = np.array([0, 1, 0, 0, 0, 1, 0, 1])
         x_, y_ = preprocessor.fit_transform(x, y)
 
         assert x.shape == x_.shape
         assert y.shape == y_.shape
-        assert np.array_equal(x_, np.array([[0, 0], [4, 40], [-2, -20], [4, 40], [1, 10], [-2, -20], [-2, -20], [7, 70]]))
+        assert np.array_equal(
+            x_,
+            np.array(
+                [
+                    [0, 0],
+                    [4, 40],
+                    [-2, -20],
+                    [4, 40],
+                    [1, 10],
+                    [-2, -20],
+                    [-2, -20],
+                    [7, 70],
+                ]
+            ),
+        )
         assert np.array_equal(y_, y)
 
     def test_simple_multivariate_seasonal(self):
         preprocessor = Differencing(1, 2)
 
-        x = np.array([[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]])
+        x = np.array(
+            [[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]]
+        )
         y = np.array([0, 1, 0, 0, 0, 1, 0, 1])
         x_, y_ = preprocessor.fit_transform(x, y)
 
         assert x.shape == x_.shape
         assert y.shape == y_.shape
-        assert np.array_equal(x_, np.array([[0, 0], [0, 0], [2, 20], [2, 20], [5, 50], [-1, -10], [-4, -40], [5, 50]]))
+        assert np.array_equal(
+            x_,
+            np.array(
+                [
+                    [0, 0],
+                    [0, 0],
+                    [2, 20],
+                    [2, 20],
+                    [5, 50],
+                    [-1, -10],
+                    [-4, -40],
+                    [5, 50],
+                ]
+            ),
+        )
         assert np.array_equal(y_, y)
 
     def test_simple_order_two(self):

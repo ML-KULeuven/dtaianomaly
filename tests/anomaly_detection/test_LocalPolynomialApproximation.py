@@ -10,9 +10,18 @@ class TestLocalPolynomialApproximation:
         assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_str(self):
-        assert str(LocalPolynomialApproximation(5)) == "LocalPolynomialApproximation(neighborhood=5)"
-        assert str(LocalPolynomialApproximation(15, 3)) == "LocalPolynomialApproximation(neighborhood=15,power=3)"
-        assert str(LocalPolynomialApproximation(25, buffer=42)) == "LocalPolynomialApproximation(neighborhood=25,buffer=42)"
+        assert (
+            str(LocalPolynomialApproximation(5))
+            == "LocalPolynomialApproximation(neighborhood=5)"
+        )
+        assert (
+            str(LocalPolynomialApproximation(15, 3))
+            == "LocalPolynomialApproximation(neighborhood=15,power=3)"
+        )
+        assert (
+            str(LocalPolynomialApproximation(25, buffer=42))
+            == "LocalPolynomialApproximation(neighborhood=25,buffer=42)"
+        )
 
     def test_neighborhood(self):
         LocalPolynomialApproximation(15)

@@ -1,6 +1,11 @@
-
 import numpy as np
-from dtaianomaly.data.simple_time_series import make_sine_wave, inject_anomalies, demonstration_time_series, DemonstrationTimeSeriesLoader
+
+from dtaianomaly.data.simple_time_series import (
+    DemonstrationTimeSeriesLoader,
+    demonstration_time_series,
+    inject_anomalies,
+    make_sine_wave,
+)
 
 
 class TestDemonstrationTimeSeriesLoader:
@@ -14,9 +19,15 @@ class TestDemonstrationTimeSeriesLoader:
         assert dataset.y_train is None
 
     def test_str(self):
-        assert str(DemonstrationTimeSeriesLoader()) == 'DemonstrationTimeSeriesLoader()'
-        assert str(DemonstrationTimeSeriesLoader(False)) == 'DemonstrationTimeSeriesLoader()'
-        assert str(DemonstrationTimeSeriesLoader(True)) == 'DemonstrationTimeSeriesLoader(do_caching=True)'
+        assert str(DemonstrationTimeSeriesLoader()) == "DemonstrationTimeSeriesLoader()"
+        assert (
+            str(DemonstrationTimeSeriesLoader(False))
+            == "DemonstrationTimeSeriesLoader()"
+        )
+        assert (
+            str(DemonstrationTimeSeriesLoader(True))
+            == "DemonstrationTimeSeriesLoader(do_caching=True)"
+        )
 
 
 class TestInjectAnomalies:
@@ -33,7 +44,11 @@ class TestInjectAnomalies:
         np.random.seed(0)
         time_series = np.zeros(1000)
         anomalies = inject_anomalies(time_series, 950, 1.0, 2.0)
-        assert ((anomalies == 0) | ((1.0 <= time_series) & (time_series <= 2.0)) | ((-2.0 <= time_series) & (time_series <= -1.0))).all()
+        assert (
+            (anomalies == 0)
+            | ((1.0 <= time_series) & (time_series <= 2.0))
+            | ((-2.0 <= time_series) & (time_series <= -1.0))
+        ).all()
 
     def test_multivariate(self, multivariate_time_series):
         np.random.seed(0)

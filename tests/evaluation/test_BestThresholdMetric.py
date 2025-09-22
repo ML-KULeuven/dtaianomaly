@@ -1,17 +1,16 @@
-
-import pytest
 import numpy as np
+import pytest
 
 from dtaianomaly.evaluation.BestThresholdMetric import BestThresholdMetric
+from dtaianomaly.evaluation.simple_binary_metrics import FBeta, Precision, Recall
 from dtaianomaly.evaluation.simple_proba_metrics import AreaUnderROC
-from dtaianomaly.evaluation.simple_binary_metrics import Precision, FBeta, Recall
 
 
 class TestBestThresholdMetric:
 
     def test_string_metric(self):
         with pytest.raises(TypeError):
-            BestThresholdMetric('Precision()')
+            BestThresholdMetric("Precision()")
 
     def test_proba_metric(self):
         with pytest.raises(TypeError):
@@ -85,7 +84,9 @@ class TestBestThresholdMetric:
         # Sorted scores: [0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9]
         thresholds = np.array([0.2, 0.3, 0.65, 0.85, 0.9])
         metric = BestThresholdMetric(FBeta())
-        assert metric.compute(y_true, y_pred, thresholds=thresholds) == pytest.approx(0.75)
+        assert metric.compute(y_true, y_pred, thresholds=thresholds) == pytest.approx(
+            0.75
+        )
         assert metric.threshold_ == pytest.approx(0.65)
         assert metric.thresholds_.shape == metric.scores_.shape
         assert np.array_equal(metric.thresholds_, thresholds)
@@ -96,12 +97,20 @@ class TestBestThresholdMetric:
         # Sorted scores: [0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9]
         thresholds = np.array([0.2, 0.3, 0.65, 0.85, 0.9])
         metric = BestThresholdMetric(FBeta(), max_nb_thresholds=2)
-        assert metric.compute(y_true, y_pred, thresholds=thresholds) == pytest.approx(2/3)
+        assert metric.compute(y_true, y_pred, thresholds=thresholds) == pytest.approx(
+            2 / 3
+        )
         assert metric.threshold_ == pytest.approx(0.3)
         assert metric.thresholds_.shape == (2,)
         assert metric.thresholds_.shape == metric.scores_.shape
         assert np.array_equal(metric.thresholds_, np.array([0.3, 0.85]))
 
     def test_str(self):
-        assert str(BestThresholdMetric(Precision())) == "BestThresholdMetric(metric=Precision())"
-        assert str(BestThresholdMetric(FBeta(beta=2.0))) == "BestThresholdMetric(metric=FBeta(beta=2.0))"
+        assert (
+            str(BestThresholdMetric(Precision()))
+            == "BestThresholdMetric(metric=Precision())"
+        )
+        assert (
+            str(BestThresholdMetric(FBeta(beta=2.0)))
+            == "BestThresholdMetric(metric=FBeta(beta=2.0))"
+        )

@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from dtaianomaly.preprocessing import RobustScaler
@@ -15,7 +14,9 @@ class TestRobustScaler:
         assert robust_scaler.scale_ == [5.0]
 
         X_, _ = robust_scaler.transform(X)
-        assert np.array_equal(X_, [-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.0])
+        assert np.array_equal(
+            X_, [-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+        )
 
     def test_other_quantile_range(self):
         X = np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
@@ -26,7 +27,10 @@ class TestRobustScaler:
         assert robust_scaler.scale_ == [8.0]
 
         X_, _ = robust_scaler.transform(X)
-        assert np.array_equal(X_, [-0.625, -0.5, -0.375, -0.25, -0.125, 0., 0.125, 0.25, 0.375, 0.5, 0.625])
+        assert np.array_equal(
+            X_,
+            [-0.625, -0.5, -0.375, -0.25, -0.125, 0.0, 0.125, 0.25, 0.375, 0.5, 0.625],
+        )
 
     def test_single_value(self):
         X = np.ones(1000) * 123.4

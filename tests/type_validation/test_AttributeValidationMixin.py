@@ -1,6 +1,4 @@
-
 import pytest
-
 from conftest import ATTRIBUTE_VALIDATION_CONFIGS
 
 from dtaianomaly.type_validation import AttributeValidationMixin, IntegerAttribute
@@ -8,20 +6,24 @@ from dtaianomaly.type_validation import AttributeValidationMixin, IntegerAttribu
 
 class TestAttributeValidationMixin:
 
-    @pytest.mark.parametrize('config', ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test(self, config):
 
         class MyObject(AttributeValidationMixin):
             attribute: any
-            attribute_validation = {"attribute": config['validator']}
+            attribute_validation = {"attribute": config["validator"]}
 
             def __init__(self, attribute):
                 self.attribute = attribute
 
-        valid = config['valid']
-        invalid_type = config['invalid_type']
-        invalid_value = config['invalid_value']
-        expected_value_error = ValueError if config['validator']._is_valid_type(invalid_value) else TypeError
+        valid = config["valid"]
+        invalid_type = config["invalid_type"]
+        invalid_value = config["invalid_value"]
+        expected_value_error = (
+            ValueError
+            if config["validator"]._is_valid_type(invalid_value)
+            else TypeError
+        )
 
         # Cannot initialize with invalid type
         with pytest.raises(TypeError):
@@ -46,7 +48,7 @@ class TestAttributeValidationMixin:
         # Can update to valid value
         my_object.attribute = valid
 
-    @pytest.mark.parametrize('config', ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_no_validation(self, config):
 
         class MyObject(AttributeValidationMixin):
@@ -55,9 +57,9 @@ class TestAttributeValidationMixin:
             def __init__(self, attribute):
                 self.attribute = attribute
 
-        valid = config['valid']
-        invalid_type = config['invalid_type']
-        invalid_value = config['invalid_value']
+        valid = config["valid"]
+        invalid_type = config["invalid_type"]
+        invalid_value = config["invalid_value"]
 
         assert MyObject(invalid_type).attribute == invalid_type
         assert MyObject(invalid_value).attribute == invalid_value
@@ -73,28 +75,36 @@ class TestAttributeValidationMixin:
             my_object.attribute = value
             assert my_object.attribute == value
 
-    @pytest.mark.parametrize('config_parent', ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize('config_child', ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("config_parent", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("config_child", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_inheritance(self, config_parent, config_child):
 
         class Parent(AttributeValidationMixin):
             attribute_parent: any
-            attribute_validation = {"attribute_parent": config_parent['validator']}
+            attribute_validation = {"attribute_parent": config_parent["validator"]}
 
             def __init__(self, attribute_parent):
                 self.attribute_parent = attribute_parent
 
         class Child(Parent):
             attribute_child: any
-            attribute_validation = {"attribute_child": config_child['validator']}
+            attribute_validation = {"attribute_child": config_child["validator"]}
 
             def __init__(self, attribute_parent, attribute_child):
                 super().__init__(attribute_parent=attribute_parent)
                 self.attribute_child = attribute_child
 
         # Check if a value error or type error will be raised for invalid values
-        expected_value_error_parent = ValueError if config_parent['validator']._is_valid_type(config_parent["invalid_value"]) else TypeError
-        expected_value_error_child = ValueError if config_child['validator']._is_valid_type(config_child["invalid_value"]) else TypeError
+        expected_value_error_parent = (
+            ValueError
+            if config_parent["validator"]._is_valid_type(config_parent["invalid_value"])
+            else TypeError
+        )
+        expected_value_error_child = (
+            ValueError
+            if config_child["validator"]._is_valid_type(config_child["invalid_value"])
+            else TypeError
+        )
 
         # Cannot initialize if any has invalid type
         with pytest.raises(TypeError):

@@ -1,6 +1,5 @@
-
-import pytest
 import numpy as np
+import pytest
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.preprocessing import MinMaxScaler

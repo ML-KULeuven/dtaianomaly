@@ -18,4 +18,4 @@ repos:
     -   id: black
         language: python
 
-files: "dtaianomaly"
+files: ^(dtaianomaly|tests)/

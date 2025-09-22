@@ -1,6 +1,5 @@
-
-import pytest
 import numpy as np
+import pytest
 
 from dtaianomaly.anomaly_detection import DWT_MLEAD, Supervision
 from dtaianomaly.anomaly_detection.DWT_MLEAD import _multilevel_haar_transform
@@ -16,7 +15,7 @@ class TestDWTMLEAD:
         with pytest.raises(TypeError):
             DWT_MLEAD(start_level=True)
         with pytest.raises(TypeError):
-            DWT_MLEAD(start_level='a string')
+            DWT_MLEAD(start_level="a string")
         DWT_MLEAD(start_level=5)  # Doesn't raise an error
 
     def test_initialize_too_small_start_level(self):
@@ -83,7 +82,22 @@ class TestDWTMLEAD:
             DWT_MLEAD(padding_mode="tmp")
         DWT_MLEAD(padding_mode="wrap")
 
-    @pytest.mark.parametrize('mode', ['constant', 'edge', 'linear_ramp', 'maximum', 'mean', 'median', 'minimum', 'reflect', 'symmetric', 'wrap', 'empty'])
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            "constant",
+            "edge",
+            "linear_ramp",
+            "maximum",
+            "mean",
+            "median",
+            "minimum",
+            "reflect",
+            "symmetric",
+            "wrap",
+            "empty",
+        ],
+    )
     def test_initialize_valid_padding_mode(self, mode):
         DWT_MLEAD(padding_mode=mode)
 
@@ -112,4 +126,7 @@ class TestDWTMLEAD:
         assert str(DWT_MLEAD()) == "DWT_MLEAD()"
         assert str(DWT_MLEAD(5)) == "DWT_MLEAD(start_level=5)"
         assert str(DWT_MLEAD(quantile_epsilon=0.1)) == "DWT_MLEAD(quantile_epsilon=0.1)"
-        assert str(DWT_MLEAD(padding_mode='linear_ramp')) == "DWT_MLEAD(padding_mode='linear_ramp')"
+        assert (
+            str(DWT_MLEAD(padding_mode="linear_ramp"))
+            == "DWT_MLEAD(padding_mode='linear_ramp')"
+        )

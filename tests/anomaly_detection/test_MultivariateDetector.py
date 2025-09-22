@@ -1,9 +1,15 @@
+import warnings
 from typing import Optional
 
-import warnings
 import numpy as np
 import pytest
-from dtaianomaly.anomaly_detection import BaseDetector, MultivariateDetector, Supervision, RandomDetector
+
+from dtaianomaly.anomaly_detection import (
+    BaseDetector,
+    MultivariateDetector,
+    RandomDetector,
+    Supervision,
+)
 
 
 class DummyDetector(BaseDetector):
@@ -20,11 +26,14 @@ class DummyDetector(BaseDetector):
 
 class TestMultivariateDetector:
 
-    @pytest.mark.parametrize('detector', [
-        DummyDetector(Supervision.UNSUPERVISED),
-        DummyDetector(Supervision.SEMI_SUPERVISED),
-        DummyDetector(Supervision.SUPERVISED),
-    ])
+    @pytest.mark.parametrize(
+        "detector",
+        [
+            DummyDetector(Supervision.UNSUPERVISED),
+            DummyDetector(Supervision.SEMI_SUPERVISED),
+            DummyDetector(Supervision.SUPERVISED),
+        ],
+    )
     def test_supervision(self, detector):
         multivariate_detector = MultivariateDetector(detector)
         assert multivariate_detector.supervision == detector.supervision
@@ -49,7 +58,7 @@ class TestMultivariateDetector:
         MultivariateDetector(DummyDetector(), "max")
         MultivariateDetector(DummyDetector(), "min")
 
-    @pytest.mark.parametrize('aggregation', ['mean', 'min', 'max'])
+    @pytest.mark.parametrize("aggregation", ["mean", "min", "max"])
     def test_aggregations(self, aggregation, multivariate_time_series):
         detector = MultivariateDetector(RandomDetector(seed=0), aggregation)
         detector.fit(multivariate_time_series)
@@ -70,35 +79,54 @@ class TestMultivariateDetector:
         MultivariateDetector(DummyDetector(), raise_warning_for_univariate=True)
 
     def test_warning_univariate_raise(self, univariate_time_series):
-        detector = MultivariateDetector(RandomDetector(), raise_warning_for_univariate=True)
+        detector = MultivariateDetector(
+            RandomDetector(), raise_warning_for_univariate=True
+        )
         with pytest.warns(UserWarning):
             detector.fit(univariate_time_series)
 
     def test_warning_univariate_no_raise(self, univariate_time_series):
-        detector = MultivariateDetector(RandomDetector(), raise_warning_for_univariate=False)
+        detector = MultivariateDetector(
+            RandomDetector(), raise_warning_for_univariate=False
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             detector.fit(univariate_time_series)
 
     def test_warning_multivariate_raise(self, multivariate_time_series):
-        detector = MultivariateDetector(RandomDetector(), raise_warning_for_univariate=True)
+        detector = MultivariateDetector(
+            RandomDetector(), raise_warning_for_univariate=True
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             detector.fit(multivariate_time_series)
 
     def test_warning_multivariate_no_raise(self, multivariate_time_series):
-        detector = MultivariateDetector(RandomDetector(), raise_warning_for_univariate=False)
+        detector = MultivariateDetector(
+            RandomDetector(), raise_warning_for_univariate=False
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             detector.fit(multivariate_time_series)
 
-    def test_different_fit_predict_dimension(self, multivariate_time_series, univariate_time_series):
+    def test_different_fit_predict_dimension(
+        self, multivariate_time_series, univariate_time_series
+    ):
         detector = MultivariateDetector(RandomDetector())
         detector.fit(univariate_time_series)
         with pytest.raises(ValueError):
             detector.decision_function(multivariate_time_series)
 
     def test_str(self):
-        assert str(MultivariateDetector(DummyDetector())) == "MultivariateDetector(detector=DummyDetector())"
-        assert str(MultivariateDetector(DummyDetector(Supervision.SUPERVISED))) == "MultivariateDetector(detector=DummyDetector(supervision=Supervision.SUPERVISED))"
-        assert str(MultivariateDetector(DummyDetector(), 'min')) == "MultivariateDetector(detector=DummyDetector(),aggregation='min')"
+        assert (
+            str(MultivariateDetector(DummyDetector()))
+            == "MultivariateDetector(detector=DummyDetector())"
+        )
+        assert (
+            str(MultivariateDetector(DummyDetector(Supervision.SUPERVISED)))
+            == "MultivariateDetector(detector=DummyDetector(supervision=Supervision.SUPERVISED))"
+        )
+        assert (
+            str(MultivariateDetector(DummyDetector(), "min"))
+            == "MultivariateDetector(detector=DummyDetector(),aggregation='min')"
+        )

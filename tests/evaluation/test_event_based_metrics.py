@@ -1,14 +1,19 @@
-
-import pytest
 import numpy as np
-from dtaianomaly.evaluation.event_wise_metrics import EventWisePrecision, EventWiseRecall, EventWiseFBeta, _compute_event_wise_metrics
+import pytest
+
+from dtaianomaly.evaluation.event_wise_metrics import (
+    EventWiseFBeta,
+    EventWisePrecision,
+    EventWiseRecall,
+    _compute_event_wise_metrics,
+)
 
 
 class TestInitialization:
 
     def test_invalid_type_beta(self):
         with pytest.raises(TypeError):
-            EventWiseFBeta(beta='1.0')
+            EventWiseFBeta(beta="1.0")
         with pytest.raises(TypeError):
             EventWiseFBeta(beta=True)
 
@@ -18,7 +23,7 @@ class TestInitialization:
         with pytest.raises(ValueError):
             EventWiseFBeta(beta=-1)
 
-    @pytest.mark.parametrize('beta', [0.5, 1.0, 2.0])
+    @pytest.mark.parametrize("beta", [0.5, 1.0, 2.0])
     def test_valid_beta(self, beta):
         metric = EventWiseFBeta(beta=beta)
         assert metric.beta == beta
@@ -40,7 +45,9 @@ class TestComputeEventWiseMetrics:
         # RE = 2/2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 0) = 1.0 * 1.0 = 1.0
         # F1E = 2 * (1 * 1) / (1 + 1) = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -60,7 +67,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1.0 (0/0 -> treat as 1.0 according to implementation logic)
         # PE = 0.0 (denominator 0 -> treat as 0.0)
         # F1E = 0.0 (2*0*1 / (0+1))
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -80,7 +89,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1/1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0) = 1.0
         # F1E = 2 * (1 * 1) / (1 + 1) = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -100,7 +111,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1.0 (0/0 -> treat as 1.0)
         # PE = (0 / (0 + 2)) * (1 - 0.3) = 0 * 0.7 = 0.0
         # F1E = 0.0 (because PE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -120,7 +133,9 @@ class TestComputeEventWiseMetrics:
         # RE = 0/2 = 0.0
         # PE = 0.0 (denominator TPE+FPE is 0 -> treat as 0.0)
         # F1E = 0.0 (because RE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 0.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -140,7 +155,9 @@ class TestComputeEventWiseMetrics:
         # RE = 2/2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 1.0) = 1.0 * 0.0 = 0.0
         # F1E = 0.0 (because PE is 0)
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -163,8 +180,10 @@ class TestComputeEventWiseMetrics:
         # RE = 2 / 2 = 1.0
         # PE = (2 / (2 + 1)) * (1 - 4/7) = (2/3) * (3/7) = 2/7
         # F1E = 2 * (1.0 * 2/7) / (1.0 + 2/7) = (4/7) / (9/7) = 4/9
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
-        assert pytest.approx(precision_event) == 2/7
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
+        assert pytest.approx(precision_event) == 2 / 7
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
         assert EventWiseRecall().compute(y_true, y_pred) == recall_event
@@ -184,7 +203,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0) = 1.0
         # F1E = 1.0
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 1.0
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -203,7 +224,9 @@ class TestComputeEventWiseMetrics:
         # RE = 2 / 2 = 1.0
         # PE = (2 / (2 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (1.0 * 0.5) / (1.0 + 0.5) = 1.0 / 1.5 = 2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -222,7 +245,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 2 = 0.5
         # PE = (1 / (1 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (0.5 * 0.5) / (0.5 + 0.5) = 2 * 0.25 / 1.0 = 0.5
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 0.5
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -241,7 +266,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 2 = 0.5
         # PE = (1 / (1 + 1)) * (1 - 0.4) = 0.5 * 0.6 = 0.3
         # F1E = 2 * (0.5 * 0.3) / (0.5 + 0.3) = 0.3 / 0.8 = 3/8 = 0.375
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.3
         assert pytest.approx(recall_event) == 0.5
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -260,7 +287,9 @@ class TestComputeEventWiseMetrics:
         # RE = 1 / 1 = 1.0
         # PE = (1 / (1 + 0)) * (1 - 0.5) = 1.0 * 0.5 = 0.5
         # F1E = 2 * (1.0 * 0.5) / (1.0 + 0.5) = 1.0 / 1.5 = 2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -273,7 +302,9 @@ class TestComputeEventWiseMetrics:
         # TPE=1, FNE=0, FPE=0
         # N=4 (0,1,4,5), FP=2 (1,4), FAR=0.5
         # RE=1.0, PE=(1/1)*(1-0.5)=0.5, F1E=2/3
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
         assert pytest.approx(precision_event) == 0.5
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
@@ -290,8 +321,10 @@ class TestComputeEventWiseMetrics:
         # RE=1.0
         # PE = (1 / (1 + 1)) * (1 - 2/3) = 0.5 * (1/3) = 1/6
         # F1E = 2 * (1.0 * 1/6) / (1.0 + 1/6) = (1/3) / (7/6) = (1/3) * (6/7) = 2/7
-        precision_event, recall_event = _compute_event_wise_metrics(y_true.astype(bool), y_pred.astype(bool))
-        assert pytest.approx(precision_event) == 1/6
+        precision_event, recall_event = _compute_event_wise_metrics(
+            y_true.astype(bool), y_pred.astype(bool)
+        )
+        assert pytest.approx(precision_event) == 1 / 6
         assert pytest.approx(recall_event) == 1.0
         assert EventWisePrecision().compute(y_true, y_pred) == precision_event
         assert EventWiseRecall().compute(y_true, y_pred) == recall_event
@@ -311,17 +344,23 @@ class TestMetrics:
     def test_f05(self):
         # ((1+0.5²) * 0.3 * 0.5) / (0.5² * 0.3 + 0.5)
         # = (1.25 * 0.15) / (0.25 * 0.3 + 0.5) = 0.1875 / 0.575 = 1875/5750
-        assert EventWiseFBeta(beta=0.5).compute(self.y_true, self.y_pred) == pytest.approx(1875/5750)
+        assert EventWiseFBeta(beta=0.5).compute(
+            self.y_true, self.y_pred
+        ) == pytest.approx(1875 / 5750)
 
     def test_f1(self):
         # ((1+1²) * 0.3 * 0.5) / (1² * 0.3 + 0.5)
         # = (2 * 0.15) / 0.8 = 0.3 / 0.8 = 3/8
-        assert EventWiseFBeta().compute(self.y_true, self.y_pred) == pytest.approx(3/8)
+        assert EventWiseFBeta().compute(self.y_true, self.y_pred) == pytest.approx(
+            3 / 8
+        )
 
     def test_f2(self):
         # ((1+2²) * 0.3 * 0.5) / (2² * 0.3 + 0.5)
         # = (5 * 0.15) / (4 * 0.3 + 0.5) = 0.75 / 1.7 = 75/170
-        assert EventWiseFBeta(beta=2).compute(self.y_true, self.y_pred) == pytest.approx(75/170)
+        assert EventWiseFBeta(beta=2).compute(
+            self.y_true, self.y_pred
+        ) == pytest.approx(75 / 170)
 
 
 class TestStr:

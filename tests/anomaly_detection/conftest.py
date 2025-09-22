@@ -1,5 +1,5 @@
-
 import torch
+
 from dtaianomaly.anomaly_detection.BaseNeuralDetector import BaseNeuralDetector
 
 
@@ -47,22 +47,24 @@ def is_un_flatten(module):
 
 def is_lstm(module, input_size, hidden_size, num_layers, bias, dropout):
     if isinstance(module, torch.nn.LSTM):
-        return \
-            module.input_size == input_size and \
-            module.hidden_size == hidden_size and \
-            module.num_layers == num_layers and \
-            module.bias == bias and \
-            module.dropout == dropout
+        return (
+            module.input_size == input_size
+            and module.hidden_size == hidden_size
+            and module.num_layers == num_layers
+            and module.bias == bias
+            and module.dropout == dropout
+        )
     return False
 
 
 def is_conv1d(module, in_channels, out_channels, kernel_size, padding):
     if isinstance(module, torch.nn.Conv1d):
-        return \
-            module.in_channels == in_channels and \
-            module.out_channels == out_channels and \
-            module.kernel_size == kernel_size and \
-            module.padding == padding
+        return (
+            module.in_channels == in_channels
+            and module.out_channels == out_channels
+            and module.kernel_size == kernel_size
+            and module.padding == padding
+        )
     return False
 
 
@@ -74,7 +76,10 @@ def is_avg_pooling(module):
 
 def is_transformer_encoder(module, num_layers, enable_nested_tensor):
     if isinstance(module, torch.nn.TransformerEncoder):
-        return module.num_layers == num_layers and module.enable_nested_tensor == enable_nested_tensor
+        return (
+            module.num_layers == num_layers
+            and module.enable_nested_tensor == enable_nested_tensor
+        )
     return False
 
 

@@ -1,9 +1,14 @@
-
-import pytest
 import numpy as np
+import pytest
+
 from dtaianomaly import utils
+from dtaianomaly.anomaly_detection.windowing_utils import (
+    check_is_valid_window_size,
+    compute_window_size,
+    reverse_sliding_window,
+    sliding_window,
+)
 from dtaianomaly.data import demonstration_time_series
-from dtaianomaly.anomaly_detection.windowing_utils import sliding_window, reverse_sliding_window, check_is_valid_window_size, compute_window_size
 
 
 class TestSlidingWindow:
@@ -114,16 +119,24 @@ class TestSlidingWindow:
         assert windows.shape == (5, 12)
         assert np.array_equal(windows[0], [0, 0, 1, 10, 2, 20, 3, 30, 4, 40, 5, 50])
         assert np.array_equal(windows[1], [4, 40, 5, 50, 6, 60, 7, 70, 8, 80, 9, 90])
-        assert np.array_equal(windows[2], [8, 80, 9, 90, 10, 100, 11, 110, 12, 120, 13, 130])
-        assert np.array_equal(windows[3], [12, 120, 13, 130, 14, 140, 15, 150, 16, 160, 17, 170])
-        assert np.array_equal(windows[4], [14, 140, 15, 150, 16, 160, 17, 170, 18, 180, 19, 190])
+        assert np.array_equal(
+            windows[2], [8, 80, 9, 90, 10, 100, 11, 110, 12, 120, 13, 130]
+        )
+        assert np.array_equal(
+            windows[3], [12, 120, 13, 130, 14, 140, 15, 150, 16, 160, 17, 170]
+        )
+        assert np.array_equal(
+            windows[4], [14, 140, 15, 150, 16, 160, 17, 170, 18, 180, 19, 190]
+        )
 
 
 class TestReverseSlidingWindow:
 
     def test_window_size_1(self):
         scores = np.arange(10)
-        reverse_windows = reverse_sliding_window(scores, window_size=1, stride=1, length_time_series=10)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=1, stride=1, length_time_series=10
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 10
         assert reverse_windows[0] == 0
@@ -139,7 +152,9 @@ class TestReverseSlidingWindow:
 
     def test_stride_1(self):
         scores = np.arange(8)
-        reverse_windows = reverse_sliding_window(scores, window_size=3, stride=1, length_time_series=10)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=3, stride=1, length_time_series=10
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 10
         assert reverse_windows[0] == 0  # [0]
@@ -156,7 +171,9 @@ class TestReverseSlidingWindow:
     def test_stride_1_bigger_numbers(self):
         # Mean and median is the for np.arange
         scores = 2 ** np.arange(8)
-        reverse_windows = reverse_sliding_window(scores, window_size=3, stride=1, length_time_series=10)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=3, stride=1, length_time_series=10
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 10
         assert reverse_windows[0] == 1  # [1]
@@ -172,7 +189,9 @@ class TestReverseSlidingWindow:
 
     def test_nice_fit(self):
         scores = np.arange(5)
-        reverse_windows = reverse_sliding_window(scores, window_size=3, stride=2, length_time_series=11)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=3, stride=2, length_time_series=11
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 11
         assert reverse_windows[0] == 0  # [0]
@@ -189,7 +208,9 @@ class TestReverseSlidingWindow:
 
     def test_not_nice_fit(self):
         scores = np.arange(5)
-        reverse_windows = reverse_sliding_window(scores, window_size=3, stride=2, length_time_series=10)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=3, stride=2, length_time_series=10
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 10
         assert reverse_windows[0] == 0  # [0]
@@ -205,7 +226,9 @@ class TestReverseSlidingWindow:
 
     def test_non_overlapping_windows(self):
         scores = np.arange(5)
-        reverse_windows = reverse_sliding_window(scores, window_size=3, stride=3, length_time_series=15)
+        reverse_windows = reverse_sliding_window(
+            scores, window_size=3, stride=3, length_time_series=15
+        )
         assert len(reverse_windows.shape) == 1
         assert reverse_windows.shape[0] == 15
         assert reverse_windows[0] == 0  # [0]
@@ -231,7 +254,7 @@ class TestCheckIsValidWindowSize:
         for i in range(1, 100):
             check_is_valid_window_size(i)
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf"])
     def test_valid_string(self, window_size):
         check_is_valid_window_size(window_size)
 
@@ -242,7 +265,7 @@ class TestCheckIsValidWindowSize:
 
     def test_invalid_string(self):
         with pytest.raises(ValueError):
-            check_is_valid_window_size('something_invalid')
+            check_is_valid_window_size("something_invalid")
 
     def test_invalid_float(self):
         with pytest.raises(ValueError):
@@ -261,44 +284,46 @@ class TestComputeWindowSize:
         for i in range(1, 100):
             assert i == compute_window_size(np.array([1, 2, 3]), i)
 
-    @pytest.mark.parametrize('window_size', [1, 'fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", [1, "fft", "acf", "mwf", "suss"])
     def test_invalid_x(self, window_size):
         check_is_valid_window_size(window_size)
-        assert not utils.is_valid_array_like([1, 2, 3, 4, '5'])
+        assert not utils.is_valid_array_like([1, 2, 3, 4, "5"])
         with pytest.raises(ValueError):
-            compute_window_size([1, 2, 3, 4, '5'], window_size)
+            compute_window_size([1, 2, 3, 4, "5"], window_size)
 
     def test_multivariate_integer(self, multivariate_time_series):
         assert 16 == compute_window_size(multivariate_time_series, 16)
 
     def test_multivariate_non_integer(self, multivariate_time_series):
         with pytest.raises(ValueError):
-            compute_window_size(multivariate_time_series, 'fft')
+            compute_window_size(multivariate_time_series, "fft")
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
     def test_demonstration_time_series(self, window_size):
         X, _ = demonstration_time_series()
-        assert compute_window_size(X, window_size, threshold=0.95) == pytest.approx(1400 / (25 / 2), abs=10)
+        assert compute_window_size(X, window_size, threshold=0.95) == pytest.approx(
+            1400 / (25 / 2), abs=10
+        )
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
     def test_no_window_size(self, window_size):
         flat = np.ones(shape=1000)
         with pytest.raises(ValueError):
             compute_window_size(flat, window_size)
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
     def test_no_window_size_but_default_window_size(self, window_size):
         flat = np.ones(shape=1000)
         assert compute_window_size(flat, window_size, default_window_size=16) == 16
 
-    @pytest.mark.parametrize('nb_periods', [5, 10])
+    @pytest.mark.parametrize("nb_periods", [5, 10])
     def test_fft_simple(self, nb_periods):
         X = np.sin(np.linspace(0, nb_periods * 2 * np.pi, 5000))
-        window_size = compute_window_size(X, window_size='fft')
-        assert window_size == 5000/nb_periods
+        window_size = compute_window_size(X, window_size="fft")
+        assert window_size == 5000 / nb_periods
 
-    @pytest.mark.parametrize('period_size', [25, 42])
-    @pytest.mark.parametrize('nb_periods', [5, 10])
+    @pytest.mark.parametrize("period_size", [25, 42])
+    @pytest.mark.parametrize("nb_periods", [5, 10])
     def test_acf_simple(self, period_size, nb_periods):
         rng = np.random.default_rng(42)
         period = rng.uniform(size=period_size)
@@ -308,55 +333,67 @@ class TestComputeWindowSize:
         assert X.shape == (period_size * nb_periods,)
         assert np.array_equal(X[:period_size], period)
 
-        window_size = compute_window_size(X, window_size='acf')
+        window_size = compute_window_size(X, window_size="acf")
         assert window_size == period_size
 
     def test_mwf_three_periods(self):
         X = np.sin(np.linspace(0, 1.5 * 2 * np.pi, 500))
 
-        window_size = compute_window_size(X, window_size='mwf', upper_bound=500)
+        window_size = compute_window_size(X, window_size="mwf", upper_bound=500)
         assert window_size == pytest.approx(500 // 3, abs=5)
 
     def test_suss_exact_threshold(self):
         X, _ = demonstration_time_series()
-        assert compute_window_size(X, 'suss', threshold=0.9437091537824681) == 104
+        assert compute_window_size(X, "suss", threshold=0.9437091537824681) == 104
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
-    def test_invalid_bounds_default_window_size(self, window_size, univariate_time_series):
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
+    def test_invalid_bounds_default_window_size(
+        self, window_size, univariate_time_series
+    ):
         window_size_ = compute_window_size(
-            univariate_time_series, window_size,
+            univariate_time_series,
+            window_size,
             lower_bound=int(univariate_time_series.shape[0] // 2),
-            upper_bound=int(univariate_time_series.shape[0] // 3),  # Smaller than lower_bound
-            default_window_size=16
+            upper_bound=int(
+                univariate_time_series.shape[0] // 3
+            ),  # Smaller than lower_bound
+            default_window_size=16,
         )
         assert window_size_ == 16
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
-    def test_invalid_bounds_no_default_window_size(self, window_size, univariate_time_series):
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
+    def test_invalid_bounds_no_default_window_size(
+        self, window_size, univariate_time_series
+    ):
         with pytest.raises(ValueError):
             compute_window_size(
-                univariate_time_series, window_size,
+                univariate_time_series,
+                window_size,
                 lower_bound=int(univariate_time_series.shape[0] // 2),
-                upper_bound=int(univariate_time_series.shape[0] // 3),  # Smaller than lower_bound
-                default_window_size=None
+                upper_bound=int(
+                    univariate_time_series.shape[0] // 3
+                ),  # Smaller than lower_bound
+                default_window_size=None,
             )
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
     def test_too_small_lower_bound(self, window_size, univariate_time_series):
         with pytest.raises(ValueError):
             compute_window_size(
-                univariate_time_series, window_size,
+                univariate_time_series,
+                window_size,
                 lower_bound=-1,
                 relative_upper_bound=-0.1,
-                default_window_size=None
+                default_window_size=None,
             )
 
-    @pytest.mark.parametrize('window_size', ['fft', 'acf', 'mwf', 'suss'])
+    @pytest.mark.parametrize("window_size", ["fft", "acf", "mwf", "suss"])
     def test_too_large_upper_bound(self, window_size, univariate_time_series):
         with pytest.raises(ValueError):
             compute_window_size(
-                univariate_time_series, window_size,
-                upper_bound=2*univariate_time_series.shape[0],
+                univariate_time_series,
+                window_size,
+                upper_bound=2 * univariate_time_series.shape[0],
                 relative_upper_bound=1.1,
-                default_window_size=None
+                default_window_size=None,
             )

@@ -1,6 +1,6 @@
-
 import pytest
-from dtaianomaly.evaluation import Precision, Recall, FBeta, AreaUnderROC, AreaUnderPR
+
+from dtaianomaly.evaluation import AreaUnderPR, AreaUnderROC, FBeta, Precision, Recall
 
 
 @pytest.fixture
@@ -10,7 +10,18 @@ def data():
 
 @pytest.fixture
 def data_proba():
-    return [1, 0, 1, 1, 0, 1, 0, 1, 0, 1], [0.8, 0.2, 0.1, 0.6, 0.9, 0.2, 0.3, 0.6, 0.5, 0.4]
+    return [1, 0, 1, 1, 0, 1, 0, 1, 0, 1], [
+        0.8,
+        0.2,
+        0.1,
+        0.6,
+        0.9,
+        0.2,
+        0.3,
+        0.6,
+        0.5,
+        0.4,
+    ]
 
 
 class TestPrecision:
@@ -18,7 +29,7 @@ class TestPrecision:
     def test(self, data):
         metric = Precision()
         y_true, y_pred = data
-        assert metric.compute(y_true, y_pred) == 4/5
+        assert metric.compute(y_true, y_pred) == 4 / 5
 
     def test_str(self):
         assert str(Precision()) == "Precision()"
@@ -29,7 +40,7 @@ class TestRecall:
     def test(self, data):
         metric = Recall()
         y_true, y_pred = data
-        assert metric.compute(y_true, y_pred) == 4/6
+        assert metric.compute(y_true, y_pred) == 4 / 6
 
     def test_str(self):
         assert str(Recall()) == "Recall()"
@@ -60,17 +71,17 @@ class TestFBeta:
     def test(self, data):
         metric = FBeta()
         y_true, y_pred = data
-        assert metric.compute(y_true, y_pred) == pytest.approx(8/11)
+        assert metric.compute(y_true, y_pred) == pytest.approx(8 / 11)
 
     def test_beta_2(self, data):
         metric = FBeta(2)
         y_true, y_pred = data
-        assert metric.compute(y_true, y_pred) == pytest.approx(20/29)
+        assert metric.compute(y_true, y_pred) == pytest.approx(20 / 29)
 
     def test_beta_0_point_5(self, data):
         metric = FBeta(0.5)
         y_true, y_pred = data
-        assert metric.compute(y_true, y_pred) == pytest.approx(10/13)
+        assert metric.compute(y_true, y_pred) == pytest.approx(10 / 13)
 
     def test_str(self):
         assert str(FBeta()) == "FBeta()"

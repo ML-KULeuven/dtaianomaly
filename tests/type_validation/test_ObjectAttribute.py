@@ -19,11 +19,13 @@ class TestLiteralAttribute:
         with pytest.raises(TypeError):
             ObjectAttribute()
 
-    @pytest.mark.parametrize('object_type', [int, str, list, bool, float])
+    @pytest.mark.parametrize("object_type", [int, str, list, bool, float])
     def test_values_valid(self, object_type):
         assert ObjectAttribute(object_type).object_type == object_type
 
-    @pytest.mark.parametrize('object_type', [5, 1.0, True, [0, 1, 2, 2], {'a': 1, 'b': 2}])
+    @pytest.mark.parametrize(
+        "object_type", [5, 1.0, True, [0, 1, 2, 2], {"a": 1, "b": 2}]
+    )
     def test_values_invalid(self, object_type):
         with pytest.raises(TypeError):
             ObjectAttribute(object_type)

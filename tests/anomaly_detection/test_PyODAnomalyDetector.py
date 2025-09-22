@@ -1,10 +1,13 @@
-
 import pytest
+
 from dtaianomaly import anomaly_detection
 from dtaianomaly.utils import all_classes
 
 
-@pytest.mark.parametrize('detector_class', all_classes(anomaly_detection.PyODAnomalyDetector, return_names=False))
+@pytest.mark.parametrize(
+    "detector_class",
+    all_classes(anomaly_detection.PyODAnomalyDetector, return_names=False),
+)
 class TestPyodAnomalyDetector:
 
     def test_initialize_too_small_window_size(self, detector_class):
@@ -18,11 +21,11 @@ class TestPyodAnomalyDetector:
             detector_class(window_size=5.5)
 
     def test_initialize_valid_string_window_size(self, detector_class):
-        detector_class(window_size='fft')
+        detector_class(window_size="fft")
 
     def test_initialize_string_window_size(self, detector_class):
         with pytest.raises(ValueError):
-            detector_class(window_size='15')
+            detector_class(window_size="15")
 
     def test_initialize_too_small_stride(self, detector_class):
         with pytest.raises(ValueError):
@@ -36,11 +39,11 @@ class TestPyodAnomalyDetector:
 
     def test_initialize_string_stride(self, detector_class):
         with pytest.raises(TypeError):
-            detector_class(window_size=10, stride='1')
+            detector_class(window_size=10, stride="1")
 
     def test_default_stride(self, detector_class):
-        assert detector_class(window_size='fft').stride == 1
+        assert detector_class(window_size="fft").stride == 1
 
     def test_invalid_additional_arguments(self, detector_class):
         with pytest.raises(TypeError):
-            detector_class(window_size='fft', some_invalid_arg=1)
+            detector_class(window_size="fft", some_invalid_arg=1)

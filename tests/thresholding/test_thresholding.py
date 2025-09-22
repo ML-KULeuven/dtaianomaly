@@ -1,14 +1,14 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.thresholding import FixedCutoff, ContaminationRate, TopN
+from dtaianomaly.thresholding import ContaminationRate, FixedCutoff, TopN
 
 
 class TestFixedCutoffThresholding:
 
     def test_cutoff(self):
         ground_truth = np.array([1, 0, 1, 1])
-        scores = np.array([1., 0., 0.5, 0.3])
+        scores = np.array([1.0, 0.0, 0.5, 0.3])
         thresholder = FixedCutoff(cutoff=0.3)
         assert np.array_equal(ground_truth, thresholder.threshold(scores))
 
@@ -19,10 +19,10 @@ class TestFixedCutoffThresholding:
     def test_invalid_scores(self):
         thresholder = FixedCutoff(0.9)
         with pytest.raises(ValueError):
-            thresholder.threshold([0.0, '0.9', 1.0])
+            thresholder.threshold([0.0, "0.9", 1.0])
 
     def test_str(self):
-        assert str(FixedCutoff(0.9)) == 'FixedCutoff(cutoff=0.9)'
+        assert str(FixedCutoff(0.9)) == "FixedCutoff(cutoff=0.9)"
 
 
 class TestContaminationRateThresholding:
@@ -47,7 +47,7 @@ class TestContaminationRateThresholding:
 
     def test_string_contamination(self):
         with pytest.raises(TypeError):
-            ContaminationRate(contamination_rate='something else')
+            ContaminationRate(contamination_rate="something else")
 
     def test_bool_contamination(self):
         with pytest.raises(TypeError):
@@ -59,15 +59,17 @@ class TestContaminationRateThresholding:
 
     def test_positive_contamination(self):
         with pytest.raises(ValueError):
-            ContaminationRate(contamination_rate=2.)
+            ContaminationRate(contamination_rate=2.0)
 
     def test_invalid_scores(self):
         thresholder = ContaminationRate(0.1)
         with pytest.raises(ValueError):
-            thresholder.threshold([0.0, '0.9', 1.0])
+            thresholder.threshold([0.0, "0.9", 1.0])
 
     def test_str(self):
-        assert str(ContaminationRate(0.1)) == 'ContaminationRate(contamination_rate=0.1)'
+        assert (
+            str(ContaminationRate(0.1)) == "ContaminationRate(contamination_rate=0.1)"
+        )
 
 
 class TestTopN:
@@ -80,7 +82,7 @@ class TestTopN:
 
     def test_string_topn(self):
         with pytest.raises(TypeError):
-            TopN(n='something else')
+            TopN(n="something else")
 
     def test_bool_topn(self):
         with pytest.raises(TypeError):
@@ -93,7 +95,7 @@ class TestTopN:
     def test_invalid_scores(self):
         thresholder = TopN(2)
         with pytest.raises(ValueError):
-            thresholder.threshold([0.0, '0.9', 1.0])
+            thresholder.threshold([0.0, "0.9", 1.0])
 
     def test_too_large_n(self):
         thresholder = TopN(5)
@@ -101,4 +103,4 @@ class TestTopN:
             thresholder.threshold(np.array([0.0, 0.9, 1.0]))
 
     def test_str(self):
-        assert str(TopN(5)) == 'TopN(n=5)'
+        assert str(TopN(5)) == "TopN(n=5)"

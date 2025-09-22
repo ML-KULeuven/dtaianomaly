@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 from dtaianomaly.preprocessing import SamplingRateUnderSampler
 
@@ -16,4 +16,6 @@ class TestSamplingRateUnderSampler:
 
     def test_too_large_sampling_rate(self, univariate_time_series):
         with pytest.raises(ValueError):
-            SamplingRateUnderSampler(univariate_time_series.shape[0]).fit_transform(univariate_time_series)
+            SamplingRateUnderSampler(univariate_time_series.shape[0]).fit_transform(
+                univariate_time_series
+            )

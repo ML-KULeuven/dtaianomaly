@@ -1,5 +1,5 @@
-
 import numpy as np
+
 from dtaianomaly.preprocessing import PiecewiseAggregateApproximation
 
 
@@ -49,7 +49,9 @@ class TestPiecewiseAggregateApproximation:
     def test_simple_multivariate(self):
         preprocessor = PiecewiseAggregateApproximation(4)
 
-        x = np.array([[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]])
+        x = np.array(
+            [[1, 10], [5, 50], [3, 30], [7, 70], [8, 80], [6, 60], [4, 40], [11, 110]]
+        )
         y = np.array([0, 1, 0, 0, 0, 1, 0, 1])
         x_, y_ = preprocessor.fit_transform(x, y)
 

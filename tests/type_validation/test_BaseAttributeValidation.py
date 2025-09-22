@@ -1,29 +1,45 @@
-
 import pytest
 from conftest import ATTRIBUTE_VALIDATION_CONFIGS
 
-from dtaianomaly.type_validation import IntegerAttribute, LiteralAttribute, NoneAttribute, UnionAttribute
+from dtaianomaly.type_validation import (
+    IntegerAttribute,
+    LiteralAttribute,
+    NoneAttribute,
+    UnionAttribute,
+)
 
 
 class TestBaseAttributeValidation:
 
     @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_raise_error_if_invalid_no_error(self, config):
-        config['validator'].raise_error_if_invalid(config['valid'], "my_attribute", "MyClass")
+        config["validator"].raise_error_if_invalid(
+            config["valid"], "my_attribute", "MyClass"
+        )
 
     @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_raise_error_if_invalid_type(self, config):
         with pytest.raises(TypeError):
-            config['validator'].raise_error_if_invalid(config['invalid_type'], "my_attribute", "MyClass")
+            config["validator"].raise_error_if_invalid(
+                config["invalid_type"], "my_attribute", "MyClass"
+            )
 
     @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_raise_error_if_invalid_value(self, config):
-        expected_error = ValueError if config['validator']._is_valid_type(config['invalid_value']) else TypeError
+        expected_error = (
+            ValueError
+            if config["validator"]._is_valid_type(config["invalid_value"])
+            else TypeError
+        )
         with pytest.raises(expected_error):
-            config['validator'].raise_error_if_invalid(config['invalid_value'], "my_attribute", "MyClass")
+            config["validator"].raise_error_if_invalid(
+                config["invalid_value"], "my_attribute", "MyClass"
+            )
 
     def test_or(self):
-        validation = IntegerAttribute(minimum=5) | LiteralAttribute('auto') | NoneAttribute()
+        validation = (
+            IntegerAttribute(minimum=5) | LiteralAttribute("auto") | NoneAttribute()
+        )
 
         assert isinstance(validation, UnionAttribute)
         assert len(validation.attribute_validators) == 3
@@ -48,5 +64,4 @@ class TestBaseAttributeValidation:
 
     def test_or_multiple_attribute_validation_with_other(self):
         with pytest.raises(TypeError):
-            IntegerAttribute(minimum=5) | LiteralAttribute('auto') | NoneAttribute() | 5
-
+            IntegerAttribute(minimum=5) | LiteralAttribute("auto") | NoneAttribute() | 5

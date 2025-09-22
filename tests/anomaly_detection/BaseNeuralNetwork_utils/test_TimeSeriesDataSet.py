@@ -1,5 +1,3 @@
-
-
 import numpy as np
 
 from dtaianomaly.anomaly_detection import ForecastDataset, ReconstructionDataset
@@ -8,24 +6,16 @@ from dtaianomaly.anomaly_detection import ForecastDataset, ReconstructionDataset
 class TestForecastDataset:
 
     def test(self):
-        dataset = ForecastDataset(
-            np.arange(17),
-            5, 1,
-            False, 'cpu',
-            1
-        )
-        assert len(dataset) == 17-5-1+1
+        dataset = ForecastDataset(np.arange(17), 5, 1, False, "cpu", 1)
+        assert len(dataset) == 17 - 5 - 1 + 1
         for i in range(12):
             history, future = dataset[i]
-            assert np.array_equal(history, np.arange(5)+i)
-            assert np.array_equal(future, np.arange(1)+5+i)
+            assert np.array_equal(history, np.arange(5) + i)
+            assert np.array_equal(future, np.arange(1) + 5 + i)
 
     def test_multivariate(self):
         dataset = ForecastDataset(
-            np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T,
-            2, 1,
-            False, 'cpu',
-            1
+            np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T, 2, 1, False, "cpu", 1
         )
         assert len(dataset) == 4
         assert np.array_equal(dataset[0][0], [[1, 1], [2, 2]])
@@ -38,12 +28,7 @@ class TestForecastDataset:
         assert np.array_equal(dataset[3][1], [[6, 6]])
 
     def test_stride_2(self):
-        dataset = ForecastDataset(
-            np.arange(17),
-            5, 2,
-            False, 'cpu',
-            1
-        )
+        dataset = ForecastDataset(np.arange(17), 5, 2, False, "cpu", 1)
         """
         0 4 5
         2 6 7
@@ -84,12 +69,7 @@ class TestForecastDataset:
         assert np.array_equal(future, np.arange(1) + 5 + 11)
 
     def test_stride_3(self):
-        dataset = ForecastDataset(
-            np.arange(17),
-            5, 3,
-            False, 'cpu',
-            1
-        )
+        dataset = ForecastDataset(np.arange(17), 5, 3, False, "cpu", 1)
         """
         0 4 5
         3 7 8
@@ -121,10 +101,7 @@ class TestForecastDataset:
 
     def test_scaling(self):
         dataset = ForecastDataset(
-            np.array([5, 10, 15, 9, 15, 10]),
-            2, 3,
-            True, 'cpu',
-            1
+            np.array([5, 10, 15, 9, 15, 10]), 2, 3, True, "cpu", 1
         )
         assert np.allclose(dataset[0][0], np.array([-1.22474487, 0]))
         assert np.allclose(dataset[0][1], np.array([1.22474487]))
@@ -132,10 +109,7 @@ class TestForecastDataset:
         assert np.allclose(dataset[1][1], np.array([-0.50800051]))
 
         dataset = ForecastDataset(
-            np.array([5, 10, 15, 9, 15, 10]),
-            2, 3,
-            False, 'cpu',
-            1
+            np.array([5, 10, 15, 9, 15, 10]), 2, 3, False, "cpu", 1
         )
         assert np.array_equal(dataset[0][0], np.array([5, 10]))
         assert np.array_equal(dataset[0][1], np.array([15]))
@@ -145,27 +119,26 @@ class TestForecastDataset:
     def test_scaling_multivariate(self):
         dataset = ForecastDataset(
             np.array([[5, 10, 15, 5, 10, 15], [9, 15, 10, 9, 15, 10]]).T,
-            2, 3,
-            True, 'cpu',
-            1
+            2,
+            3,
+            True,
+            "cpu",
+            1,
         )
         assert len(dataset) == 2
         for i in range(2):
-            assert np.allclose(dataset[i][0], [[-1.22474487, -0.88900089], [0, 1.3970014]])
+            assert np.allclose(
+                dataset[i][0], [[-1.22474487, -0.88900089], [0, 1.3970014]]
+            )
             assert np.allclose(dataset[i][1], [[1.22474487, -0.50800051]])
 
     def test_forecast_length(self):
-        dataset = ForecastDataset(
-            np.arange(17),
-            5, 1,
-            False, 'cpu',
-            3
-        )
+        dataset = ForecastDataset(np.arange(17), 5, 1, False, "cpu", 3)
         assert len(dataset) == 10
         for i in range(10):
             history, future = dataset[i]
-            assert np.array_equal(history, np.arange(5)+i)
-            assert np.array_equal(future, np.arange(3)+5+i)
+            assert np.array_equal(history, np.arange(5) + i)
+            assert np.array_equal(future, np.arange(3) + 5 + i)
 
 
 class TestReconstructionDataset:
@@ -173,18 +146,22 @@ class TestReconstructionDataset:
     def test(self):
         dataset = ReconstructionDataset(
             np.arange(17),
-            5, 1,
-            False, 'cpu',
+            5,
+            1,
+            False,
+            "cpu",
         )
         assert len(dataset) == 13
         for i in range(13):
-            assert np.array_equal(dataset[i][0], np.arange(5)+i)
+            assert np.array_equal(dataset[i][0], np.arange(5) + i)
 
     def test_multivariate(self):
         dataset = ReconstructionDataset(
             np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T,
-            3, 1,
-            False, 'cpu',
+            3,
+            1,
+            False,
+            "cpu",
         )
         assert len(dataset) == 4
         assert np.array_equal(dataset[0][0], [[1, 1], [2, 2], [3, 3]])
@@ -195,8 +172,10 @@ class TestReconstructionDataset:
     def test_stride_2(self):
         dataset = ReconstructionDataset(
             np.arange(17),
-            6, 2,
-            False, 'cpu',
+            6,
+            2,
+            False,
+            "cpu",
         )
         """
         0 5
@@ -219,8 +198,10 @@ class TestReconstructionDataset:
     def test_stride_3(self):
         dataset = ReconstructionDataset(
             np.arange(17),
-            6, 3,
-            False, 'cpu',
+            6,
+            3,
+            False,
+            "cpu",
         )
         """
         0 5
@@ -239,27 +220,37 @@ class TestReconstructionDataset:
     def test_scaling(self):
         dataset = ReconstructionDataset(
             np.array([5, 10, 15, 9, 15, 10]),
-            3, 3,
-            False, 'cpu',
+            3,
+            3,
+            False,
+            "cpu",
         )
         assert np.allclose(dataset[0], np.array([5, 10, 15]))
         assert np.allclose(dataset[1], np.array([9, 15, 10]))
 
         dataset = ReconstructionDataset(
             np.array([5, 10, 15, 9, 15, 10]),
-            3, 3,
-            True, 'cpu',
+            3,
+            3,
+            True,
+            "cpu",
         )
         assert np.allclose(dataset[0][0], np.array([-1.22474487, 0, 1.22474487]))
-        assert np.allclose(dataset[1][0], np.array([-0.88900089, 1.3970014, -0.50800051]))
+        assert np.allclose(
+            dataset[1][0], np.array([-0.88900089, 1.3970014, -0.50800051])
+        )
 
     def test_scaling_multivariate(self):
         dataset = ReconstructionDataset(
             np.array([[5, 10, 15, 5, 10, 15], [9, 15, 10, 9, 15, 10]]).T,
-            3, 3,
-            True, 'cpu',
+            3,
+            3,
+            True,
+            "cpu",
         )
         assert len(dataset) == 2
         for i in range(2):
-            assert np.allclose(dataset[i][0], [[-1.22474487, -0.88900089], [0, 1.3970014], [1.22474487, -0.50800051]])
-
+            assert np.allclose(
+                dataset[i][0],
+                [[-1.22474487, -0.88900089], [0, 1.3970014], [1.22474487, -0.50800051]],
+            )
