@@ -35,22 +35,52 @@ class TestListAttribute:
 
     @pytest.mark.parametrize('minimum_length', [0, 1, 2, 3, 4, 5])
     def test_minimum_length_valid(self, minimum_length):
-        assert ListAttribute(IntegerAttribute(), minimum_length).minimum_length == minimum_length
+        assert ListAttribute(IntegerAttribute(), minimum_length=minimum_length).minimum_length == minimum_length
 
     @pytest.mark.parametrize('minimum_length', [1.0, True, "auto", [0, 1, 2, 2], {'a': 1, 'b': 2}])
     def test_minimum_length_invalid_type(self, minimum_length):
         with pytest.raises(TypeError):
-            ListAttribute(IntegerAttribute(), minimum_length)
+            ListAttribute(IntegerAttribute(), minimum_length=minimum_length)
 
     @pytest.mark.parametrize('minimum_length', [-1])
     def test_minimum_length_invalid_value(self, minimum_length):
         with pytest.raises(ValueError):
-            ListAttribute(IntegerAttribute(), minimum_length)
+            ListAttribute(IntegerAttribute(), minimum_length=minimum_length)
 
     def test_minimum_length_immutable(self):
         validator = ListAttribute(IntegerAttribute())
         with pytest.raises(AttributeError):
             validator.minimum_length = 10
+
+    @pytest.mark.parametrize('maximum_length', [1, 2, 3, 4, 5])
+    def test_maximum_length_valid(self, maximum_length):
+        assert ListAttribute(IntegerAttribute(), maximum_length=maximum_length).maximum_length == maximum_length
+
+    @pytest.mark.parametrize('maximum_length', [1.0, True, "auto", [0, 1, 2, 2], {'a': 1, 'b': 2}])
+    def test_maximum_length_invalid_type(self, maximum_length):
+        with pytest.raises(TypeError):
+            ListAttribute(IntegerAttribute(), maximum_length=maximum_length)
+
+    @pytest.mark.parametrize('maximum_length', [0, -1])
+    def test_maximum_length_invalid_value(self, maximum_length):
+        with pytest.raises(ValueError):
+            ListAttribute(IntegerAttribute(), maximum_length=maximum_length)
+
+    def test_maximum_length_immutable(self):
+        validator = ListAttribute(IntegerAttribute())
+        with pytest.raises(AttributeError):
+            validator.maximum_length = 10
+
+    @pytest.mark.parametrize("minimum_length,maximum_length", [(0, 5), (4, 5), (5, 5)])
+    def test_minimum_and_maximum_combined_valid(self, minimum_length, maximum_length):
+        validator = ListAttribute(IntegerAttribute(), minimum_length=minimum_length, maximum_length=maximum_length)
+        assert validator.minimum_length == minimum_length
+        assert validator.maximum_length == maximum_length
+
+    @pytest.mark.parametrize("minimum_length,maximum_length", [(5, 4)])
+    def test_minimum_and_maximum_combined_invalid(self,  minimum_length, maximum_length):
+        with pytest.raises(ValueError):
+            ListAttribute(IntegerAttribute(), minimum_length=minimum_length, maximum_length=maximum_length)
 
     @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
     def test_is_valid_type(self, config):
@@ -90,10 +120,31 @@ class TestListAttribute:
     @pytest.mark.parametrize('minimum_length', [5, 10])
     def test_is_valid_value_minimum_length(self, config, minimum_length):
 
-        validator = ListAttribute(config['validator'], minimum_length)
+        validator = ListAttribute(config['validator'], minimum_length=minimum_length)
         assert validator._is_valid_value(minimum_length * [config['valid']])
         assert validator._is_valid_value((minimum_length + 1) * [config['valid']])
         assert not validator._is_valid_value((minimum_length - 1) * [config['valid']])
+
+    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize('maximum_length', [5, 10])
+    def test_is_valid_value_maximum_length(self, config, maximum_length):
+
+        validator = ListAttribute(config['validator'], maximum_length=maximum_length)
+        assert validator._is_valid_value(maximum_length * [config['valid']])
+        assert not validator._is_valid_value((maximum_length + 1) * [config['valid']])
+        assert validator._is_valid_value((maximum_length - 1) * [config['valid']])
+
+    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize('minimum_length,maximum_length', [(5, 5), (5, 10)])
+    def test_is_valid_value_minimum_and_maximum_length(self, config, minimum_length, maximum_length):
+        if minimum_length > maximum_length:
+            return
+        validator = ListAttribute(config['validator'], minimum_length=minimum_length, maximum_length=maximum_length)
+        assert validator._is_valid_value(minimum_length * [config['valid']])
+        assert validator._is_valid_value(int((minimum_length + maximum_length) / 2) * [config['valid']])
+        assert validator._is_valid_value(maximum_length * [config['valid']])
+        assert not validator._is_valid_value((minimum_length - 1) * [config['valid']])
+        assert not validator._is_valid_value((maximum_length + 1) * [config['valid']])
 
     @pytest.mark.parametrize('config', ATTRIBUTE_VALIDATION_CONFIGS)
     def test_get_valid_value_description(self, config):
@@ -114,6 +165,26 @@ class TestListAttribute:
     def test_get_valid_value_description_union_3(self):
         assert ListAttribute(IntegerAttribute(minimum=5) | LiteralAttribute("auto") | NoneAttribute())._get_valid_value_description() \
                == "list of int greater than or equal to 5, string in {'auto'} or None"
+
+    def test_get_valid_value_description_minimum_length(self):
+        assert ListAttribute(IntegerAttribute(), minimum_length=5)._get_valid_value_description() \
+               == "list of int int with minimum 5 elements"
+
+    def test_get_valid_value_description_minimum_length_0(self):
+        assert ListAttribute(IntegerAttribute(), minimum_length=0)._get_valid_value_description() \
+               == "list of int int"
+
+    def test_get_valid_value_description_maximum_length(self):
+        assert ListAttribute(IntegerAttribute(), maximum_length=5)._get_valid_value_description() \
+               == "list of int int with maximum 5 elements"
+
+    def test_get_valid_value_description_minimum_and_maximum_length(self):
+        assert ListAttribute(IntegerAttribute(), minimum_length=3, maximum_length=5)._get_valid_value_description() \
+               == "list of int int with minimum 3 elements and maximum 5 elements"
+
+    def test_get_valid_value_description_minimum_and_maximum_length_equal(self):
+        assert ListAttribute(IntegerAttribute(), minimum_length=5, maximum_length=5)._get_valid_value_description() \
+               == "list of int int with 5 elements"
 
     def test_args(self):
 

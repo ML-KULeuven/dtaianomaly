@@ -33,13 +33,15 @@ class ObjectAttribute(BaseAttributeValidation):
         return self._object_type
 
     def _is_valid_type(self, value) -> bool:
-        return type(value) is self.object_type
+        if self.object_type == int and isinstance(value, bool):
+            return False
+        return issubclass(value.__class__, self.object_type)
 
     def _get_valid_type_description(self) -> str:
         return f"'type {self.object_type}'"
 
     def _is_valid_value(self, value) -> bool:
-        return type(value) is self.object_type
+        return self._is_valid_type(value)
 
     def _get_valid_value_description(self) -> str:
         return f"'type {self.object_type}'"

@@ -19,6 +19,10 @@ class ListAttribute(BaseAttributeValidation):
     ----------
     validator: :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation`
         The validator used to validate the individual elements within the list.
+    minimum_length: int, default=None
+        The minimum length a list may have. If None, then there is no minimum.
+    maximum_length: int, default=None
+        The maximum length a list may have. If None, then there is no maximum.
 
     Examples
     --------
@@ -40,32 +44,61 @@ class ListAttribute(BaseAttributeValidation):
     """
 
     _validator: BaseAttributeValidation
-    _minimum_length: int
+    _minimum_length: int | None
+    _maximum_length: int | None
 
-    def __init__(self, validator: BaseAttributeValidation, minimum_length: int = 0):
+    def __init__(
+        self,
+        validator: BaseAttributeValidation,
+        minimum_length: int = None,
+        maximum_length: int = None,
+    ):
         if not isinstance(validator, BaseAttributeValidation):
             raise TypeError(
                 f"Attribute 'validator' in class 'ListAttribute' must be of type BaseAttributeValidation, but received '{validator}' of type {type(validator)}!"
             )
 
-        if not isinstance(minimum_length, int) or isinstance(minimum_length, bool):
-            raise TypeError(
-                f"Attribute 'minimum_length' in class 'ListAttribute' must be of type int, but received '{minimum_length}' of type {type(minimum_length)}!"
-            )
-        if minimum_length < 0:
-            raise ValueError(
-                "Attribute 'minimum_length' in class 'ListAttribute' must be larger than or equal to 0!"
-            )
+        if minimum_length is not None:
+            if not isinstance(minimum_length, int) or isinstance(minimum_length, bool):
+                raise TypeError(
+                    f"Attribute 'minimum_length' in class 'ListAttribute' must be of type int, but received '{minimum_length}' of type {type(minimum_length)}!"
+                )
+            if minimum_length < 0:
+                raise ValueError(
+                    "Attribute 'minimum_length' in class 'ListAttribute' must be larger than or equal to 0!"
+                )
+
+        if maximum_length is not None:
+            if not isinstance(maximum_length, int) or isinstance(maximum_length, bool):
+                raise TypeError(
+                    f"Attribute 'maximum_length' in class 'ListAttribute' must be of type int, but received '{maximum_length}' of type {type(maximum_length)}!"
+                )
+            if maximum_length < 1:
+                raise ValueError(
+                    "Attribute 'maximum_length' in class 'ListAttribute' must be larger than or equal to 1!"
+                )
+
+        if minimum_length is not None and maximum_length is not None:
+            if minimum_length > maximum_length:
+                raise ValueError(
+                    f"Attribute 'minimum_length' must be smaller than or equal to attribute 'maximum_length' in class 'IntegerAttribute'!"
+                )
+
         self._validator = validator
         self._minimum_length = minimum_length
+        self._maximum_length = maximum_length
 
     @property
     def validator(self) -> BaseAttributeValidation:
         return self._validator
 
     @property
-    def minimum_length(self) -> int:
+    def minimum_length(self) -> int | None:
         return self._minimum_length
+
+    @property
+    def maximum_length(self) -> int | None:
+        return self._maximum_length
 
     def _is_valid_type(self, value) -> bool:
         return isinstance(value, list) and all(
@@ -76,9 +109,11 @@ class ListAttribute(BaseAttributeValidation):
         return f"list of {self.validator._get_valid_type_description()}"
 
     def _is_valid_value(self, value) -> bool:
-        return len(value) >= self.minimum_length and all(
-            self.validator._is_valid_value(element) for element in value
-        )
+        if self.minimum_length is not None and len(value) < self.minimum_length:
+            return False
+        if self.maximum_length is not None and len(value) > self.maximum_length:
+            return False
+        return all(self.validator._is_valid_value(element) for element in value)
 
     def _get_valid_value_description(self) -> str:
 
@@ -87,9 +122,27 @@ class ListAttribute(BaseAttributeValidation):
                 return "None"
             return f"{validator._get_valid_type_description()} {validator._get_valid_value_description()}"
 
+        if self.minimum_length is not None and self.maximum_length is not None:
+            if self.minimum_length == self.maximum_length:
+                length_description = f" with {self.minimum_length} elements"
+            else:
+                length_description = f" with minimum {self.minimum_length} elements and maximum {self.maximum_length} elements"
+        elif self.minimum_length is not None and self.minimum_length > 0:
+            length_description = f" with minimum {self.minimum_length} elements"
+        elif self.maximum_length is not None:
+            length_description = f" with maximum {self.maximum_length} elements"
+        else:
+            length_description = ""
+
         if isinstance(self.validator, UnionAttribute):
             values = list(map(_simple_description, self.validator.attribute_validators))
-            return "list of " + ", ".join(values[:-1]) + " or " + values[-1]
+            return (
+                "list of "
+                + ", ".join(values[:-1])
+                + " or "
+                + values[-1]
+                + length_description
+            )
 
         else:
-            return f"list of {_simple_description(self.validator)}"
+            return f"list of {_simple_description(self.validator)}" + length_description

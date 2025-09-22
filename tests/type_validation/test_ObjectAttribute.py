@@ -45,4 +45,22 @@ class TestLiteralAttribute:
         assert ObjectAttribute(object_type)._is_valid_value(value) == expected
 
     def test_get_valid_value_description(self):
-        assert ObjectAttribute(int)._get_valid_type_description() == f"'type {int}'"
+        assert ObjectAttribute(int)._get_valid_value_description() == f"'type {int}'"
+
+    def test_custom_object(self):
+
+        class MyObject:
+            pass
+
+        assert ObjectAttribute(MyObject)._is_valid_type(MyObject())
+
+    def test_inheritance(self):
+
+        class Parent:
+            pass
+
+        class Child(Parent):
+            pass
+
+        assert ObjectAttribute(Parent)._is_valid_type(Child())
+        assert not ObjectAttribute(Child)._is_valid_type(Parent())
