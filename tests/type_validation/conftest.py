@@ -5,7 +5,8 @@ from dtaianomaly.type_validation import (
     BoolAttribute,
     LiteralAttribute,
     ListAttribute,
-    NoneAttribute
+    NoneAttribute,
+    ObjectAttribute
 )
 
 ATTRIBUTE_VALIDATION_CONFIGS = [
@@ -50,5 +51,11 @@ ATTRIBUTE_VALIDATION_CONFIGS = [
         "invalid_type": "auto",
         "invalid_value": 0,
         "valid": None
+    },
+    {
+        "validator": ObjectAttribute(int),
+        "invalid_type": "auto",
+        "invalid_value": "auto",
+        "valid": 5
     }
 ]

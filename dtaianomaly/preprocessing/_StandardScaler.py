@@ -1,7 +1,10 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+from dtaianomaly.type_validation import FloatAttribute
+
+__all__ = ["StandardScaler"]
 
 
 class StandardScaler(Preprocessor):
@@ -12,11 +15,9 @@ class StandardScaler(Preprocessor):
     deviation is computed on a training set, after which these values
     can be used to transform a new time series. Therefore, there is no
     guarantee that the values of the transformed test set will actually
-    have zero mean and unit variance.
-
-    For multivariate time series, each attribute will be normalized
-    independently, i.e., the mean and std of each attribute in the
-    transformed time series will 1.0 and 0.0, respectively.
+    have zero mean and unit variance. For multivariate time series, each
+    attribute will be normalized independently, i.e., the mean and std of
+    each attribute in the transformed time series will 1.0 and 0.0, respectively.
 
     Parameters
     ----------
@@ -36,11 +37,23 @@ class StandardScaler(Preprocessor):
     ------
     NotFittedError
         If the `transform` method is called before fitting this StandardScaler.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import StandardScaler
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = StandardScaler(n=512)
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
     min_std: float
     mean_: np.array
     std_: np.array
+
+    attribute_validation = {
+        "min_std": FloatAttribute(minimum=0.0, inclusive_minimum=False),
+    }
 
     def __init__(self, min_std: float = 1e-9):
         self.min_std = min_std

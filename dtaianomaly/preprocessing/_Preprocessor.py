@@ -2,10 +2,13 @@ import abc
 
 import numpy as np
 
-from dtaianomaly import utils
+from dtaianomaly.type_validation import AttributeValidationMixin
+from dtaianomaly.utils import PrettyPrintable, is_valid_array_like
+
+__all__ = ["Preprocessor"]
 
 
-def check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
+def _check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
     """
     Check if the given `X` and `y` arrays are valid.
 
@@ -23,9 +26,9 @@ def check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
     ValueError
         If inputs have a different size in the first dimension (n_samples)
     """
-    if not utils.is_valid_array_like(X):
+    if not is_valid_array_like(X):
         raise ValueError("`X` is not a valid array")
-    if y is not None and not utils.is_valid_array_like(y):
+    if y is not None and not is_valid_array_like(y):
         raise ValueError("`y` is not  valid array")
     if y is not None:
         X = np.asarray(X)
@@ -34,7 +37,7 @@ def check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
             raise ValueError("`X` and `y` have a different number of samples")
 
 
-class Preprocessor(utils.PrettyPrintable):
+class Preprocessor(PrettyPrintable, AttributeValidationMixin):
     """
     Base preprocessor class.
     """
@@ -56,7 +59,7 @@ class Preprocessor(utils.PrettyPrintable):
         self: Preprocessor
             Returns the fitted instance self.
         """
-        check_preprocessing_inputs(X, y)
+        _check_preprocessing_inputs(X, y)
         return self._fit(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
@@ -85,7 +88,7 @@ class Preprocessor(utils.PrettyPrintable):
             The transformed ground truth. If no ground truth was provided (`y=None`),
             then None will be returned as well.
         """
-        check_preprocessing_inputs(X, y)
+        _check_preprocessing_inputs(X, y)
         return self._transform(np.asarray(X), y if y is None else np.asarray(y))
 
     @abc.abstractmethod
@@ -119,17 +122,3 @@ class Preprocessor(utils.PrettyPrintable):
             then None will be returned as well.
         """
         return self.fit(X, y).transform(X, y)
-
-
-class Identity(Preprocessor):
-    """
-    Identity preprocessor. A dummy preprocessor which does not do any processing at all.
-    """
-
-    def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
-        return self
-
-    def _transform(
-        self, X: np.ndarray, y: np.ndarray = None
-    ) -> (np.ndarray, np.ndarray | None):
-        return X, y

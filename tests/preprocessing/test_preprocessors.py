@@ -104,3 +104,10 @@ class TestPreprocessors:
         x_fit = univariate_time_series[:split]
         x_transform = univariate_time_series[split:]
         preprocessor.fit(x_fit).transform(x_transform)
+
+    # def test_fit_transform_different_dimension(self, cls, univariate_time_series, multivariate_time_series):
+    #     If does not require any fitting ...
+    #     preprocessor = initialize(cls)
+    #     preprocessor.fit(univariate_time_series)
+    #     with pytest.raises(AttributeError):
+    #         preprocessor.transform(multivariate_time_series)

@@ -27,13 +27,6 @@ class TestMinMaxScaler:
         x = np.ones(1000) * 123.4
         assert np.array_equal(MinMaxScaler().fit_transform(x)[0], x)
 
-    def test_multivariate(self, multivariate_time_series):
-        preprocessor = MinMaxScaler()
-        x_, _ = preprocessor.fit_transform(multivariate_time_series)
-        for i in range(multivariate_time_series.shape[1]):
-            assert x_[:, i].min() == 0
-            assert x_[:, i].max() == 1
-
     def test_multivariate_with_single_value_attribute(self, multivariate_time_series):
         preprocessor = MinMaxScaler()
         multivariate_time_series[:, 0] = 987.6
@@ -42,17 +35,3 @@ class TestMinMaxScaler:
         for i in range(1, multivariate_time_series.shape[1]):
             assert x_[:, i].min() == 0
             assert x_[:, i].max() == 1
-
-    def test_different_dimension(self, univariate_time_series, multivariate_time_series):
-        preprocessor = MinMaxScaler()
-        preprocessor.fit(univariate_time_series)
-        with pytest.raises(AttributeError):
-            preprocessor.transform(multivariate_time_series)
-
-    def test_not_fitted(self, univariate_time_series):
-        preprocessor = MinMaxScaler()
-        with pytest.raises(NotFittedError):
-            preprocessor.transform(univariate_time_series)
-
-    def test_str(self):
-        assert str(MinMaxScaler()) == 'MinMaxScaler()'

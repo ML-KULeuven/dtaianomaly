@@ -1,8 +1,8 @@
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector
-from dtaianomaly.data.LazyDataLoader import LazyDataLoader
-from dtaianomaly.evaluation.metrics import Metric
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
-from dtaianomaly.thresholding.thresholding import Thresholding
+from dtaianomaly.anomaly_detection import BaseDetector
+from dtaianomaly.data import LazyDataLoader
+from dtaianomaly.evaluation import Metric
+from dtaianomaly.preprocessing import Preprocessor
+from dtaianomaly.thresholding import Thresholding
 from dtaianomaly.workflow.JobBasedWorkflow import Job, JobBasedWorkflow
 from dtaianomaly.workflow.utils import convert_to_list
 

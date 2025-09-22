@@ -1,12 +1,16 @@
 import numpy as np
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+from dtaianomaly.type_validation import FloatAttribute
+
+__all__ = ["ExponentialMovingAverage"]
 
 
 class ExponentialMovingAverage(Preprocessor):
     """
-    Compute exponential moving average. For a given input :math:`x`,
-    the exponential moving average :math:`y` is computed as
+    Compute exponential moving average.
+
+    For a given input :math:`x`, the exponential moving average :math:`y` is computed as
 
     .. math::
 
@@ -20,13 +24,25 @@ class ExponentialMovingAverage(Preprocessor):
     ----------
     alpha: float
         The decaying factor to be used in the exponential moving average.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import ExponentialMovingAverage
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = ExponentialMovingAverage(alpha=0.5)
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
     alpha: float
 
+    attribute_validation = {
+        "alpha": FloatAttribute(
+            minimum=0.0, maximum=1.0, inclusive_minimum=False, inclusive_maximum=False
+        )
+    }
+
     def __init__(self, alpha: float) -> None:
-        if not (0.0 < alpha < 1.0):
-            raise ValueError("Alpha must be in the open interval ]0, 1[")
         self.alpha = alpha
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "ExponentialMovingAverage":

@@ -1,8 +1,11 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+from dtaianomaly.type_validation import FloatAttribute
 from dtaianomaly.utils import get_dimension
+
+__all__ = ["RobustScaler"]
 
 
 class RobustScaler(Preprocessor):
@@ -29,13 +32,10 @@ class RobustScaler(Preprocessor):
 
     Parameters
     ----------
-    quantile_range: tuple of (float, float), default = (25.0, 75.0)
-        Quantile range used to compute the ``scale_`` of the robust scaler.
-        By default, this is equal to the Inter Quantile Range (IQR). The first
-        value of the quantile range corresponds to the smallest quantile, the
-        second value corresponds to the larger quantile. If the first value is
-        not smaller than the second value, an error will be thrown. The values
-        must also both be in the range [0, 100].
+    lower_quantile: float, default=25.0
+        The lower quantile used to compute the scale. Must be in range [0.0, 100.0].
+    upper_quantile: float, default=75.0
+        The upper quantile used to compute the scale. Must be in range [0.0, 100.0].
 
     Attributes
     ----------
@@ -48,57 +48,46 @@ class RobustScaler(Preprocessor):
     ------
     NotFittedError
         If the `transform` method is called before fitting this StandardScaler.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import RobustScaler
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = RobustScaler()
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
-    quantile_range: (float, float)
+    lower_quantile: float
+    upper_quantile: float
     center_: np.array
     scale_: np.array
 
-    def __init__(self, quantile_range: (float, float) = (25.0, 75.0)):
-        if not isinstance(quantile_range, tuple):
-            raise TypeError("`quantile_range` should be tuple")
-        if len(quantile_range) != 2:
+    attribute_validation = {
+        "lower_quantile": FloatAttribute(minimum=0.0, maximum=100.0),
+        "upper_quantile": FloatAttribute(minimum=0.0, maximum=100.0),
+    }
+
+    def __init__(self, lower_quantile: float = 25.0, upper_quantile: float = 75.0):
+        if lower_quantile > upper_quantile:
             raise ValueError(
-                "'quantile_range' should consist of exactly two values (length of 2)"
+                f"Attribute 'lower_quantile' must be smaller than attribute 'upper_quantile' in 'RobustScaler', but received '{lower_quantile}' and '{upper_quantile}' "
             )
-        if not isinstance(quantile_range[0], (float, int)) or isinstance(
-            quantile_range[0], bool
-        ):
-            raise TypeError(
-                "The first element `quantile_range` should be a float or int"
-            )
-        if not isinstance(quantile_range[1], (float, int)) or isinstance(
-            quantile_range[1], bool
-        ):
-            raise TypeError(
-                "The second element `quantile_range` should be a float or int"
-            )
-        if quantile_range[0] < 0.0:
-            raise ValueError(
-                "the first element in 'quantile_range' must be at least 0.0"
-            )
-        if quantile_range[1] > 100.0:
-            raise ValueError(
-                "the second element in 'quantile_range' must be at most 100.0"
-            )
-        if not quantile_range[0] < quantile_range[1]:
-            raise ValueError(
-                "the first element in 'quantile_range' must be at smaller than the second element in 'quantile_range'"
-            )
-        self.quantile_range = quantile_range
+        self.lower_quantile = lower_quantile
+        self.upper_quantile = upper_quantile
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "RobustScaler":
         if get_dimension(X) == 1:
             # univariate case
             self.center_ = np.array([np.nanmedian(X)])
-            q_min = np.percentile(X, q=self.quantile_range[0])
-            q_max = np.percentile(X, q=self.quantile_range[1])
+            q_min = np.percentile(X, q=self.lower_quantile)
+            q_max = np.percentile(X, q=self.upper_quantile)
             self.scale_ = np.array([q_max - q_min])
         else:
             # multivariate case
             self.center_ = np.nanmedian(X, axis=0)
-            q_min = np.percentile(X, q=self.quantile_range[0], axis=0)
-            q_max = np.percentile(X, q=self.quantile_range[1], axis=0)
+            q_min = np.percentile(X, q=self.lower_quantile, axis=0)
+            q_max = np.percentile(X, q=self.upper_quantile, axis=0)
             self.scale_ = q_max - q_min
         return self
 

@@ -1,24 +1,25 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+
+__all__ = ["MinMaxScaler"]
 
 
 class MinMaxScaler(Preprocessor):
     """
+    Apply min-max scaling on a given time series.
+
     Rescale raw time series to a [0, 1] via min-max scaling. The
     minimum and maximum is computed on a training set, after which
     these values can be used to transform a new time series. Therefore,
     there is no guarantee that the values of the transformed test set
-    will actually be in the range [0, 1].
-
-    For multivariate time series, each attribute will be normalized
-    independently, i.e., the minimum and maximum of each attribute in
-    the transformed time series will 0 and 1, respectively.
-
-    If the minimum and maximum of an attribute is the same (the time
-    series consists of only one value), then the transformation will
-    not do anything.
+    will actually be in the range [0, 1]. For multivariate time series,
+    each attribute will be normalized independently, i.e., the minimum
+    and maximum of each attribute in the transformed time series will
+    0 and 1, respectively. If the minimum and maximum of an attribute
+    is the same (the time series consists of only one value), then
+    the transformation will not do anything.
 
     Attributes
     ----------
@@ -31,6 +32,14 @@ class MinMaxScaler(Preprocessor):
     ------
     NotFittedError
         If the `transform` method is called before fitting this MinMaxScaler.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import MinMaxScaler
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = MinMaxScaler()
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
     min_: np.array

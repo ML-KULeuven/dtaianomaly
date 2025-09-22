@@ -14,7 +14,7 @@ from dtaianomaly.data.DataSet import DataSet
 from dtaianomaly.data.LazyDataLoader import LazyDataLoader
 from dtaianomaly.evaluation.metrics import BinaryMetric, Metric, ProbaMetric
 from dtaianomaly.pipeline.Pipeline import Pipeline
-from dtaianomaly.preprocessing.Preprocessor import Identity, Preprocessor
+from dtaianomaly.preprocessing import Identity, Preprocessor
 from dtaianomaly.thresholding.thresholding import Thresholding
 from dtaianomaly.utils import is_valid_list
 from dtaianomaly.workflow.error_logging import log_error

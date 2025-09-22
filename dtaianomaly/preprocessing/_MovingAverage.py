@@ -1,33 +1,43 @@
 import numpy as np
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+from dtaianomaly.type_validation import IntegerAttribute
+
+__all__ = ["MovingAverage"]
 
 
 class MovingAverage(Preprocessor):
     """
-    Computes the moving average of a time series. This is the unweighted
-    average of the observations within a window.
+    Computes the moving average of a time series.
 
-    To compute the moving average at time :math:`t`, the window is centered at
+    To compute the moving average at time :math:`t`, i.e., the unweighted
+    average of the observations within a window. The window is centered at
     position :math:`t`. For an odd window size, the number of measurements taken
     before and after :math:`t` is equal (namely ``(window_size - 1 ) / 2``. For an
     even window size, there is one additional observation taken before :math:`t`,
-    to ensure a correct window size.
-
-    For multivariate time series, the moving average is computed within
-    each attribute independently.
+    to ensure a correct window size. For multivariate time series, the moving
+    average is computed within each attribute independently.
 
     Parameters
     ----------
     window_size: int
         Length of the window in which the average should be computed.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import MovingAverage
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = MovingAverage(window_size=16)
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
     window_size: int
+    attribute_validation = {
+        "window_size": IntegerAttribute(minimum=1),
+    }
 
     def __init__(self, window_size: int) -> None:
-        if window_size <= 0:
-            raise ValueError("Window size must be strictly positive")
         self.window_size = window_size
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "MovingAverage":

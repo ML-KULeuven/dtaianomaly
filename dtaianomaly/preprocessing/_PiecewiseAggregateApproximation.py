@@ -1,6 +1,9 @@
 import numpy as np
 
-from dtaianomaly.preprocessing.Preprocessor import Preprocessor
+from dtaianomaly.preprocessing._Preprocessor import Preprocessor
+from dtaianomaly.type_validation import IntegerAttribute
+
+__all__ = ["PiecewiseAggregateApproximation"]
 
 
 class PiecewiseAggregateApproximation(Preprocessor):
@@ -26,18 +29,20 @@ class PiecewiseAggregateApproximation(Preprocessor):
     ----------
     n: int
         The number of equi-sized frames to generate.
+
+    Examples
+    --------
+    >>> from dtaianomaly.preprocessing import PiecewiseAggregateApproximation
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
+    >>> preprocessor = PiecewiseAggregateApproximation(n=8)
+    >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 
     n: int
+    attribute_validation = {"n": IntegerAttribute(minimum=1)}
 
     def __init__(self, n: int):
-        super().__init__()
-
-        if not isinstance(n, int) or isinstance(n, bool):
-            raise TypeError("`n` should be an integer")
-        if n <= 0:
-            raise ValueError("'n' must be strictly positive!")
-
         self.n = n
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
