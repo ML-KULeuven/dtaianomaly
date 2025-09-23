@@ -12,7 +12,7 @@ Utility classes
     :template: class.rst
 
     CheckIsFittedMixin
-    PrettyPrintable
+    PrintConstructionCallMixin
 
 
 Utility functions

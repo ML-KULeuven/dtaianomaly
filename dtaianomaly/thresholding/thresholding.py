@@ -2,10 +2,10 @@ import abc
 
 import numpy as np
 
-from dtaianomaly import utils
+from dtaianomaly.utils import PrintConstructionCallMixin, is_valid_array_like
 
 
-class Thresholding(utils.PrettyPrintable):
+class Thresholding(PrintConstructionCallMixin):
 
     @abc.abstractmethod
     def threshold(self, scores: np.ndarray) -> np.ndarray:
@@ -66,7 +66,7 @@ class FixedCutoff(Thresholding):
         ValueError
             If `scores` is not a valid array
         """
-        if not utils.is_valid_array_like(scores):
+        if not is_valid_array_like(scores):
             raise ValueError("Input must be numerical array-like")
 
         scores = np.asarray(scores)
@@ -118,7 +118,7 @@ class ContaminationRate(Thresholding):
         ValueError
             If `scores` is not a valid array
         """
-        if not utils.is_valid_array_like(scores):
+        if not is_valid_array_like(scores):
             raise ValueError("Input must be numerical array-like")
 
         scores = np.asarray(scores)
@@ -169,7 +169,7 @@ class TopN(Thresholding):
         ValueError
             If `scores` is not a valid array
         """
-        if not utils.is_valid_array_like(scores):
+        if not is_valid_array_like(scores):
             raise ValueError("Input must be numerical array-like")
         if self.n > scores.shape[0]:
             raise ValueError(

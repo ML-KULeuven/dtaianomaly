@@ -2,11 +2,11 @@ import abc
 
 import numpy as np
 
-from dtaianomaly import utils
 from dtaianomaly.thresholding import Thresholding
+from dtaianomaly.utils import PrintConstructionCallMixin, is_valid_array_like
 
 
-class Metric(utils.PrettyPrintable):
+class Metric(PrintConstructionCallMixin):
 
     def compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         """
@@ -34,9 +34,9 @@ class Metric(utils.PrettyPrintable):
         ValueError
             If `y_true` is non-binary.
         """
-        if not utils.is_valid_array_like(y_true):
+        if not is_valid_array_like(y_true):
             raise ValueError("Input 'y_true' should be numeric array-like")
-        if not utils.is_valid_array_like(y_pred):
+        if not is_valid_array_like(y_pred):
             raise ValueError("Input 'y_pred' should be numeric array-like")
         y_true = np.asarray(y_true)
         y_pred = np.asarray(y_pred)

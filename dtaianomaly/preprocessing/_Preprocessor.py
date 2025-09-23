@@ -3,7 +3,11 @@ import abc
 import numpy as np
 
 from dtaianomaly.type_validation import AttributeValidationMixin
-from dtaianomaly.utils import CheckIsFittedMixin, PrettyPrintable, is_valid_array_like
+from dtaianomaly.utils import (
+    CheckIsFittedMixin,
+    PrintConstructionCallMixin,
+    is_valid_array_like,
+)
 
 __all__ = ["Preprocessor"]
 
@@ -37,7 +41,9 @@ def _check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
             raise ValueError("`X` and `y` have a different number of samples")
 
 
-class Preprocessor(PrettyPrintable, AttributeValidationMixin, CheckIsFittedMixin):
+class Preprocessor(
+    PrintConstructionCallMixin, AttributeValidationMixin, CheckIsFittedMixin
+):
     """
     Base preprocessor class.
     """

@@ -2,14 +2,17 @@ import abc
 import enum
 import os.path
 import pickle
-from collections import ChainMap
 from pathlib import Path
 
 import numpy as np
 import scipy
 
-from dtaianomaly import utils
 from dtaianomaly.thresholding.thresholding import ContaminationRate
+from dtaianomaly.utils import (
+    CheckIsFittedMixin,
+    PrintConstructionCallMixin,
+    is_valid_array_like,
+)
 
 
 class Supervision(enum.Enum):
@@ -27,7 +30,7 @@ class Supervision(enum.Enum):
     SUPERVISED = 3
 
 
-class BaseDetector(utils.PrettyPrintable):
+class BaseDetector(PrintConstructionCallMixin, CheckIsFittedMixin):
     """
     Abstract base class for time series anomaly detection.
 
@@ -66,7 +69,7 @@ class BaseDetector(utils.PrettyPrintable):
             Returns the instance itself.
         """
         # Check the input
-        if not utils.is_valid_array_like(X):
+        if not is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
 
         # Fit the detector
@@ -78,44 +81,6 @@ class BaseDetector(utils.PrettyPrintable):
     @abc.abstractmethod
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         """Effectively fit this detector."""
-
-    def is_fitted(self) -> bool:
-        """
-        Return whether this anomaly detector is fitted.
-
-        Returns
-        -------
-        is_fitted: bool
-            True if and only if this detector is fitted, and can be
-            used for detecting anomalies.
-        """
-
-        def all_annotations(obj) -> ChainMap:
-            """Returns a dictionary-like ChainMap that includes annotations for all
-            attributes defined in cls or inherited from superclasses."""
-            return ChainMap(
-                *(
-                    c.__annotations__
-                    for c in type(obj).__mro__
-                    if "__annotations__" in c.__dict__
-                )
-            )
-
-        return all(
-            hasattr(self, attr) for attr in all_annotations(self) if attr.endswith("_")
-        )
-
-    def check_is_fitted(self) -> None:
-        """
-        Check whether this anomaly detector is fitted or not.
-
-        Raises
-        ------
-        NotFittedError
-            If this detector is not fitted yet.
-        """
-        if not self.is_fitted():
-            raise NotFittedError("This anomaly detector has not been fitted yet!")
 
     def decision_function(self, X: np.ndarray) -> np.array:
         """
@@ -132,7 +97,7 @@ class BaseDetector(utils.PrettyPrintable):
             The computed anomaly scores.
         """
         # Check input
-        if not utils.is_valid_array_like(X):
+        if not is_valid_array_like(X):
             raise ValueError(f"Input must be numerical array-like")
 
         # Check if fitted
@@ -175,7 +140,7 @@ class BaseDetector(utils.PrettyPrintable):
             in the interval [0, 1], because these values can not unambiguously be
             transformed to an anomaly probability.
         """
-        if not utils.is_valid_array_like(X):
+        if not is_valid_array_like(X):
             raise ValueError("Input must be numerical array-like")
 
         raw_scores = self.decision_function(X)

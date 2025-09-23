@@ -2,7 +2,7 @@ import pytest
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
 from dtaianomaly.in_time_ad import CustomDetectorVisualizer, custom_visualizers
-from dtaianomaly.utils.discovery import all_classes
+from dtaianomaly.utils import all_classes
 
 anomaly_detectors = [
     anomaly_detection.AlwaysNormal,

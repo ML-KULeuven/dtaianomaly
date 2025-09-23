@@ -5,6 +5,8 @@ from importlib import import_module
 from operator import itemgetter
 from pathlib import Path
 
+__all__ = ["all_classes"]
+
 _MODULES_TO_IGNORE = ("pipeline", "utils", "visualisation", "workflow")
 
 
