@@ -112,3 +112,8 @@ class TestPreprocessors:
                 preprocessor.transform(multivariate_time_series)
         else:
             preprocessor.transform(multivariate_time_series)
+
+    def test_piped_str(self, cls):
+        preprocessor = initialize(cls)
+        if not isinstance(preprocessor, ChainedPreprocessor):
+            assert str(preprocessor) == preprocessor.piped_str()

@@ -2,7 +2,9 @@ import numpy as np
 
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.preprocessing import ChainedPreprocessor, Preprocessor
-from dtaianomaly.utils import is_valid_list
+from dtaianomaly.type_validation import ObjectAttribute
+
+__all__ = ["Pipeline"]
 
 
 class Pipeline(BaseDetector):
@@ -22,32 +24,40 @@ class Pipeline(BaseDetector):
         The preprocessors to include in this pipeline.
     detector: BaseDetector
         The anomaly detector to include in this pipeline.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import IsolationForest
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> from dtaianomaly.pipeline import Pipeline
+    >>> from dtaianomaly.preprocessing import StandardScaler
+    >>> X, y = demonstration_time_series()
+    >>> pipeline = Pipeline(StandardScaler(), IsolationForest(16))
+    >>> pipeline.fit(X).decision_function(X)
+    array([-0.01080726, -0.01053199, -0.00883758, ..., -0.05298726,
+           -0.05898066, -0.05713733])
     """
 
     preprocessor: Preprocessor
     detector: BaseDetector
+
+    attribute_validation = {
+        "preprocessor": ObjectAttribute(Preprocessor),
+        "detector": ObjectAttribute(BaseDetector),
+    }
 
     def __init__(
         self,
         preprocessor: Preprocessor | list[Preprocessor],
         detector: BaseDetector,
     ):
-        if not (
-            isinstance(preprocessor, Preprocessor)
-            or is_valid_list(preprocessor, Preprocessor)
-        ):
-            raise TypeError(
-                "preprocessor expects a Preprocessor object or list of Preprocessors"
-            )
-        if not isinstance(detector, BaseDetector):
-            raise TypeError("detector expects a BaseDetector object")
-        super().__init__(detector.supervision)
-
-        if isinstance(preprocessor, list):
-            self.preprocessor = ChainedPreprocessor(preprocessor)
-        else:
-            self.preprocessor = preprocessor
+        self.preprocessor = (
+            ChainedPreprocessor(preprocessor)
+            if isinstance(preprocessor, list)
+            else preprocessor
+        )
         self.detector = detector
+        super().__init__(detector.supervision)
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         X, y = self.preprocessor.fit_transform(X=X, y=y)
@@ -57,5 +67,5 @@ class Pipeline(BaseDetector):
         X, _ = self.preprocessor.transform(X=X, y=None)
         return self.detector.decision_function(X)
 
-    def __str__(self) -> str:
-        return f"{self.preprocessor}->{self.detector}"
+    def piped_str(self) -> str:
+        return f"{self.preprocessor.piped_str()}->{self.detector}"

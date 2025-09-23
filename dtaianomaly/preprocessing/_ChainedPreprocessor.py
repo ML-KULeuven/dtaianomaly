@@ -68,5 +68,5 @@ class ChainedPreprocessor(Preprocessor):
             X, y = preprocessor._transform(X, y)
         return X, y
 
-    def piped_print(self) -> str:
+    def piped_str(self) -> str:
         return "->".join(map(str, self.base_preprocessors))

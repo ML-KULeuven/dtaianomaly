@@ -24,8 +24,8 @@ class TestChainedPreprocessor:
         assert isinstance(preprocessor.base_preprocessors[1], MinMaxScaler)
         assert isinstance(preprocessor.base_preprocessors[2], StandardScaler)
 
-    def test_piped_print(self):
+    def test_piped_str(self):
         preprocessor = ChainedPreprocessor(Identity(), MinMaxScaler(), StandardScaler())
         assert (
-            preprocessor.piped_print() == "Identity()->MinMaxScaler()->StandardScaler()"
+            preprocessor.piped_str() == "Identity()->MinMaxScaler()->StandardScaler()"
         )

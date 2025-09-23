@@ -8,6 +8,7 @@ import numpy as np
 import scipy
 
 from dtaianomaly.thresholding import ContaminationRateThreshold
+from dtaianomaly.type_validation import AttributeValidationMixin
 from dtaianomaly.utils import (
     CheckIsFittedMixin,
     PrintConstructionCallMixin,
@@ -30,7 +31,9 @@ class Supervision(enum.Enum):
     SUPERVISED = 3
 
 
-class BaseDetector(PrintConstructionCallMixin, CheckIsFittedMixin):
+class BaseDetector(
+    PrintConstructionCallMixin, CheckIsFittedMixin, AttributeValidationMixin
+):
     """
     Abstract base class for time series anomaly detection.
 

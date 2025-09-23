@@ -129,3 +129,6 @@ class Preprocessor(
             then None will be returned as well.
         """
         return self.fit(X, y).transform(X, y)
+
+    def piped_str(self) -> str:
+        return self.__str__()
