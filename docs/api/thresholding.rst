@@ -3,14 +3,23 @@ Thresholding module
 
 .. automodule:: dtaianomaly.thresholding
 
-.. autoclass:: dtaianomaly.thresholding.Thresholding
-   :members:
+Base objects
+------------
 
-.. autoclass:: dtaianomaly.thresholding.FixedCutoff
-   :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
 
-.. autoclass:: dtaianomaly.thresholding.ContaminationRate
-   :members:
+    Thresholding
 
-.. autoclass:: dtaianomaly.thresholding.TopN
-   :members:
+
+Available Thresholds
+--------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    FixedCutoffThreshold
+    ContaminationRateThreshold
+    TopNThreshold

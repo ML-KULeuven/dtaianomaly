@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import scipy
 
-from dtaianomaly.thresholding.thresholding import ContaminationRate
+from dtaianomaly.thresholding import ContaminationRateThreshold
 from dtaianomaly.utils import (
     CheckIsFittedMixin,
     PrintConstructionCallMixin,
@@ -232,9 +232,9 @@ class BaseDetector(PrintConstructionCallMixin, CheckIsFittedMixin):
             )
 
         # Convert the decision scores to binary predictions
-        prediction = ContaminationRate(contamination_rate=contamination).threshold(
-            decision_scores
-        )
+        prediction = ContaminationRateThreshold(
+            contamination_rate=contamination
+        ).threshold(decision_scores)
 
         # Apply the ExCeed method (https://github.com/Lorenzo-Perini/Confidence_AD/blob/master/ExCeeD.py)
         n = decision_scores.shape[0]

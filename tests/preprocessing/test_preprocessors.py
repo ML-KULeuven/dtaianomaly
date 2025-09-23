@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from dtaianomaly import utils
-from dtaianomaly.preprocessing import ChainedPreprocessor, Identity
+from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, Preprocessor
 
 
 def initialize(cls):
@@ -24,7 +24,7 @@ def initialize(cls):
     return cls(**filtered_kwargs)
 
 
-@pytest.mark.parametrize("cls", utils.all_classes("preprocessor", return_names=False))
+@pytest.mark.parametrize("cls", utils.all_classes(Preprocessor, return_names=False))
 class TestPreprocessors:
 
     def test_is_valid_array_like_univariate_1d(self, cls, univariate_time_series):

@@ -9,13 +9,12 @@ from functools import partial
 import numpy as np
 import pandas as pd
 
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.data.DataSet import DataSet
-from dtaianomaly.data.LazyDataLoader import LazyDataLoader
-from dtaianomaly.evaluation.metrics import BinaryMetric, Metric, ProbaMetric
-from dtaianomaly.pipeline.Pipeline import Pipeline
+from dtaianomaly.anomaly_detection import BaseDetector, Supervision
+from dtaianomaly.data import DataSet, LazyDataLoader
+from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric
+from dtaianomaly.pipeline import Pipeline
 from dtaianomaly.preprocessing import Identity, Preprocessor
-from dtaianomaly.thresholding.thresholding import Thresholding
+from dtaianomaly.thresholding import Thresholding
 from dtaianomaly.utils import is_valid_list
 from dtaianomaly.workflow.error_logging import log_error
 from dtaianomaly.workflow.utils import convert_to_list, convert_to_proba_metrics
