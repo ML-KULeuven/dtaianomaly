@@ -4,6 +4,15 @@ from matplotlib.patches import ConnectionPatch
 
 from dtaianomaly import utils
 
+__all__ = [
+    "plot_time_series_colored_by_score",
+    "plot_time_series_anomalies",
+    "plot_demarcated_anomalies",
+    "plot_with_zoom",
+    "plot_anomaly_scores",
+    "format_time_steps",
+]
+
 
 def plot_time_series_colored_by_score(
     X: np.ndarray,

@@ -7,7 +7,7 @@ The functions within this module offer alternative manners to nicely plot the ti
 along with the ground truth or predicted anomalies.
 """
 
-from .visualization import (
+from ._visualization import (
     format_time_steps,
     plot_anomaly_scores,
     plot_demarcated_anomalies,
