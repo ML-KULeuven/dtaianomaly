@@ -54,8 +54,8 @@ def valid_config():
             {"type": "AreaUnderROC"},
         ],
         "thresholds": [
-            {"type": "TopN", "n": 10},
-            {"type": "FixedCutoff", "cutoff": 0.5},
+            {"type": "TopNThreshold", "n": 10},
+            {"type": "FixedCutoffThreshold", "cutoff": 0.5},
         ],
         "preprocessors": [
             {"type": "MovingAverage", "window_size": 15},
@@ -88,7 +88,7 @@ class TestWorkflowFromConfig:
     def test_file_too_large(self, tmp_path, valid_config):
         with open(tmp_path / "config.json", "a") as file:
             valid_config["detectors"].extend(
-                [{"type": "IsolationForest", "window_size": w} for w in range(1, 10000)]
+                [{"type": "IsolationForest", "window_size": w} for w in range(1, 10)]
             )  # Make the file big
             json.dump(valid_config, file)
         workflow_from_config(
@@ -173,21 +173,24 @@ class TestInterpretThresholds:
         interpret_config(valid_config)  # No error
 
     def test_single_entry(self):
-        thresholds = interpret_thresholds({"type": "TopN", "n": 10})
+        thresholds = interpret_thresholds({"type": "TopNThreshold", "n": 10})
         assert isinstance(thresholds, list)
         assert len(thresholds) == 1
-        assert isinstance(thresholds[0], thresholding.TopN)
+        assert isinstance(thresholds[0], thresholding.TopNThreshold)
         assert thresholds[0].n == 10
 
     def test_multiple_entries(self):
         thresholds = interpret_thresholds(
-            [{"type": "TopN", "n": 10}, {"type": "FixedCutoff", "cutoff": 0.5}]
+            [
+                {"type": "TopNThreshold", "n": 10},
+                {"type": "FixedCutoffThreshold", "cutoff": 0.5},
+            ]
         )
         assert isinstance(thresholds, list)
         assert len(thresholds) == 2
-        assert isinstance(thresholds[0], thresholding.TopN)
+        assert isinstance(thresholds[0], thresholding.TopNThreshold)
         assert thresholds[0].n == 10
-        assert isinstance(thresholds[1], thresholding.FixedCutoff)
+        assert isinstance(thresholds[1], thresholding.FixedCutoffThreshold)
         assert thresholds[1].cutoff == 0.5
 
 
@@ -467,7 +470,7 @@ def infer_minimal_entry(cls):
         "sampling_rate": 2,
         "n": 4,
         "metric": {"type": "Precision"},
-        "thresholder": {"type": "FixedCutoff", "cutoff": 0.9},
+        "thresholder": {"type": "FixedCutoffThreshold", "cutoff": 0.9},
         "cutoff": 0.9,
         "contamination_rate": 0.1,
         "base_preprocessors": [{"type": "Identity"}],

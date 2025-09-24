@@ -1,10 +1,12 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation.range_based_metrics import (
+from dtaianomaly.evaluation import (
     RangeBasedFBeta,
     RangeBasedPrecision,
     RangeBasedRecall,
+)
+from dtaianomaly.evaluation._range_based_metrics import (
     _cardinality_factor,
     _delta,
     _existence_reward,
@@ -44,102 +46,11 @@ def test_instance():
     return y_true, y_pred, precision, recall
 
 
-@pytest.mark.parametrize(
-    "metric",
-    [
-        RangeBasedPrecision,
-        RangeBasedRecall,
-        RangeBasedFBeta,
-    ],
-)
-class TestInitialization:
-
-    def test_no_parameters(self, metric):
-        metric()
-
-    def test_alpha_invalid_type(self, metric):
-        if isinstance(metric(), RangeBasedPrecision):
-            return
-        with pytest.raises(TypeError):
-            metric(alpha="0.5")
-        with pytest.raises(TypeError):
-            metric(alpha=True)
-        metric(alpha=0)
-        metric(alpha=0.2)
-        metric(alpha=0.9)
-
-    def test_alpha_invalid_value(self, metric):
-        if isinstance(metric(), RangeBasedPrecision):
-            return
-        with pytest.raises(ValueError):
-            metric(alpha=-1)
-        with pytest.raises(ValueError):
-            metric(alpha=1.0001)
-        metric(alpha=0)
-        metric(alpha=0.5)
-        metric(alpha=1)
-
-    def test_delta_invalid_type(self, metric):
-        with pytest.raises(TypeError):
-            metric(delta=1)
-        with pytest.raises(TypeError):
-            metric(delta=0.5)
-        with pytest.raises(TypeError):
-            metric(delta=True)
-        with pytest.raises(TypeError):
-            metric(delta=lambda _: 1)
-        with pytest.raises(TypeError):
-            metric(delta=lambda _, __, ___: 1)
-        metric(delta="flat")
-        metric(delta="front")
-        metric(delta="back")
-        metric(delta="middle")
-        metric(delta=lambda _, __: 1)
-
-    def test_delta_invalid_value(self, metric):
-        with pytest.raises(ValueError):
-            metric(delta="1")
-        metric(delta="flat")
-        metric(delta="front")
-        metric(delta="back")
-        metric(delta="middle")
-        metric(delta=lambda _, __: 1)
-
-    def test_gamma_invalid_type(self, metric):
-        with pytest.raises(TypeError):
-            metric(gamma=1)
-        with pytest.raises(TypeError):
-            metric(gamma=0.5)
-        with pytest.raises(TypeError):
-            metric(gamma=True)
-        with pytest.raises(TypeError):
-            metric(gamma=lambda _, __: 1)
-        with pytest.raises(TypeError):
-            metric(gamma=lambda _, __, ___: 1)
-        metric(gamma="one")
-        metric(gamma="reciprocal")
-        metric(gamma=lambda _: 1)
-
-    def test_gamma_invalid_value(self, metric):
-        with pytest.raises(ValueError):
-            metric(gamma="1")
-        metric(gamma="one")
-        metric(gamma="reciprocal")
-        metric(gamma=lambda _: 1)
-
-
 class TestRangeBasedPrecision:
 
     def test(self, test_instance):
         y_true, y_pred, precision, _ = test_instance
         assert pytest.approx(RangeBasedPrecision().compute(y_true, y_pred)) == precision
-
-    def test_str(self):
-        assert str(RangeBasedPrecision()) == "RangeBasedPrecision()"
-        assert (
-            str(RangeBasedPrecision(delta="front"))
-            == "RangeBasedPrecision(delta='front')"
-        )
 
 
 class TestRangeBasedRecall:
@@ -148,32 +59,8 @@ class TestRangeBasedRecall:
         y_true, y_pred, _, recall = test_instance
         assert pytest.approx(RangeBasedRecall().compute(y_true, y_pred)) == recall
 
-    def test_str(self):
-        assert str(RangeBasedRecall()) == "RangeBasedRecall()"
-        assert str(RangeBasedRecall(alpha=0.3)) == "RangeBasedRecall(alpha=0.3)"
-        assert str(RangeBasedRecall(delta="front")) == "RangeBasedRecall(delta='front')"
-
 
 class TestRangeBasedFBeta:
-
-    def test_default_beta(self):
-        assert RangeBasedFBeta().beta == 1.0
-
-    def test_string_beta(self):
-        with pytest.raises(TypeError):
-            RangeBasedFBeta("1.0")
-
-    def test_bool_beta(self):
-        with pytest.raises(TypeError):
-            RangeBasedFBeta(True)
-
-    def test_zero_beta(self):
-        with pytest.raises(ValueError):
-            RangeBasedFBeta(0.0)
-
-    def test_negative_beta(self):
-        with pytest.raises(ValueError):
-            RangeBasedFBeta(-1.0)
 
     @pytest.mark.parametrize("beta", [0.5, 1, 2])
     def test(self, beta, test_instance):
@@ -183,13 +70,6 @@ class TestRangeBasedFBeta:
         assert pytest.approx(numerator / denominator) == RangeBasedFBeta(beta).compute(
             y_true, y_pred
         )
-
-    def test_str(self):
-        assert str(RangeBasedFBeta()) == "RangeBasedFBeta()"
-        assert str(RangeBasedFBeta(beta=0.5)) == "RangeBasedFBeta(beta=0.5)"
-        assert str(RangeBasedFBeta(beta=2)) == "RangeBasedFBeta(beta=2)"
-        assert str(RangeBasedFBeta(alpha=0.3)) == "RangeBasedFBeta(alpha=0.3)"
-        assert str(RangeBasedFBeta(delta="front")) == "RangeBasedFBeta(delta='front')"
 
 
 class TestUtils:
@@ -250,10 +130,8 @@ class TestUtils:
             assert _delta("middle", i, 20) == 21 - i
 
     def test_delta_custom(self):
-        for i in range(20):
-            assert _delta(lambda j, _: j + 1, i, 20) == i + 1
-        for i in range(20):
-            assert _delta(lambda _, j: j, i, 20) == 20
+        with pytest.raises(ValueError):
+            _delta("invalid", 0, 20)
 
     def test_gamma_one(self):
         for i in range(2, 10):
@@ -264,8 +142,8 @@ class TestUtils:
             assert _gamma("reciprocal", i) == 1 / i
 
     def test_gamma_custom(self):
-        for i in range(2, 20):
-            assert _gamma(lambda j: 1 / (2 * j), i) == 1 / (2 * i)
+        with pytest.raises(ValueError):
+            _gamma("invalid", 10)
 
     @pytest.mark.parametrize(
         "interval,other_intervals,expected",

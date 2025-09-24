@@ -1,39 +1,21 @@
 import math
-from itertools import groupby
-from operator import itemgetter
 
 import numpy as np
 
-from dtaianomaly.evaluation._common import FBetaBase
-from dtaianomaly.evaluation.metrics import BinaryMetric
+from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
+from dtaianomaly.evaluation._FBetaMixin import FBetaMixin
+from dtaianomaly.utils import make_intervals
+
+__all__ = [
+    "AffiliationPrecision",
+    "AffiliationRecall",
+    "AffiliationFBeta",
+]
+
 
 ###############################################################################
 # AFFILIATION METRICS #########################################################
 ###############################################################################
-
-
-def _convert_vector_to_events(vector):
-    """
-    Convert a binary vector (indicating 1 for the anomalous instances)
-    to a list of events. The events are considered as durations,
-    i.e. setting 1 at index i corresponds to an anomalous interval [i, i+1).
-
-    :param vector: a list of elements belonging to {0, 1}
-    :return: a list of couples, each couple representing the start and stop of
-    each event
-    """
-    positive_indexes = [idx for idx, val in enumerate(vector) if val > 0]
-    events = []
-    for k, g in groupby(enumerate(positive_indexes), lambda ix: ix[0] - ix[1]):
-        cur_cut = list(map(itemgetter(1), g))
-        events.append((cur_cut[0], cur_cut[-1]))
-
-    # Consistent conversion in case of range anomalies (for indexes):
-    # A positive index i is considered as the interval [i, i+1),
-    # so the last index should be moved by 1
-    events = [(x, y + 1) for (x, y) in events]
-
-    return events
 
 
 def _test_events(events):
@@ -59,10 +41,12 @@ def _test_events(events):
 def _compute_affiliation_metrics(
     y_true: np.ndarray, y_pred: np.ndarray
 ) -> (float, float):
-    events_gt = _convert_vector_to_events(y_true)
+    starts, ends = make_intervals(y_true)
+    events_gt = list(zip(starts, ends + 1))
     _test_events(events_gt)
 
-    events_pred = _convert_vector_to_events(y_pred)
+    starts, ends = make_intervals(y_pred)
+    events_pred = list(zip(starts, ends + 1))
     _test_events(events_pred)
 
     if len(events_gt) == 0:
@@ -94,7 +78,7 @@ def _compute_affiliation_metrics(
 
 class AffiliationPrecision(BinaryMetric):
     """
-    Computes the affiliation-based precision score :cite:`huet2022local`.
+    Compute the affiliation-based precision score :cite:`huet2022local`.
 
     The affiliation-metrics will first divide the time domain into a number
     of so-called affiliations: subsequences that are closest to the ground
@@ -102,6 +86,20 @@ class AffiliationPrecision(BinaryMetric):
     the precision is computed within each affiliation as the distance from
     the predicted anomalous events to the ground truth event. The final
     precision then equals the average precision across all the affiliations.
+
+    See Also
+    --------
+    AffiliationRecall: Compute the affiliation-based Recall score.
+    AffiliationFBeta: Compute the affiliation-based :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import AffiliationPrecision
+    >>> metric = AffiliationPrecision()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    0.6875
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -111,7 +109,7 @@ class AffiliationPrecision(BinaryMetric):
 
 class AffiliationRecall(BinaryMetric):
     """
-    Computes the affiliation-based recall score :cite:`huet2022local`.
+    Compute the affiliation-based recall score :cite:`huet2022local`.
 
     The affiliation-metrics will first divide the time domain into a number
     of so-called affiliations: subsequences that are closest to the ground
@@ -120,6 +118,20 @@ class AffiliationRecall(BinaryMetric):
     the ground truth anomalous event to the closest predicted anomalies in
     that affiliation. The final recall then equals the average recall
     across all the affiliations.
+
+    See Also
+    --------
+    AffiliationPrecision: Compute the affiliation-based Precision score.
+    AffiliationFBeta: Compute the affiliation-based :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import AffiliationRecall
+    >>> metric = AffiliationRecall()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    1.0
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -127,9 +139,9 @@ class AffiliationRecall(BinaryMetric):
         return affiliation_recall
 
 
-class AffiliationFBeta(BinaryMetric, FBetaBase):
+class AffiliationFBeta(BinaryMetric, FBetaMixin):
     """
-    Computes the affiliation-based :math:`F_\\beta` score :cite:`huet2022local`.
+    Compute the affiliation-based :math:`F_\\beta` score :cite:`huet2022local`.
 
     The affiliation-metrics will first divide the time domain into a number
     of so-called affiliations: subsequences that are closest to the ground
@@ -145,14 +157,20 @@ class AffiliationFBeta(BinaryMetric, FBetaBase):
     beta: int, float, default=1
         Desired beta parameter.
 
-    See also
+    See Also
     --------
     AffiliationPrecision: Compute the affiliation-based Precision score.
     AffiliationRecall: Compute the affiliation-based Recall score.
-    """
 
-    def __init__(self, beta: (float, int) = 1) -> None:
-        super().__init__(beta)
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import AffiliationFBeta
+    >>> metric = AffiliationFBeta()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)   # doctest: +ELLIPSIS
+    0.814...
+    """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         affiliation_precision, affiliation_recall = _compute_affiliation_metrics(

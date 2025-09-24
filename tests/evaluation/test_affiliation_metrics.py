@@ -3,15 +3,16 @@ import math
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation.affiliation_metrics import (
+from dtaianomaly.evaluation import (
     AffiliationFBeta,
     AffiliationPrecision,
     AffiliationRecall,
+)
+from dtaianomaly.evaluation._affiliation_metrics import (
     _affiliation_partition,
     _affiliation_precision_proba,
     _affiliation_recall_proba,
     _compute_affiliation_metrics,
-    _convert_vector_to_events,
     _cut_into_three_func,
     _cut_J_based_on_mean_func,
     _E_gt_func,
@@ -23,7 +24,6 @@ from dtaianomaly.evaluation.affiliation_metrics import (
     _integral_mini_interval,
     _integral_mini_interval_P_CDFmethod__min_piece,
     _integral_mini_interval_Pprecision_CDFmethod,
-    _integral_mini_interval_Precall_CDFmethod,
     _interval_intersection,
     _interval_length,
     _interval_subset,
@@ -33,55 +33,11 @@ from dtaianomaly.evaluation.affiliation_metrics import (
     _test_events,
 )
 
-
-class TestAffiliationPrecision:
-
-    def test_str(self):
-        assert str(AffiliationPrecision()) == "AffiliationPrecision()"
-
-
-class TestAffiliationRecall:
-
-    def test_str(self):
-        assert str(AffiliationRecall()) == "AffiliationRecall()"
-
-
-class TestAffiliationFBeta:
-
-    def test_default_beta(self):
-        assert AffiliationFBeta().beta == 1.0
-
-    def test_string_beta(self):
-        with pytest.raises(TypeError):
-            AffiliationFBeta("1.0")
-
-    def test_bool_beta(self):
-        with pytest.raises(TypeError):
-            AffiliationFBeta(True)
-
-    def test_zero_beta(self):
-        with pytest.raises(ValueError):
-            AffiliationFBeta(0.0)
-
-    def test_negative_beta(self):
-        with pytest.raises(ValueError):
-            AffiliationFBeta(-1.0)
-
-    @pytest.mark.parametrize("beta", [0.5, 1, 2])
-    def test(self, beta):
-        y_true = np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1])
-        y_pred = np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0])
-        precision, recall = 0.8181818181818181, 0.8442760942760943
-        numerator = (1 + beta**2) * precision * recall
-        denominator = beta**2 * precision + recall
-        assert pytest.approx(numerator / denominator) == AffiliationFBeta(beta).compute(
-            y_true, y_pred
-        )
-
-    def test_str(self):
-        assert str(AffiliationFBeta()) == "AffiliationFBeta()"
-        assert str(AffiliationFBeta(beta=0.5)) == "AffiliationFBeta(beta=0.5)"
-        assert str(AffiliationFBeta(beta=2)) == "AffiliationFBeta(beta=2)"
+"""
+Due to checks, two lines in the code are not reachable:
+- "raise ValueError("The i_pivot should be outside J")" in _integral_mini_interval_Precall_CDFmethod
+- "raise ValueError("unexpected unconsidered case")" in _cut_into_three_func
+"""
 
 
 class TestComputeAffiliationMetrics:
@@ -116,6 +72,17 @@ class TestComputeAffiliationMetrics:
             assert pytest.approx(p_cls) == precision
         assert pytest.approx(r) == recall
         assert pytest.approx(r_cls) == recall
+
+    @pytest.mark.parametrize("beta", [0.5, 1, 2])
+    def test_fbeta(self, beta):
+        y_true = np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1])
+        y_pred = np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0])
+        precision, recall = 0.8181818181818181, 0.8442760942760943
+        numerator = (1 + beta**2) * precision * recall
+        denominator = beta**2 * precision + recall
+        assert pytest.approx(numerator / denominator) == AffiliationFBeta(beta).compute(
+            y_true, y_pred
+        )
 
     def test_no_ground_truth(self):
         with pytest.raises(ValueError):
@@ -754,98 +721,6 @@ class TestGenerics:
     )
     def test_len_wo_nan(self, vector, expected):
         assert _len_wo_nan(vector) == expected
-
-    @pytest.mark.parametrize(
-        "vector,expected",
-        [
-            ([], []),
-            ([0], []),
-            ([0, 0, 0, 0, 0], []),
-            ([1], [(0, 1)]),
-            ([1, 1, 1, 1, 1], [(0, 5)]),
-            ([1, 1, 0, 0, 0], [(0, 2)]),
-            ([0, 0, 1, 1, 1], [(2, 5)]),
-            ([1, 0, 1, 1, 1], [(0, 1), (2, 5)]),
-            ([1, 1, 0, 1, 0, 1, 1, 1], [(0, 2), (3, 4), (5, 8)]),
-            (
-                [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    1,
-                    1,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    1,
-                    1,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-                [(6, 12), (17, 20), (60, 63)],
-            ),
-        ],
-    )
-    def test_convert_vector_to_events(self, vector, expected):
-        assert _convert_vector_to_events(vector) == expected
 
 
 class TestTestEvents:

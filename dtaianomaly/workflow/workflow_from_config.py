@@ -140,14 +140,14 @@ def threshold_entry(entry):
     threshold_type = entry["type"]
     entry_without_type = {key: value for key, value in entry.items() if key != "type"}
 
-    if threshold_type == "FixedCutoff":
-        return thresholding.FixedCutoff(**entry_without_type)
+    if threshold_type == "FixedCutoffThreshold":
+        return thresholding.FixedCutoffThreshold(**entry_without_type)
 
-    elif threshold_type == "ContaminationRate":
-        return thresholding.ContaminationRate(**entry_without_type)
+    elif threshold_type == "ContaminationRateThreshold":
+        return thresholding.ContaminationRateThreshold(**entry_without_type)
 
-    elif threshold_type == "TopN":
-        return thresholding.TopN(**entry_without_type)
+    elif threshold_type == "TopNThreshold":
+        return thresholding.TopNThreshold(**entry_without_type)
     else:
         raise ValueError(f"Invalid threshold entry: {entry}")
 

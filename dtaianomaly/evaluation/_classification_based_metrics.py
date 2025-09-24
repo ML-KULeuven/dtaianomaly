@@ -1,8 +1,10 @@
 import numpy as np
 from sklearn import metrics
 
-from dtaianomaly.evaluation._common import FBetaBase
-from dtaianomaly.evaluation.metrics import BinaryMetric
+from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
+from dtaianomaly.evaluation._FBetaMixin import FBetaMixin
+
+__all__ = ["Precision", "Recall", "FBeta"]
 
 
 class Precision(BinaryMetric):
@@ -28,10 +30,21 @@ class Precision(BinaryMetric):
     generates few false alarms, ensuring that most flagged anomalies
     are truly abnormal events. However, it does not measure how many
     anomalies were actually identified.
-    """
 
-    def __init__(self) -> None:
-        super().__init__()
+    See Also
+    --------
+    Recall: Compute the Recall score.
+    FBeta: Compute the :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import Precision
+    >>> metric = Precision()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    0.5
+    """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return metrics.precision_score(y_true=y_true, y_pred=y_pred)
@@ -60,16 +73,27 @@ class Recall(BinaryMetric):
     A high recall ensures that most anomalies are detected, but it doesn’t
     account for how many false positives (normal events incorrectly flagged
     as anomalies) were generated, which is handled by precision.
-    """
 
-    def __init__(self) -> None:
-        super().__init__()
+    See Also
+    --------
+    Precision: Compute the Precision score.
+    FBeta: Compute the :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import Recall
+    >>> metric = Recall()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    1.0
+    """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return metrics.recall_score(y_true=y_true, y_pred=y_pred)
 
 
-class FBeta(BinaryMetric, FBetaBase):
+class FBeta(BinaryMetric, FBetaMixin):
     """
     Computes the :math:`F_\\beta` score.
 
@@ -98,14 +122,20 @@ class FBeta(BinaryMetric, FBetaBase):
     beta: int, float, default=1
         Desired beta parameter.
 
-    See also
+    See Also
     --------
     Precision: Compute the Precision score.
     Recall: Compute the Recall score.
-    """
 
-    def __init__(self, beta: (float, int) = 1) -> None:
-        super().__init__(beta)
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import FBeta
+    >>> metric = FBeta()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.666...
+    """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return self._f_score(

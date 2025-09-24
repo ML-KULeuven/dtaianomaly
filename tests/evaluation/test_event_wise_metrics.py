@@ -1,32 +1,8 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation.event_wise_metrics import (
-    EventWiseFBeta,
-    EventWisePrecision,
-    EventWiseRecall,
-    _compute_event_wise_metrics,
-)
-
-
-class TestInitialization:
-
-    def test_invalid_type_beta(self):
-        with pytest.raises(TypeError):
-            EventWiseFBeta(beta="1.0")
-        with pytest.raises(TypeError):
-            EventWiseFBeta(beta=True)
-
-    def test_invalid_value_beta(self):
-        with pytest.raises(ValueError):
-            EventWiseFBeta(beta=0.0)
-        with pytest.raises(ValueError):
-            EventWiseFBeta(beta=-1)
-
-    @pytest.mark.parametrize("beta", [0.5, 1.0, 2.0])
-    def test_valid_beta(self, beta):
-        metric = EventWiseFBeta(beta=beta)
-        assert metric.beta == beta
+from dtaianomaly.evaluation import EventWiseFBeta, EventWisePrecision, EventWiseRecall
+from dtaianomaly.evaluation._event_wise_metrics import _compute_event_wise_metrics
 
 
 class TestComputeEventWiseMetrics:
@@ -361,17 +337,3 @@ class TestMetrics:
         assert EventWiseFBeta(beta=2).compute(
             self.y_true, self.y_pred
         ) == pytest.approx(75 / 170)
-
-
-class TestStr:
-
-    def test_precision(self):
-        assert str(EventWisePrecision()) == "EventWisePrecision()"
-
-    def test_recall(self):
-        assert str(EventWiseRecall()) == "EventWiseRecall()"
-
-    def test_fbeta(self):
-        assert str(EventWiseFBeta()) == "EventWiseFBeta()"
-        assert str(EventWiseFBeta(2.0)) == "EventWiseFBeta(beta=2.0)"
-        assert str(EventWiseFBeta(0.5)) == "EventWiseFBeta(beta=0.5)"

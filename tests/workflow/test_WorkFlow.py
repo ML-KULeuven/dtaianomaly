@@ -22,7 +22,7 @@ from dtaianomaly.data import (
 )
 from dtaianomaly.evaluation import AreaUnderROC, Precision, Recall
 from dtaianomaly.preprocessing import Identity, Preprocessor, StandardScaler
-from dtaianomaly.thresholding import FixedCutoff, TopN
+from dtaianomaly.thresholding import FixedCutoffThreshold, TopNThreshold
 from dtaianomaly.workflow import JobBasedWorkflow, Workflow
 from dtaianomaly.workflow.JobBasedWorkflow import _get_train_test_data
 
@@ -36,7 +36,7 @@ class TestWorkflowInitialization:
                 UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
             n_jobs=4,
@@ -50,7 +50,7 @@ class TestWorkflowInitialization:
             JobBasedWorkflow(
                 jobs=[1, 2, 3],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
-                thresholds=[TopN(10), FixedCutoff(0.5)],
+                thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             )
 
     def test_no_dataloaders(self):
@@ -58,7 +58,7 @@ class TestWorkflowInitialization:
             Workflow(
                 dataloaders=[],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
-                thresholds=[TopN(10), FixedCutoff(0.5)],
+                thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
                 preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=4,
@@ -73,7 +73,7 @@ class TestWorkflowInitialization:
                     UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
                 ],
                 metrics=[],
-                thresholds=[TopN(10), FixedCutoff(0.5)],
+                thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
                 preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=4,
@@ -88,7 +88,7 @@ class TestWorkflowInitialization:
                     UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
                 ],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
-                thresholds=[TopN(10), FixedCutoff(0.5)],
+                thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
                 preprocessors=[Identity(), StandardScaler()],
                 detectors=[],
                 n_jobs=4,
@@ -102,7 +102,7 @@ class TestWorkflowInitialization:
                 UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True,
@@ -117,7 +117,7 @@ class TestWorkflowInitialization:
                 UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[],
             detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
             n_jobs=4,
@@ -161,7 +161,7 @@ class TestWorkflowInitialization:
                     UCRLoader(path=str(tmp_path_factory.mktemp("some-path-2"))),
                 ],
                 metrics=[Precision(), Recall(), AreaUnderROC()],
-                thresholds=[TopN(10), FixedCutoff(0.5)],
+                thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
                 preprocessors=[Identity(), StandardScaler()],
                 detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
                 n_jobs=0,
@@ -177,7 +177,7 @@ class TestWorkflowSuccess:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
@@ -215,7 +215,7 @@ class TestWorkflowSuccess:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor("fft"), IsolationForest("fft")],
             n_jobs=1,
@@ -257,7 +257,7 @@ class TestWorkflowSuccess:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
@@ -293,7 +293,7 @@ class TestWorkflowSuccess:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
@@ -334,7 +334,7 @@ class TestWorkflowSuccess:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True,
@@ -415,7 +415,7 @@ class TestWorkflowFail:
                 DummyDataLoaderError(),
             ],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
@@ -447,7 +447,7 @@ class TestWorkflowFail:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[PreprocessorError(), StandardScaler()],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
@@ -478,7 +478,7 @@ class TestWorkflowFail:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
@@ -506,7 +506,7 @@ class TestWorkflowFail:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[PreprocessorError(), StandardScaler()],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
@@ -534,7 +534,7 @@ class TestWorkflowFail:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             preprocessors=[Identity(), StandardScaler()],
             detectors=[SupervisedDetector(), IsolationForest(15)],
             n_jobs=1,
@@ -750,7 +750,7 @@ class TestSaveAnomalyScores:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True,
@@ -790,7 +790,7 @@ class TestSaveAnomalyScores:
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
-            thresholds=[TopN(10), FixedCutoff(0.5)],
+            thresholds=[TopNThreshold(10), FixedCutoffThreshold(0.5)],
             detectors=[DetectorError(), IsolationForest(15)],
             n_jobs=1,
             trace_memory=True,

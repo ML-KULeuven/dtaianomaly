@@ -2,8 +2,11 @@ import warnings
 
 import numpy as np
 
-from dtaianomaly.evaluation._common import make_intervals
-from dtaianomaly.evaluation.metrics import ProbaMetric
+from dtaianomaly.evaluation._ProbaMetric import ProbaMetric
+from dtaianomaly.type_validation import IntegerAttribute, NoneAttribute
+from dtaianomaly.utils import make_intervals
+
+__all__ = ["UCRScore"]
 
 
 class UCRScore(ProbaMetric):
@@ -28,16 +31,21 @@ class UCRScore(ProbaMetric):
     tolerance: int, default=None
         The minimum tolerance around the ground truth anomalous event to avoid
         bias towards short anomalies. If None, no tolerance is included.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import UCRScore
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> UCRScore().compute(y_true, [0.3, 0.2, 0.5, 0.8, 1.0, 0.9, 0.3, 0.0])
+    1
+    >>> UCRScore().compute(y_true, [0.3, 0.2, 0.5, 0.8, 0.9, 0.9, 0.3, 1.0])
+    0
     """
 
     tolerance: int | None
+    attribute_validation = {"tolerance": IntegerAttribute(minimum=1) | NoneAttribute()}
 
     def __init__(self, tolerance: int = None):
-        if tolerance is not None:
-            if not isinstance(tolerance, int) or isinstance(tolerance, bool):
-                raise TypeError("`tolerance` should be an integer")
-            if tolerance < 1:
-                raise ValueError("`tolerance`  should be at least 1!")
         self.tolerance = tolerance
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:

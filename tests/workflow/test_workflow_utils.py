@@ -1,5 +1,5 @@
 from dtaianomaly.evaluation import AreaUnderROC, Precision, ThresholdMetric
-from dtaianomaly.thresholding import ContaminationRate, FixedCutoff
+from dtaianomaly.thresholding import ContaminationRateThreshold, FixedCutoffThreshold
 from dtaianomaly.workflow.utils import convert_to_list, convert_to_proba_metrics
 
 
@@ -8,7 +8,7 @@ class TestConvertToProbaMetrics:
     def test(self):
         proba_metrics = convert_to_proba_metrics(
             metrics=[AreaUnderROC(), Precision()],
-            thresholds=[ContaminationRate(0.05)],
+            thresholds=[ContaminationRateThreshold(0.05)],
         )
         assert len(proba_metrics) == 2
         assert (
@@ -22,7 +22,7 @@ class TestConvertToProbaMetrics:
     def test_multiple_thresholds(self):
         proba_metrics = convert_to_proba_metrics(
             metrics=[AreaUnderROC(), Precision()],
-            thresholds=[ContaminationRate(0.05), FixedCutoff(0.5)],
+            thresholds=[ContaminationRateThreshold(0.05), FixedCutoffThreshold(0.5)],
         )
         assert len(proba_metrics) == 3
         assert (
@@ -36,7 +36,7 @@ class TestConvertToProbaMetrics:
     def test_no_binary_metric(self):
         proba_metrics = convert_to_proba_metrics(
             metrics=[AreaUnderROC()],
-            thresholds=[ContaminationRate(0.05), FixedCutoff(0.5)],
+            thresholds=[ContaminationRateThreshold(0.05), FixedCutoffThreshold(0.5)],
         )
         assert len(proba_metrics) == 1
         assert (

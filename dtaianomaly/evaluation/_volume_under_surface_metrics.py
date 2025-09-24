@@ -3,7 +3,15 @@ from abc import ABC
 import numba as nb
 import numpy as np
 
-from dtaianomaly.evaluation.metrics import ProbaMetric
+from dtaianomaly.evaluation._ProbaMetric import ProbaMetric
+from dtaianomaly.type_validation import BoolAttribute, IntegerAttribute, NoneAttribute
+
+__all__ = ["RangeAreaUnderROC", "RangeAreaUnderPR", "VolumeUnderROC", "VolumeUnderPR"]
+
+_DEFAULT_BUFFER_SIZE: int | None = None
+_DEFAULT_MAX_BUFFER_SIZE: int = 500
+_DEFAULT_COMPATIBILITY_MODE: bool = False
+_DEFAULT_MAX_SAMPLES: int = 250
 
 
 class RangeAucMetric(ProbaMetric, ABC):
@@ -12,31 +20,19 @@ class RangeAucMetric(ProbaMetric, ABC):
     the confusion matrix.
     """
 
-    buffer_size: int | None
     compatibility_mode: bool
     max_samples: int
 
+    attribute_validation = {
+        "compatibility_mode": BoolAttribute(),
+        "max_samples": IntegerAttribute(minimum=1),
+    }
+
     def __init__(
         self,
-        buffer_size: int = None,
         compatibility_mode: bool = False,
         max_samples: int = 250,
     ):
-        if buffer_size is not None:
-            if not isinstance(buffer_size, int) or isinstance(buffer_size, bool):
-                raise TypeError("`buffer_size` should be an integer")
-            if buffer_size < 1:
-                raise ValueError("`buffer_size`  should be at least 1!")
-
-        if not isinstance(compatibility_mode, bool):
-            raise TypeError("'compatibility_mode' should be a boolean")
-
-        if not isinstance(max_samples, int) or isinstance(max_samples, bool):
-            raise TypeError("`max_samples` should be an integer")
-        if max_samples < 1:
-            raise ValueError("`max_samples`  should be at least 1!")
-
-        self.buffer_size = buffer_size
         self.compatibility_mode = compatibility_mode
         self.max_samples = max_samples
 
@@ -53,15 +49,17 @@ class RangeAucMetric(ProbaMetric, ABC):
         ends = index[labels == -1]
         return starts, ends
 
-    def _extend_anomaly_labels(self, y_true: np.ndarray) -> (np.ndarray, np.ndarray):
+    def _extend_anomaly_labels(
+        self, y_true: np.ndarray, buffer_size: int | None
+    ) -> (np.ndarray, np.ndarray):
         """Extends the anomaly labels with slopes on both ends. Makes the labels continuous instead of binary."""
         starts, ends = self._anomaly_bounds(y_true)
 
-        if self.buffer_size is None:
+        if buffer_size is None:
             # per default: set buffer size as median anomaly length:
-            self.buffer_size = int(np.median(ends - starts))
+            buffer_size = int(np.median(ends - starts))
 
-        if self.buffer_size <= 1:
+        if buffer_size <= 1:
             if self.compatibility_mode:
                 anomalies = np.array(list(zip(starts, ends - 1)))
             else:
@@ -69,15 +67,15 @@ class RangeAucMetric(ProbaMetric, ABC):
             return y_true.astype(float), anomalies
 
         y_true_cont = y_true.astype(float)
-        slope_length = self.buffer_size // 2
+        slope_length = buffer_size // 2
         length = y_true_cont.shape[0]
         if self.compatibility_mode:
             for i, (s, e) in enumerate(zip(starts, ends)):
                 e -= 1
                 x1 = np.arange(e, min(e + slope_length, length))
-                y_true_cont[x1] += np.sqrt(1 - (x1 - e) / self.buffer_size)
+                y_true_cont[x1] += np.sqrt(1 - (x1 - e) / buffer_size)
                 x2 = np.arange(max(s - slope_length, 0), s)
-                y_true_cont[x2] += np.sqrt(1 - (s - x2) / self.buffer_size)
+                y_true_cont[x2] += np.sqrt(1 - (s - x2) / buffer_size)
             y_true_cont = np.clip(y_true_cont, 0, 1)
             starts, ends = self._anomaly_bounds(y_true_cont)
             anomalies = np.array(list(zip(starts, ends - 1)))
@@ -109,9 +107,9 @@ class RangeAucMetric(ProbaMetric, ABC):
         return thresholds
 
     def _range_pr_roc_auc_support(
-        self, y_true: np.ndarray, y_score: np.ndarray
+        self, y_true: np.ndarray, y_score: np.ndarray, buffer_size: int | None
     ) -> (float, float):
-        y_true_cont, anomalies = self._extend_anomaly_labels(y_true)
+        y_true_cont, anomalies = self._extend_anomaly_labels(y_true, buffer_size)
         thresholds = self._uniform_threshold_sampling(y_score)
         p = np.average([np.sum(y_true), np.sum(y_true_cont)])
 
@@ -168,7 +166,7 @@ def _range_pr_roc_auc_support_numbafied(
 
 class RangeAreaUnderPR(RangeAucMetric):
     """
-    Computes the area under the range-based precision-recall-curve :cite:`paparrizos2022volume`.
+    Computes the area under the range-based PR-curve :cite:`paparrizos2022volume`.
 
     A slope of length ``buffer_size // 2`` is added at the beginning and end of each anomalous
     event. Next, the precision and recall is computed, taking into account the slopes in ground
@@ -191,18 +189,64 @@ class RangeAreaUnderPR(RangeAucMetric):
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeAreaUnderPR
+    >>> metric = RangeAreaUnderPR()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.838...
+
+    Warnings
+    --------
+    Implementation of the Volume Under the Surface (VUS) metrics proposed by :cite:`paparrizos2022volume`.
+    This implementation is adopted from :cite:`wenig2022timeeval`, who slightly modified the original
+    implementations:
+
+    - For the recall (FPR) existence reward, anomalies are counted as separate events, even
+      if the added slopes overlap;
+    - Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each
+      point in the ground truth is maximized;
+    - The original slopes are asymmetric: the slopes at the end of anomalies are a single
+      point shorter than the ones at the beginning of anomalies. Symmetric slopes are used,
+      with the same size for the beginning and end of anomalies;
+    - A linear approximation of the slopes is used instead of the convex slope shape presented
+      in the paper.
+
+    By default, the adjusted versions of each metric are used. To use the original implementations,
+    you can set ``compatibility_mode=True`` when initializing the metrics.
+
+    In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
+    precisions and false positive rates for every threshold), which leads to a more than 25x
+    speedup on the demonstration time series.
     """
+
+    buffer_size: int | None
+    attribute_validation = {
+        "buffer_size": IntegerAttribute(minimum=1) | NoneAttribute()
+    }
 
     def __init__(
         self,
-        buffer_size: int = None,
-        compatibility_mode: bool = False,
-        max_samples: int = 250,
+        buffer_size: int = _DEFAULT_BUFFER_SIZE,
+        compatibility_mode: bool = _DEFAULT_COMPATIBILITY_MODE,
+        max_samples: int = _DEFAULT_MAX_SAMPLES,
     ):
-        super().__init__(buffer_size, compatibility_mode, max_samples)
+        super().__init__(compatibility_mode, max_samples)
+        self.buffer_size = buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        range_pr_auc, _ = self._range_pr_roc_auc_support(y_true, y_pred)
+        range_pr_auc, _ = self._range_pr_roc_auc_support(
+            y_true, y_pred, self.buffer_size
+        )
         return range_pr_auc
 
 
@@ -231,18 +275,64 @@ class RangeAreaUnderROC(RangeAucMetric):
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
+
+    See Also
+    --------
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeAreaUnderROC
+    >>> metric = RangeAreaUnderROC()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.877...
+
+    Warnings
+    --------
+    Implementation of the Volume Under the Surface (VUS) metrics proposed by :cite:`paparrizos2022volume`.
+    This implementation is adopted from :cite:`wenig2022timeeval`, who slightly modified the original
+    implementations:
+
+    - For the recall (FPR) existence reward, anomalies are counted as separate events, even
+      if the added slopes overlap;
+    - Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each
+      point in the ground truth is maximized;
+    - The original slopes are asymmetric: the slopes at the end of anomalies are a single
+      point shorter than the ones at the beginning of anomalies. Symmetric slopes are used,
+      with the same size for the beginning and end of anomalies;
+    - A linear approximation of the slopes is used instead of the convex slope shape presented
+      in the paper.
+
+    By default, the adjusted versions of each metric are used. To use the original implementations,
+    you can set ``compatibility_mode=True`` when initializing the metrics.
+
+    In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
+    precisions and false positive rates for every threshold), which leads to a more than 25x
+    speedup on the demonstration time series.
     """
+
+    buffer_size: int | None
+    attribute_validation = {
+        "buffer_size": IntegerAttribute(minimum=1) | NoneAttribute()
+    }
 
     def __init__(
         self,
-        buffer_size: int = None,
-        compatibility_mode: bool = False,
-        max_samples: int = 250,
+        buffer_size: int = _DEFAULT_BUFFER_SIZE,
+        compatibility_mode: bool = _DEFAULT_COMPATIBILITY_MODE,
+        max_samples: int = _DEFAULT_MAX_SAMPLES,
     ):
-        super().__init__(buffer_size, compatibility_mode, max_samples)
+        super().__init__(compatibility_mode, max_samples)
+        self.buffer_size = buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        _, range_auc_roc = self._range_pr_roc_auc_support(y_true, y_pred)
+        _, range_auc_roc = self._range_pr_roc_auc_support(
+            y_true, y_pred, self.buffer_size
+        )
         return range_auc_roc
 
 
@@ -268,33 +358,65 @@ class VolumeUnderPR(RangeAucMetric):
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import VolumeUnderPR
+    >>> metric = VolumeUnderPR()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.994...
+
+    Warnings
+    --------
+    Implementation of the Volume Under the Surface (VUS) metrics proposed by :cite:`paparrizos2022volume`.
+    This implementation is adopted from :cite:`wenig2022timeeval`, who slightly modified the original
+    implementations:
+
+    - For the recall (FPR) existence reward, anomalies are counted as separate events, even
+      if the added slopes overlap;
+    - Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each
+      point in the ground truth is maximized;
+    - The original slopes are asymmetric: the slopes at the end of anomalies are a single
+      point shorter than the ones at the beginning of anomalies. Symmetric slopes are used,
+      with the same size for the beginning and end of anomalies;
+    - A linear approximation of the slopes is used instead of the convex slope shape presented
+      in the paper.
+
+    By default, the adjusted versions of each metric are used. To use the original implementations,
+    you can set ``compatibility_mode=True`` when initializing the metrics.
+
+    In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
+    precisions and false positive rates for every threshold), which leads to a more than 25x
+    speedup on the demonstration time series.
     """
 
     max_buffer_size: int
+    attribute_validation = {"max_buffer_size": IntegerAttribute(minimum=1)}
 
     def __init__(
         self,
-        max_buffer_size: int = 500,
-        compatibility_mode: bool = False,
-        max_samples: int = 250,
+        max_buffer_size: int = _DEFAULT_MAX_BUFFER_SIZE,
+        compatibility_mode: bool = _DEFAULT_COMPATIBILITY_MODE,
+        max_samples: int = _DEFAULT_MAX_SAMPLES,
     ):
-        super().__init__(None, compatibility_mode, max_samples)
-
-        if not isinstance(max_buffer_size, int) or isinstance(max_buffer_size, bool):
-            raise TypeError("`max_buffer_size` should be an integer")
-        if max_buffer_size < 1:
-            raise ValueError("`max_buffer_size`  should be at least 1!")
-
+        super().__init__(compatibility_mode, max_samples)
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         prs = np.zeros(self.max_buffer_size + 1)
-        for bs in np.arange(0, self.max_buffer_size + 1):
-            self.buffer_size = bs
-            pr_auc, _ = self._range_pr_roc_auc_support(y_true, y_pred)
-            prs[bs] = pr_auc
-        range_pr_volume: float = np.sum(prs) / (self.max_buffer_size + 1)
-        return range_pr_volume
+        for buffer_size in np.arange(0, self.max_buffer_size + 1):
+            pr_auc, _ = self._range_pr_roc_auc_support(y_true, y_pred, buffer_size)
+            prs[buffer_size] = pr_auc
+        range_pr_volume = np.sum(prs) / (self.max_buffer_size + 1)
+        return float(range_pr_volume)
 
 
 class VolumeUnderROC(RangeAucMetric):
@@ -319,30 +441,62 @@ class VolumeUnderROC(RangeAucMetric):
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import VolumeUnderROC
+    >>> metric = VolumeUnderROC()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.992...
+
+    Warnings
+    --------
+    Implementation of the Volume Under the Surface (VUS) metrics proposed by :cite:`paparrizos2022volume`.
+    This implementation is adopted from :cite:`wenig2022timeeval`, who slightly modified the original
+    implementations:
+
+    - For the recall (FPR) existence reward, anomalies are counted as separate events, even
+      if the added slopes overlap;
+    - Overlapping slopes don't sum up in their anomaly weight, the anomaly weight for each
+      point in the ground truth is maximized;
+    - The original slopes are asymmetric: the slopes at the end of anomalies are a single
+      point shorter than the ones at the beginning of anomalies. Symmetric slopes are used,
+      with the same size for the beginning and end of anomalies;
+    - A linear approximation of the slopes is used instead of the convex slope shape presented
+      in the paper.
+
+    By default, the adjusted versions of each metric are used. To use the original implementations,
+    you can set ``compatibility_mode=True`` when initializing the metrics.
+
+    In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
+    precisions and false positive rates for every threshold), which leads to a more than 25x
+    speedup on the demonstration time series.
     """
 
     max_buffer_size: int
+    attribute_validation = {"max_buffer_size": IntegerAttribute(minimum=1)}
 
     def __init__(
         self,
-        max_buffer_size: int = 500,
-        compatibility_mode: bool = False,
-        max_samples: int = 250,
+        max_buffer_size: int = _DEFAULT_MAX_BUFFER_SIZE,
+        compatibility_mode: bool = _DEFAULT_COMPATIBILITY_MODE,
+        max_samples: int = _DEFAULT_MAX_SAMPLES,
     ):
-        super().__init__(None, compatibility_mode, max_samples)
-
-        if not isinstance(max_buffer_size, int) or isinstance(max_buffer_size, bool):
-            raise TypeError("`max_buffer_size` should be an integer")
-        if max_buffer_size < 1:
-            raise ValueError("`max_buffer_size`  should be at least 1!")
-
+        super().__init__(compatibility_mode, max_samples)
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         rocs = np.zeros(self.max_buffer_size + 1)
-        for bs in np.arange(0, self.max_buffer_size + 1):
-            self.buffer_size = bs
-            _, roc_auc = self._range_pr_roc_auc_support(y_true, y_pred)
-            rocs[bs] = roc_auc
-        range_pr_volume: float = np.sum(rocs) / (self.max_buffer_size + 1)
-        return range_pr_volume
+        for buffer_size in np.arange(0, self.max_buffer_size + 1):
+            _, roc_auc = self._range_pr_roc_auc_support(y_true, y_pred, buffer_size)
+            rocs[buffer_size] = roc_auc
+        range_pr_volume = np.sum(rocs) / (self.max_buffer_size + 1)
+        return float(range_pr_volume)

@@ -1,22 +1,28 @@
 import numpy as np
 
-from dtaianomaly.evaluation.metrics import BinaryMetric, ProbaMetric
+from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
+from dtaianomaly.evaluation._ProbaMetric import ProbaMetric
+from dtaianomaly.type_validation import IntegerAttribute, NoneAttribute, ObjectAttribute
+
+__all__ = ["BestThresholdMetric"]
 
 
 class BestThresholdMetric(ProbaMetric):
     """
-    Compute the maximum score of a binary metric over all thresholds.
-    This method will iterate over the possible threshold for given
-    predicted anomaly scores, compute the binary metric for each
+    Compute the maximum score across all thresholds.
+
+    Compute the maximum score of a :py:class:`~dtaianomaly.evaluation.BinaryMetric` over all thresholds.
+    This method will iterate over the possible thresholds for given
+    predicted anomaly scores, compute the :py:class:`~dtaianomaly.evaluation.BinaryMetric` for each
     threshold, and then return the score for the highest threshold.
 
     Parameters
     ----------
     metric: BinaryMetric
-        Instance of the desired `Metric` class
-    max_nb_thresholds: int, default=-1
+        Instance of the desired :py:class:`~dtaianomaly.evaluation.BinaryMetric` class
+    max_nb_thresholds: int, default=None
         The maximum number of thresholds to use for computing the best threshold.
-        If ``max_nb_thresholds = -1``, all thresholds will be used. Otherwise, the
+        If ``max_nb_thresholds = None``, all thresholds will be used. Otherwise, the
         value indicates the subsample of all possible thresholds that should be used.
         This subset is created by first sorting the possible unique thresholds, and
         then selecting the threshold at regular intervals (i.e., the 3rd, 6th, 9th, ...).
@@ -31,25 +37,29 @@ class BestThresholdMetric(ProbaMetric):
         The thresholds used for evaluating the performance.
     scores_: array-like of floats
         The evaluation scores corresponding to each threshold in ``thresholds_``.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import BestThresholdMetric, Precision
+    >>> metric = BestThresholdMetric(Precision())
+    >>> y_true = [   0,   0,   0,   1,   1,   0,   0,   0]
+    >>> y_pred = [0.95, 0.5, 0.4, 0.8, 1.0, 0.7, 0.2, 0.1]
+    >>> metric.compute(y_true, y_pred)
+    1.0
     """
 
     metric: BinaryMetric
-    max_nb_thresholds: int
+    max_nb_thresholds: int | None
     threshold_: float
     thresholds_: np.array
     scores_: np.array
 
-    def __init__(self, metric: BinaryMetric, max_nb_thresholds: int = -1) -> None:
-        if not isinstance(metric, BinaryMetric):
-            raise TypeError(f"metric expects 'BinaryMetric', got {type(metric)}")
-        if not isinstance(max_nb_thresholds, int) or isinstance(
-            max_nb_thresholds, bool
-        ):
-            raise TypeError("`max_nb_thresholds` should be an integer")
-        if max_nb_thresholds <= 0 and max_nb_thresholds != -1:
-            raise ValueError(
-                "`max_nb_thresholds` must be strictly positive or equal to -1!"
-            )
+    attribute_validation = {
+        "metric": ObjectAttribute(BinaryMetric),
+        "max_nb_thresholds": IntegerAttribute(minimum=1) | NoneAttribute(),
+    }
+
+    def __init__(self, metric: BinaryMetric, max_nb_thresholds: int = None) -> None:
         self.metric = metric
         self.max_nb_thresholds = max_nb_thresholds
 
@@ -92,7 +102,10 @@ class BestThresholdMetric(ProbaMetric):
             thresholds = np.append(np.insert(thresholds, 0, 0), 1)
 
         # Select a subset of the thresholds, if requested and useful
-        if 0 < self.max_nb_thresholds < thresholds.shape[0]:
+        if (
+            self.max_nb_thresholds is not None
+            and 0 < self.max_nb_thresholds < thresholds.shape[0]
+        ):
             selected_thresholds = np.linspace(
                 0, thresholds.shape[0], self.max_nb_thresholds + 2, dtype=int
             )[1:-1]
@@ -113,4 +126,4 @@ class BestThresholdMetric(ProbaMetric):
         self.threshold_ = self.thresholds_[i]
 
         # Return the best score
-        return best_score
+        return float(best_score)

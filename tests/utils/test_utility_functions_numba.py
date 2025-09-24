@@ -1,7 +1,25 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation._common import make_intervals
+from dtaianomaly.utils import make_intervals, np_any_axis0, np_any_axis1, np_diff
+
+_SEEDS = list(range(5))
+
+
+@pytest.mark.parametrize("seed", _SEEDS)
+class TestGenericFunctions:
+
+    def test_np_any_axis1(self, seed):
+        array = np.random.default_rng(seed).choice([True, False], size=(100, 3))
+        assert np.array_equal(np.any(array, axis=1), np_any_axis1(array))
+
+    def test_np_any_axis0(self, seed):
+        array = np.random.default_rng(seed).choice([True, False], size=(3, 100))
+        assert np.array_equal(np.any(array, axis=0), np_any_axis0(array))
+
+    def test_np_diff(self, seed):
+        array = np.random.default_rng(seed).uniform(low=-1.0, high=1.0, size=100)
+        assert np.array_equal(np.diff(array), np_diff(array))
 
 
 class TestMakeIntervals:

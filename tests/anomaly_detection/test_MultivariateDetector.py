@@ -123,10 +123,6 @@ class TestMultivariateDetector:
             == "MultivariateDetector(detector=DummyDetector())"
         )
         assert (
-            str(MultivariateDetector(DummyDetector(Supervision.SUPERVISED)))
-            == "MultivariateDetector(detector=DummyDetector(supervision=Supervision.SUPERVISED))"
-        )
-        assert (
             str(MultivariateDetector(DummyDetector(), "min"))
             == "MultivariateDetector(detector=DummyDetector(),aggregation='min')"
         )

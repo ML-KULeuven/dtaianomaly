@@ -1,13 +1,11 @@
 import numba as nb
 import numpy as np
 
-from dtaianomaly.evaluation._common import (
-    FBetaBase,
-    make_intervals,
-    np_any_axis0,
-    np_any_axis1,
-)
-from dtaianomaly.evaluation.metrics import BinaryMetric
+from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
+from dtaianomaly.evaluation._FBetaMixin import FBetaMixin
+from dtaianomaly.utils import make_intervals, np_any_axis0, np_any_axis1
+
+__all__ = ["EventWiseFBeta", "EventWiseRecall", "EventWisePrecision"]
 
 
 @nb.njit(fastmath=True, cache=True, parallel=True)
@@ -90,6 +88,20 @@ class EventWisePrecision(BinaryMetric):
     .. math::
 
        \\text{Event-Wise Precision} = \\frac{TP_e}{TP_e + FP_e} \\times (1 - \\frac{FP}{N})
+
+    See Also
+    --------
+    EventWiseRecall: Compute the event-wise Recall score.
+    EventWiseFBeta: Compute the event-wise :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import EventWisePrecision
+    >>> metric = EventWisePrecision()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.333...
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -117,6 +129,20 @@ class EventWiseRecall(BinaryMetric):
     .. math::
 
        \\text{Event-Wise Recall} = \\frac{TP_e}{TP_e + FN_e}
+
+    See Also
+    --------
+    EventWisePrecision: Compute the event-wise Precision score.
+    EventWiseFBeta: Compute the event-wise :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import EventWiseRecall
+    >>> metric = EventWiseRecall()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    1.0
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -126,7 +152,7 @@ class EventWiseRecall(BinaryMetric):
         return event_wise_recall
 
 
-class EventWiseFBeta(BinaryMetric, FBetaBase):
+class EventWiseFBeta(BinaryMetric, FBetaMixin):
     """
     Computes the Event-Wise :math:`F_\\beta` score :cite:`el2024multivariate`.
 
@@ -147,14 +173,20 @@ class EventWiseFBeta(BinaryMetric, FBetaBase):
     beta: int, float, default=1
         Desired beta parameter.
 
-    See also
+    See Also
     --------
-    EventWisePrecision: Compute the Event-Wise Precision score.
-    EventWiseRecall: Compute the Event-Wise Recall score.
-    """
+    EventWisePrecision: Compute the event-wise Precision score.
+    EventWiseRecall: Compute the event-wise Recall score.
 
-    def __init__(self, beta: (float, int) = 1) -> None:
-        super().__init__(beta)
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import EventWiseFBeta
+    >>> metric = EventWiseFBeta()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    0.5
+    """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         event_wise_precision, event_wise_recall = _compute_event_wise_metrics(

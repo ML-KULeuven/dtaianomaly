@@ -1,14 +1,18 @@
 import abc
-from collections.abc import Callable
+from typing import Literal
 
 import numpy as np
 
-from dtaianomaly.evaluation._common import FBetaBase, make_intervals
-from dtaianomaly.evaluation.metrics import BinaryMetric
+from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
+from dtaianomaly.evaluation._FBetaMixin import FBetaMixin
+from dtaianomaly.type_validation import FloatAttribute, LiteralAttribute
+from dtaianomaly.utils import make_intervals
+
+__all__ = ["RangeBasedPrecision", "RangeBasedFBeta", "RangeBasedRecall"]
 
 _IntervalType = tuple[int, int]
-_DeltaType = str | Callable[[int, int], float]
-_GammaType = str | Callable[[int], float]
+_DeltaType = Literal["flat", "front", "back", "middle"]
+_GammaType = Literal["one", "reciprocal"]
 
 
 def _interval_overlap(a: _IntervalType, b: _IntervalType) -> _IntervalType | None:
@@ -47,7 +51,7 @@ def _delta(delta: _DeltaType, i: int, anomaly_length: int) -> float:
     elif delta == "middle":
         return i if i <= anomaly_length / 2 else anomaly_length - i + 1
     else:  # Custom method
-        return delta(i, anomaly_length)
+        raise ValueError(f"Invalid value for delta given: '{delta}")
 
 
 def _gamma(gamma: _GammaType, nb_overlapping_intervals: int) -> float:
@@ -56,7 +60,7 @@ def _gamma(gamma: _GammaType, nb_overlapping_intervals: int) -> float:
     elif gamma == "reciprocal":
         return 1 / nb_overlapping_intervals
     else:  # Custom method
-        return gamma(nb_overlapping_intervals)
+        raise ValueError(f"Invalid value for gamma given: '{gamma}")
 
 
 def _existence_reward(
@@ -123,38 +127,12 @@ def _recall_interval(
 class RangeBasedMetricBasePrecision(BinaryMetric, abc.ABC):
     delta: _DeltaType
     gamma: _GammaType
+    attribute_validation = {
+        "delta": LiteralAttribute("flat", "front", "back", "middle"),
+        "gamma": LiteralAttribute("one", "reciprocal"),
+    }
 
     def __init__(self, delta: _DeltaType = "flat", gamma: _GammaType = "reciprocal"):
-        if isinstance(delta, str):
-            if delta not in ["flat", "front", "back", "middle"]:
-                raise ValueError(
-                    f"Only predefined `delta` values are ['flat', 'front', 'back', 'middle'], received: '{delta}'"
-                )
-        elif callable(delta):
-            try:
-                delta(0, 10)
-            except TypeError:
-                raise TypeError(
-                    "If 'delta' is a custom method, it should be of the form '(int, int) -> float'"
-                )
-        else:
-            raise TypeError(f"`delta` should be a string or a callable")
-
-        if isinstance(gamma, str):
-            if gamma not in ["one", "reciprocal"]:
-                raise ValueError(
-                    f"Only predefined `gamma` values are ['one', 'reciprocal'], received: '{gamma}'"
-                )
-        elif callable(gamma):
-            try:
-                gamma(2)
-            except TypeError:
-                raise TypeError(
-                    "If 'gamma' is a custom method, it should be of the form 'int -> float'"
-                )
-        else:
-            raise TypeError(f"`gamma` should be a string or a callable")
-
         self.delta = delta
         self.gamma = gamma
 
@@ -177,6 +155,10 @@ class RangeBasedMetricBasePrecision(BinaryMetric, abc.ABC):
 class RangeBasedMetricBasePrecisionRecall(RangeBasedMetricBasePrecision, abc.ABC):
     alpha: float
 
+    attribute_validation = {
+        "alpha": FloatAttribute(0.0, 1.0),
+    }
+
     def __init__(
         self,
         alpha: float = 0.5,
@@ -184,12 +166,6 @@ class RangeBasedMetricBasePrecisionRecall(RangeBasedMetricBasePrecision, abc.ABC
         gamma: _GammaType = "reciprocal",
     ):
         super().__init__(delta, gamma)
-
-        if not isinstance(alpha, (float, int)) or isinstance(alpha, bool):
-            raise TypeError("`alpha` should be numeric")
-        if not (0.0 <= alpha <= 1.0):
-            raise ValueError("`alpha` should be at least 0 and at most 1")
-
         self.alpha = alpha
 
     def _recall(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -221,7 +197,7 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
 
     Parameters
     ----------
-    delta: str or callable, default='flat'
+    delta: str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -229,14 +205,32 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
         - ``'front'``: Predictions that are near the front of the ground truth anomaly (i.e. early detection) have a higher weight.
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
-        - Callable: A custom function to include positional bias, which takes as input two integers (a position within the anomalous range, and the total length of that range) and returns a float (the weight of that position).
 
-    gamma: str or callable, default='reciprocal'
+    gamma: str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
-        - Callable: A custom function to penalize fragmented detection, which takes as input an integer (the number of detected ranges) and returns a float (the penalization factor).
+
+    See Also
+    --------
+    RangeBasedPrecision: Compute the range-based precision score.
+    RangeBasedRecall: Compute the range-based recall score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeBasedPrecision
+    >>> metric = RangeBasedPrecision()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.333...
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -263,7 +257,7 @@ class RangeBasedRecall(RangeBasedMetricBasePrecisionRecall):
         compared to detecting a large portion of the ground truth events. Should be at least 0
         and at most 1.
 
-    delta: str or callable, default='flat'
+    delta: str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -271,21 +265,39 @@ class RangeBasedRecall(RangeBasedMetricBasePrecisionRecall):
         - ``'front'``: Predictions that are near the front of the ground truth anomaly (i.e. early detection) have a higher weight.
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
-        - Callable: A custom function to include positional bias, which takes as input two integers (a position within the anomalous range, and the total length of that range) and returns a float (the weight of that position).
 
-    gamma: str or callable, default='reciprocal'
+    gamma: str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
-        - Callable: A custom function to penalize fragmented detection, which takes as input an integer (the number of detected ranges) and returns a float (the penalization factor).
+
+    See Also
+    --------
+    RangeBasedPrecision: Compute the range-based precision score.
+    RangeBasedFBeta: Compute the range-based :math:`F_\\beta` score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeBasedRecall
+    >>> metric = RangeBasedRecall()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    1.0
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return self._recall(y_true, y_pred)
 
 
-class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaBase):
+class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaMixin):
     """
     Computes the range-based :math:`F_\\beta` score :cite:`tatbul2018precision`.
 
@@ -304,7 +316,7 @@ class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaBase):
         compared to detecting a large portion of the ground truth events. Should be at least 0
         and at most 1.
 
-    delta: str or callable, default='flat'
+    delta: str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -312,30 +324,43 @@ class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaBase):
         - ``'front'``: Predictions that are near the front of the ground truth anomaly (i.e. early detection) have a higher weight.
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
-        - Callable: A custom function to include positional bias, which takes as input two integers (a position within the anomalous range, and the total length of that range) and returns a float (the weight of that position).
 
-    gamma: str or callable, default='reciprocal'
+    gamma: str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
-        - Callable: A custom function to penalize fragmented detection, which takes as input an integer (the number of detected ranges) and returns a float (the penalization factor).
 
-    See also
+    See Also
     --------
     RangeBasedPrecision: Compute the range-based precision score.
     RangeBasedRecall: Compute the range-based recall score.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeBasedFBeta
+    >>> metric = RangeBasedFBeta()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)
+    0.5
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def __init__(
         self,
-        beta: (float, int) = 1.0,
+        beta: int | float = 1.0,
         alpha: float = 0.5,
         delta: _DeltaType = "flat",
         gamma: _GammaType = "reciprocal",
     ):
         RangeBasedMetricBasePrecisionRecall.__init__(self, alpha, delta, gamma)
-        FBetaBase.__init__(self, beta)
+        FBetaMixin.__init__(self, beta)
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         return self._f_score(

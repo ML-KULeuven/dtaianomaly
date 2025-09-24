@@ -20,10 +20,6 @@ class TestNeuralBaseDetector:
             == "MultilayerPerceptron(window_size=100,learning_rate=0.01)"
         )
         assert (
-            str(MultilayerPerceptron(window_size=100, loss_function=torch.nn.L1Loss()))
-            == "MultilayerPerceptron(window_size=100,loss_function=L1Loss())"
-        )
-        assert (
             str(
                 MultilayerPerceptron(
                     window_size=100, data_loader_kwargs={"shuffle": True}

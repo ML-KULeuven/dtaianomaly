@@ -109,9 +109,9 @@ preprocessors = [
     preprocessing.RobustScaler,
 ]
 thresholders = [
-    thresholding.FixedCutoff,
-    thresholding.ContaminationRate,
-    thresholding.TopN,
+    thresholding.FixedCutoffThreshold,
+    thresholding.ContaminationRateThreshold,
+    thresholding.TopNThreshold,
 ]
 custom_demonstrator_visualizers = [
     custom_visualizers.CentroidVisualizer,
