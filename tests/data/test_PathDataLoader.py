@@ -16,7 +16,7 @@ class DummyLoader(PathDataLoader):
 class TestPathDataLoader:
 
     def test_invalid_path(self, tmp_path):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             DummyLoader(tmp_path / "some" / "invalid" / "path")
 
     def test_valid_file(self, tmp_path):
@@ -28,19 +28,16 @@ class TestPathDataLoader:
         loader = DummyLoader(tmp_path)
         assert loader.path == str(tmp_path)
 
-    def test_str(self, tmp_path):
-        assert str(DummyLoader(tmp_path)) == f"DummyLoader(path='{tmp_path}')"
-
 
 class TestFromDirectory:
 
     def test_no_directory(self):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             from_directory("some-invalid-path", DummyLoader)
 
     def test_file_given(self, tmp_path):
         open(tmp_path / "a-file", "a").close()  # Make the file
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             from_directory(tmp_path / "a-file", DummyLoader)
 
     def test_valid(self, tmp_path):

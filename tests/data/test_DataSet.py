@@ -3,9 +3,9 @@ from typing import Optional
 import numpy as np
 import pytest
 
-from dtaianomaly import utils
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
 from dtaianomaly.data import DataSet
+from dtaianomaly.utils import get_dimension
 
 
 @pytest.fixture
@@ -170,9 +170,7 @@ class TestFeatureNames:
         assert data_set.feature_names is None
 
     def test_no_feature_name(self, valid_X_test, valid_y_test):
-        feature_names = [
-            f"Feature {i}" for i in range(utils.get_dimension(valid_X_test))
-        ]
+        feature_names = [f"Feature {i}" for i in range(get_dimension(valid_X_test))]
         data_set = DataSet(
             X_test=valid_X_test, y_test=valid_y_test, feature_names=feature_names
         )
@@ -183,7 +181,7 @@ class TestFeatureNames:
             DataSet(
                 X_test=valid_X_test,
                 y_test=valid_y_test,
-                feature_names=[i for i in range(utils.get_dimension(valid_X_test))],
+                feature_names=[i for i in range(get_dimension(valid_X_test))],
             )
 
     def test_invalid_number_of_feature_names_given(self, valid_X_test, valid_y_test):
@@ -192,7 +190,7 @@ class TestFeatureNames:
                 X_test=valid_X_test,
                 y_test=valid_y_test,
                 feature_names=[
-                    f"Feature {i}" for i in range(utils.get_dimension(valid_X_test) + 1)
+                    f"Feature {i}" for i in range(get_dimension(valid_X_test) + 1)
                 ],
             )
 

@@ -2,7 +2,10 @@ import abc
 import os
 from pathlib import Path
 
-from dtaianomaly.data.LazyDataLoader import LazyDataLoader
+from dtaianomaly.data._LazyDataLoader import LazyDataLoader
+from dtaianomaly.type_validation import PathAttribute
+
+__all__ = ["PathDataLoader", "from_directory"]
 
 
 class PathDataLoader(LazyDataLoader, abc.ABC):
@@ -23,12 +26,12 @@ class PathDataLoader(LazyDataLoader, abc.ABC):
         If the given path does not point to an existing file or directory.
     """
 
-    path: str
+    path: str | Path
+
+    attribute_validation = {"path": PathAttribute()}
 
     def __init__(self, path: str | Path, do_caching: bool = False):
         super().__init__(do_caching)
-        if not (Path(path).is_file() or Path(path).is_dir()):
-            raise FileNotFoundError(f"No such file or directory: {path}")
         self.path = str(path)
 
 
@@ -60,7 +63,7 @@ def from_directory(
         If `directory` cannot be found
     """
     if not Path(directory).is_dir():
-        raise FileNotFoundError(f"No such directory: {directory}")
+        raise ValueError(f"No such directory: {directory}")
 
     all_files = [
         os.path.join(directory, f)

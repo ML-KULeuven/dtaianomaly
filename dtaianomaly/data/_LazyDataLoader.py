@@ -1,10 +1,13 @@
 import abc
 
-from dtaianomaly.data.DataSet import DataSet
+from dtaianomaly.data._DataSet import DataSet
+from dtaianomaly.type_validation import AttributeValidationMixin, BoolAttribute
 from dtaianomaly.utils import PrintConstructionCallMixin
 
+__all__ = ["LazyDataLoader"]
 
-class LazyDataLoader(PrintConstructionCallMixin):
+
+class LazyDataLoader(PrintConstructionCallMixin, AttributeValidationMixin):
     """
     A lazy dataloader for anomaly detection workflows
 
@@ -28,6 +31,8 @@ class LazyDataLoader(PrintConstructionCallMixin):
 
     do_caching: bool
     cache_: DataSet
+
+    attribute_validation = {"do_caching": BoolAttribute()}
 
     def __init__(self, do_caching: bool = False):
         self.do_caching = do_caching

@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import pytest
 
@@ -109,48 +107,17 @@ class TestCustomDataLoader:
         assert Supervision.SUPERVISED in compatible_supervision
 
     def test_non_existing_test_path(self):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             CustomDataLoader("invalid-test-path.csv")
 
     def test_non_existing_train_path(self, tmp_path):
         write_unsupervised_data(tmp_path / "unsupervised.csv")
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             CustomDataLoader(tmp_path / "unsupervised.csv", "invalid-train-path.csv")
 
     def test_none_test_path(self):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(TypeError):
             CustomDataLoader(None)
-
-    def test_str(self, tmp_path):
-        write_unsupervised_data(tmp_path / "unsupervised.csv")
-        write_semi_supervised_data(
-            tmp_path / "semi_supervised.csv", tmp_path / "semi_supervised_train.csv"
-        )
-        write_supervised_data(
-            tmp_path / "supervised.csv", tmp_path / "supervised_train.csv"
-        )
-
-        assert (
-            str(CustomDataLoader(tmp_path / "unsupervised.csv"))
-            == f"CustomDataLoader(test_path={tmp_path / 'unsupervised.csv'})"
-        )
-        assert (
-            str(
-                CustomDataLoader(
-                    tmp_path / "semi_supervised.csv",
-                    tmp_path / "semi_supervised_train.csv",
-                )
-            )
-            == f"CustomDataLoader(test_path={tmp_path / 'semi_supervised.csv'},train_path={tmp_path / 'semi_supervised_train.csv'})"
-        )
-        assert (
-            str(
-                CustomDataLoader(
-                    tmp_path / "supervised.csv", tmp_path / "supervised_train.csv"
-                )
-            )
-            == f"CustomDataLoader(test_path={tmp_path / 'supervised.csv'},train_path={tmp_path / 'supervised_train.csv'})"
-        )
 
     def test_different_nb_features(self, tmp_path):
         write_supervised_data(

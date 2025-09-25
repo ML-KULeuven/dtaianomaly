@@ -41,12 +41,8 @@ class TestUCRLoader:
         assert loaded.X_test.shape[0] == loaded.y_test.shape[0]
 
     def test_faulty_path(self):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             UCRLoader(path="bollocks")
-
-    @data_available
-    def test_str(self, loader):
-        assert str(loader) == f"UCRLoader(path='{UCR_DATA_PATH}/{UCR_DATA_SET}')"
 
     @directory_available
     def test_from_directory(self):

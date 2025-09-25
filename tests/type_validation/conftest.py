@@ -6,6 +6,7 @@ from dtaianomaly.type_validation import (
     LiteralAttribute,
     NoneAttribute,
     ObjectAttribute,
+    PathAttribute,
 )
 
 ATTRIBUTE_VALIDATION_CONFIGS = [
@@ -56,5 +57,11 @@ ATTRIBUTE_VALIDATION_CONFIGS = [
         "invalid_type": "auto",
         "invalid_value": "auto",
         "valid": 5,
+    },
+    {
+        "validator": PathAttribute(),
+        "invalid_type": None,
+        "invalid_value": "non-existing-path",
+        "valid": ".",
     },
 ]

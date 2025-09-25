@@ -3,7 +3,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from dtaianomaly.data.LazyDataLoader import DataSet, LazyDataLoader
+from dtaianomaly.data._DataSet import DataSet
+from dtaianomaly.data._LazyDataLoader import LazyDataLoader
+from dtaianomaly.type_validation import NoneAttribute, PathAttribute
+
+__all__ = ["CustomDataLoader"]
 
 
 class CustomDataLoader(LazyDataLoader):
@@ -31,10 +35,23 @@ class CustomDataLoader(LazyDataLoader):
         will be no training data in the loaded dataset.
     do_caching: bool, default=False
         Whether to cache the loaded data or not
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import CustomDataLoader
+    >>> train_path = "path-to-training-data.csv"
+    >>> test_path = "path-to-testing-data.csv"
+    >>> data_set_train_and_test = CustomDataLoader(test_path, train_path).load()  # doctest: +SKIP
+    >>> data_set_only_test = CustomDataLoader(test_path).load()  # No training data  # doctest: +SKIP
     """
 
     train_path: str | None
     test_path: str
+
+    attribute_validation = {
+        "train_path": PathAttribute() | NoneAttribute(),
+        "test_path": PathAttribute(),
+    }
 
     def __init__(
         self,
@@ -43,13 +60,6 @@ class CustomDataLoader(LazyDataLoader):
         do_caching: bool = False,
     ):
         super().__init__(do_caching)
-        for path in [train_path, test_path]:
-            if path is not None:
-                if not (Path(path).is_file() or Path(path).is_dir()):
-                    raise FileNotFoundError(f"No such file or directory: {path}")
-        if test_path is None:
-            raise FileNotFoundError(f"The test_path may not be None!")
-
         self.train_path = train_path
         self.test_path = test_path
 

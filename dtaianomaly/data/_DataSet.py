@@ -1,12 +1,14 @@
 import numpy as np
 
-from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
+from dtaianomaly.anomaly_detection import BaseDetector, Supervision
 from dtaianomaly.utils import (
     get_dimension,
     is_univariate,
     is_valid_array_like,
     is_valid_list,
 )
+
+__all__ = ["DataSet"]
 
 
 class DataSet:

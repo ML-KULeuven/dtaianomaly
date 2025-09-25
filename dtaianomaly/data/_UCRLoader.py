@@ -1,7 +1,9 @@
 import numpy as np
 
-from dtaianomaly.data.DataSet import DataSet
-from dtaianomaly.data.PathDataLoader import PathDataLoader
+from dtaianomaly.data._DataSet import DataSet
+from dtaianomaly.data._PathDataLoader import PathDataLoader
+
+__all__ = ["UCRLoader"]
 
 
 class UCRLoader(PathDataLoader):
@@ -27,6 +29,12 @@ class UCRLoader(PathDataLoader):
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:
     ``*_<train-test-split>_<start>_<stop>.txt``.
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import UCRLoader
+    >>> path_to_ucr = "001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"
+    >>> ucr_data_set = UCRLoader(path_to_ucr).load()  # doctest: +SKIP
     """
 
     def _load(self) -> DataSet:

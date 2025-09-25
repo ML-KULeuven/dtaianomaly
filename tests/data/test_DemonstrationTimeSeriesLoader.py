@@ -1,8 +1,7 @@
 import numpy as np
 
-from dtaianomaly.data.simple_time_series import (
-    DemonstrationTimeSeriesLoader,
-    demonstration_time_series,
+from dtaianomaly.data import DemonstrationTimeSeriesLoader, demonstration_time_series
+from dtaianomaly.data._DemonstrationTimeSeriesLoader import (
     inject_anomalies,
     make_sine_wave,
 )
@@ -17,17 +16,6 @@ class TestDemonstrationTimeSeriesLoader:
         assert np.array_equal(y, dataset.y_test)
         assert dataset.X_train is None
         assert dataset.y_train is None
-
-    def test_str(self):
-        assert str(DemonstrationTimeSeriesLoader()) == "DemonstrationTimeSeriesLoader()"
-        assert (
-            str(DemonstrationTimeSeriesLoader(False))
-            == "DemonstrationTimeSeriesLoader()"
-        )
-        assert (
-            str(DemonstrationTimeSeriesLoader(True))
-            == "DemonstrationTimeSeriesLoader(do_caching=True)"
-        )
 
 
 class TestInjectAnomalies:

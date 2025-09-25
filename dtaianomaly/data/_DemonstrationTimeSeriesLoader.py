@@ -1,6 +1,9 @@
 import numpy as np
 
-from dtaianomaly.data import DataSet, LazyDataLoader
+from dtaianomaly.data._DataSet import DataSet
+from dtaianomaly.data._LazyDataLoader import LazyDataLoader
+
+__all__ = ["DemonstrationTimeSeriesLoader", "demonstration_time_series"]
 
 
 class DemonstrationTimeSeriesLoader(LazyDataLoader):
@@ -13,6 +16,13 @@ class DemonstrationTimeSeriesLoader(LazyDataLoader):
     the typical sine-pattern (including some Gaussian noise), the
     valley around observation 950 is slightly deeper than the other
     valleys in the time series, leading to an anomaly.
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import DemonstrationTimeSeriesLoader
+    >>> data_set = DemonstrationTimeSeriesLoader().load()
+    >>> X = data_set.X_test
+    >>> y = data_set.y_test
     """
 
     def _load(self) -> DataSet:
@@ -31,6 +41,11 @@ def demonstration_time_series() -> (np.ndarray, np.ndarray):
         The raw time series data
     y: np.ndarray of shape (nb_samples)
         The ground truth labels
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> X, y = demonstration_time_series()
     """
     np.random.seed(42)
 
