@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import (
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -77,6 +77,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     window_size_: int
     pca_: PCA
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         window_size: int | str,
@@ -85,8 +87,6 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         **kwargs,
     ):
         super().__init__(Supervision.SEMI_SUPERVISED)
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(max_iter, int) or isinstance(max_iter, bool):
             raise TypeError("`max_iter` should be an integer")

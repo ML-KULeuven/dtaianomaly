@@ -7,11 +7,8 @@ import torch
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
-    compute_window_size,
-    reverse_sliding_window,
-)
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import compute_window_size, reverse_sliding_window
 
 _OPTIMIZER_TYPE = Literal["adam", "sgd"]
 _COMPILE_MODE_TYPE = Literal[
@@ -148,6 +145,8 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
     optimizer_: torch.optim.Optimizer
     neural_network_: torch.nn.Module
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         supervision: Supervision,
@@ -170,7 +169,6 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         super().__init__(supervision)
 
         # Check preprocessing related parameters
-        check_is_valid_window_size(window_size)
         if not isinstance(stride, int) or isinstance(stride, bool):
             raise TypeError("`stride` should be an integer")
         if stride < 1:

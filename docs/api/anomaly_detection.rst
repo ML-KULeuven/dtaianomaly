@@ -75,7 +75,3 @@ Utilities
 ---------
 
 .. autofunction:: dtaianomaly.anomaly_detection.load_detector
-.. autofunction:: dtaianomaly.anomaly_detection.sliding_window
-.. autofunction:: dtaianomaly.anomaly_detection.reverse_sliding_window
-.. autofunction:: dtaianomaly.anomaly_detection.check_is_valid_window_size
-.. autofunction:: dtaianomaly.anomaly_detection.compute_window_size

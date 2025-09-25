@@ -5,8 +5,8 @@ from tslearn.clustering import KShape
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import (
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -81,6 +81,8 @@ class KShapeAnomalyDetector(BaseDetector):
     centroids_: list[np.array]
     weights_: np.array
     kshape_: KShape
+
+    attribute_validation = {"window_size": WindowSizeAttribute()}
 
     def __init__(
         self,

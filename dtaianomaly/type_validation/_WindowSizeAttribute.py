@@ -1,6 +1,7 @@
 from dtaianomaly.type_validation._BaseAttributeValidation import BaseAttributeValidation
 from dtaianomaly.type_validation._IntegerAttribute import IntegerAttribute
 from dtaianomaly.type_validation._LiteralAttribute import LiteralAttribute
+from dtaianomaly.windowing import AUTO_WINDOW_SIZE_COMPUTATION
 
 __all__ = ["WindowSizeAttribute"]
 
@@ -38,7 +39,7 @@ class WindowSizeAttribute(BaseAttributeValidation):
     """
 
     validator: BaseAttributeValidation = IntegerAttribute(minimum=1) | LiteralAttribute(
-        ["fft", "suss", "acf", "mwf"]
+        AUTO_WINDOW_SIZE_COMPUTATION
     )
 
     def _is_valid_type(self, value) -> bool:

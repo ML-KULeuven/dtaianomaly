@@ -5,10 +5,8 @@ import torch
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
-    compute_window_size,
-)
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import compute_window_size
 
 
 class TimeMoEAnomalyDetector(BaseDetector):
@@ -77,6 +75,8 @@ class TimeMoEAnomalyDetector(BaseDetector):
     window_size_: int
     time_moe_: any
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         window_size: int | str,
@@ -95,8 +95,6 @@ class TimeMoEAnomalyDetector(BaseDetector):
             raise Exception(
                 "Module 'transformers' is not available, make sure you install it before using Time-MoE!"
             )
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(model_path, str):
             raise TypeError("The 'model_path' must be a string!")

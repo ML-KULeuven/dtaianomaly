@@ -2,11 +2,8 @@ import numpy as np
 import stumpy
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
-    compute_window_size,
-    reverse_sliding_window,
-)
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import compute_window_size, reverse_sliding_window
 
 
 class MatrixProfileDetector(BaseDetector):
@@ -68,6 +65,8 @@ class MatrixProfileDetector(BaseDetector):
     window_size_: int
     X_reference_: np.ndarray
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         window_size: int | str,
@@ -77,8 +76,6 @@ class MatrixProfileDetector(BaseDetector):
         novelty: bool = False,
     ) -> None:
         super().__init__(Supervision.UNSUPERVISED)
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(normalize, bool):
             raise TypeError("`normalize` should be boolean")

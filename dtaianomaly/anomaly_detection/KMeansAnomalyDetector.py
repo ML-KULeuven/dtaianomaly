@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import (
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -57,12 +57,13 @@ class KMeansAnomalyDetector(BaseDetector):
     window_size_: int
     k_means_: KMeans
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self, window_size: int | str, stride: int = 1, n_clusters: int = 8, **kwargs
     ):
         super().__init__(Supervision.UNSUPERVISED)
 
-        check_is_valid_window_size(window_size)
         if not isinstance(stride, int) or isinstance(stride, bool):
             raise TypeError("`stride` should be an integer")
         if stride < 1:

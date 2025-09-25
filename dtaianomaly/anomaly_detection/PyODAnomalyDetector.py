@@ -4,8 +4,8 @@ import numpy as np
 from pyod.models.base import BaseDetector as PyODBaseDetector
 
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import (
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -46,10 +46,10 @@ class PyODAnomalyDetector(BaseDetector, abc.ABC):
     window_size_: int
     pyod_detector_: PyODBaseDetector
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(self, window_size: int | str, stride: int = 1, **kwargs):
         super().__init__(self._supervision())
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(stride, int) or isinstance(stride, bool):
             raise TypeError("`stride` should be an integer")

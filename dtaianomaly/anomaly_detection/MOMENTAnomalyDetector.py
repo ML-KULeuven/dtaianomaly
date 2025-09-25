@@ -6,10 +6,8 @@ import torch
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection.BaseDetector import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
-    compute_window_size,
-)
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import compute_window_size
 
 _MOMENT_MODEL_SIZE_TYPE = Literal["small", "base", "large"]
 _VALID_MOMENT_MODEL_SIZE = ["small", "base", "large"]
@@ -81,6 +79,8 @@ class MOMENTAnomalyDetector(BaseDetector):
     window_size_: int
     moment_: any
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         window_size: int | str,
@@ -104,8 +104,6 @@ class MOMENTAnomalyDetector(BaseDetector):
             raise Exception(
                 "Module 'momentfm' is not available, make sure you install it before using MOMENT!"
             )
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(model_size, str):
             raise TypeError("The 'model_size' must be a string!")
@@ -272,20 +270,3 @@ class MOMENTAnomalyDetector(BaseDetector):
             batches_and_masks.append((batch, masks))
 
         return batches_and_masks
-
-
-def main():
-    import doctest
-
-    doctest.testmod()
-
-    # from dtaianomaly.data import demonstration_time_series
-    # from dtaianomaly.visualization import plot_anomaly_scores
-    # X, y = demonstration_time_series()
-    # moment = MOMENTAnomalyDetector(128, batch_size=128, do_fine_tuning=True)
-    # y_pred = moment.fit(X).decision_function(X)
-    # plot_anomaly_scores(X, y, y_pred, figsize=(20, 5)).show()
-
-
-if __name__ == "__main__":
-    main()

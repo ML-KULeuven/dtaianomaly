@@ -46,23 +46,12 @@ from .RobustRandomCutForestAnomalyDetector import RobustRandomCutForestAnomalyDe
 from .SpectralResidual import SpectralResidual
 from .TimeMoEAnomalyDetector import TimeMoEAnomalyDetector
 from .Transformer import Transformer
-from .windowing_utils import (
-    check_is_valid_window_size,
-    compute_window_size,
-    reverse_sliding_window,
-    sliding_window,
-)
 
 __all__ = [
     # Base
     "BaseDetector",
     "Supervision",
     "load_detector",
-    # Sliding window
-    "sliding_window",
-    "reverse_sliding_window",
-    "check_is_valid_window_size",
-    "compute_window_size",
     # Baselines
     "AlwaysNormal",
     "AlwaysAnomalous",

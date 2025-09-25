@@ -4,8 +4,8 @@ from typing import Literal
 import numpy as np
 
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
-from dtaianomaly.anomaly_detection.windowing_utils import (
-    check_is_valid_window_size,
+from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import (
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -80,6 +80,8 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
     max_samples_: int
     forest_: list["RCTree"]
 
+    attribute_validation = {"window_size": WindowSizeAttribute()}
+
     def __init__(
         self,
         window_size: int | str,
@@ -91,8 +93,6 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
         random_state: int = None,
     ):
         super().__init__(Supervision.UNSUPERVISED)
-
-        check_is_valid_window_size(window_size)
 
         if not isinstance(online_learning, bool):
             raise TypeError("'online_learning' should be a boolean")
