@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from dtaianomaly.utils import (
+    convert_to_list,
     get_dimension,
     is_univariate,
     is_valid_array_like,
@@ -118,3 +119,31 @@ class TestGetDimension:
     def test(self, dimension):
         X = np.random.default_rng(42).uniform(size=(1000, dimension))
         assert get_dimension(X) == dimension
+        assert get_dimension(list(X)) == dimension
+
+
+class TestConvertToList:
+
+    @pytest.mark.parametrize("value", [1, 3.14, True, "auto", {"a": 1, "b": 2}])
+    def test_single_value(self, value):
+        l = convert_to_list(value)
+        assert isinstance(l, list)
+        assert len(l) == 1
+        assert l[0] == value
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [1, 2, 3, 4, 5],
+            [1.41, 2.82, 3.14],
+            [True, False],
+            ["auto", "manual", "other"],
+        ],
+    )
+    def test_list(self, value):
+        l = convert_to_list(value)
+        assert isinstance(l, list)
+        assert len(l) == len(value)
+        for i in range(len(l)):
+            assert l[i] == value[i]

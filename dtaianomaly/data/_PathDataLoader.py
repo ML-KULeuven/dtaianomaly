@@ -36,16 +36,16 @@ class PathDataLoader(LazyDataLoader, abc.ABC):
 
 
 def from_directory(
-    directory: str | Path, dataloader: type[PathDataLoader], **kwargs
+    path: str | Path, base_type: type[PathDataLoader], **kwargs
 ) -> list[PathDataLoader]:
     """
     Construct a `PathDataLoader` instance for every file in the given `directory`
 
     Parameters
     ----------
-    directory: str or Path
+    path: str or Path
         Path to the directory in question
-    dataloader: PathDataLoader **object**
+    base_type: PathDataLoader **object**
         Class object of the data loader, called for constructing
         each data loader instance
     **kwargs:
@@ -62,13 +62,12 @@ def from_directory(
     FileNotFoundError
         If `directory` cannot be found
     """
-    if not Path(directory).is_dir():
-        raise ValueError(f"No such directory: {directory}")
+    if not Path(path).is_dir():
+        raise ValueError(f"No such directory: {path}")
 
     all_files = [
-        os.path.join(directory, f)
-        for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f))
-        or os.path.isdir(os.path.join(directory, f))
+        os.path.join(path, f)
+        for f in os.listdir(path)
+        if os.path.isfile(os.path.join(path, f)) or os.path.isdir(os.path.join(path, f))
     ]
-    return [dataloader(file, **kwargs) for file in all_files]
+    return [base_type(file, **kwargs) for file in all_files]

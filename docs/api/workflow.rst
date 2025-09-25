@@ -3,14 +3,24 @@ Workflow module
 
 .. automodule:: dtaianomaly.workflow
 
-.. autoclass:: dtaianomaly.workflow.Workflow
-   :members:
+Workflow related classes
+------------------------
 
-.. autoclass:: dtaianomaly.workflow.JobBasedWorkflow
-   :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
 
-.. autoclass:: dtaianomaly.workflow.Job
-   :members:
+    Workflow
+    JobBasedWorkflow
+    Job
 
-.. autofunction:: dtaianomaly.workflow.workflow_from_config
-.. autofunction:: dtaianomaly.workflow.interpret_config
+
+Loading a workflow from a configuration file
+--------------------------------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: function.rst
+
+    workflow_from_config
+    interpret_config

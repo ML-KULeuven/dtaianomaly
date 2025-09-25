@@ -9,7 +9,7 @@ from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.evaluation import Metric
 from dtaianomaly.in_time_ad import CustomDetectorVisualizer
-from dtaianomaly.workflow.utils import convert_to_list
+from dtaianomaly.utils import convert_to_list
 
 torch.classes.__path__ = []  # To avoid torch-warning
 

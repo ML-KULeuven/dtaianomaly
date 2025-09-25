@@ -1,36 +1,18 @@
 """
-This module contains the workflow functionality.
+It is often crucial to perform large scale experiments to analyze the performance
+of anomaly detectors on large benchmark sets. The ``Workflow`` module offer such
+functionality and can be imported as follows:
 
 >>> from dtaianomaly import workflow
-
-Below we illustrate how a simple workflow can be initialized, which will
-apply Matrix Profile and Isolation Forest on a dataset from the UCR
-archive, and compute the area under the ROC and PR curves:
-
-.. testsetup::
-
-   import os
-   os.chdir('..')
-
-
->>> from dtaianomaly.data import UCRLoader
->>> from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest
->>> from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
->>> workflow = workflow.Workflow(
-...     dataloaders=[
-...         UCRLoader(path='data/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt'),
-...     ],
-...     detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
-...     metrics=[AreaUnderROC(), AreaUnderPR()]
-... )
 
 We refer to the `documentation <https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/quantitative_evaluation.html>`_
 for more information regarding the configuration and use of a Workflow.
 """
 
-from .JobBasedWorkflow import Job, JobBasedWorkflow
-from .Workflow import Workflow
-from .workflow_from_config import interpret_config, workflow_from_config
+from ._Job import Job
+from ._JobBasedWorkflow import JobBasedWorkflow
+from ._Workflow import Workflow
+from ._workflow_from_config import interpret_config, workflow_from_config
 
 __all__ = [
     "Workflow",

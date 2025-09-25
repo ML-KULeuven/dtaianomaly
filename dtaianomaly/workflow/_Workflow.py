@@ -3,8 +3,12 @@ from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.evaluation import Metric
 from dtaianomaly.preprocessing import Preprocessor
 from dtaianomaly.thresholding import Thresholding
-from dtaianomaly.workflow.JobBasedWorkflow import Job, JobBasedWorkflow
-from dtaianomaly.workflow.utils import convert_to_list
+from dtaianomaly.type_validation import ListAttribute, ObjectAttribute
+from dtaianomaly.utils import convert_to_list
+from dtaianomaly.workflow._Job import Job
+from dtaianomaly.workflow._JobBasedWorkflow import JobBasedWorkflow
+
+__all__ = ["Workflow"]
 
 
 class Workflow(JobBasedWorkflow):
@@ -89,11 +93,30 @@ class Workflow(JobBasedWorkflow):
     ----------
     jobs: list of Job
         The jobs to execute within this workflow.
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import DemonstrationTimeSeriesLoader
+    >>> from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest
+    >>> from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
+    >>> from dtaianomaly.workflow import Workflow
+    >>> workflow = Workflow(
+    ...     dataloaders=DemonstrationTimeSeriesLoader(),
+    ...     detectors=[MatrixProfileDetector(window_size=100), IsolationForest(15)],
+    ...     metrics=[AreaUnderROC(), AreaUnderPR()]
+    ... )
+    >>> workflow.run()  # doctest: +SKIP
     """
 
     dataloaders: list[LazyDataLoader]
     preprocessors: list[Preprocessor]
     detectors: list[BaseDetector]
+
+    attribute_validation = {
+        "dataloaders": ListAttribute(ObjectAttribute(LazyDataLoader), minimum_length=1),
+        "preprocessors": ListAttribute(ObjectAttribute(Preprocessor)),
+        "detectors": ListAttribute(ObjectAttribute(BaseDetector), minimum_length=1),
+    }
 
     def __init__(
         self,
@@ -110,7 +133,6 @@ class Workflow(JobBasedWorkflow):
         fit_semi_supervised_on_test_data: bool = False,
         show_progress: bool = False,
     ):
-
         # Make sure the inputs are lists.
         dataloaders = convert_to_list(dataloaders)
         preprocessors = convert_to_list(preprocessors or [])
@@ -119,13 +141,13 @@ class Workflow(JobBasedWorkflow):
         # Initialize the jobs
         if len(preprocessors) == 0:
             jobs = [
-                Job(dataloader, None, detector)
+                Job(dataloader, detector)
                 for dataloader in dataloaders
                 for detector in detectors
             ]
         else:
             jobs = [
-                Job(dataloader, preprocessor, detector)
+                Job(dataloader, detector, preprocessor)
                 for dataloader in dataloaders
                 for preprocessor in preprocessors
                 for detector in detectors
@@ -143,8 +165,6 @@ class Workflow(JobBasedWorkflow):
             fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data,
             show_progress=show_progress,
         )
-
-        # Set the properties of this workflow
         self.dataloaders = dataloaders
         self.preprocessors = preprocessors
         self.detectors = detectors

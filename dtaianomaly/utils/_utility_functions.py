@@ -1,8 +1,17 @@
 from collections.abc import Sequence
+from typing import TypeVar
 
 import numpy as np
 
-__all__ = ["is_valid_list", "is_valid_array_like", "is_univariate", "get_dimension"]
+__all__ = [
+    "is_valid_list",
+    "is_valid_array_like",
+    "is_univariate",
+    "get_dimension",
+    "convert_to_list",
+]
+
+T = TypeVar("T")
 
 
 def is_valid_list(value, target_type) -> bool:
@@ -22,6 +31,18 @@ def is_valid_list(value, target_type) -> bool:
     is_valid: bool
         True if and only if the given ``value`` is a list and all elements in
         the list are of type ``Type``, otherwise False.
+
+    Examples
+    --------
+    >>> from dtaianomaly.utils import is_valid_list
+    >>> is_valid_list([1, 2, 3, 4, 5], int)
+    True
+    >>> is_valid_list([1, 2, 3, 4, 5], str)
+    False
+    >>> is_valid_list(["1", "2", "3", "4", "5"], int)
+    False
+    >>> is_valid_list(["1", "2", "3", "4", "5"], str)
+    True
     """
     return (isinstance(value, list) or isinstance(value, tuple)) and all(
         isinstance(item, target_type) for item in value
@@ -45,6 +66,20 @@ def is_valid_array_like(array) -> bool:
         True if and only if the given array is either a numpy array
         or a python sequence, in which the type entirely consists of
         numerical values, otherwise False.
+
+    Examples
+    --------
+    >>> from dtaianomaly.utils import is_valid_array_like
+    >>> is_valid_array_like([1, 2, 3, 4, 5])
+    True
+    >>> is_valid_array_like([[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+    True
+    >>> is_valid_array_like([1, 2, 3.0, 4, 5])
+    True
+    >>> is_valid_array_like([1, 2, "3", 4, 5])
+    False
+    >>> is_valid_array_like(["1", "2", "3", "4", "5"])
+    False
     """
     # Check for valid numpy array
     if isinstance(array, np.ndarray):
@@ -96,6 +131,16 @@ def is_univariate(X: np.ndarray) -> bool:
     is_univariate: bool
         True if and only if the given time series has only one dimension,
         or if the second dimension of the time series is of size 1.
+
+    Examples
+    --------
+    >>> from dtaianomaly.utils import is_univariate
+    >>> is_univariate([1, 2, 3, 4, 5])
+    True
+    >>> is_univariate([[1], [2], [3], [4], [5]])
+    True
+    >>> is_univariate([[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+    False
     """
     return get_dimension(X) == 1
 
@@ -113,9 +158,56 @@ def get_dimension(X: np.ndarray) -> int:
     -------
     n_attributes: int
         The number of attributes in the given time series.
+
+    Examples
+    --------
+    >>> from dtaianomaly.utils import get_dimension
+    >>> get_dimension([1, 2, 3, 4, 5])
+    1
+    >>> get_dimension([[1], [2], [3], [4], [5]])
+    1
+    >>> get_dimension([[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+    2
+    >>> get_dimension([[1, 10, 100], [2, 20, 200], [3, 30, 300], [4, 40, 400], [5, 50, 500]])
+    3
     """
     X = np.array(X)
     if len(X.shape) == 1:
         return 1
     else:
         return X.shape[1]
+
+
+def convert_to_list(value: T | list[T]) -> list[T]:
+    """
+    Converts a given value to a list.
+
+    Converts the given value in a list. If the value already is a list, then
+    it will simply be returned. Otherwise, a list is returned with a single
+    element as the given element.
+
+    Parameters
+    ----------
+    value: list or other
+        The value to convert to a list.
+
+    Returns
+    -------
+    as_a_list: list
+        The given value in a list.
+
+    Examples
+    --------
+    >>> from dtaianomaly.utils import convert_to_list
+    >>> convert_to_list(1)
+    [1]
+    >>> convert_to_list(3.14)
+    [3.14]
+    >>> convert_to_list([1, 3.14])
+    [1, 3.14]
+    """
+    if not isinstance(value, list):
+        return [
+            value,
+        ]
+    return value

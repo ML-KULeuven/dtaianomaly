@@ -8,32 +8,19 @@ import numpy as np
 
 import dtaianomaly
 from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
-from dtaianomaly.data import DataSet, LazyDataLoader, demonstration_time_series
+from dtaianomaly.data import DataSet, DemonstrationTimeSeriesLoader, LazyDataLoader
 from dtaianomaly.evaluation import AreaUnderROC
 from dtaianomaly.pipeline import Pipeline
 from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, Preprocessor
 from dtaianomaly.workflow import Workflow
-from dtaianomaly.workflow.error_logging import log_error
-
-
-class DemonstrationDataLoader(LazyDataLoader):
-
-    def __init__(self):
-        super().__init__(".")
-
-    def _load(self) -> DataSet:
-        X, y = demonstration_time_series()
-        return DataSet(X, y)
+from dtaianomaly.workflow._error_logging import log_error
 
 
 class DemonstrationDataLoaderWithTrainData(LazyDataLoader):
 
-    def __init__(self):
-        super().__init__(".")
-
     def _load(self) -> DataSet:
-        X, y = demonstration_time_series()
-        return DataSet(X, y, X_train=np.zeros(shape=1000))
+        dataset = DemonstrationTimeSeriesLoader().load()
+        return DataSet(dataset.X_test, dataset.y_test, X_train=np.zeros(shape=1000))
 
 
 class ErrorDataLoader(LazyDataLoader):
@@ -67,7 +54,7 @@ class TestErrorLogging:
 
     def test_error_loading(self, tmp_path_factory):
         workflow = Workflow(
-            dataloaders=ErrorDataLoader("."),
+            dataloaders=ErrorDataLoader(),
             metrics=AreaUnderROC(),
             preprocessors=ChainedPreprocessor(Identity(), ErrorPreprocessor()),
             detectors=IsolationForest(15),
@@ -89,7 +76,7 @@ class TestErrorLogging:
 
     def test_error_preprocessing(self, tmp_path_factory):
         workflow = Workflow(
-            dataloaders=DemonstrationDataLoader(),
+            dataloaders=DemonstrationTimeSeriesLoader(),
             metrics=AreaUnderROC(),
             preprocessors=ErrorPreprocessor(),
             detectors=IsolationForest(15),
@@ -111,7 +98,7 @@ class TestErrorLogging:
 
     def test_error_chained_preprocessing(self, tmp_path_factory):
         workflow = Workflow(
-            dataloaders=DemonstrationDataLoader(),
+            dataloaders=DemonstrationTimeSeriesLoader(),
             metrics=AreaUnderROC(),
             preprocessors=ErrorPreprocessor(),
             detectors=IsolationForest(15),
@@ -133,7 +120,7 @@ class TestErrorLogging:
 
     def test_error_detecting_anomalies(self, tmp_path_factory):
         workflow = Workflow(
-            dataloaders=DemonstrationDataLoader(),
+            dataloaders=DemonstrationTimeSeriesLoader(),
             metrics=AreaUnderROC(),
             preprocessors=Identity(),
             detectors=ErrorAnomalyDetector(),

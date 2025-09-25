@@ -8,6 +8,7 @@ from ._CheckIsFittedMixin import CheckIsFittedMixin
 from ._discovery import all_classes
 from ._PrintConstructionCallMixin import PrintConstructionCallMixin
 from ._utility_functions import (
+    convert_to_list,
     get_dimension,
     is_univariate,
     is_valid_array_like,
@@ -32,4 +33,5 @@ __all__ = [
     "np_any_axis0",
     "np_any_axis1",
     "make_intervals",
+    "convert_to_list",
 ]

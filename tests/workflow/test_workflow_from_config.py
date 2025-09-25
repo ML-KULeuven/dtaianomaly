@@ -17,21 +17,16 @@ from dtaianomaly import (
     utils,
 )
 from dtaianomaly.workflow import Workflow, interpret_config, workflow_from_config
-from dtaianomaly.workflow.workflow_from_config import (
-    data_entry,
-    detector_entry,
-    interpret_additional_information,
-    interpret_dataloaders,
-    interpret_detectors,
-    interpret_metrics,
-    interpret_preprocessing,
-    interpret_thresholds,
-    metric_entry,
-    preprocessing_entry,
-    threshold_entry,
+from dtaianomaly.workflow._workflow_from_config import (
+    _interpret_additional_information,
+    _interpret_config,
+    _interpret_entry,
 )
 
 DATA_PATH = f"{pathlib.Path(__file__).parent.parent.parent}/data"
+ALL_CLASSES = utils.all_classes(
+    return_names=False, exclude_types=in_time_ad.CustomDetectorVisualizer
+)
 
 
 @pytest.fixture
@@ -43,7 +38,7 @@ def valid_config():
                 "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt",
             },
             {
-                "type": "directory",
+                "type": "from_directory",
                 "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
                 "base_type": "UCRLoader",
             },
@@ -67,6 +62,53 @@ def valid_config():
         ],
         "n_jobs": 4,
         "trace_memory": True,
+    }
+
+
+def infer_minimal_entry(cls):
+    kwargs = {
+        "window_size": 15,
+        "neighborhood_size_before": 15,
+        "detector": {"type": "IsolationForest", "window_size": 15},
+        "preprocessor": preprocessing.Identity(),
+        "order": 2,
+        "alpha": 0.7,
+        "nb_samples": 500,
+        "sampling_rate": 2,
+        "n": 4,
+        "metric": {"type": "Precision"},
+        "thresholder": {"type": "FixedCutoffThreshold", "cutoff": 0.9},
+        "cutoff": 0.9,
+        "contamination_rate": 0.1,
+        "base_preprocessors": [{"type": "Identity"}],
+        "path": DATA_PATH,
+        "test_path": DATA_PATH,
+        "train_path": DATA_PATH,
+        "neighborhood": 20,
+        "moving_average_window_size": 5,
+        "decoder_dimensions": [64, 32, 16],
+    }
+    sig = inspect.signature(cls.__init__)
+    accepted_params = set(
+        [
+            p.name
+            for p in sig.parameters.values()
+            if p.name != "self" and p.default is inspect.Parameter.empty
+        ]
+    )
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    return {"type": cls.__name__} | filtered_kwargs
+
+
+def infer_extensive_entry(cls):
+    minimal_entry = infer_minimal_entry(cls)
+    sig = inspect.signature(cls.__init__)
+    optional_parameters = (
+        set(sig.parameters) - {"self", "kwargs", "args"} - set(minimal_entry.keys())
+    )
+    return minimal_entry | {
+        parameter: sig.parameters[parameter].default
+        for parameter in optional_parameters
     }
 
 
@@ -146,393 +188,90 @@ class TestInterpretConfig:
         with pytest.raises(TypeError):
             interpret_config(str(tmp_path / "config.json"))
 
-    def test_with_data_root(self, valid_config):
-        config = valid_config.copy()
-        config["data_root"] = DATA_PATH
-        config["dataloaders"] = [
-            {
-                "type": "UCRLoader",
-                "path": f"UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt",
-            },
-            {
-                "type": "directory",
-                "path": f"UCR-time-series-anomaly-archive",
-                "base_type": "UCRLoader",
-            },
-        ]
-        self.test(config)
 
+class Test_InterpretConfig:
 
-class TestInterpretThresholds:
-
-    def test_empty(self, valid_config):
-        del valid_config["thresholds"]
-        valid_config["metrics"] = [  # Make sure there are only proba metrics
-            {"type": "AreaUnderROC"}
-        ]
-        interpret_config(valid_config)  # No error
-
-    def test_single_entry(self):
-        thresholds = interpret_thresholds({"type": "TopNThreshold", "n": 10})
-        assert isinstance(thresholds, list)
-        assert len(thresholds) == 1
-        assert isinstance(thresholds[0], thresholding.TopNThreshold)
-        assert thresholds[0].n == 10
-
-    def test_multiple_entries(self):
-        thresholds = interpret_thresholds(
-            [
-                {"type": "TopNThreshold", "n": 10},
-                {"type": "FixedCutoffThreshold", "cutoff": 0.5},
-            ]
-        )
-        assert isinstance(thresholds, list)
-        assert len(thresholds) == 2
-        assert isinstance(thresholds[0], thresholding.TopNThreshold)
-        assert thresholds[0].n == 10
-        assert isinstance(thresholds[1], thresholding.FixedCutoffThreshold)
-        assert thresholds[1].cutoff == 0.5
-
-
-class TestInterpretDataloaders:
-
-    def test_empty(self, valid_config):
-        del valid_config["dataloaders"]
-        with pytest.raises(ValueError):
-            interpret_config(valid_config)
-
-    def test_single_entry(self):
-        path = f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"
-        dataloaders = interpret_dataloaders({"type": "UCRLoader", "path": path})
-        assert isinstance(dataloaders, list)
-        assert len(dataloaders) == 1
-        assert isinstance(dataloaders[0], data.UCRLoader)
-        assert dataloaders[0].path == path
-
-    def test_multiple_entries(self):
-        path = f"{DATA_PATH}/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt"
-        dataloaders = interpret_dataloaders(
-            [
-                {"type": "UCRLoader", "path": path},
-                {
-                    "type": "directory",
-                    "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
-                    "base_type": "UCRLoader",
-                },
-            ]
-        )
-        assert isinstance(dataloaders, list)
-        assert len(dataloaders) >= 1
-        assert all(isinstance(loader, data.UCRLoader) for loader in dataloaders)
-        assert all(
-            loader.path.startswith(f"{DATA_PATH}/UCR-time-series-anomaly-archive")
-            for loader in dataloaders
-        )
-        assert dataloaders[0].path == path
-
-    def test_from_directory(self):
-        dataloaders = data_entry(
-            {
-                "type": "directory",
-                "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
-                "base_type": "UCRLoader",
-            }
-        )
-        assert all(isinstance(loader, data.UCRLoader) for loader in dataloaders)
-        assert all(
-            loader.path.startswith(f"{DATA_PATH}/UCR-time-series-anomaly-archive")
-            for loader in dataloaders
-        )
-
-    def test_from_directory_too_many_entries(self):
-        with pytest.raises(ValueError):
-            data_entry(
-                {
-                    "type": "directory",
-                    "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
-                    "base_type": "UCRLoader",
-                    "something-else": 0,
-                }
-            )
-
-    def test_from_directory_no_path(self):
-        with pytest.raises(TypeError):
-            data_entry(
-                {
-                    "type": "directory",
-                    "base_type": "UCRLoader",
-                    "some-replacement": "to-have-proper-number-items",
-                }
-            )
-
-    def test_from_directory_no_base_type(self):
-        with pytest.raises(TypeError):
-            data_entry(
-                {
-                    "type": "directory",
-                    "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
-                    "some-replacement": "to-have-proper-number-items",
-                }
-            )
-
-    def test_from_directory_invalid_base_type(self):
-        with pytest.raises(ValueError):
-            data_entry(
-                {
-                    "type": "directory",
-                    "path": f"{DATA_PATH}/UCR-time-series-anomaly-archive",
-                    "base_type": "INVALID",
-                }
-            )
-
-    def test_invalid_type(self):
-        with pytest.raises(ValueError):
-            data_entry({"type": "INVALID"})
-
-
-class TestInterpretMetrics:
-
-    def test_empty(self, valid_config):
-        del valid_config["metrics"]
-        with pytest.raises(ValueError):
-            interpret_config(valid_config)
-
-    def test_single_entry(self):
-        metrics = interpret_metrics({"type": "Precision"})
-        assert isinstance(metrics, list)
-        assert len(metrics) == 1
-        assert isinstance(metrics[0], evaluation.Precision)
-
-    def test_multiple_entries(self):
-        metrics = interpret_metrics([{"type": "Precision"}, {"type": "Recall"}])
-        assert isinstance(metrics, list)
-        assert len(metrics) == 2
-        assert isinstance(metrics[0], evaluation.Precision)
-        assert isinstance(metrics[1], evaluation.Recall)
-
-    def test_threshold_metric_no_thresholder(self):
-        with pytest.raises(ValueError):
-            metric_entry(
-                {
-                    "type": "ThresholdMetric",
-                    "no_thresholder": {"type": "FixedCutoff"},
-                    "metric": {"type": "Precision"},
-                }
-            )
-
-    def test_threshold_metric_no_metric(self):
-        with pytest.raises(ValueError):
-            metric_entry(
-                {
-                    "type": "ThresholdMetric",
-                    "thresholder": {"type": "FixedCutoff"},
-                    "no_metric": {"type": "Precision"},
-                }
-            )
-
-    def test_best_threshold_metric_no_metric(self):
-        with pytest.raises(TypeError):
-            metric_entry(
-                {"type": "BestThresholdMetric", "no_metric": {"type": "Precision"}}
-            )
-
-
-class TestInterpretDetectors:
-
-    def test_empty(self, valid_config):
-        del valid_config["detectors"]
-        with pytest.raises(ValueError):
-            interpret_config(valid_config)
-
-    def test_single_entry(self):
-        detectors = interpret_detectors({"type": "IsolationForest", "window_size": 15})
-        assert isinstance(detectors, list)
-        assert len(detectors) == 1
-        assert isinstance(detectors[0], anomaly_detection.IsolationForest)
-        assert detectors[0].window_size == 15
-
-    def test_multiple_entries(self):
-        detectors = interpret_detectors(
-            [
-                {"type": "IsolationForest", "window_size": 15},
-                {"type": "MatrixProfileDetector", "window_size": 25},
-            ]
-        )
-        assert isinstance(detectors, list)
-        assert len(detectors) == 2
-        assert isinstance(detectors[0], anomaly_detection.IsolationForest)
-        assert detectors[0].window_size == 15
-        assert isinstance(detectors[1], anomaly_detection.MatrixProfileDetector)
-        assert detectors[1].window_size == 25
-
-
-class TestInterpretPreprocessors:
-
-    def test_empty(self, valid_config):
-        del valid_config["preprocessors"]
-        interpret_config(valid_config)  # No error
-
-    def test_single_entry(self):
-        preprocessors = interpret_preprocessing({"type": "MinMaxScaler"})
-        assert isinstance(preprocessors, list)
-        assert len(preprocessors) == 1
-        assert isinstance(preprocessors[0], preprocessing.MinMaxScaler)
-
-    def test_multiple_entries(self):
-        preprocessors = interpret_preprocessing(
-            [{"type": "MinMaxScaler"}, {"type": "MovingAverage", "window_size": 40}]
-        )
-        assert isinstance(preprocessors, list)
-        assert len(preprocessors) == 2
-        assert isinstance(preprocessors[0], preprocessing.MinMaxScaler)
-        assert isinstance(preprocessors[1], preprocessing.MovingAverage)
-        assert preprocessors[1].window_size == 40
-
-    def test_chained_preprocessor_non_list_processor(self):
-        with pytest.raises(ValueError):
-            preprocessing_entry(
-                {
-                    "type": "ChainedPreprocessor",
-                    "base_preprocessors": {"type": "MinMaxScaler"},
-                }
-            )
-
-    def test_chained_preprocessor_no_base_preprocessors(self):
-        with pytest.raises(TypeError):
-            preprocessing_entry(
-                {
-                    "type": "ChainedPreprocessor",
-                    "no_base_preprocessors": [
-                        {"type": "MinMaxScaler"},
-                        {"type": "MovingAverage", "window_size": 40},
-                    ],
-                }
-            )
-
-    def test_chained_preprocessor(self):
-        preprocessor = preprocessing_entry(
-            {
-                "type": "ChainedPreprocessor",
-                "base_preprocessors": [
-                    {"type": "MinMaxScaler"},
-                    {"type": "MovingAverage", "window_size": 40},
-                ],
-            }
-        )
-        assert isinstance(preprocessor, preprocessing.ChainedPreprocessor)
-        assert len(preprocessor.base_preprocessors) == 2
-        assert isinstance(
-            preprocessor.base_preprocessors[0], preprocessing.MinMaxScaler
-        )
-        assert isinstance(
-            preprocessor.base_preprocessors[1], preprocessing.MovingAverage
-        )
-        assert preprocessor.base_preprocessors[1].window_size == 40
-
-
-class TestAdditionalInformation:
-
-    def test(self):
-        additional_information = interpret_additional_information(
-            {"n_jobs": 3, "error_log_path": "test", "something_else": 5}
-        )
-        assert len(additional_information) == 2
-        assert "n_jobs" in additional_information
-        assert additional_information["n_jobs"] == 3
-        assert "error_log_path" in additional_information
-        assert additional_information["error_log_path"] == "test"
-
-
-def infer_entry_function(cls):
-    if issubclass(cls, anomaly_detection.BaseDetector):
-        return detector_entry
-    elif issubclass(cls, data.LazyDataLoader):
-        return data_entry
-    elif issubclass(cls, evaluation.Metric):
-        return metric_entry
-    elif issubclass(cls, thresholding.Thresholding):
-        return threshold_entry
-    elif issubclass(cls, preprocessing.Preprocessor):
-        return preprocessing_entry
-    else:
-        pytest.fail(f"An invalid object is given: {cls}")
-
-
-def infer_minimal_entry(cls):
-    kwargs = {
-        "window_size": 15,
-        "neighborhood_size_before": 15,
-        "detector": {"type": "IsolationForest", "window_size": 15},
-        "preprocessor": preprocessing.Identity(),
-        "order": 2,
-        "alpha": 0.7,
-        "nb_samples": 500,
-        "sampling_rate": 2,
-        "n": 4,
-        "metric": {"type": "Precision"},
-        "thresholder": {"type": "FixedCutoffThreshold", "cutoff": 0.9},
-        "cutoff": 0.9,
-        "contamination_rate": 0.1,
-        "base_preprocessors": [{"type": "Identity"}],
-        "path": DATA_PATH,
-        "test_path": DATA_PATH,
-        "train_path": DATA_PATH,
-        "neighborhood": 20,
-        "moving_average_window_size": 5,
-    }
-    sig = inspect.signature(cls.__init__)
-    accepted_params = set(
+    @pytest.mark.parametrize(
+        "name,cls",
         [
-            p.name
-            for p in sig.parameters.values()
-            if p.name != "self" and p.default is inspect.Parameter.empty
-        ]
+            ("dataloaders", data.DemonstrationTimeSeriesLoader),
+            ("preprocessors", preprocessing.StandardScaler),
+            ("detectors", anomaly_detection.IsolationForest),
+            ("metrics", evaluation.Precision),
+            ("thresholds", thresholding.FixedCutoffThreshold),
+        ],
     )
-    filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
-    return {"type": cls.__name__} | filtered_kwargs
+    @pytest.mark.parametrize("required", [True, False])
+    def test_valid(self, name, cls, required):
+        entry = infer_minimal_entry(cls)
+        loaded_entry = _interpret_entry(entry)
+        loaded_config = _interpret_config(name, {name: entry}, required)
+        assert str(loaded_entry) == str(loaded_config[0])
 
-
-def infer_extensive_entry(cls):
-    minimal_entry = infer_minimal_entry(cls)
-    sig = inspect.signature(cls.__init__)
-    optional_parameters = (
-        set(sig.parameters) - {"self", "kwargs", "args"} - set(minimal_entry.keys())
+    @pytest.mark.parametrize(
+        "name,clss",
+        [
+            ("dataloaders", [data.DemonstrationTimeSeriesLoader, data.UCRLoader]),
+            (
+                "preprocessors",
+                [preprocessing.StandardScaler, preprocessing.MinMaxScaler],
+            ),
+            (
+                "detectors",
+                [
+                    anomaly_detection.IsolationForest,
+                    anomaly_detection.LocalOutlierFactor,
+                ],
+            ),
+            ("metrics", [evaluation.Precision, evaluation.FBeta]),
+            (
+                "thresholds",
+                [thresholding.FixedCutoffThreshold, thresholding.TopNThreshold],
+            ),
+        ],
     )
-    return minimal_entry | {
-        parameter: sig.parameters[parameter].default
-        for parameter in optional_parameters
-    }
+    @pytest.mark.parametrize("required", [True, False])
+    def test_valid_list(self, name, clss, required):
+        config = {name: [infer_minimal_entry(cls) for cls in clss]}
+        loaded_config = _interpret_config(name, config, required)
+        assert len(loaded_config) == len(clss)
+        for i in range(len(clss)):
+            loaded_entry = _interpret_entry(infer_minimal_entry(clss[i]))
+            assert str(loaded_entry) == str(loaded_config[i])
+
+    def test_name_not_in_config(self):
+        with pytest.raises(ValueError):
+            _interpret_config("something", {"something-else": {}}, True)
+
+    def test_name_not_in_config_not_required(self):
+        assert _interpret_config("something", {"something-else": {}}, False) is None
 
 
-@pytest.mark.parametrize(
-    "cls",
-    utils.all_classes(
-        return_names=False, exclude_types=in_time_ad.CustomDetectorVisualizer
-    ),
-)
-class TestInterpretEntries:
+class TestInterpretEntry:
 
     @pytest.mark.parametrize(
         "infer_entry", [infer_minimal_entry, infer_extensive_entry]
     )
+    @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test(self, cls, infer_entry, monkeypatch):
         if cls == anomaly_detection.MOMENTAnomalyDetector:
             monkeypatch.setattr(sys, "version_info", (3, 10, 7, "final", 0))
             sys.modules["momentfm"] = types.ModuleType("momentfm")
 
-        entry_function = infer_entry_function(cls)
         entry = infer_entry(cls)
-        read_object = entry_function(entry)
+        read_object = _interpret_entry(entry)
         assert isinstance(read_object, cls)
         for key, value in entry.items():
-            if key in ["base_preprocessors", "metric", "thresholder", "detector"]:
-                continue  # Simply assume it is correct, because test would become so difficult that errors can sneak in
-            elif key == "type":
+            if key == "type":
                 continue  # Skip this key as it is only necessary for the configuration
+            elif key == "base_preprocessors":
+                assert list(map(str, getattr(read_object, key))) == list(
+                    map(str, map(_interpret_entry, value))
+                )
+            elif isinstance(value, dict):
+                assert str(getattr(read_object, key)) == str(_interpret_entry(value))
             elif hasattr(read_object, key):
                 assert getattr(read_object, key) == value
-            elif hasattr(read_object, "kwargs"):
-                assert getattr(read_object, "kwargs")[key] == value
             else:
                 pytest.fail(
                     f"Object should either have '{key}' as attribute, or have 'kwargs' as attribute, which in turn has '{key}' as attribute!"
@@ -541,32 +280,70 @@ class TestInterpretEntries:
         if cls == anomaly_detection.MOMENTAnomalyDetector:
             del sys.modules["momentfm"]
 
+    @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test_invalid_parameter(self, cls):
-        entry_function = infer_entry_function(cls)
         minimal_entry = infer_minimal_entry(cls)
         minimal_entry["some-other-random-parameter"] = 0
         with pytest.raises(TypeError):
-            entry_function(minimal_entry)
+            _interpret_entry(minimal_entry)
 
+    @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test_missing_obligated_parameters(self, cls):
-        entry_function = infer_entry_function(cls)
         minimal_entry = infer_minimal_entry(cls)
         if len(minimal_entry) > 1:
-            print(minimal_entry)
             with pytest.raises(TypeError):
-                entry_function({"type": cls.__name__})
+                _interpret_entry({"type": cls.__name__})
 
-
-@pytest.mark.parametrize(
-    "entry_function",
-    [threshold_entry, metric_entry, metric_entry, detector_entry, preprocessing_entry],
-)
-class TestInvalidEntries:
-
-    def test_invalid_type(self, entry_function):
+    @pytest.mark.parametrize("config", [{}, {"type": "INVALID-TYPE"}])
+    def test_invalid_type(self, config):
         with pytest.raises(ValueError):
-            entry_function({"type": "INVALID-TYPE"})
+            _interpret_entry(config)
 
-    def test_no_type(self, entry_function):
-        with pytest.raises(KeyError):
-            entry_function({})
+
+class TestAdditionalInformation:
+
+    @staticmethod
+    def additional_parameters():
+        parameters = list(inspect.signature(Workflow.__init__).parameters.values())
+        to_skip = [
+            "self",
+            "dataloaders",
+            "metrics",
+            "detectors",
+            "preprocessors",
+            "thresholds",
+        ]
+        return [param for param in parameters if param.name not in to_skip]
+
+    @pytest.mark.parametrize("param", additional_parameters())
+    @pytest.mark.parametrize("add_invalid", [True, False])
+    def test(self, param, add_invalid):
+        config = {param.name: param.default}
+        if add_invalid:
+            config["something-invalid"] = 0
+        result = _interpret_additional_information(config)
+        assert len(result) == 1
+        assert param.name in result
+        assert result[param.name] == param.default
+
+    @pytest.mark.parametrize("param1", additional_parameters())
+    @pytest.mark.parametrize("param2", additional_parameters())
+    @pytest.mark.parametrize("add_invalid", [True, False])
+    def test_two_params(self, param1, param2, add_invalid):
+        if param1.name == param2.name:
+            return
+        config = {param1.name: param1.default, param2.name: param2.default}
+        if add_invalid:
+            config["something-invalid"] = 0
+        result = _interpret_additional_information(config)
+        assert len(result) == 2
+        assert param1.name in result
+        assert result[param1.name] == param1.default
+        assert param2.name in result
+        assert result[param2.name] == param2.default
+
+    @pytest.mark.parametrize("nb_invalid", [1, 3, 10])
+    def test_only_invalid(self, nb_invalid):
+        config = {f"something-invalid-{i}": i for i in range(nb_invalid)}
+        result = _interpret_additional_information(config)
+        assert len(result) == 0

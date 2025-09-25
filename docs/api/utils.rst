@@ -26,6 +26,7 @@ Utility functions
     is_valid_array_like
     is_univariate
     get_dimension
+    convert_to_list
 
 
 Numba-based utility functions

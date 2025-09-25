@@ -10,62 +10,26 @@ import numpy as np
 import pandas as pd
 
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
-from dtaianomaly.data import DataSet, LazyDataLoader
-from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric
-from dtaianomaly.pipeline import Pipeline
-from dtaianomaly.preprocessing import Identity, Preprocessor
+from dtaianomaly.data import DataSet
+from dtaianomaly.evaluation import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
 from dtaianomaly.thresholding import Thresholding
-from dtaianomaly.utils import is_valid_list
-from dtaianomaly.workflow.error_logging import log_error
-from dtaianomaly.workflow.utils import convert_to_list, convert_to_proba_metrics
+from dtaianomaly.type_validation import (
+    AttributeValidationMixin,
+    BoolAttribute,
+    IntegerAttribute,
+    ListAttribute,
+    NoneAttribute,
+    ObjectAttribute,
+    PathAttribute,
+)
+from dtaianomaly.utils import convert_to_list
+from dtaianomaly.workflow._error_logging import log_error
+from dtaianomaly.workflow._Job import Job
+
+__all__ = ["JobBasedWorkflow"]
 
 
-class Job:
-    """
-    A job to execute within the JobBasedWorkflow.
-
-    Parameters
-    ----------
-    dataloader: LazyDataLoader
-        The data loader that should be used for loading the time series data.
-    preprocessor: Preprocessor or None
-        The preprocessor to use for processing the time series, before the anomalies
-        are detected. If no preprocessor is given (``preprocessor=None``), then the
-        time series does not need to be processed.
-    detector: BaseDetector
-        The anomaly detector to use for detecting anomalies, after the time series
-        has been preprocessed.
-
-    Attributes
-    ----------
-    pipeline: Pipeline
-        The pipeline which combines the preprocessor and the anomaly detector, such
-        that the anomalies can be detected with a single call. If no preprocessor was
-        given, the preprocessor of the pipeline equals ``Identity()``.
-    has_preprocessor: bool
-        Whether this job has a preprocessor, i.e., whether ``preprocessor == None``.
-    """
-
-    dataloader: LazyDataLoader
-    preprocessor: Preprocessor | None
-    detector: BaseDetector
-    pipeline: Pipeline
-    has_preprocessor: bool
-
-    def __init__(
-        self,
-        dataloader: LazyDataLoader,
-        preprocessor: Preprocessor | None,
-        detector: BaseDetector,
-    ):
-        self.dataloader = dataloader
-        self.preprocessor = preprocessor
-        self.detector = detector
-        self.pipeline = Pipeline(preprocessor or Identity(), detector)
-        self.has_preprocessor = preprocessor is not None
-
-
-class JobBasedWorkflow:
+class JobBasedWorkflow(AttributeValidationMixin):
     """
     Run anomaly detection experiments.
 
@@ -130,6 +94,34 @@ class JobBasedWorkflow:
            Ensure ``tqdm`` installed for this (which is not part of the core
            dependencies of ``dtaianomaly``). Otherwise, no progress bar will
            be shown.
+
+    Examples
+    --------
+    >>> from dtaianomaly.data import DemonstrationTimeSeriesLoader
+    >>> from dtaianomaly.anomaly_detection import MatrixProfileDetector, IsolationForest
+    >>> from dtaianomaly.evaluation import AreaUnderROC, AreaUnderPR
+    >>> from dtaianomaly.preprocessing import StandardScaler, MinMaxScaler
+    >>> from dtaianomaly.workflow import JobBasedWorkflow, Job
+    >>> workflow = JobBasedWorkflow(
+    ...     jobs=[
+    ...         Job(
+    ...             dataloader=DemonstrationTimeSeriesLoader(),
+    ...             detector=IsolationForest(15),
+    ...         ),
+    ...         Job(
+    ...             dataloader=DemonstrationTimeSeriesLoader(),
+    ...             preprocessor=StandardScaler(),
+    ...             detector=IsolationForest(15),
+    ...         ),
+    ...         Job(
+    ...             dataloader=DemonstrationTimeSeriesLoader(),
+    ...             preprocessor=MinMaxScaler(),
+    ...             detector=IsolationForest(15),
+    ...         ),
+    ...     ],
+    ...     metrics=[AreaUnderROC(), AreaUnderPR()]
+    ... )
+    >>> workflow.run()  # doctest: +SKIP
     """
 
     jobs = list[Job]
@@ -141,6 +133,18 @@ class JobBasedWorkflow:
     fit_unsupervised_on_test_data: bool
     fit_semi_supervised_on_test_data: bool
     show_progress: bool
+
+    attribute_validation = {
+        "jobs": ListAttribute(ObjectAttribute(Job), minimum_length=1),
+        "metrics": ListAttribute(ObjectAttribute(ProbaMetric), minimum_length=1),
+        "n_jobs": IntegerAttribute(minimum=1),
+        "trace_memory": BoolAttribute(),
+        "anomaly_scores_path": PathAttribute(must_exist=False) | NoneAttribute(),
+        "error_log_path": PathAttribute(must_exist=False),
+        "fit_unsupervised_on_test_data": BoolAttribute(),
+        "fit_semi_supervised_on_test_data": BoolAttribute(),
+        "show_progress": BoolAttribute(),
+    }
 
     def __init__(
         self,
@@ -155,31 +159,12 @@ class JobBasedWorkflow:
         fit_semi_supervised_on_test_data: bool = False,
         show_progress: bool = False,
     ):
-
-        # Check the given jobs
-        if not is_valid_list(jobs, Job):
-            raise TypeError("The given jobs should be a list of Job-objects!")
-        if len(jobs) == 0:
-            raise ValueError("At least one job should be given to the workflow!")
-
-        # Make sure the inputs are lists.
+        # Add thresholding to the binary metrics
         metrics = convert_to_list(metrics)
         thresholds = convert_to_list(thresholds or [])
-
-        # Add thresholding to the binary metrics
-        if len(thresholds) == 0 and any(
-            isinstance(metric, BinaryMetric) for metric in metrics
-        ):
-            raise ValueError(
-                "There should be at least one thresholding option if a binary metric is passed!"
-            )
-        proba_metrics = convert_to_proba_metrics(metrics=metrics, thresholds=thresholds)
-
-        # Perform checks on input
-        if len(metrics) == 0:
-            raise ValueError("At least one metrics should be given to the workflow!")
-        if n_jobs < 1:
-            raise ValueError("There should be at least one job within a workflow!")
+        proba_metrics = _convert_to_proba_metrics(
+            metrics=metrics, thresholds=thresholds
+        )
 
         # Set the properties of this workflow
         self.jobs = jobs
@@ -423,6 +408,26 @@ def _single_job(
 
     # Return the results
     return results
+
+
+def _convert_to_proba_metrics(
+    metrics: list[Metric], thresholds: list[Thresholding]
+) -> list[ProbaMetric]:
+    """The given lists are assumed to be non-empty."""
+    proba_metrics = []
+    for metric in metrics:
+        if isinstance(metric, BinaryMetric):
+            if len(thresholds) == 0:
+                raise ValueError(
+                    "A binary metric is given but no thresholds are given!"
+                )
+            proba_metrics.extend(
+                ThresholdMetric(thresholder=threshold, metric=metric)
+                for threshold in thresholds
+            )
+        elif isinstance(metric, ProbaMetric):
+            proba_metrics.append(metric)
+    return proba_metrics
 
 
 def _start_tracing_runtime() -> float:
