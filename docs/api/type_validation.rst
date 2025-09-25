@@ -27,5 +27,6 @@ Available Validators
     LiteralAttribute
     NoneAttribute
     ObjectAttribute
+    PathAttribute
     UnionAttribute
     WindowSizeAttribute

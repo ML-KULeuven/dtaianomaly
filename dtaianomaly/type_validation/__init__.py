@@ -14,6 +14,7 @@ from ._ListAttribute import ListAttribute
 from ._LiteralAttribute import LiteralAttribute
 from ._NoneAttribute import NoneAttribute
 from ._ObjectAttribute import ObjectAttribute
+from ._PathAttribute import PathAttribute
 from ._WindowSizeAttribute import WindowSizeAttribute
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "ListAttribute",
     "WindowSizeAttribute",
     "ObjectAttribute",
+    "PathAttribute",
 ]
