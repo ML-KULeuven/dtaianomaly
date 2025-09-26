@@ -30,10 +30,10 @@ anomaly_detectors = [
     anomaly_detection.LongShortTermMemoryNetwork,
     anomaly_detection.Transformer,
     anomaly_detection.LocalPolynomialApproximation,
-    anomaly_detection.ChronosAnomalyDetector,
+    anomaly_detection.Chronos,
     anomaly_detection.SpectralResidual,
-    anomaly_detection.MOMENTAnomalyDetector,
-    anomaly_detection.TimeMoEAnomalyDetector,
+    anomaly_detection.MOMENT,
+    anomaly_detection.TimeMoE,
     anomaly_detection.RobustRandomCutForestAnomalyDetector,
 ]
 data_loaders = [

@@ -35,7 +35,7 @@ class TestMedianMethod:
         with pytest.raises(ValueError):
             SpectralResidual(moving_average_window_size)
 
-    @pytest.mark.parametrize("epsilon", [1e-5, 1e-3, 0.1, 1.0, 2])
+    @pytest.mark.parametrize("epsilon", [1e-5, 1e-3, 0.1, 1.0, 2.0])
     def test_epsilon_valid(self, epsilon):
         detector = SpectralResidual(3, epsilon)
         assert detector.epsilon == epsilon

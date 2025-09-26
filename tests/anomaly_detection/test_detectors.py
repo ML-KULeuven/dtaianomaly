@@ -7,27 +7,18 @@ from sklearn.exceptions import NotFittedError
 
 from dtaianomaly import anomaly_detection, pipeline, preprocessing, utils
 
-DETECTORS_WITHOUT_FITTING = [
-    anomaly_detection.baselines.AlwaysNormal,
-    anomaly_detection.baselines.AlwaysAnomalous,
-    anomaly_detection.baselines.RandomDetector,
-    anomaly_detection.DWT_MLEAD,
-    anomaly_detection.LocalPolynomialApproximation,
-    anomaly_detection.MedianMethod,
-    anomaly_detection.SpectralResidual,
-]
 DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.DWT_MLEAD,
     anomaly_detection.LocalPolynomialApproximation,
     anomaly_detection.MedianMethod,
     anomaly_detection.KShapeAnomalyDetector,
-    anomaly_detection.ChronosAnomalyDetector,
+    anomaly_detection.Chronos,
     anomaly_detection.SpectralResidual,
-    anomaly_detection.MOMENTAnomalyDetector,
-    anomaly_detection.TimeMoEAnomalyDetector,
+    anomaly_detection.MOMENT,
+    anomaly_detection.TimeMoE,
 ]
 DETECTORS_TO_EXCLUDE = [
-    anomaly_detection.MOMENTAnomalyDetector,  # Due to dependency conflicts
+    anomaly_detection.MOMENT,  # Due to dependency conflicts
 ]
 
 
@@ -118,7 +109,7 @@ class TestAnomalyDetectors:
 
     def test_decision_function_not_fitted(self, cls, univariate_time_series):
         detector = initialize(cls)
-        if type(detector) not in DETECTORS_WITHOUT_FITTING:
+        if detector.requires_fitting():
             with pytest.raises(NotFittedError):
                 detector.decision_function(univariate_time_series)
 
@@ -149,7 +140,7 @@ class TestAnomalyDetectors:
     def test_multivariate(self, cls, multivariate_time_series):
         detector = initialize(cls)
         if type(detector) in DETECTORS_NOT_MULTIVARIATE:
-            if type(detector) not in DETECTORS_WITHOUT_FITTING:
+            if detector.requires_fitting():
                 with pytest.raises(ValueError):
                     detector.fit(multivariate_time_series)
                 detector.fit(

@@ -254,8 +254,8 @@ class TestInterpretEntry:
     )
     @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test(self, cls, infer_entry, monkeypatch):
-        if cls == anomaly_detection.MOMENTAnomalyDetector:
-            monkeypatch.setattr(sys, "version_info", (3, 10, 7, "final", 0))
+        if cls == anomaly_detection.MOMENT:
+            monkeypatch.setattr(sys, "version_info", (3, 11, 7, "final", 0))
             sys.modules["momentfm"] = types.ModuleType("momentfm")
 
         entry = infer_entry(cls)
@@ -270,6 +270,8 @@ class TestInterpretEntry:
                 )
             elif isinstance(value, dict):
                 assert str(getattr(read_object, key)) == str(_interpret_entry(value))
+            elif isinstance(value, tuple):
+                assert getattr(read_object, key) == list(value)
             elif hasattr(read_object, key):
                 assert getattr(read_object, key) == value
             else:
@@ -277,7 +279,7 @@ class TestInterpretEntry:
                     f"Object should either have '{key}' as attribute, or have 'kwargs' as attribute, which in turn has '{key}' as attribute!"
                 )
 
-        if cls == anomaly_detection.MOMENTAnomalyDetector:
+        if cls == anomaly_detection.MOMENT:
             del sys.modules["momentfm"]
 
     @pytest.mark.parametrize("cls", ALL_CLASSES)

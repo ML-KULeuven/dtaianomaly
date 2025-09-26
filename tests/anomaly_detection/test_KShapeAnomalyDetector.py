@@ -54,7 +54,9 @@ class TestKShapeAnomalyDetector:
         KShapeAnomalyDetector(
             5, sequence_length_multiplier=2.5
         )  # Doesn't raise an error
-        KShapeAnomalyDetector(5, sequence_length_multiplier=3)  # Doesn't raise an error
+        KShapeAnomalyDetector(
+            5, sequence_length_multiplier=3.0
+        )  # Doesn't raise an error
 
     def test_initialize_too_small_sequance_length_multiplier(self):
         with pytest.raises(ValueError):
@@ -64,7 +66,7 @@ class TestKShapeAnomalyDetector:
         with pytest.raises(ValueError):
             KShapeAnomalyDetector(window_size=15, sequence_length_multiplier=0.9999)
         KShapeAnomalyDetector(
-            window_size=15, sequence_length_multiplier=1
+            window_size=15, sequence_length_multiplier=1.0
         )  # Doesn't raise an error with float
 
     def test_initialize_non_float_overlap_rate(self):
@@ -101,22 +103,3 @@ class TestKShapeAnomalyDetector:
         for i in range(len(theta)):
             assert np.array_equal(detector.centroids_[i], theta[i][0])
             assert detector.weights_[i] == theta[i][1]
-
-    def test_str(self):
-        assert str(KShapeAnomalyDetector(5)) == "KShapeAnomalyDetector(window_size=5)"
-        assert (
-            str(KShapeAnomalyDetector(15, sequence_length_multiplier=2.5))
-            == "KShapeAnomalyDetector(window_size=15,sequence_length_multiplier=2.5)"
-        )
-        assert (
-            str(KShapeAnomalyDetector(15, sequence_length_multiplier=2))
-            == "KShapeAnomalyDetector(window_size=15,sequence_length_multiplier=2)"
-        )
-        assert (
-            str(KShapeAnomalyDetector(15, overlap_rate=0.15))
-            == "KShapeAnomalyDetector(window_size=15,overlap_rate=0.15)"
-        )
-        assert (
-            str(KShapeAnomalyDetector(25, n_clusters=2))
-            == "KShapeAnomalyDetector(window_size=25,n_clusters=2)"
-        )

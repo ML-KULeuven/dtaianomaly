@@ -9,34 +9,8 @@ from conftest import (
     is_un_flatten,
 )
 
-from dtaianomaly.anomaly_detection import (
-    BaseNeuralDetector,
-    MultilayerPerceptron,
-    Supervision,
-)
-
-
-class TestMultilayerPerceptron:
-
-    def test_supervision(self):
-        assert (
-            MultilayerPerceptron(window_size=100).supervision
-            == Supervision.SEMI_SUPERVISED
-        )
-
-    def test_str(self):
-        assert (
-            str(MultilayerPerceptron(window_size=100))
-            == "MultilayerPerceptron(window_size=100)"
-        )
-        assert (
-            str(MultilayerPerceptron(window_size=100, hidden_layers=[64, 32, 16]))
-            == "MultilayerPerceptron(window_size=100,hidden_layers=[64, 32, 16])"
-        )
-        assert (
-            str(MultilayerPerceptron(window_size=100, dropout_rate=0.5))
-            == "MultilayerPerceptron(window_size=100,dropout_rate=0.5)"
-        )
+from dtaianomaly.anomaly_detection import MultilayerPerceptron, Supervision
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
 
 
 class TestInitialize:
@@ -56,7 +30,7 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
 
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0, 0])
+    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
     def test_dropout_rate_valid(self, dropout_rate):
         detector = MultilayerPerceptron(window_size=16, dropout_rate=dropout_rate)
         assert detector.dropout_rate == dropout_rate
@@ -71,9 +45,7 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size=16, dropout_rate=dropout_rate)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_activation_function_valid(self, activation_function):
         detector = MultilayerPerceptron(
             window_size=16, activation_function=activation_function
@@ -178,7 +150,7 @@ class TestBuildArchitecture:
             window_size=16,
             hidden_layers=hidden_layers,
             batch_normalization=False,  # For simpler testing
-            dropout_rate=0,  # For simpler testing
+            dropout_rate=0.0,  # For simpler testing
         )
         detector.window_size_ = detector.window_size
         modules = detector._build_architecture(8).modules()
@@ -220,9 +192,7 @@ class TestBuildArchitecture:
         with pytest.raises(StopIteration):
             next(modules)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_custom_activation_function(self, activation_function):
         detector = MultilayerPerceptron(
             window_size=16, activation_function=activation_function
@@ -277,7 +247,7 @@ class TestBuildArchitecture:
             next(modules)
 
     def test_zero_dropout_rate(self):
-        detector = MultilayerPerceptron(window_size=16, dropout_rate=0)
+        detector = MultilayerPerceptron(window_size=16, dropout_rate=0.0)
         detector.window_size_ = detector.window_size
         modules = detector._build_architecture(8).modules()
 

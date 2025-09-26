@@ -13,8 +13,9 @@ from conftest import (
     is_transformer_encoder_layer,
 )
 
-from dtaianomaly.anomaly_detection import BaseNeuralDetector, Supervision, Transformer
-from dtaianomaly.anomaly_detection.Transformer import _adjust_nhead
+from dtaianomaly.anomaly_detection import Supervision, Transformer
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
+from dtaianomaly.anomaly_detection._Transformer import _adjust_nhead
 
 
 class TestTransformer:
@@ -95,7 +96,7 @@ class TestInitialize:
         with pytest.raises(TypeError):
             Transformer(window_size=16, bias=bias)
 
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0, 0])
+    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
     def test_dropout_rate_valid(self, dropout_rate):
         detector = Transformer(window_size=16, dropout_rate=dropout_rate)
         assert detector.dropout_rate == dropout_rate
@@ -110,9 +111,7 @@ class TestInitialize:
         with pytest.raises(ValueError):
             Transformer(window_size=16, dropout_rate=dropout_rate)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_activation_function_valid(self, activation_function):
         detector = Transformer(window_size=16, activation_function=activation_function)
         assert detector.activation_function == activation_function
@@ -203,9 +202,7 @@ class TestBuildArchitecture:
     @pytest.mark.parametrize("dimension_feedforward", [64, 128])
     @pytest.mark.parametrize("bias", [True, False])
     @pytest.mark.parametrize("dropout_rate", [0.2])
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_custom(
         self,
         forecast_length,

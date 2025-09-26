@@ -2,30 +2,7 @@ import pytest
 from conftest import is_flatten, is_linear, is_lstm
 
 from dtaianomaly.anomaly_detection import LongShortTermMemoryNetwork, Supervision
-from dtaianomaly.anomaly_detection.LongShortTermMemoryNetwork import _LSTM
-
-
-class TestLongShortTermMemoryNetwork:
-
-    def test_supervision(self):
-        assert (
-            LongShortTermMemoryNetwork(window_size=100).supervision
-            == Supervision.SEMI_SUPERVISED
-        )
-
-    def test_str(self):
-        assert (
-            str(LongShortTermMemoryNetwork(window_size=100))
-            == "LongShortTermMemoryNetwork(window_size=100)"
-        )
-        assert (
-            str(LongShortTermMemoryNetwork(window_size=100, hidden_units=17))
-            == "LongShortTermMemoryNetwork(window_size=100,hidden_units=17)"
-        )
-        assert (
-            str(LongShortTermMemoryNetwork(window_size=100, dropout_rate=0.5))
-            == "LongShortTermMemoryNetwork(window_size=100,dropout_rate=0.5)"
-        )
+from dtaianomaly.anomaly_detection._LongShortTermMemoryNetwork import _LSTM
 
 
 class TestInitialize:
@@ -72,7 +49,7 @@ class TestInitialize:
         with pytest.raises(TypeError):
             LongShortTermMemoryNetwork(window_size=16, bias=bias)
 
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0, 0])
+    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
     def test_dropout_rate_valid(self, dropout_rate):
         detector = LongShortTermMemoryNetwork(window_size=16, dropout_rate=dropout_rate)
         assert detector.dropout_rate == dropout_rate
@@ -108,7 +85,7 @@ class TestBuildArchitecture:
     @pytest.mark.parametrize("hidden_units", [1, 4, 8])
     @pytest.mark.parametrize("num_lstm_layers", [1, 4, 8])
     @pytest.mark.parametrize("bias", [True, False])
-    @pytest.mark.parametrize("dropout_rate", [0, 0.2])
+    @pytest.mark.parametrize("dropout_rate", [0.0, 0.2])
     def test_custom(
         self, forecast_length, hidden_units, num_lstm_layers, bias, dropout_rate
     ):

@@ -4,29 +4,12 @@ import torch
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection import BaseNeuralDetector, MultilayerPerceptron
-
-_VALID_ERROR_METRICS = ["mean-absolute-error", "mean-squared-error"]
-
-
-class TestNeuralBaseDetector:
-
-    def test_str(self):
-        assert (
-            str(MultilayerPerceptron(window_size=100))
-            == "MultilayerPerceptron(window_size=100)"
-        )
-        assert (
-            str(MultilayerPerceptron(window_size=100, learning_rate=0.01))
-            == "MultilayerPerceptron(window_size=100,learning_rate=0.01)"
-        )
-        assert (
-            str(
-                MultilayerPerceptron(
-                    window_size=100, data_loader_kwargs={"shuffle": True}
-                )
-            )
-            == "MultilayerPerceptron(window_size=100,data_loader_kwargs={'shuffle': True})"
-        )
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import (
+    ACTIVATION_FUNCTIONS,
+    COMPILE_MODES,
+    LOSSES,
+    OPTIMIZERS,
+)
 
 
 class TestInitialize:
@@ -75,29 +58,10 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", batch_size=batch_size)
 
-    def test_data_loader_kwargs_valid(self):
-        detector = MultilayerPerceptron(
-            window_size="fft", data_loader_kwargs={"shuffle": True}
-        )
-        assert detector.data_loader_kwargs == {"shuffle": True}
-
-    def test_data_loader_kwargs_invalid_type(self):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(
-                window_size="fft", data_loader_kwargs={"invalid-kwarg": True}
-            )
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", data_loader_kwargs="invalid-kwarg")
-
-    @pytest.mark.parametrize("optimizer", BaseNeuralDetector._OPTIMIZERS.keys())
+    @pytest.mark.parametrize("optimizer", OPTIMIZERS)
     def test_optimizer_valid(self, optimizer):
         detector = MultilayerPerceptron(window_size="fft", optimizer=optimizer)
         assert detector.optimizer == optimizer
-
-    def test_optimizer_valid_callable(self):
-        MultilayerPerceptron(
-            window_size="fft", optimizer=lambda x: torch.optim.Adagrad(x)
-        )
 
     @pytest.mark.parametrize("optimizer", [10, False])
     def test_optimizer_invalid_type(self, optimizer):
@@ -115,17 +79,17 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", optimizer=optimizer)
 
-    @pytest.mark.parametrize("learning_rate", [0.01, 1.0, 10])
+    @pytest.mark.parametrize("learning_rate", [0.01, 1.0, 10.0])
     def test_learning_rate_valid(self, learning_rate):
         detector = MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
         assert detector.learning_rate == learning_rate
 
-    @pytest.mark.parametrize("learning_rate", ["0.001", False])
+    @pytest.mark.parametrize("learning_rate", ["0.001", False, 0])
     def test_learning_rate_invalid_type(self, learning_rate):
         with pytest.raises(TypeError):
             MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
 
-    @pytest.mark.parametrize("learning_rate", [-1, 0])
+    @pytest.mark.parametrize("learning_rate", [-1.0, 0.0])
     def test_learning_rate_invalid_value(self, learning_rate):
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
@@ -173,11 +137,7 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", n_epochs=n_epochs)
 
-    @pytest.mark.parametrize(
-        "loss_function",
-        [torch.nn.MSELoss(), torch.nn.L1Loss()]
-        + list(BaseNeuralDetector._LOSSES.keys()),
-    )
+    @pytest.mark.parametrize("loss_function", LOSSES)
     def test_loss_function_valid(self, loss_function):
         detector = MultilayerPerceptron(window_size="fft", loss_function=loss_function)
         assert detector.loss_function == loss_function
@@ -310,10 +270,20 @@ class TestBuildDataLoader:
 
 class TestBuildActivationFunction:
 
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
+    def test(self, activation_function):  # All defined functions work
+        BaseNeuralDetector._build_activation_function(activation_function)
+
     @pytest.mark.parametrize(
-        "activation_function,cls", BaseNeuralDetector._ACTIVATION_FUNCTIONS.items()
+        "activation_function,cls",
+        [
+            ("linear", torch.nn.Identity),
+            ("relu", torch.nn.ReLU),
+            ("sigmoid", torch.nn.Sigmoid),
+            ("tanh", torch.nn.Tanh),
+        ],
     )
-    def test(self, activation_function, cls):
+    def test_valid_return(self, activation_function, cls):
         assert isinstance(
             BaseNeuralDetector._build_activation_function(activation_function), cls
         )
@@ -325,21 +295,33 @@ class TestBuildActivationFunction:
 
 class TestBuildOptimizer:
 
-    @pytest.mark.parametrize("optimizer,cls", BaseNeuralDetector._OPTIMIZERS.items())
-    def test(self, optimizer, cls):
+    @pytest.mark.parametrize("optimizer", OPTIMIZERS)
+    def test(self, optimizer):  # All defined functions work
+        detector = MultilayerPerceptron(window_size=1, optimizer=optimizer)
+        detector.window_size_ = detector.window_size
+        architecture = detector._build_architecture(100)
+        detector._build_optimizer(architecture.parameters())
+
+    @pytest.mark.parametrize(
+        "optimizer,cls",
+        [
+            ("adam", torch.optim.Adam),
+            ("sgd", torch.optim.SGD),
+        ],
+    )
+    def test_valid_return(self, optimizer, cls):
         detector = MultilayerPerceptron(window_size=1, optimizer=optimizer)
         detector.window_size_ = detector.window_size
         architecture = detector._build_architecture(100)
         assert isinstance(detector._build_optimizer(architecture.parameters()), cls)
 
-    def test_invalid_optimizer(self):
-        detector = MultilayerPerceptron(window_size=1, optimizer="adam")
-        detector.window_size_ = detector.window_size
-        detector.window_size_ = detector.window_size
-        architecture = detector._build_architecture(100)
-        detector.optimizer = "invalid"
-        with pytest.raises(ValueError):
-            detector._build_optimizer(architecture.parameters())
+    # def test_invalid_optimizer(self):
+    #     detector = MultilayerPerceptron(window_size=1, optimizer="adam")
+    #     detector.window_size_ = detector.window_size
+    #     architecture = detector._build_architecture(100)
+    #     detector.optimizer = "invalid"  #This is not possible due to type validation
+    #     with pytest.raises(TypeError):
+    #         detector._build_optimizer(architecture.parameters())
 
     @pytest.mark.parametrize("learning_rate", [0.01, 0.00005])
     def test_learning_rate(self, learning_rate):
@@ -349,50 +331,37 @@ class TestBuildOptimizer:
         optimizer = detector._build_optimizer(architecture.parameters())
         assert optimizer.param_groups[0]["lr"] == learning_rate
 
-    def test_learning_rate_with_callable_optimizer(self):
-        detector = MultilayerPerceptron(window_size=1, learning_rate=10)
-        detector.window_size_ = detector.window_size
-        architecture = detector._build_architecture(100)
-        optimizer = detector._build_optimizer(architecture.parameters())
-        assert optimizer.param_groups[0]["lr"] == 10
-
-        detector = MultilayerPerceptron(
-            window_size=1,
-            learning_rate=10,
-            optimizer=lambda x: torch.optim.Adam(x, lr=0.1),
-        )
-        detector.window_size_ = detector.window_size
-        architecture = detector._build_architecture(100)
-        optimizer = detector._build_optimizer(architecture.parameters())
-        assert optimizer.param_groups[0]["lr"] == 0.1
-
 
 class TestBuildLossFunction:
 
-    @pytest.mark.parametrize("loss_function,cls", BaseNeuralDetector._LOSSES.items())
-    def test_literal(self, loss_function, cls):
-        detector = MultilayerPerceptron(16, loss_function=loss_function)
-        assert isinstance(detector._build_loss_function(), cls)
+    @pytest.mark.parametrize("loss", LOSSES)
+    def test(self, loss):  # All defined functions work
+        MultilayerPerceptron(16, loss_function=loss)
 
-    @pytest.mark.parametrize("loss_function", [torch.nn.MSELoss(), torch.nn.L1Loss()])
-    def test_module(self, loss_function):
-        detector = MultilayerPerceptron(16, loss_function=loss_function)
-        assert isinstance(detector._build_loss_function(), loss_function.__class__)
+    @pytest.mark.parametrize(
+        "loss,cls",
+        [
+            ("mse", torch.nn.MSELoss),
+            ("l1", torch.nn.L1Loss),
+            ("huber", torch.nn.SmoothL1Loss),
+        ],
+    )
+    def test_valid_return(self, loss, cls):
+        assert isinstance(
+            MultilayerPerceptron(16, loss_function=loss)._build_loss_function(), cls
+        )
 
-    def test_invalid(self):
-        detector = MultilayerPerceptron(16)
-        detector.loss_function = "MSE"
-        with pytest.raises(ValueError):
-            detector._build_loss_function()
+    # def test_invalid(self):
+    #     detector = MultilayerPerceptron(16)
+    #     detector.loss_function = "MSE"  # This raises an error due to type validation
+    #     with pytest.raises(ValueError):
+    #         detector._build_loss_function()
 
 
 @pytest.mark.slow
 class TestCompile:
 
-    @pytest.mark.parametrize(
-        "compile_mode",
-        ["default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"],
-    )
+    @pytest.mark.parametrize("compile_mode", COMPILE_MODES)
     def test(self, compile_mode, univariate_time_series):
         detector = MultilayerPerceptron(
             window_size=12, compile_model=True, compile_mode=compile_mode

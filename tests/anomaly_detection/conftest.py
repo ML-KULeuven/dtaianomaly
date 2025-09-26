@@ -1,6 +1,6 @@
 import torch
 
-from dtaianomaly.anomaly_detection.BaseNeuralDetector import BaseNeuralDetector
+from dtaianomaly.anomaly_detection import BaseNeuralDetector
 
 
 def is_sequential(module):
@@ -26,7 +26,9 @@ def is_normalization(module, normalized_shape):
 
 
 def is_activation(module, activation):
-    return isinstance(module, BaseNeuralDetector._ACTIVATION_FUNCTIONS[activation])
+    return isinstance(
+        module, BaseNeuralDetector._build_activation_function(activation).__class__
+    )
 
 
 def is_dropout(module, p):

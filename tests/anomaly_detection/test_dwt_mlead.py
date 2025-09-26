@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from dtaianomaly.anomaly_detection import DWT_MLEAD, Supervision
-from dtaianomaly.anomaly_detection.DWT_MLEAD import _multilevel_haar_transform
+from dtaianomaly.anomaly_detection._DWT_MLEAD import _multilevel_haar_transform
 
 
 @pytest.mark.numba
@@ -47,7 +47,7 @@ class TestDWTMLEAD:
         DWT_MLEAD(quantile_boundary_type="percentile")
 
     def test_initialize_not_implemented_quantile_boundary_type(self):
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(ValueError):
             DWT_MLEAD(quantile_boundary_type="monte-carlo")
         DWT_MLEAD(quantile_boundary_type="percentile")
 
@@ -57,15 +57,15 @@ class TestDWTMLEAD:
         with pytest.raises(TypeError):
             DWT_MLEAD(quantile_epsilon=True)
         DWT_MLEAD(quantile_epsilon=0.5)
-        DWT_MLEAD(quantile_epsilon=0)
+        DWT_MLEAD(quantile_epsilon=0.0)
 
     def test_initialize_invalid_quantile_epsilon(self):
         with pytest.raises(ValueError):
             DWT_MLEAD(quantile_epsilon=-0.5)
         with pytest.raises(ValueError):
             DWT_MLEAD(quantile_epsilon=1.1)
-        DWT_MLEAD(quantile_epsilon=1)
-        DWT_MLEAD(quantile_epsilon=0)
+        DWT_MLEAD(quantile_epsilon=1.0)
+        DWT_MLEAD(quantile_epsilon=0.0)
 
     def test_initialize_non_str_padding_mode(self):
         with pytest.raises(TypeError):
@@ -111,12 +111,6 @@ class TestDWTMLEAD:
         DWT_MLEAD(start_level=5).decision_function(np.zeros(shape=33))
         with pytest.raises(ValueError):
             DWT_MLEAD(start_level=5).decision_function(np.zeros(shape=32))
-
-    def test_invalid_quantile_boundary_type(self):
-        dwt_mlead = DWT_MLEAD()
-        dwt_mlead.quantile_boundary_type = "invalid"
-        with pytest.raises(ValueError):
-            dwt_mlead.decision_function(np.zeros(shape=128))
 
     def test_multilevel_haar_transform_invalid_max_levels(self):
         with pytest.raises(ValueError):

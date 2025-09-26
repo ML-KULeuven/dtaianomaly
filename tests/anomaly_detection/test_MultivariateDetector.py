@@ -64,13 +64,6 @@ class TestMultivariateDetector:
         detector.fit(multivariate_time_series)
         detector.decision_function(multivariate_time_series)
 
-    def test_invalid_aggregation(self, multivariate_time_series):
-        detector = MultivariateDetector(RandomDetector(seed=0), "mean")
-        detector.fit(multivariate_time_series)
-        detector.aggregation = "INVALID"
-        with pytest.raises(ValueError):
-            detector.decision_function(multivariate_time_series)
-
     def test_initialize_non_bool_raise_warning_for_univariate(self):
         with pytest.raises(TypeError):
             MultivariateDetector(DummyDetector(), raise_warning_for_univariate=0)

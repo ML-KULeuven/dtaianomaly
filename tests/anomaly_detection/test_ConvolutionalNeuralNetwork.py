@@ -9,35 +9,9 @@ from conftest import (
     is_sequential,
 )
 
-from dtaianomaly.anomaly_detection import (
-    BaseNeuralDetector,
-    ConvolutionalNeuralNetwork,
-    Supervision,
-)
-from dtaianomaly.anomaly_detection.ConvolutionalNeuralNetwork import _CNN
-
-
-class TestConvolutionalNeuralNetwork:
-
-    def test_supervision(self):
-        assert (
-            ConvolutionalNeuralNetwork(window_size=100).supervision
-            == Supervision.SEMI_SUPERVISED
-        )
-
-    def test_str(self):
-        assert (
-            str(ConvolutionalNeuralNetwork(window_size=100))
-            == "ConvolutionalNeuralNetwork(window_size=100)"
-        )
-        assert (
-            str(ConvolutionalNeuralNetwork(window_size=100, hidden_layers=[16, 16, 16]))
-            == "ConvolutionalNeuralNetwork(window_size=100,hidden_layers=[16, 16, 16])"
-        )
-        assert (
-            str(ConvolutionalNeuralNetwork(window_size=100, kernel_size=9))
-            == "ConvolutionalNeuralNetwork(window_size=100,kernel_size=9)"
-        )
+from dtaianomaly.anomaly_detection import ConvolutionalNeuralNetwork, Supervision
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
+from dtaianomaly.anomaly_detection._ConvolutionalNeuralNetwork import _CNN
 
 
 class TestInitialize:
@@ -72,9 +46,7 @@ class TestInitialize:
         with pytest.raises(ValueError):
             ConvolutionalNeuralNetwork(window_size=16, hidden_layers=dimensions)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_activation_function_valid(self, activation_function):
         detector = ConvolutionalNeuralNetwork(
             window_size=16, activation_function=activation_function
@@ -195,9 +167,7 @@ class TestBuildArchitecture:
         with pytest.raises(StopIteration):
             next(modules)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_custom_activation_function(self, activation_function):
         detector = ConvolutionalNeuralNetwork(
             window_size=16, activation_function=activation_function

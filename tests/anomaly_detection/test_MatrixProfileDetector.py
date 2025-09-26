@@ -39,13 +39,13 @@ class TestMatrixProfileDetector:
         with pytest.raises(TypeError):
             MatrixProfileDetector(window_size=15, p="a string")
         MatrixProfileDetector(5, p=2.5)  # Doesn't raise an error with float
-        MatrixProfileDetector(5, p=3)  # Doesn't raise an error with int
+        MatrixProfileDetector(5, p=3.0)  # Doesn't raise an error with int
 
     def test_initialize_too_small_p(self):
         with pytest.raises(ValueError):
             MatrixProfileDetector(window_size=15, p=0.5)
         MatrixProfileDetector(5, p=2.5)  # Doesn't raise an error with float
-        MatrixProfileDetector(5, p=3)  # Doesn't raise an error with int
+        MatrixProfileDetector(5, p=3.0)  # Doesn't raise an error with int
 
     def test_initialize_non_integer_k(self):
         with pytest.raises(TypeError):

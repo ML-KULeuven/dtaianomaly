@@ -9,25 +9,9 @@ from conftest import (
     is_un_flatten,
 )
 
-from dtaianomaly.anomaly_detection import AutoEncoder, BaseNeuralDetector, Supervision
-from dtaianomaly.anomaly_detection.AutoEncoder import _AutoEncoderArchitecture
-
-
-class TestAutoEncoder:
-
-    def test_supervision(self):
-        assert AutoEncoder(window_size=100).supervision == Supervision.SEMI_SUPERVISED
-
-    def test_str(self):
-        assert str(AutoEncoder(window_size=100)) == "AutoEncoder(window_size=100)"
-        assert (
-            str(AutoEncoder(window_size=100, encoder_dimensions=[64, 32]))
-            == "AutoEncoder(window_size=100,encoder_dimensions=[64, 32])"
-        )
-        assert (
-            str(AutoEncoder(window_size=100, dropout_rate=0.5))
-            == "AutoEncoder(window_size=100,dropout_rate=0.5)"
-        )
+from dtaianomaly.anomaly_detection import AutoEncoder
+from dtaianomaly.anomaly_detection._AutoEncoder import _AutoEncoderArchitecture
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
 
 
 class TestInitialization:
@@ -77,12 +61,12 @@ class TestInitialization:
         with pytest.raises(ValueError):
             AutoEncoder(window_size=16, decoder_dimensions=dimensions)
 
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0, 0])
+    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
     def test_dropout_rate_valid(self, dropout_rate):
         detector = AutoEncoder(window_size=16, dropout_rate=dropout_rate)
         assert detector.dropout_rate == dropout_rate
 
-    @pytest.mark.parametrize("dropout_rate", ["0.1", [0.2], True])
+    @pytest.mark.parametrize("dropout_rate", ["0.1", [0.2], True, 1])
     def test_dropout_rate_invalid_type(self, dropout_rate):
         with pytest.raises(TypeError):
             AutoEncoder(window_size=16, dropout_rate=dropout_rate)
@@ -92,9 +76,7 @@ class TestInitialization:
         with pytest.raises(ValueError):
             AutoEncoder(window_size=16, dropout_rate=dropout_rate)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_activation_function_valid(self, activation_function):
         detector = AutoEncoder(window_size=16, activation_function=activation_function)
         assert detector.activation_function == activation_function
@@ -172,7 +154,7 @@ class TestBuildArchitecture:
             encoder_dimensions=encoder_dimensions,
             latent_space_dimension=8,
             batch_normalization=False,  # For simpler testing
-            dropout_rate=0,  # For simpler testing
+            dropout_rate=0.0,  # For simpler testing
         )
         detector.window_size_ = detector.window_size
         modules = detector._build_architecture(8).modules()
@@ -244,7 +226,7 @@ class TestBuildArchitecture:
             decoder_dimensions=decoder_dimensions,
             latent_space_dimension=8,
             batch_normalization=False,  # For simpler testing
-            dropout_rate=0,  # For simpler testing
+            dropout_rate=0.0,  # For simpler testing
         )
         detector.window_size_ = detector.window_size
         modules = detector._build_architecture(8).modules()
@@ -306,9 +288,7 @@ class TestBuildArchitecture:
         with pytest.raises(StopIteration):
             next(modules)
 
-    @pytest.mark.parametrize(
-        "activation_function", BaseNeuralDetector._ACTIVATION_FUNCTIONS.keys()
-    )
+    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
     def test_custom_activation_function(self, activation_function):
         detector = AutoEncoder(window_size=16, activation_function=activation_function)
         detector.window_size_ = detector.window_size
@@ -379,7 +359,7 @@ class TestBuildArchitecture:
             next(modules)
 
     def test_zero_dropout_rate(self):
-        detector = AutoEncoder(window_size=16, dropout_rate=0)
+        detector = AutoEncoder(window_size=16, dropout_rate=0.0)
         detector.window_size_ = detector.window_size
         modules = detector._build_architecture(8).modules()
 

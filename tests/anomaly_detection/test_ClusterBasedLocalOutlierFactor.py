@@ -50,7 +50,7 @@ class TestClusterBasedLocalOutlierFactor:
 
     def test_alpha(self):
         ClusterBasedLocalOutlierFactor(15, alpha=0.5)
-        ClusterBasedLocalOutlierFactor(15, alpha=1)
+        ClusterBasedLocalOutlierFactor(15, alpha=1.0)
         with pytest.raises(TypeError):
             ClusterBasedLocalOutlierFactor(15, alpha="0.5")
         with pytest.raises(TypeError):
@@ -58,12 +58,12 @@ class TestClusterBasedLocalOutlierFactor:
         with pytest.raises(ValueError):
             ClusterBasedLocalOutlierFactor(15, alpha=-0.1)
         with pytest.raises(ValueError):
-            ClusterBasedLocalOutlierFactor(15, alpha=-1)
+            ClusterBasedLocalOutlierFactor(15, alpha=-1.0)
         with pytest.raises(ValueError):
             ClusterBasedLocalOutlierFactor(15, alpha=1.1)
 
     def test_beta(self):
-        ClusterBasedLocalOutlierFactor(15, beta=10)
+        ClusterBasedLocalOutlierFactor(15, beta=10.0)
         ClusterBasedLocalOutlierFactor(15, beta=4.3)
         ClusterBasedLocalOutlierFactor(15, beta=1.0)
         with pytest.raises(TypeError):
@@ -73,4 +73,4 @@ class TestClusterBasedLocalOutlierFactor:
         with pytest.raises(ValueError):
             ClusterBasedLocalOutlierFactor(15, beta=0.9)
         with pytest.raises(ValueError):
-            ClusterBasedLocalOutlierFactor(15, beta=-1)
+            ClusterBasedLocalOutlierFactor(15, beta=-1.0)
