@@ -20,6 +20,7 @@ def initialize(cls):
     return cls(**filtered_kwargs)
 
 
+@pytest.mark.numba
 @pytest.mark.parametrize("cls", all_classes(Metric, return_names=False))
 class TestMetrics:
 

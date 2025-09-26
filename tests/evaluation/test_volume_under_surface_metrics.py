@@ -27,6 +27,7 @@ def y_pred():
     return y
 
 
+@pytest.mark.numba
 class TestVUSMetrics:
 
     def test_range_pr_auc_compat(self, y_true, y_pred):

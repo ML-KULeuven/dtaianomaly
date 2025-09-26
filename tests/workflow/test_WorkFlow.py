@@ -177,6 +177,7 @@ class TestWorkflowInitialization:
 
 
 @pytest.mark.parametrize("show_progress", [True, False])
+@pytest.mark.slow
 class TestWorkflowSuccess:
     pytest.importorskip("tqdm")
 
@@ -413,6 +414,7 @@ class SupervisedDetector(BaseDetector):
         return np.zeros(X.shape[0])
 
 
+@pytest.mark.slow
 class TestWorkflowFail:
 
     def test_failed_to_read_data(self, tmp_path_factory):
@@ -658,6 +660,7 @@ class TestGetTrainTestData:
 
 
 @pytest.mark.parametrize("n_jobs", [1, 2])
+@pytest.mark.slow
 class TestShowProgress:
 
     def test_show_progress_tqdm_installed(self, monkeypatch, tmp_path_factory, n_jobs):
@@ -751,6 +754,7 @@ class TestShowProgress:
         mock.assert_not_called()
 
 
+@pytest.mark.slow
 class TestSaveAnomalyScores:
 
     def test(self, tmp_path_factory):

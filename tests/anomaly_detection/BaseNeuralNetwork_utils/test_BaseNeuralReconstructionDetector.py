@@ -24,6 +24,7 @@ class TestInitialization:
             AutoEncoder(window_size=16, error_metric=error_metric)
 
 
+@pytest.mark.slow
 class TestErrorMetric:
 
     @pytest.mark.parametrize("error_metric", _VALID_ERROR_METRICS)

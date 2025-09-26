@@ -15,6 +15,7 @@ from dtaianomaly import visualization
         (visualization.plot_with_zoom, {"start_zoom": 50, "end_zoom": 100}, False),
     ],
 )
+@pytest.mark.slow
 class TestPlottingFunctions:
 
     def test_univariate(
@@ -114,6 +115,7 @@ class TestPlottingFunctions:
         (visualization.plot_time_series_anomalies, {}, True),
     ],
 )
+@pytest.mark.slow
 class TestGivenAxis:
 
     def test_given_axis(
@@ -138,6 +140,7 @@ class TestGivenAxis:
         (visualization.plot_time_series_anomalies, {}, True),
     ],
 )
+@pytest.mark.slow
 class TestNonBinaryPrediction:
 
     def test_non_binary_y(
@@ -179,6 +182,7 @@ class TestNonBinaryPrediction:
         ),  # Test if it is possible to provide no 'y'
     ],
 )
+@pytest.mark.slow
 class TestPlotWithZoom:
 
     def test(
@@ -235,6 +239,7 @@ class TestPlotWithZoom:
         )
 
 
+@pytest.mark.slow
 class TestPlotAnomalyScoresMultiplePredictions:
 
     def test_univariate(self, univariate_time_series):
@@ -268,6 +273,7 @@ class TestPlotAnomalyScoresMultiplePredictions:
             )
 
 
+@pytest.mark.slow
 class TestPlotConfidence:
 
     def test_univariate(self, univariate_time_series):

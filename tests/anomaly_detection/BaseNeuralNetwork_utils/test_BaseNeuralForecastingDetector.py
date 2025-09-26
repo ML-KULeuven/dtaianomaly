@@ -39,6 +39,7 @@ class TestInitialize:
             MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
 
 
+@pytest.mark.slow
 class TestErrorMetric:
 
     @pytest.mark.parametrize("error_metric", _VALID_ERROR_METRICS)

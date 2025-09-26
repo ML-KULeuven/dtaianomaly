@@ -15,6 +15,7 @@ def initialize(cls):
     return cls(**filtered_kwargs)
 
 
+@pytest.mark.numba
 @pytest.mark.parametrize("cls", all_classes(ProbaMetric, return_names=False))
 class TestProbaMetric:
 

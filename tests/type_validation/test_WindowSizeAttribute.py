@@ -1,7 +1,7 @@
 import pytest
 
-from dtaianomaly.anomaly_detection.windowing_utils import AUTO_WINDOW_SIZE_COMPUTATION
 from dtaianomaly.type_validation import WindowSizeAttribute
+from dtaianomaly.windowing import AUTO_WINDOW_SIZE_COMPUTATION
 
 
 class TestNoneAttribute:

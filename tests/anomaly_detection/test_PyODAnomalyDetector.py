@@ -17,7 +17,7 @@ class TestPyodAnomalyDetector:
         detector_class(15)  # Doesn't raise an error with int
 
     def test_initialize_float_window_size(self, detector_class):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             detector_class(window_size=5.5)
 
     def test_initialize_valid_string_window_size(self, detector_class):

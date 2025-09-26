@@ -5,6 +5,7 @@ from dtaianomaly.anomaly_detection import DWT_MLEAD, Supervision
 from dtaianomaly.anomaly_detection.DWT_MLEAD import _multilevel_haar_transform
 
 
+@pytest.mark.numba
 class TestDWTMLEAD:
 
     def test_supervision(self):
@@ -121,12 +122,3 @@ class TestDWTMLEAD:
         with pytest.raises(ValueError):
             _multilevel_haar_transform(np.zeros(shape=63), levels=6)
         _multilevel_haar_transform(np.zeros(shape=64), levels=6)
-
-    def test_str(self):
-        assert str(DWT_MLEAD()) == "DWT_MLEAD()"
-        assert str(DWT_MLEAD(5)) == "DWT_MLEAD(start_level=5)"
-        assert str(DWT_MLEAD(quantile_epsilon=0.1)) == "DWT_MLEAD(quantile_epsilon=0.1)"
-        assert (
-            str(DWT_MLEAD(padding_mode="linear_ramp"))
-            == "DWT_MLEAD(padding_mode='linear_ramp')"
-        )

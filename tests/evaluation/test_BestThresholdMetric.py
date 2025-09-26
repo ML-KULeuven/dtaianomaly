@@ -1,13 +1,7 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation import (
-    AreaUnderROC,
-    BestThresholdMetric,
-    FBeta,
-    Precision,
-    Recall,
-)
+from dtaianomaly.evaluation import BestThresholdMetric, FBeta, Precision, Recall
 
 
 class TestBestThresholdMetric:

@@ -12,7 +12,7 @@ class TestKShapeAnomalyDetector:
         assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_initialize_non_int_window_size(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             KShapeAnomalyDetector(window_size=True)
         with pytest.raises(ValueError):
             KShapeAnomalyDetector(window_size="a string")
@@ -93,6 +93,7 @@ class TestKShapeAnomalyDetector:
         with pytest.raises(NotFittedError):
             detector.theta_()
 
+    @pytest.mark.slow
     def test_theta(self, univariate_time_series):
         detector = KShapeAnomalyDetector(window_size=15)
         detector.fit(univariate_time_series)

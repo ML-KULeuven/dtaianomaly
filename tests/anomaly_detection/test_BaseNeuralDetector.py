@@ -36,7 +36,7 @@ class TestInitialize:
         MultilayerPerceptron(window_size="fft")
         MultilayerPerceptron(window_size="suss")
         MultilayerPerceptron(window_size=16)
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             MultilayerPerceptron(window_size=16.0)
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size=-5)
@@ -386,6 +386,7 @@ class TestBuildLossFunction:
             detector._build_loss_function()
 
 
+@pytest.mark.slow
 class TestCompile:
 
     @pytest.mark.parametrize(
@@ -400,6 +401,7 @@ class TestCompile:
         detector.decision_function(univariate_time_series)
 
 
+@pytest.mark.slow
 class TestRandomState:
 
     @pytest.mark.parametrize(

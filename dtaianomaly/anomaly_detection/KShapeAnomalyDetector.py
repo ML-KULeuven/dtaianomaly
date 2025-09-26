@@ -94,8 +94,6 @@ class KShapeAnomalyDetector(BaseDetector):
     ):
         super().__init__(Supervision.UNSUPERVISED)
 
-        check_is_valid_window_size(window_size)
-
         if not isinstance(n_clusters, int) or isinstance(n_clusters, bool):
             raise TypeError("`n_clusters` should be integer")
         if n_clusters <= 1:

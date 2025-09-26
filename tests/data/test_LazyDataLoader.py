@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+import pytest
 
 from dtaianomaly.data import DataSet, LazyDataLoader
 
@@ -16,6 +17,7 @@ class CostlyDummyLoader(LazyDataLoader):
         )
 
 
+@pytest.mark.slow
 class TestLazyDataLoader:
 
     def test_caching(self):

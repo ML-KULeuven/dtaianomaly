@@ -10,7 +10,7 @@ class TestRobustPrincipalComponentAnalysis:
         assert detector.supervision == Supervision.SEMI_SUPERVISED
 
     def test_initialize_non_int_window_size(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             RobustPrincipalComponentAnalysis(window_size=True)
         with pytest.raises(ValueError):
             RobustPrincipalComponentAnalysis(window_size="a string")

@@ -6,6 +6,7 @@ from dtaianomaly.utils import make_intervals, np_any_axis0, np_any_axis1, np_dif
 _SEEDS = list(range(5))
 
 
+@pytest.mark.numba
 @pytest.mark.parametrize("seed", _SEEDS)
 class TestGenericFunctions:
 
@@ -22,6 +23,7 @@ class TestGenericFunctions:
         assert np.array_equal(np.diff(array), np_diff(array))
 
 
+@pytest.mark.numba
 class TestMakeIntervals:
 
     @pytest.mark.parametrize(

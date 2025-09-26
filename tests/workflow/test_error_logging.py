@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 import numpy as np
+import pytest
 
 import dtaianomaly
 from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
@@ -50,6 +51,7 @@ class ErrorAnomalyDetector(BaseDetector):
         raise Exception("An error occurred when detecting anomalies!")
 
 
+@pytest.mark.slow
 class TestErrorLogging:
 
     def test_error_loading(self, tmp_path_factory):

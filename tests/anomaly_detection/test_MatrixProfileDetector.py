@@ -11,7 +11,7 @@ class TestMatrixProfileDetector:
         assert detector.supervision == Supervision.UNSUPERVISED
 
     def test_initialize_non_int_window_size(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             MatrixProfileDetector(window_size=True)
         with pytest.raises(ValueError):
             MatrixProfileDetector(window_size="a string")
@@ -66,6 +66,7 @@ class TestMatrixProfileDetector:
             MatrixProfileDetector(window_size=15, novelty=0)
         MatrixProfileDetector(5, novelty=False)  # Doesn't raise an error
 
+    @pytest.mark.slow
     def test_novelty_univariate(self, univariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=True)
         y_pred = detector.fit(univariate_time_series).decision_function(
@@ -73,6 +74,7 @@ class TestMatrixProfileDetector:
         )
         assert y_pred.shape == (univariate_time_series.shape[0],)
 
+    @pytest.mark.slow
     def test_novelty_multivariate(self, multivariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=True)
         y_pred = detector.fit(multivariate_time_series).decision_function(
@@ -80,6 +82,7 @@ class TestMatrixProfileDetector:
         )
         assert y_pred.shape == (multivariate_time_series.shape[0],)
 
+    @pytest.mark.slow
     def test_not_fitted_no_novelty(self, univariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=False)
         detector.fit(univariate_time_series)
@@ -98,6 +101,7 @@ class TestMatrixProfileDetector:
         with pytest.raises(ValueError):
             detector.decision_function(multivariate_time_series)
 
+    @pytest.mark.slow
     def test_no_novelty_different_dimension(
         self, univariate_time_series, multivariate_time_series
     ):
@@ -105,6 +109,7 @@ class TestMatrixProfileDetector:
         detector.fit(multivariate_time_series)
         detector.decision_function(univariate_time_series)  # No error
 
+    @pytest.mark.slow
     def test_novelty_univariate_but_multi_dimensional(self, univariate_time_series):
         data_2d = univariate_time_series.reshape(-1, 1)
         assert data_2d.shape == (univariate_time_series.shape[0], 1)

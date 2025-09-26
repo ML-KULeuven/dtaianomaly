@@ -5,6 +5,7 @@ from dtaianomaly.evaluation import EventWiseFBeta, EventWisePrecision, EventWise
 from dtaianomaly.evaluation._event_wise_metrics import _compute_event_wise_metrics
 
 
+@pytest.mark.numba
 class TestComputeEventWiseMetrics:
 
     def test_perfect_match(self):
@@ -306,6 +307,7 @@ class TestComputeEventWiseMetrics:
         assert EventWiseRecall().compute(y_true, y_pred) == recall_event
 
 
+@pytest.mark.numba
 class TestMetrics:
     # From TestComputeEventWiseMetrics.test_pred_segment_between_gt
     y_true = np.array([0, 1, 1, 0, 0, 0, 1, 1, 0])

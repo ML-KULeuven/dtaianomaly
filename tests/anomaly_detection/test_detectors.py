@@ -90,6 +90,7 @@ def initialize(cls):
         "Could not form valid cluster separation. Please change n_clusters or change clustering method",
     )
 )
+@pytest.mark.slow
 class TestAnomalyDetectors:
 
     def test_fit(self, cls, univariate_time_series):
