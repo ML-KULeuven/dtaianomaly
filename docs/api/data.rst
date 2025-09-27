@@ -3,32 +3,36 @@ Data module
 
 .. automodule:: dtaianomaly.data
 
-.. autoclass:: dtaianomaly.data.LazyDataLoader
-    :members:
-
-.. autoclass:: dtaianomaly.data.DataSet
-    :members:
-
-Demonstration time series
--------------------------
-
-.. autofunction:: dtaianomaly.data.demonstration_time_series
-
-.. autoclass:: dtaianomaly.data.DemonstrationTimeSeriesLoader
-
-.. image:: /../notebooks/Demonstration-time-series.svg
-   :align: center
-   :width: 100%
-
-
-Loading data
+Base objects
 ------------
 
-.. autoclass:: dtaianomaly.data.PathDataLoader
-    :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
 
-.. autofunction:: dtaianomaly.data.from_directory
+    DataSet
+    LazyDataLoader
+    PathDataLoader
 
-.. autoclass:: dtaianomaly.data.UCRLoader
 
-.. autoclass:: dtaianomaly.data.CustomDataLoader
+Available data loaders
+----------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    DemonstrationTimeSeriesLoader
+    UCRLoader
+    CustomDataLoader
+
+
+Available functions
+-------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: function.rst
+
+    from_directory
+    demonstration_time_series

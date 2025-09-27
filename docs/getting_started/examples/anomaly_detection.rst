@@ -128,9 +128,9 @@ anomaly (precision<1).
 
 .. doctest::
 
-    >>> from dtaianomaly.thresholding import FixedCutoff
+    >>> from dtaianomaly.thresholding import FixedCutoffThreshold
     >>> from dtaianomaly.evaluation import Precision, Recall
-    >>> thresholding = FixedCutoff(0.85)
+    >>> thresholding = FixedCutoffThreshold(0.85)
     >>> y_pred_binary = thresholding.threshold(y_pred)
     >>> precision = Precision().compute(y, y_pred_binary)
     >>> recall = Recall().compute(y, y_pred_binary)

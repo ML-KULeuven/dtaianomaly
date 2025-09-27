@@ -5,8 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from dtaianomaly import utils
-from dtaianomaly.evaluation._common import make_intervals
+from dtaianomaly.utils import get_dimension, is_univariate, make_intervals
 
 
 def plot_data(
@@ -30,17 +29,17 @@ def plot_data(
 
     # Format the feature names
     if feature_names is None:
-        feature_names = [f"Feature {i+1}" for i in range(utils.get_dimension(X))]
+        feature_names = [f"Feature {i+1}" for i in range(get_dimension(X))]
 
     # Plot the data
-    if utils.is_univariate(X):
+    if is_univariate(X):
         fig.add_trace(
             go.Scatter(x=time_steps, y=X, mode="lines", name=feature_names[0]),
             row=row,
             col=col,
         )
     else:
-        for d in range(utils.get_dimension(X)):
+        for d in range(get_dimension(X)):
             fig.add_trace(
                 go.Scatter(
                     x=time_steps, y=X[:, d], mode="lines", name=feature_names[d]
@@ -136,12 +135,12 @@ def plot_detected_anomalies(
     )
 
     # Handle both multivariate an univariate time series (creat new variable to avoid modifying the array)
-    if utils.is_univariate(X):
+    if is_univariate(X):
         X_ = np.reshape(X, shape=(X.shape[0], 1))
     else:
         X_ = X
 
-    for d in range(utils.get_dimension(X)):
+    for d in range(get_dimension(X)):
         # Plot the true positives
         true_positive = (y == 1) & (y_pred == 1)
         fig.add_trace(

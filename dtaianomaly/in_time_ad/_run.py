@@ -8,10 +8,12 @@ from streamlit.web import cli as stcli
 from dtaianomaly.anomaly_detection import BaseDetector
 from dtaianomaly.data import LazyDataLoader
 from dtaianomaly.evaluation import Metric
-from dtaianomaly.in_time_ad import CustomDetectorVisualizer
-from dtaianomaly.workflow.utils import convert_to_list
+from dtaianomaly.in_time_ad._CustomDetectorVisualizer import CustomDetectorVisualizer
+from dtaianomaly.utils import convert_to_list
 
 torch.classes.__path__ = []  # To avoid torch-warning
+
+__all__ = ["run"]
 
 
 def run(
@@ -24,20 +26,23 @@ def run(
     ) = None,
 ):
     """
-    Start up the demonstrator for ``dtaianomaly``.
+    Run InTimeAD.
+
+    Start up the demonstrator for ``dtaianomaly``. This function will start a web-application
+    on your local host, to which you can navigate in order to see InTimeAD.
 
     Parameters
     ----------
-    configuration_path: str, default=None
+    configuration_path : str, default=None
         The path to the configuration file for the demonstrator. The configuration file
         must be in a json format.
-    custom_data_loaders: LazyDataLoader object or list of LazyDataLoader objects, default=None
+    custom_data_loaders : LazyDataLoader object or list of LazyDataLoader objects, default=None
         Additional data loaders which must be available within the demonstrator.
-    custom_anomaly_detectors: BaseDetector object or list of BaseDetector objects, default=None
+    custom_anomaly_detectors : BaseDetector object or list of BaseDetector objects, default=None
         Additional anomaly detectors which must be available within the demonstrator.
-    custom_metrics: Metric object or list of Metric objects, default=None
+    custom_metrics : Metric object or list of Metric objects, default=None
         Additional evaluation metrics which must be available within the demonstrator.
-    custom_visualizers: CustomDetectorVisualizer object or list of CustomDetectorVisualizer objects, default=None
+    custom_visualizers : CustomDetectorVisualizer object or list of CustomDetectorVisualizer objects, default=None
         Additional custom visualizations for certain anomaly detectors.
     """
     # Run the applications

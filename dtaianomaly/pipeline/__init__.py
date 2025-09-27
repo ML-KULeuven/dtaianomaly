@@ -11,6 +11,6 @@ better achieved by implementing the :py:class:`dtaianomaly.preprocessing.Preproc
 :py:class:`dtaianomaly.evaluation.Metric` objects.
 """
 
-from .Pipeline import Pipeline
+from ._Pipeline import Pipeline
 
 __all__ = ["Pipeline"]

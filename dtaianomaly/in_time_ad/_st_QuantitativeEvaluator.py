@@ -19,7 +19,7 @@ from dtaianomaly.in_time_ad._utils import (
 )
 from dtaianomaly.in_time_ad._visualization import get_detector_color_map
 from dtaianomaly.preprocessing import MinMaxScaler
-from dtaianomaly.thresholding import FixedCutoff
+from dtaianomaly.thresholding import FixedCutoffThreshold
 
 
 class StMetric:
@@ -27,7 +27,7 @@ class StMetric:
     metric_id: int
     metric: Metric
     parameters: dict
-    thresholding: FixedCutoff | None
+    thresholding: FixedCutoffThreshold | None
 
     def __init__(self, metric: type[Metric], configuration: dict):
         self.metric_id = StMetric.__METRIC_COUNTER
@@ -52,7 +52,7 @@ class StMetric:
 
         # Initialize the thresholding if no proba metric is given
         if not issubclass(metric, ProbaMetric):
-            self.thresholding = FixedCutoff(
+            self.thresholding = FixedCutoffThreshold(
                 configuration["parameters-required"]["cutoff"]
             )
             self.parameters["cutoff"] = configuration["parameters-optional"]["cutoff"]
@@ -162,7 +162,7 @@ class StMetric:
             ]
 
         # Optional import of thresholding
-        if isinstance(self.thresholding, FixedCutoff):
+        if isinstance(self.thresholding, FixedCutoffThreshold):
             return (
                 [
                     f"from dtaianomaly.thresholding import {self.thresholding.__class__.__name__}",

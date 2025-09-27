@@ -1,6 +1,5 @@
-
-import pytest
 import numpy as np
+import pytest
 
 from dtaianomaly.data import demonstration_time_series
 

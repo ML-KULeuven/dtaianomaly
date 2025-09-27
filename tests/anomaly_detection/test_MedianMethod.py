@@ -1,6 +1,6 @@
-
-import pytest
 import numpy as np
+import pytest
+
 from dtaianomaly.anomaly_detection import MedianMethod, Supervision
 
 
@@ -32,14 +32,20 @@ class TestMedianMethod:
 
     def test_initialize_string_neighborhood_size_before(self):
         with pytest.raises(TypeError):
-            MedianMethod(neighborhood_size_before='15')
+            MedianMethod(neighborhood_size_before="15")
 
     def test_initialize_too_small_neighborhood_size_after(self):
         with pytest.raises(ValueError):
             MedianMethod(neighborhood_size_before=15, neighborhood_size_after=-1)
-        MedianMethod(neighborhood_size_before=15, neighborhood_size_after=0)  # Doesn't raise an error with float
-        MedianMethod(neighborhood_size_before=15, neighborhood_size_after=1)  # Doesn't raise an error with float
-        MedianMethod(neighborhood_size_before=15, neighborhood_size_after=5)  # Doesn't raise an error with int
+        MedianMethod(
+            neighborhood_size_before=15, neighborhood_size_after=0
+        )  # Doesn't raise an error with float
+        MedianMethod(
+            neighborhood_size_before=15, neighborhood_size_after=1
+        )  # Doesn't raise an error with float
+        MedianMethod(
+            neighborhood_size_before=15, neighborhood_size_after=5
+        )  # Doesn't raise an error with int
 
     def test_initialize_float_neighborhood_size_after(self):
         with pytest.raises(TypeError):
@@ -47,11 +53,17 @@ class TestMedianMethod:
 
     def test_initialize_string_neighborhood_size_after(self):
         with pytest.raises(TypeError):
-            MedianMethod(neighborhood_size_before=10, neighborhood_size_after='1')
+            MedianMethod(neighborhood_size_before=10, neighborhood_size_after="1")
 
     def test_str(self):
-        assert str(MedianMethod(neighborhood_size_before=5)) == "MedianMethod(neighborhood_size_before=5)"
-        assert str(MedianMethod(neighborhood_size_before=15, neighborhood_size_after=3)) == "MedianMethod(neighborhood_size_before=15,neighborhood_size_after=3)"
+        assert (
+            str(MedianMethod(neighborhood_size_before=5))
+            == "MedianMethod(neighborhood_size_before=5)"
+        )
+        assert (
+            str(MedianMethod(neighborhood_size_before=15, neighborhood_size_after=3))
+            == "MedianMethod(neighborhood_size_before=15,neighborhood_size_after=3)"
+        )
 
     @staticmethod
     def check_prediction(pred, actual, neighborhood):

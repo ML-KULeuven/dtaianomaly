@@ -1,8 +1,10 @@
-
 Pipeline module
 ===============
 
 .. automodule:: dtaianomaly.pipeline
 
-.. autoclass:: dtaianomaly.pipeline.Pipeline
-   :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    Pipeline

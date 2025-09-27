@@ -10,24 +10,28 @@ the latter predicted "scores" (more or less anomalous). This distinction is impo
 a :py:class:`~dtaianomaly.workflow.Worfklow`.
 """
 
-from .affiliation_metrics import (
+from ._affiliation_metrics import (
     AffiliationFBeta,
     AffiliationPrecision,
     AffiliationRecall,
 )
-from .BestThresholdMetric import BestThresholdMetric
-from .event_wise_metrics import EventWiseFBeta, EventWisePrecision, EventWiseRecall
-from .metrics import BinaryMetric, Metric, ProbaMetric, ThresholdMetric
-from .point_adjusted_binary_metrics import (
+from ._area_under_the_curve_metrics import AreaUnderPR, AreaUnderROC
+from ._BestThresholdMetric import BestThresholdMetric
+from ._BinaryMetric import BinaryMetric
+from ._classification_based_metrics import FBeta, Precision, Recall
+from ._event_wise_metrics import EventWiseFBeta, EventWisePrecision, EventWiseRecall
+from ._FBetaMixin import FBetaMixin
+from ._Metric import Metric
+from ._point_adjusted_metrics import (
     PointAdjustedFBeta,
     PointAdjustedPrecision,
     PointAdjustedRecall,
 )
-from .range_based_metrics import RangeBasedFBeta, RangeBasedPrecision, RangeBasedRecall
-from .simple_binary_metrics import FBeta, Precision, Recall
-from .simple_proba_metrics import AreaUnderPR, AreaUnderROC
-from .UCRScore import UCRScore
-from .volume_under_surface import (
+from ._ProbaMetric import ProbaMetric
+from ._range_based_metrics import RangeBasedFBeta, RangeBasedPrecision, RangeBasedRecall
+from ._ThresholdMetric import ThresholdMetric
+from ._UCRScore import UCRScore
+from ._volume_under_surface_metrics import (
     RangeAreaUnderPR,
     RangeAreaUnderROC,
     VolumeUnderPR,
@@ -62,4 +66,5 @@ __all__ = [
     "RangeBasedRecall",
     "RangeBasedFBeta",
     "UCRScore",
+    "FBetaMixin",
 ]

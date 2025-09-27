@@ -3,12 +3,9 @@ import copy
 import numpy as np
 import streamlit as st
 
-from dtaianomaly.anomaly_detection import (
-    BaseDetector,
-    Supervision,
-    check_is_valid_window_size,
-)
+from dtaianomaly.anomaly_detection import BaseDetector, Supervision
 from dtaianomaly.data import DataSet
+from dtaianomaly.in_time_ad._CustomDetectorVisualizer import CustomDetectorVisualizer
 from dtaianomaly.in_time_ad._utils import (
     get_parameters,
     input_widget_hyperparameter,
@@ -16,7 +13,7 @@ from dtaianomaly.in_time_ad._utils import (
     show_small_header,
     update_object,
 )
-from dtaianomaly.in_time_ad.CustomDetectorVisualizer import CustomDetectorVisualizer
+from dtaianomaly.type_validation import WindowSizeAttribute
 
 
 class StAnomalyDetector:
@@ -134,7 +131,11 @@ class StAnomalyDetector:
                     **self.parameters["window_size_selection"],
                 )
                 try:
-                    check_is_valid_window_size(selected_window_size)
+                    WindowSizeAttribute().raise_error_if_invalid(
+                        selected_window_size,
+                        "window_size",
+                        self.detector.__class__.__name__,
+                    )
                     valid_window_size = True
                 except:
                     valid_window_size = False

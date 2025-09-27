@@ -146,14 +146,13 @@ and easily analyze multiple detectors simultaneously.
 .. doctest::
 
     >>> from dtaianomaly.data import LazyDataLoader, DataSet
+    >>> import numpy as np
     >>>
     >>> class SimpleDataLoader(LazyDataLoader):
     ...     def _load(self) -> DataSet:
-    ...         """ Read a data frame with the data in column 'X' and the labels in column 'y'. """
-    ...         df = pd.read_clipboard(self.path)
-    ...         return DataSet(df['X'].values, df['y'].values)
+    ...         return DataSet(np.random.uniform(size=1000), np.random.choice([0, 1], p=(0.9, 0.1), size=1000))
     >>>
-    >>> data_loader = SimpleDataLoader('data')
+    >>> data_loader = SimpleDataLoader()
 
 .. _custom-preprocessor:
 
@@ -223,7 +222,7 @@ deviations above the mean anomaly score are considered anomalous.
     ...     def __init__(self, factor: float):
     ...         self.factor = factor
     ...
-    ...     def threshold(self, scores: np.ndarray) -> np.ndarray:
+    ...     def _threshold(self, scores: np.ndarray) -> np.ndarray:
     ...         threshold = scores.mean() + self.factor * scores.std()
     ...         return scores > threshold
     >>>

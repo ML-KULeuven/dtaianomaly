@@ -26,11 +26,49 @@ if errorlevel 9009 (
 
 if "%1" == "" goto help
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+REM Handle "clean" argument
+set CLEAN=0
+set TARGET=%1
+
+:parse_args
+if "%1"=="" goto after_args
+if /I "%1"=="clean" (
+	set CLEAN=1
+) else (
+	set TARGET=%1
+)
+shift
+goto parse_args
+
+:after_args
+if %CLEAN%==1 (
+	echo.Removing build directory "%BUILDDIR%"...
+	if exist "%BUILDDIR%" (
+		rmdir /s /q "%BUILDDIR%"
+		echo.Build directory removed.
+	) else (
+		echo.No build directory found.
+	)
+
+    echo.Removing "api\auto_generated" directory...
+	if exist "api\auto_generated" (
+		rmdir /s /q "api\auto_generated"
+		echo."api\auto_generated" directory removed.
+	) else (
+		echo.No "api\auto_generated" directory found.
+	)
+)
+
+%SPHINXBUILD% -M %TARGET% %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :help
+echo.
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+echo.
+echo.Add the optional argument "clean" to remove "%BUILDDIR%" and "api\auto_generated" before running `target'
+echo.For example: `make target clean'.
+echo.
 
 :end
 popd

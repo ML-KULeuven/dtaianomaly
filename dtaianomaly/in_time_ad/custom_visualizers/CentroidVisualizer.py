@@ -9,7 +9,7 @@ from dtaianomaly.anomaly_detection import (
     KMeansAnomalyDetector,
     KShapeAnomalyDetector,
 )
-from dtaianomaly.in_time_ad.CustomDetectorVisualizer import CustomDetectorVisualizer
+from dtaianomaly.in_time_ad._CustomDetectorVisualizer import CustomDetectorVisualizer
 
 
 class CentroidVisualizer(CustomDetectorVisualizer):
