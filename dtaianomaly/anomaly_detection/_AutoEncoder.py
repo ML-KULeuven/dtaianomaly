@@ -45,55 +45,55 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
+    error_metric : {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
         The error measure between the reconstructed window and the original window.
-    encoder_dimensions: list of ints, default=[64]
+    encoder_dimensions : list of ints, default=[64]
         The number of neurons in each layer of the encoder. If an empty list is given, then
         the input of the encoder is directly connected to the latent space in a fully-connected
         manner.
-    latent_space_dimension: int default=32
+    latent_space_dimension : int default=32
         The dimension of the latent space.
-    decoder_dimensions: list of ints, default=[64]
+    decoder_dimensions : list of ints, default=[64]
         The number of neurons in each layer of the decoder. If an empty list is given, then
         the latent space is directly connected to the output in a fully-connected manner.
-    dropout_rate: float in interval [0, 1[, default=0.2
+    dropout_rate : float in interval [0, 1[, default=0.2
         The dropout rate for the dropout layers. If the dropout rate is 0, no dropout layers
         will be added to the auto encoder.
-    activation_function: {"linear", "relu", "sigmoid", "tanh"} default="relu"
+    activation_function : {"linear", "relu", "sigmoid", "tanh"} default="relu"
         The activation function to use at the end of each layer.
-    batch_normalization: bool = True,
+    batch_normalization : bool = True,
         Whether to add batch normalization after each layer or not.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    standard_scaling: bool, default=True
+    standard_scaling : bool, default=True
         Whether to standard scale each window independently, before feeding it to the network.
-    batch_size: int, default=32
+    batch_size : int, default=32
         The size of the batches to feed to the network.
-    data_loader_kwargs: dictionary, default=None
+    data_loader_kwargs : dictionary, default=None
         Additional kwargs to be passed to the data loader.
-        For more information, see: https://docs.pytorch.org/docs/stable/data.html
-    optimizer: {"adam", "sgd"} or callable default="adam"
+        For more information, see: https://docs.pytorch.org/docs/stable/data.html.
+    optimizer : {"adam", "sgd"} or callable default="adam"
         The optimizer to use for learning the weights. If "adam" is given,
         then the torch.optim.Adam optimizer will be used. If "sgd" is given,
         then the torch.optim.SGD optimizer will be used. Otherwise, a callable
         should be given, which takes as input the network parameters, and then
         creates an optimizer.
-    learning_rate: float, default=1e-3
+    learning_rate : float, default=1e-3
         The learning rate to use for training the network. Has no effect
         if optimize is a callable.
-    compile_model: bool, default=False
+    compile_model : bool, default=False
         Whether the network architecture should be compiled or not before
         training the weights.
-        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
-    compile_mode: {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html.
+    compile_mode : {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
         Method to compile the architecture.
-        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
-    n_epochs: int, default=10
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html.
+    n_epochs : int, default=10
         The number of epochs for which the neural network should be trained.
-    loss_function: {"mse", "l1", "huber} or torch.nn.Module, default="mse"
+    loss_function : {"mse", "l1", "huber} or torch.nn.Module, default="mse"
         The loss function to use for updating the weights. Valid options are:
 
         - ``'mse'``: Use the Mean Squared Error loss.
@@ -101,21 +101,27 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
         - ``'huber'``: Use the huber loss, which smoothly combines the MSE-loss with the L1-loss.
         - ``torch.nn.Module``: a custom torch module to use for the loss function.
 
-    device: str, default="cpu"
+    device : str, default="cpu"
         The device on which te neural network should be trained.
-        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
-    seed: int, default=None
+        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device.
+    seed : int, default=None
         The seed used for training the model. This seed will update the torch
         and numpy seed at the beginning of the fit method.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector.
-    optimizer_: torch.optim.Optimizer
+    optimizer_ : torch.optim.Optimizer
         The optimizer used for learning the weights of the network.
-    neural_network_: torch.nn.Module
+    neural_network_ : torch.nn.Module
         The PyTorch network architecture.
+
+    See Also
+    --------
+    BaseNeuralReconstructionDetector: Use a neural network to reconstruct
+        windows in the time series, and detect anomalies as windows that
+        are incorrectly reconstructed.
 
     Examples
     --------
@@ -125,12 +131,6 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
     >>> auto_encoder = AutoEncoder(10, seed=0).fit(x)
     >>> auto_encoder.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
     array([0.59210092, 0.56707534, 0.56629006, ..., 0.58380051, 0.5808109 , 0.54450774]...)
-
-    See also
-    --------
-    BaseNeuralReconstructionDetector: Use a neural network to reconstruct
-        windows in the time series, and detect anomalies as windows that
-        are incorrectly reconstructed.
     """
 
     encoder_dimensions: list[int]

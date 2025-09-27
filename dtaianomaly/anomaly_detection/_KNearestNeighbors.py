@@ -28,21 +28,21 @@ class KNearestNeighbors(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_neighbors: int, default=5
+    n_neighbors : int, default=5
         The number of neighbors to use for the nearest neighbor queries.
-    method: {'largest', 'mean', 'median'}, default='largest'
+    method : {'largest', 'mean', 'median'}, default='largest'
         How to compute the outlier scores given the nearest neighbors:
 
         - ``'largest'``: Use the distance to the kth neighbor.
         - ``'mean'``: Use the mean distance to the k nearest neighbors.
         - ``'median'``: Use the median distance to the k nearest neighbors.
 
-    metric: str, default='minkowski'
+    metric : str, default='minkowski'
         Distance metric for distance computations. Any metric of scikit-learn and
         scipy.spatial.distance can be used.
     **kwargs
@@ -50,7 +50,7 @@ class KNearestNeighbors(BasePyODAnomalyDetector):
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : KNN
         A K-nearest neighbors detector of PyOD

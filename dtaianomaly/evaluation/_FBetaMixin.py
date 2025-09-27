@@ -9,13 +9,15 @@ __all__ = ["FBetaMixin"]
 
 class FBetaMixin(AttributeValidationMixin):
     """
+    Base class for F-Beta metrics.
+
     Base class for all F-Beta based metrics. Takes a beta value, checks if it
     is correct, and offers a method to compute the F-score for a given precision
     and recall.
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
     """
 

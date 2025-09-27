@@ -8,7 +8,7 @@ __all__ = ["AreaUnderROC", "AreaUnderPR"]
 
 class AreaUnderROC(ProbaMetric):
     """
-    Computes the Area Under the Receiver Operating Characteristic Curve (AUC-ROC) score.
+    Compute the Area Under the Receiver Operating Characteristic Curve (AUC-ROC) score.
 
     The AUC-ROC is a widely used metric to evaluate the performance of
     a binary classifier, especially in anomaly detection. The ROC-curve

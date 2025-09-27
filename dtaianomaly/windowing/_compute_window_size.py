@@ -26,16 +26,12 @@ def compute_window_size(
     either automatically, using a number of procedures for estimating the window
     size, or based on a user-defined value.
 
-    Warnings
-    --------
-    Automatically computing the windwow size only works for univariate time series!
-
     Parameters
     ----------
-    X: array-like of shape (n_samples, n_attributes)
+    X : array-like of shape (n_samples, n_attributes)
         Input time series.
 
-    window_size: int or str
+    window_size : int or str
         The method by which a window size should be computed. Valid options are:
 
         - ``int``: Simply return the given window size.
@@ -44,42 +40,46 @@ def compute_window_size(
         - ``'mwf'``: Computes the window size using the Multi-Window-Finder method :cite:`imani2021multi`.
         - ``'suss'``: Computes the window size using the Summary Statistics Subsequence method :cite:`ermshaus2023clasp`.
 
-    lower_bound: int, default=10
+    lower_bound : int, default=10
         The lower bound on the automatically computed window size. Only used if ``window_size``
         equals ``'fft'``, ``'acf'``, ``'mwf'`` or ``'suss'``.
 
-    relative_lower_bound: float, default=0.0
+    relative_lower_bound : float, default=0.0
         The lower bound on the automatically computed window size, relative to the
         length of the given time series. Only used if ``window_size`` equals ``'fft'``,
         ``'acf'``, ``'mwf'`` or ``'suss'``.
 
-    upper_bound: int, default=1000
+    upper_bound : int, default=1000
         The lower bound on the automatically computed window size. Only used if ``window_size``
         equals ``'fft'``, ``'acf'``, or ``'mwf'``.
 
-    relative_upper_bound: float, default=1.0
+    relative_upper_bound : float, default=1.0
         The upper bound on the automatically computed window size, relative to the
         length of the given time series. Only used if ``window_size`` equals ``'fft'``,
         ``'acf'``, or ``'mwf'``.
 
-    threshold: float, default=0.89
+    threshold : float, default=0.89
         The threshold for selecting the optimal window size using ``'suss'``.
 
-    default_window_size: int, default=None
+    default_window_size : int, default=None
         The default window size, in case an invalid automatic window size was computed.
         By default, the value is set to None, which means that an error is thrown.
 
     Returns
     -------
-    window_size_: int
+    int
         The computed window size.
+
+    Warnings
+    --------
+    Automatically computing the windwow size only works for univariate time series!
 
     See Also
     --------
-    dominant_fourier_frequency: Compute the window size based on the fft
-    highest_autocorrelation: Compute the window size based on the acf
-    multi_window_finder: Compute the window size with mwf
-    summary_statistics_subsequences: Compute the window size with suss
+    dominant_fourier_frequency: Compute the window size based on the fft.
+    highest_autocorrelation: Compute the window size based on the acf.
+    multi_window_finder: Compute the window size with mwf.
+    summary_statistics_subsequences: Compute the window size with suss.
 
     Examples
     --------

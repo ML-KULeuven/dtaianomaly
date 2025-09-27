@@ -15,8 +15,8 @@ class TopNThreshold(Thresholding):
 
     Parameters
     ----------
-    n: int
-        The number of instances that should be flagged as an anomaly
+    n : int
+        The number of instances that should be flagged as an anomaly.
 
     Examples
     --------
@@ -39,12 +39,12 @@ class TopNThreshold(Thresholding):
 
         Parameters
         ----------
-        scores: array-like (n_samples)
+        scores : array-like (n_samples)
             Raw anomaly scores
 
         Returns
         -------
-        anomaly_labels: array-like of shape (n_samples)
+        anomaly_labels : array-like of shape (n_samples)
             Integer array of 1s and 0s, representing anomalous samples
             and normal samples respectively
 

@@ -13,19 +13,21 @@ __all__ = ["workflow_from_config", "interpret_config"]
 
 def workflow_from_config(path: str, max_size: int = 1000000):
     """
+    Construct a Workflow using a configuration at a given path.
+
     Construct a Workflow instance based on a JSON or TOML file. The file is
     first parsed, and then interpreted to obtain a :py:class:`~dtaianomaly.workflow.Workflow`
 
     Parameters
     ----------
-    path: str
-        Path to the config file
-    max_size: int, optional
+    path : str
+        Path to the config file.
+    max_size : int, optional
         Maximal size of the config file in bytes. Defaults to 1 MB.
 
     Returns
     -------
-    workflow: Workflow
+    Workflow
         The parsed workflow from the given config file.
 
     Raises
@@ -64,23 +66,22 @@ def workflow_from_config(path: str, max_size: int = 1000000):
     return interpret_config(parsed_config)
 
 
-def interpret_config(config: dict):
+def interpret_config(config: dict) -> Workflow:
     """
-    Actual parsing/interpretation logic
+    Actual parsing/interpretation logic.
 
-    All the different `_interpret_*` functions below check the config
-    for the corresponding `dtaianomaly` objects. These functions should
-    be extended when the full package is extended.
+    Interprets a given dictionary, and returns the corresponding
+    workflow, setup as defined in the configuration file.
 
     Parameters
     ----------
-    config: dict
-        The config to parse
+    config : dict
+        The configuration dictionary to parse.
 
     Returns
     -------
     Workflow
-        Containing all the components specified in the config
+        A Workflow object containing all the components specified in the config.
     """
     # Check the config file
     if not isinstance(config, dict):

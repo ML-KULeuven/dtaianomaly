@@ -5,7 +5,7 @@ __all__ = ["FloatAttribute"]
 
 class FloatAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a float.
+    Validator for floats.
 
     Check wether a given value is a valid float. By default, any float is valid,
     but it is also possible to put an upper- and lower-bound on the valid range
@@ -13,13 +13,13 @@ class FloatAttribute(BaseAttributeValidation):
 
     Parameters
     ----------
-    minimum: float, default=None
+    minimum : float, default=None
         The minimum value a given float can have. If ``None``, there is no lower-bound.
-    maximum: float, default=None
+    maximum : float, default=None
         The maximum value a given float can have. If ``None``, there is no upper-bound.
-    inclusive_minimum: bool, default=True
+    inclusive_minimum : bool, default=True
         Whether the lower-bound itself is valid or not.
-    inclusive_maximum: bool, default=True
+    inclusive_maximum : bool, default=True
         Whether the upper-bound itself is valid or not.
 
     Examples

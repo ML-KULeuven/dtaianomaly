@@ -18,9 +18,9 @@ class BestThresholdMetric(ProbaMetric):
 
     Parameters
     ----------
-    metric: BinaryMetric
-        Instance of the desired :py:class:`~dtaianomaly.evaluation.BinaryMetric` class
-    max_nb_thresholds: int, default=None
+    metric : BinaryMetric
+        Instance of the desired :py:class:`~dtaianomaly.evaluation.BinaryMetric` class.
+    max_nb_thresholds : int, default=None
         The maximum number of thresholds to use for computing the best threshold.
         If ``max_nb_thresholds = None``, all thresholds will be used. Otherwise, the
         value indicates the subsample of all possible thresholds that should be used.
@@ -31,11 +31,11 @@ class BestThresholdMetric(ProbaMetric):
 
     Attributes
     ----------
-    threshold_: float
+    threshold_ : float
         The threshold resulting in the best performance.
-    thresholds_: array-like of floats
+    thresholds_ : array-like of floats
         The thresholds used for evaluating the performance.
-    scores_: array-like of floats
+    scores_ : array-like of floats
         The evaluation scores corresponding to each threshold in ``thresholds_``.
 
     Examples

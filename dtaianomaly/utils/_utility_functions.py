@@ -16,19 +16,21 @@ T = TypeVar("T")
 
 def is_valid_list(value, target_type) -> bool:
     """
+    Check if a given list is valid.
+
     Check if the given list is a valid, with each instance being a member
     of the given type.
 
     Parameters
     ----------
-    value: object
-        The value to check if it is a valid list
-    target_type: Type
-        The type of each object in the given list
+    value : object
+        The value to check if it is a valid list.
+    target_type : Type
+        The type of each object in the given list.
 
     Returns
     -------
-    is_valid: bool
+    bool
         True if and only if the given ``value`` is a list and all elements in
         the list are of type ``Type``, otherwise False.
 
@@ -51,18 +53,20 @@ def is_valid_list(value, target_type) -> bool:
 
 def is_valid_array_like(array) -> bool:
     """
+    Check if a value is a valid array-like.
+
     Check if input is "array-like". Within ``dtaianomaly``, this is
     either a numpy array of numerical values or a python sequence of
     numerical values.
 
     Parameters
     ----------
-    array: object
-        The array to check if it is a valid array-like
+    array : object
+        The array to check if it is a valid array-like.
 
     Returns
     -------
-    is_valid: bool
+    bool
         True if and only if the given array is either a numpy array
         or a python sequence, in which the type entirely consists of
         numerical values, otherwise False.
@@ -119,11 +123,15 @@ def is_valid_array_like(array) -> bool:
 
 def is_univariate(X: np.ndarray) -> bool:
     """
-    Checks if the given array equals a univariate time series.
+    Check if the given time series is univariate.
+
+    Check if the given time series consists of only one attribute.
+    This means that the numpy array should be either one-dimiensional,
+    or that the second dimension should have a size of 1.
 
     Parameters
     ----------
-    X: array-like of shape (n_samples, n_attributes)
+    X : array-like of shape (n_samples, n_attributes)
         The time series data to check if it is univariate.
 
     Returns
@@ -147,16 +155,19 @@ def is_univariate(X: np.ndarray) -> bool:
 
 def get_dimension(X: np.ndarray) -> int:
     """
-    Get the dimension of the given array.
+    Get the dimension of the given time series.
+
+    Return the number of attributes in the given time series. This is either
+    the size of the second dimension, or the 1 if the given array is one-dimensional.
 
     Parameters
     ----------
-    X: array-like of shape (n_samples, n_attributes)
-        The time series data to get the dimension from
+    X : array-like of shape (n_samples, n_attributes)
+        The time series data to get the dimension from.
 
     Returns
     -------
-    n_attributes: int
+    int
         The number of attributes in the given time series.
 
     Examples
@@ -180,20 +191,20 @@ def get_dimension(X: np.ndarray) -> int:
 
 def convert_to_list(value: T | list[T]) -> list[T]:
     """
-    Converts a given value to a list.
+    Convert a given value to a list.
 
-    Converts the given value in a list. If the value already is a list, then
+    Convert the given value in a list. If the value already is a list, then
     it will simply be returned. Otherwise, a list is returned with a single
     element as the given element.
 
     Parameters
     ----------
-    value: list or other
+    value : list or other
         The value to convert to a list.
 
     Returns
     -------
-    as_a_list: list
+    list
         The given value in a list.
 
     Examples

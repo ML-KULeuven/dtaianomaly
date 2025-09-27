@@ -197,7 +197,7 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
 
     Parameters
     ----------
-    delta: str, default='flat'
+    delta : str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -206,11 +206,17 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
 
-    gamma: str, default='reciprocal'
+    gamma : str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application.
 
     See Also
     --------
@@ -225,12 +231,6 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
     >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
     >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
     0.333...
-
-    Warnings
-    --------
-    Note that, while tuning a metric to some domain is beneficial in practical applications,
-    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
-    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -252,12 +252,12 @@ class RangeBasedRecall(RangeBasedMetricBasePrecisionRecall):
 
     Parameters
     ----------
-    alpha: float, default=0.5
+    alpha : float, default=0.5
         The importance of detecting the events (even if it is only a single detected point)
         compared to detecting a large portion of the ground truth events. Should be at least 0
         and at most 1.
 
-    delta: str, default='flat'
+    delta : str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -266,11 +266,17 @@ class RangeBasedRecall(RangeBasedMetricBasePrecisionRecall):
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
 
-    gamma: str, default='reciprocal'
+    gamma : str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application
 
     See Also
     --------
@@ -285,12 +291,6 @@ class RangeBasedRecall(RangeBasedMetricBasePrecisionRecall):
     >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
     >>> metric.compute(y_true, y_pred)
     1.0
-
-    Warnings
-    --------
-    Note that, while tuning a metric to some domain is beneficial in practical applications,
-    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
-    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
@@ -309,14 +309,14 @@ class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaMixin):
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
-    alpha: float, default=0.5
+    alpha : float, default=0.5
         The importance of detecting the events (even if it is only a single detected point)
         compared to detecting a large portion of the ground truth events. Should be at least 0
         and at most 1.
 
-    delta: str, default='flat'
+    delta : str, default='flat'
         Bias for the position of the predicted anomaly in the ground truth anomalous
         range. Valid options are:
 
@@ -325,11 +325,17 @@ class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaMixin):
         - ``'back'``: Predictions that are near the end of the ground truth anomaly (i.e. late detection) have a higher weight.
         - ``'middle'``: Predictions that are near the center of the ground truth anomaly have a higher weight.
 
-    gamma: str, default='reciprocal'
+    gamma : str, default='reciprocal'
         Penalization approach for detecting multiple ranges with a single range. Valid options are:
 
         - ``'one'``: Fragmented detection should not be penalized.
         - ``'reciprocal'``: Weight fragmented detection of :math:´N´ ranges with as single range by a factor of :math:´1/N´.
+
+    Warnings
+    --------
+    Note that, while tuning a metric to some domain is beneficial in practical applications,
+    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
+    multiple anomaly detectors, as you can optimize the metric for a specific application.
 
     See Also
     --------
@@ -344,12 +350,6 @@ class RangeBasedFBeta(RangeBasedMetricBasePrecisionRecall, FBetaMixin):
     >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
     >>> metric.compute(y_true, y_pred)
     0.5
-
-    Warnings
-    --------
-    Note that, while tuning a metric to some domain is beneficial in practical applications,
-    this flexibility makes it difficult for a large-scale, general-purpose evaluation of
-    multiple anomaly detectors, as you can optimize the metric for a specific application.
     """
 
     def __init__(

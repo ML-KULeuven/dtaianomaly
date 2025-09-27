@@ -5,14 +5,14 @@ __all__ = ["LiteralAttribute"]
 
 class LiteralAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a literal.
+    Validator for literals.
 
     Check wether a given value is a valid literal. A literal is a value of type
     string but must be one of the predefined values.
 
     Parameters
     ----------
-    *values: string or list of string
+    *values : string or list of string
         The valid literals.
 
     Examples

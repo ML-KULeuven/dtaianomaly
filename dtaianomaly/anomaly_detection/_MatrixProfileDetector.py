@@ -29,7 +29,7 @@ class MatrixProfileDetector(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for computing the matrix profile. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     normalize : bool, default=True
@@ -40,7 +40,7 @@ class MatrixProfileDetector(BaseDetector):
     k : int, default=1
         The k-th nearest neighbor to use for computing the sequence distance
         in the matrix profile.
-    novelty: bool, default=False
+    novelty : bool, default=False
         If novelty detection should be performed, i.e., detect anomalies in regard
         to the train time series. If False, the matrix profile equals a self-join,
         otherwise the matrix profile will be computed by comparing the subsequences
@@ -48,10 +48,15 @@ class MatrixProfileDetector(BaseDetector):
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for computing the matrix profile
     X_reference_ : np.ndarray of shape (n_samples, n_attributes)
         The reference time series. Only available if ``novelty=True``
+
+    Notes
+    -----
+    If the given time series is multivariate, the matrix profile is computed
+    for each dimension separately and then summed up.
 
     Examples
     --------
@@ -61,11 +66,6 @@ class MatrixProfileDetector(BaseDetector):
     >>> matrix_profile = MatrixProfileDetector(window_size=50).fit(x)
     >>> matrix_profile.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.20325439, 1.20690487, 1.20426043, ..., 1.47953858, 1.50188666, 1.49891281]...)
-
-    Notes
-    -----
-    If the given time series is multivariate, the matrix profile is computed
-    for each dimension separately and then summed up.
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -164,13 +164,22 @@ class MatrixProfileDetector(BaseDetector):
         return reverse_sliding_window(matrix_profile, self.window_size_, 1, X.shape[0])
 
     def is_fitted(self) -> bool:
-        # X reference should not exist if novelty=False
+        """
+        Check whether this object is fitted.
+
+        Check whether all the attributes of this object that end with
+        an underscore ('_') has been initialized. If `novelty` is False,
+        then the check will skip the attribute `X_reference_`, because
+        it is only relevant for novelty detection.
+
+        Returns
+        -------
+        bool
+            True if and only if all the attributes of this object ending
+            with '_' are initialized.
+        """
         if self.novelty:
-            return all(
-                hasattr(self, attr)
-                for attr in self.__annotations__
-                if attr.endswith("_")
-            )
+            super().is_fitted()
         else:
             return all(
                 hasattr(self, attr)

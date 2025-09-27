@@ -5,7 +5,9 @@ __all__ = ["BoolAttribute"]
 
 class BoolAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a boolean.
+    Validator for booleans.
+
+    Check if the given value is a boolean.
 
     Examples
     --------

@@ -20,6 +20,8 @@ __all__ = ["Supervision", "BaseDetector", "load_detector"]
 
 class Supervision(enum.Enum):
     """
+    Supervision types.
+
     An enum for the different supervision types for anomaly detectors.
     Valid supervision types are:
 
@@ -46,7 +48,7 @@ class BaseDetector(
 
     Parameters
     ----------
-    supervision: Supervision
+    supervision : Supervision
         The type of supervision this anomaly detector requires.
     """
 
@@ -58,18 +60,22 @@ class BaseDetector(
 
     def fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> "BaseDetector":
         """
-        Abstract method, fit this detector to the given data.
+        Fit this detector.
+
+        Fit this detector to the given data.
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
+        X : array-like of shape (n_samples, n_attributes)
             Input time series.
-        y: array-like, default=None
+        y : array-like, default=None
             Ground-truth information.
+        **kwargs
+            Additional parameters to be used to fit the anomaly detector.
 
         Returns
         -------
-        self: BaseDetector
+        BaseDetector
             Returns the instance itself.
         """
         # Check the input
@@ -88,16 +94,18 @@ class BaseDetector(
 
     def decision_function(self, X: np.ndarray) -> np.array:
         """
-        Abstract method, compute anomaly scores.
+        Compute anomaly scores.
+
+        Compute the anomaly scores for the given time series using this detector.
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
+        X : array-like of shape (n_samples, n_attributes)
             Input time series.
 
         Returns
         -------
-        decision_scores: array-like of shape (n_samples)
+        array-like of shape (n_samples)
             The computed anomaly scores.
         """
         # Check input
@@ -116,7 +124,7 @@ class BaseDetector(
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """
-        Predict anomaly probabilities
+        Predict anomaly probabilities.
 
         Estimate the probability of a sample of `X` being anomalous,
         based on the anomaly scores obtained from `decision_function`
@@ -124,12 +132,12 @@ class BaseDetector(
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
+        X : array-like of shape (n_samples, n_attributes)
             Input time series.
 
         Returns
         -------
-        anomaly_scores: array-like of shape (n_samples)
+        array-like of shape (n_samples)
             1D array with the same length as `X`, with values
             in the interval [0, 1], in which a higher value
             implies that the instance is more likely to be
@@ -170,9 +178,9 @@ class BaseDetector(
         decision_scores_given: bool = False,
     ):
         """
-        Predict the confidence of the anomaly scores on the test given test data.
+        Predict the confidence of the anomaly scores on the test given test data :cite:`perini2021quantifying`.
 
-        This method implements ExCeeD [perini2020quantifying]_ (Example-wise Confidence
+        This method implements ExCeeD (Example-wise Confidence
         of anomaly Detectors) to estimate the confidence. ExCeed transforms the predicted
         decision scores to probability estimates using a Bayesian approach, which enables
         to assign a confidence score to each prediction which captures the uncertainty
@@ -180,16 +188,16 @@ class BaseDetector(
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
+        X : array-like of shape (n_samples, n_attributes)
             The test time series for which the confidence of anomaly scores
             should be predicted.
-        X_train: array-like of shape (n_samples_train, n_attributes), default=None
+        X_train : array-like of shape (n_samples_train, n_attributes), default=None
             The training time series, which can be used as reference. If
             ``X_train=None``, the test set is used as reference set.
-        contamination: float, default=0.05
+        contamination : float, default=0.05
             The (estimated) contamination rate for the data, i.e., the expected
             percentage of anomalies.
-        decision_scores_given: bool, default=False
+        decision_scores_given : bool, default=False
             Whether the given ``X`` and ``X_train`` represent time series data
             or decision scores. If ``decision_scores_given=False`` (default),
             then the given arrays are interpreted as time series. Otherwise,
@@ -198,16 +206,9 @@ class BaseDetector(
 
         Returns
         -------
-        confidence: array-like of shape (n_samples)
+        array-like of shape (n_samples)
             The confidence of this anomaly detector in each prediction in the
             given test time series.
-
-        References
-        ----------
-        .. [perini2020quantifying] Perini, L., Vercruyssen, V., Davis, J. Quantifying
-           the Confidence of Anomaly Detectors in Their Example-Wise Predictions. In:
-           Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2020.
-           Springer, Cham, doi: `10.1007/978-3-030-67664-3_14 <https://doi.org/10.1007/978-3-030-67664-3_14>`_.
         """
         # Set the decision scores
         if decision_scores_given:
@@ -265,13 +266,15 @@ class BaseDetector(
 
     def save(self, path: str | Path) -> None:
         """
+        Save this detector.
+
         Save detector to disk as a pickle file with extension `.dtai`. If the given
         path consists of multiple subdirectories, then the not existing subdirectories
         are created.
 
         Parameters
         ----------
-        path: str or Path
+        path : str or Path
             Location where to store the detector.
         """
         # Add the '.dtai' extension
@@ -295,12 +298,12 @@ def load_detector(path: str | Path) -> BaseDetector:
 
     Parameters
     ----------
-    path: str or Path
+    path : str or Path
         Location of the stored detector.
 
     Returns
     -------
-    detector: BaseDetector
+    BaseDetector
         The loaded detector.
     """
     with open(path, "rb") as f:

@@ -22,9 +22,9 @@ class MinMaxScaler(Preprocessor):
 
     Attributes
     ----------
-    min_: array-like of shape (n_attributes)
+    min_ : array-like of shape (n_attributes)
         The minimum value in each attribute of the training data.
-    max_: array-like of shape (n_attributes)
+    max_ : array-like of shape (n_attributes)
         The maximum value in each attribute of the training data.
 
     Raises

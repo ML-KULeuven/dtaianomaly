@@ -19,10 +19,10 @@ class UCRLoader(PathDataLoader):
 
     Parameters
     ----------
-    path: str
+    path : str
         The path at which the data set is located.
-    do_caching: bool, default=False
-        Whether to cache the loaded data or not
+    do_caching : bool, default=False
+        Whether to cache the loaded data or not.
 
     Notes
     -----

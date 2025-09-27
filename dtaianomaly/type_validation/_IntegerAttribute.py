@@ -5,7 +5,7 @@ __all__ = ["IntegerAttribute"]
 
 class IntegerAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is an int.
+    Validator for integers.
 
     Check wether a given value is a valid int. By default, any int is valid,
     but it is also possible to put an upper- and lower-bound on the valid range
@@ -13,9 +13,9 @@ class IntegerAttribute(BaseAttributeValidation):
 
     Parameters
     ----------
-    minimum: int, default=None
+    minimum : int, default=None
         The minimum value a given int can have. If ``None``, there is no lower-bound.
-    maximum: int, default=None
+    maximum : int, default=None
         The maximum value a given int can have. If ``None``, there is no upper-bound.
 
     Examples

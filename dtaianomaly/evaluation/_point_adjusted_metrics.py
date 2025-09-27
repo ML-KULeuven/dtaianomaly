@@ -16,14 +16,14 @@ def _point_adjust(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    y_true: array-like of shape (n_samples)
+    y_true : array-like of shape (n_samples)
         Ground-truth labels.
-    y_pred: array-like of shape (n_samples)
+    y_pred : array-like of shape (n_samples)
         Predicted anomaly scores.
 
     Returns
     -------
-    point_adjusted_y_pred: array-like of shape (n_samples)
+    array-like of shape (n_samples)
         The point adjusted predicted anomalies
     """
     # Find the anomalous events
@@ -52,16 +52,16 @@ class PointAdjustedPrecision(BinaryMetric):
     In this case, all predictions in the anomalous event are set to 1,
     thereby indicating that the method predicted an anomaly.
 
-    See Also
-    --------
-    Precision: Compute the standard, not point-adjusted precision.
-
     Warnings
     --------
     It is known that the point-adjusted metrics heavily overestimate
     the performance of anomaly detectors. It is therefore not recommended
     to solely rely on those metrics to evaluate a model. These metrics
     were implemented for reproducibility of existing works.
+
+    See Also
+    --------
+    Precision: Compute the standard, not point-adjusted precision.
 
     Examples
     --------
@@ -90,16 +90,16 @@ class PointAdjustedRecall(BinaryMetric):
     In this case, all predictions in the anomalous event are set to 1,
     thereby indicating that the method predicted an anomaly.
 
-    See Also
-    --------
-    Recall: Compute the standard, not point-adjusted recall.
-
     Warnings
     --------
     It is known that the point-adjusted metrics heavily overestimate
     the performance of anomaly detectors. It is therefore not recommended
     to solely rely on those metrics to evaluate a model. These metrics
     were implemented for reproducibility of existing works.
+
+    See Also
+    --------
+    Recall: Compute the standard, not point-adjusted recall.
 
     Examples
     --------
@@ -128,12 +128,8 @@ class PointAdjustedFBeta(BinaryMetric, FBetaMixin):
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
-
-    See Also
-    --------
-    FBeta: Compute the standard, not point-adjusted :math:`F_\\beta`.
 
     Warnings
     --------
@@ -141,6 +137,10 @@ class PointAdjustedFBeta(BinaryMetric, FBetaMixin):
     the performance of anomaly detectors. It is therefore not recommended
     to solely rely on those metrics to evaluate a model. These metrics
     were implemented for reproducibility of existing works.
+
+    See Also
+    --------
+    FBeta: Compute the standard, not point-adjusted :math:`F_\\beta`.
 
     Examples
     --------

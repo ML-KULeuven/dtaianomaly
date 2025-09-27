@@ -18,23 +18,23 @@ def dominant_fourier_frequency(
     best. The window size is therefore computed as the period of this dominant
     sine-wave.
 
-    Warnings
-    --------
-    Automatically computing the windwow size only works for univariate time series!
-
     Parameters
     ----------
-    X: array-like of shape (n_samples,)
+    X : array-like of shape (n_samples,)
         Input time series.
-    lower_bound: int, default=10
+    lower_bound : int, default=10
         The lower bound on the automatically computed window size.
-    upper_bound: int, default=1000
+    upper_bound : int, default=1000
         The lower bound on the automatically computed window size.
 
     Returns
     -------
-    window_size: int
+    int
         The computed window size.
+
+    Warnings
+    --------
+    Automatically computing the windwow size only works for univariate time series!
 
     Examples
     --------

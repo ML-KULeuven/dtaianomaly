@@ -17,12 +17,12 @@ def np_diff(x):
 
     Parameters
     ----------
-    x: np.array of shape (N,)
-        The array on which the difference should be computed
+    x : np.array of shape (N,)
+        The array on which the difference should be computed.
 
     Returns
     -------
-    diff: np.array of shape (N-1,)
+    np.array of shape (N-1,)
         Identical as np.diff(x)
 
     Examples
@@ -47,13 +47,13 @@ def np_any_axis0(x):
 
     Parameters
     ----------
-    x: np.ndarray of shape (N, M)
-        The array on which the numpy-call should be applied
+    x : np.ndarray of shape (N, M)
+        The array on which the numpy-call should be applied.
 
     Returns
     -------
-    diff: np.array of shape (M,)
-        Identical as np.any(x, axis=0)
+    np.array of shape (M,)
+        Identical as np.any(x, axis=0).
 
     Examples
     --------
@@ -80,13 +80,13 @@ def np_any_axis1(x):
 
     Parameters
     ----------
-    x: np.ndarray of shape (N, M)
-        The array on which the numpy-call should be applied
+    x : np.ndarray of shape (N, M)
+        The array on which the numpy-call should be applied.
 
     Returns
     -------
-    diff: np.array of shape (N,)
-        Identical as np.any(x, axis=1)
+    np.array of shape (N,)
+        Identical as np.any(x, axis=1).
 
     Examples
     --------
@@ -114,7 +114,7 @@ def make_intervals(x: np.array) -> (np.array, np.array):
 
     Parameters
     ----------
-    x: np.array
+    x : np.array
         The array from which the intervals must be computed. The array should consist
         of solely 0's and 1's.
 

@@ -45,30 +45,30 @@ class CheckIsFittedMixin(abc.ABC):
 
     def requires_fitting(self) -> bool:
         """
-        Checks whether this object requires fitting.
+        Check whether this object requires fitting.
 
-        Checks whether any of the attributes of this object ends with an
+        Check whether any of the attributes of this object ends with an
         underscore ('_'), which indicates that the attribute is set when
         the object is fitted. Note that this method does not check whether
         the object is fitted, i.e., whether the attributes have been set.
 
         Returns
         -------
-        requires_fitting: bool
+        bool
             True if and only if this object has attributes that end with '_'.
         """
         return any(attr.endswith("_") for attr in self._all_annotations())
 
     def is_fitted(self) -> bool:
         """
-        Checks whether this object is fitted.
+        Check whether this object is fitted.
 
-        Checks whether all the attributes of this object that end with
+        Check whether all the attributes of this object that end with
         an underscore ('_') has been initialized.
 
         Returns
         -------
-        is_fitted: bool
+        bool
             True if and only if all the attributes of this object ending
             with '_' are initialized.
         """
@@ -82,7 +82,7 @@ class CheckIsFittedMixin(abc.ABC):
         """
         Raise an error if this object is not fitted.
 
-        Checks whether this object is fitted, and if it is not fitted,
+        Check whether this object is fitted, and if it is not fitted,
         an exception is thrown.
 
         Raises

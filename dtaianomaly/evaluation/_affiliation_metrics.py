@@ -73,7 +73,7 @@ def _compute_affiliation_metrics(
         p_precision_average = p_precision[0]  # math.nan
     p_recall_average = sum(p_recall) / len(p_recall)
 
-    return p_precision_average, p_recall_average
+    return float(p_precision_average), float(p_recall_average)
 
 
 class AffiliationPrecision(BinaryMetric):
@@ -154,7 +154,7 @@ class AffiliationFBeta(BinaryMetric, FBetaMixin):
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
 
     See Also

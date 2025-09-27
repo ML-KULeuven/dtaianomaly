@@ -26,11 +26,15 @@ class MedianMethod(BaseDetector):
 
     Parameters
     ----------
-    neighborhood_size_before: int
+    neighborhood_size_before : int
         The number of observations before the sample to include in the neighborhood.
-    neighborhood_size_after: int, default=None
+    neighborhood_size_after : int, default=None
         The number of observations after the sample to include in the neighborhood.
         If None, the same value as ``window_size_before`` will be used.
+
+    Notes
+    -----
+    MedianMethod only handles univariate time series.
 
     Examples
     --------
@@ -40,10 +44,6 @@ class MedianMethod(BaseDetector):
     >>> median_method = MedianMethod(10)  # No fitting is necessary
     >>> median_method.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.1851476 , 0.68191703, 1.05125284, ..., 0.81373386, 1.86097851, 0.05852008]...)
-
-    Notes
-    -----
-    MedianMethod only handles univariate time series.
     """
 
     neighborhood_size_before: int

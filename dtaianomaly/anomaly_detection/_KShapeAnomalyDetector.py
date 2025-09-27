@@ -36,33 +36,37 @@ class KShapeAnomalyDetector(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size, the length of the subsequences that will be detected as anomalies. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    n_clusters: int, default=3
+    n_clusters : int, default=3
         The number of clusters to use for KShape clustering.
-    sequence_length_multiplier: float, default=4.0
+    sequence_length_multiplier : float, default=4.0
         The amount by which the window size should be multiplied to create
         sliding windows for clustering the data using KShape. Should be
         at least 1, to make sure that the cluster-centroids are larger
         than the sequences to detect anomalies in.
-    overlap_rate: float, default=0.5
+    overlap_rate : float, default=0.5
         The overlap of the sliding windows for clustering the data. Will
         be used to compute a relative stride to avoid trivial matches
         when clustering subsequences.
-    **kwargs:
+    **kwargs
         Arguments to be passed to KShape-clustering of tsslearn.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for computing the matrix profile
-    centroids_: list of array-like of shape (window_size_*sequence_length_multiplier,)
+    centroids_ : list of array-like of shape (window_size_*sequence_length_multiplier,)
         The centroids computed by KShape clustering.
-    weights_: list of float
+    weights_ : list of float
         The normalized weights corresponding to each cluster.
-    kshape_: KShape
+    kshape_ : KShape
         The fitted KShape-object of tslearn, used to cluster the data.
+
+    Notes
+    -----
+    KshapeAD only handles univariate time series.
 
     Examples
     --------
@@ -72,10 +76,6 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
     >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 , 1.34704128]...)
-
-    Notes
-    -----
-    KshapeAD only handles univariate time series.
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -116,12 +116,14 @@ class KShapeAnomalyDetector(BaseDetector):
 
     def theta_(self) -> list[(np.array, float)]:
         """
+        Compute :math:`\\Theta`.
+
         Computes :math:`\\Theta = \\{(C_0, w_0), \\dots, (C_k, w_k)\\}`, the normal
         behavior consisting of  :math:`k` clusters.
 
         Returns
         -------
-        theta: list of tuples of array-likes of shape (window_size_*sequence_length_multiplier,) and floats
+        list of tuples of array-likes of shape (window_size_*sequence_length_multiplier,) and floats
             A list of tuples in which the first element consists of the centroid
             corresponding to each cluster and the second element corresponds to
             the normalized weight of that cluster.

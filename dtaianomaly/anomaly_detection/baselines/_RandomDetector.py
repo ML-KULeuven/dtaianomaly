@@ -15,7 +15,7 @@ class RandomDetector(BaseDetector):
 
     Parameters
     ----------
-    seed: int, default=None
+    seed : int, default=None
         The seed to use for generating anomaly scores. If None, no seed will be used.
 
     Examples

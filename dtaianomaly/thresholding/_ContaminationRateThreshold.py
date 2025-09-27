@@ -15,7 +15,7 @@ class ContaminationRateThreshold(Thresholding):
 
     Parameters
     ----------
-    contamination_rate: float
+    contamination_rate : float
         The contamination_rate, i.e., the percentage of instances
         that are anomalous.
 

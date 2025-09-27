@@ -27,18 +27,18 @@ class MultivariateDetector(BaseDetector):
 
     Parameters
     ----------
-    detector: BaseDetector
+    detector : BaseDetector
         The anomaly detector used to detect anomalies in each attribute.
-    aggregation: {'min', 'max', 'mean'}, default='max'
+    aggregation : {'min', 'max', 'mean'}, default='max'
         Manner to aggregate the anomaly scores across each dimension.
-    raise_warning_for_univariate: bool, default=True
+    raise_warning_for_univariate : bool, default=True
         Whether to raise a warning when the model is fitted on a univariate
         time series. Teh value does not change the output of the model, but
         only serves to surpress the warning message.
 
     Attributes
     ----------
-    fitted_detectors_: list of BaseDetector
+    fitted_detectors_ : list of BaseDetector
         The fitted anomaly detectors, one for each attribute.
 
     Examples

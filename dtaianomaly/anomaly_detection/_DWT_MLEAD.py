@@ -34,24 +34,15 @@ class DWT_MLEAD(BaseDetector):
 
     Parameters
     ----------
-    start_level: int, default=3
+    start_level : int, default=3
         The first level for computing the Discrete Wavelet Transform.
-    quantile_boundary_type: {'percentile'}, default='percentile'
+    quantile_boundary_type : {'percentile'}, default='percentile'
         Method for putting a boundary on the likelihood estimates within each DWT-level.
         ``'percentile'`` will consider a ``quantile_epsilon`` of the windows as anomalous.
-    quantile_epsilon: float, default=0.01
+    quantile_epsilon : float, default=0.01
         The percentile used as threshold on the likelihood estimates.
-    padding_mode: {'constant', 'edge', 'linear_ramp', 'maximum', 'mean', 'median', 'minimum', 'reflect', 'symmetric', 'wrap', 'empty'}, default='wrap'
+    padding_mode : {'constant', 'edge', 'linear_ramp', 'maximum', 'mean', 'median', 'minimum', 'reflect', 'symmetric', 'wrap', 'empty'}, default='wrap'
         Mode for padding the time series, which is passed to `numpy.pad <https://numpy.org/doc/stable/reference/generated/numpy.pad.html>`_.
-
-    Examples
-    --------
-    >>> from dtaianomaly.anomaly_detection import DWT_MLEAD
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> dwt_mlead = DWT_MLEAD()  # No fitting is necessary
-    >>> dwt_mlead.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([ 0.,  0.,  0., ..., 12., 12., 12.]...)
 
     Notes
     -----
@@ -73,6 +64,15 @@ class DWT_MLEAD(BaseDetector):
     - aeon uses ``'wrap'`` padding and TimeEval uses ``'periodic'`` padding. Initial
       experiments show that different values may lead to quite different anomaly scores.
       Therefore, we included the padding as a parameter of DWT-MLEAD.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import DWT_MLEAD
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> x, y = demonstration_time_series()
+    >>> dwt_mlead = DWT_MLEAD()  # No fitting is necessary
+    >>> dwt_mlead.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([ 0.,  0.,  0., ..., 12., 12., 12.]...)
     """
 
     start_level: int

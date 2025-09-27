@@ -28,13 +28,13 @@ class CustomDataLoader(LazyDataLoader):
 
     Parameters
     ----------
-    test_path: str
+    test_path : str
         The path at which the test data is located.
-    train_path: str, default=None
+    train_path : str, default=None
         The path at which the train data is located. If None, then there
         will be no training data in the loaded dataset.
-    do_caching: bool, default=False
-        Whether to cache the loaded data or not
+    do_caching : bool, default=False
+        Whether to cache the loaded data or not.
 
     Examples
     --------

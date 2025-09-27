@@ -20,16 +20,16 @@ class StandardScaler(Preprocessor):
 
     Parameters
     ----------
-    min_std: float, default = 1e-9
+    min_std : float, default = 1e-9
         The minimum std required to actually Z-normalize an attribute.
         If the standard deviation is below this value, then no normalization
         will be applied. This prevents amplifying noise in the data.
 
     Attributes
     ----------
-    mean_: array-like of shape (n_attributes)
+    mean_ : array-like of shape (n_attributes)
         The mean value in each attribute of the training data.
-    std_: array-like of shape (n_attributes)
+    std_ : array-like of shape (n_attributes)
         The standard deviation in each attribute of the training data.
 
     Raises
@@ -42,7 +42,7 @@ class StandardScaler(Preprocessor):
     >>> from dtaianomaly.preprocessing import StandardScaler
     >>> from dtaianomaly.data import demonstration_time_series
     >>> X, y = demonstration_time_series()
-    >>> preprocessor = StandardScaler(n=512)
+    >>> preprocessor = StandardScaler()
     >>> X_, y_ = preprocessor.fit_transform(X, y)
     """
 

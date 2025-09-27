@@ -16,25 +16,29 @@ class Job(AttributeValidationMixin):
     """
     A job to execute within the JobBasedWorkflow.
 
+    A single job to be executed within a workflow. A job contains (1) a data loader
+    to indicate which data to use, (2) an optional preprocessor to process the data
+    in some way, and (3) a detector to find the anomalies.
+
     Parameters
     ----------
-    dataloader: LazyDataLoader
+    dataloader : LazyDataLoader
         The data loader that should be used for loading the time series data.
-    preprocessor: Preprocessor or None
+    detector : BaseDetector
+        The anomaly detector to use for detecting anomalies, after the time series
+        has been preprocessed.
+    preprocessor : Preprocessor or None
         The preprocessor to use for processing the time series, before the anomalies
         are detected. If no preprocessor is given (``preprocessor=None``), then the
         time series does not need to be processed.
-    detector: BaseDetector
-        The anomaly detector to use for detecting anomalies, after the time series
-        has been preprocessed.
 
     Attributes
     ----------
-    pipeline: Pipeline
+    pipeline : Pipeline
         The pipeline which combines the preprocessor and the anomaly detector, such
         that the anomalies can be detected with a single call. If no preprocessor was
         given, the preprocessor of the pipeline equals ``Identity()``.
-    has_preprocessor: bool
+    has_preprocessor : bool
         Whether this job has a preprocessor, i.e., whether ``preprocessor == None``.
     """
 

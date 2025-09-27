@@ -67,7 +67,7 @@ def _compute_event_wise_metrics(y_true: np.ndarray, y_pred: np.ndarray):
 
 class EventWisePrecision(BinaryMetric):
     """
-    Computes the Event-Wise Precision score :cite:`el2024multivariate`.
+    Compute the Event-Wise Precision score :cite:`el2024multivariate`.
 
     Precision measures how accurately the model identifies anomalies.
     For the Event-Wise Precision, the true and false positives are
@@ -113,7 +113,7 @@ class EventWisePrecision(BinaryMetric):
 
 class EventWiseRecall(BinaryMetric):
     """
-    Computes the Event-Wise Recall score :cite:`el2024multivariate`.
+    Compute the Event-Wise Recall score :cite:`el2024multivariate`.
 
     Recall measures the model's ability to correctly identify all actual
     anomalies. For the Event-Wise Recall, the true positives and false
@@ -154,7 +154,7 @@ class EventWiseRecall(BinaryMetric):
 
 class EventWiseFBeta(BinaryMetric, FBetaMixin):
     """
-    Computes the Event-Wise :math:`F_\\beta` score :cite:`el2024multivariate`.
+    Compute the Event-Wise :math:`F_\\beta` score :cite:`el2024multivariate`.
 
     The :math:`F_\\beta` combines both precision and recall into a single
     value. It provides a balanced evaluation of a model’s performance,
@@ -170,7 +170,7 @@ class EventWiseFBeta(BinaryMetric, FBetaMixin):
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
 
     See Also

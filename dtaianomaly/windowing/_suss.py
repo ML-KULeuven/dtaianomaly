@@ -7,9 +7,9 @@ def summary_statistics_subsequences(
     X: np.ndarray, lower_bound: int = 10, threshold: float = 0.89
 ) -> int:
     """
-    Computes the window size using the Summary Statistics Subsequence method :cite:`ermshaus2023clasp`.
+    Compute the window size using the Summary Statistics Subsequence method :cite:`ermshaus2023clasp`.
 
-    Comapres a multiple summary statistics (mean, standard deviation, range of values)
+    Comapre a multiple summary statistics (mean, standard deviation, range of values)
     within subsequences to those of the complete time series. The assumption is that
     for a proper subsequence length, the local summary statistics within the subsequences
     will be highly similar to the global statistics across the complete time series.
@@ -17,23 +17,23 @@ def summary_statistics_subsequences(
     is highly similar to the statistics of the time series is returned as computed
     window size.
 
-    Warnings
-    --------
-    Automatically computing the windwow size only works for univariate time series!
-
     Parameters
     ----------
-    X: array-like of shape (n_samples,)
+    X : array-like of shape (n_samples,)
         Input time series.
-    lower_bound: int, default=10
+    lower_bound : int, default=10
         The lower bound on the automatically computed window size.
-    threshold: float, default=0.89
+    threshold : float, default=0.89
         The threshold for selecting the optimal window size.
 
     Returns
     -------
-    window_size: int
+    int
         The computed window size.
+
+    Warnings
+    --------
+    Automatically computing the windwow size only works for univariate time series!
 
     Examples
     --------

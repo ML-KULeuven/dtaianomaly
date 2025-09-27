@@ -8,7 +8,7 @@ __all__ = ["WindowSizeAttribute"]
 
 class WindowSizeAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a windos size.
+    Validator for a window size.
 
     Check wether a given value is a valid window size. A valid window size
     is either an int greater than or equal to 1, or a literal in {'fft',

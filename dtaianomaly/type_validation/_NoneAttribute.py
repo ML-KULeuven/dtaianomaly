@@ -5,7 +5,11 @@ __all__ = ["NoneAttribute"]
 
 class NoneAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is of none-type.
+    Validator for ``None``.
+
+    Validate if a given value is of none-type. Note that this
+    validator will typically be used in conjunction with another
+    validator.
 
     Examples
     --------

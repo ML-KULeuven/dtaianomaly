@@ -33,38 +33,28 @@ class TimeMoE(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    model_path: {'TimeMoE-50M', 'TimeMoE-200M' default='TimeMoE-50M'
+    model_path : {'TimeMoE-50M', 'TimeMoE-200M' default='TimeMoE-50M'
         The Time-MoE model to use.
-    batch_size: int, default=16
+    batch_size : int, default=16
         The number of windows to feed simultaneously to Chronos, within a batch.
-    prediction_length: int, default=1
+    prediction_length : int, default=1
         The number of samples to predict for each window.
-    normalize_sequences: bool, default=True
+    normalize_sequences : bool, default=True
         Whether each sequence must be normalized before feeding it Time-MoE.
-    min_std: float, default=1e-8
+    min_std : float, default=1e-8
         The lowest possible standard deviation to use for normalization.
-    device: str, default='cpu'
+    device : str, default='cpu'
         The device to use.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     time_moe_ : transformers.AutoModelForCausalLM
         The Time-MoE model used for forecasting the time series
-
-    Examples
-    --------
-    >>> from dtaianomaly.anomaly_detection import TimeMoE
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> time_moe = TimeMoE(10).fit(x)
-    >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +SKIP
-    array([6.34949149e-05, 6.34949149e-05, 6.34949149e-05, ...,
-           6.34949149e-05, 6.34949149e-05, 6.34949149e-05]...)
 
     Warnings
     --------
@@ -81,6 +71,16 @@ class TimeMoE(BaseDetector):
       This means the maximum sequence length for Time-MoE is 4096. To
       achieve optimal forecasting performance, it is recommended that the
       sum of ``window_size_`` and ``prediction_length`` does not exceed 4096.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import TimeMoE
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> x, y = demonstration_time_series()
+    >>> time_moe = TimeMoE(10).fit(x)
+    >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +SKIP
+    array([6.34949149e-05, 6.34949149e-05, 6.34949149e-05, ...,
+           6.34949149e-05, 6.34949149e-05, 6.34949149e-05]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

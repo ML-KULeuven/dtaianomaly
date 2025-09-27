@@ -7,7 +7,7 @@ def multi_window_finder(
     X: np.ndarray, lower_bound: int = 10, upper_bound: int = 1000
 ) -> int:
     """
-    Computes the window size using the Multi-Window-Finder method :cite:`imani2021multi`.
+    Compute the window size using the Multi-Window-Finder method :cite:`imani2021multi`.
 
     A subsequence-based approach which assumes that the variance in the moving averages is
     small given an appropriate window size. This window size then captures the global pattern
@@ -15,23 +15,23 @@ def multi_window_finder(
     the moving average for a number of window candidates, and select the one that minimizes
     the variance.
 
-    Warnings
-    --------
-    Automatically computing the windwow size only works for univariate time series!
-
     Parameters
     ----------
-    X: array-like of shape (n_samples,)
+    X : array-like of shape (n_samples,)
         Input time series.
-    lower_bound: int, default=10
+    lower_bound : int, default=10
         The lower bound on the automatically computed window size.
-    upper_bound: int, default=1000
+    upper_bound : int, default=1000
         The lower bound on the automatically computed window size.
 
     Returns
     -------
-    window_size: int
+    int
         The computed window size.
+
+    Warnings
+    --------
+    Automatically computing the windwow size only works for univariate time series!
 
     Examples
     --------

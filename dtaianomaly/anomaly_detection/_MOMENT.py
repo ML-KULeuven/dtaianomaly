@@ -32,29 +32,38 @@ class MOMENT(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:func:`~dtaianomaly.anomaly_detection.windowing_utils.compute_window_size`.
-    model_size: {'small', 'base', 'large'}, default='small'
+    model_size : {'small', 'base', 'large'}, default='small'
         The MOMENT-model to use.
-    batch_size: int, default=16
+    batch_size : int, default=16
         The number of windows to feed simultaneously to Chronos, within a batch.
-    do_fine_tuning: bool, default=False
+    do_fine_tuning : bool, default=False
         Whether to fine tune the model during fitting. If False, then the model will
         perform zero-shot forecasting.
-    learning_rate: float, default=1e-4
+    learning_rate : float, default=1e-4
         The learning rate to use for fine-tuning MOMENT.
-    nb_epochs: int, default=1
+    nb_epochs : int, default=1
         The number of epochs to finetune MOMENT.
-    device: str, default='cpu'
+    device : str, default='cpu'
         The device to use.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     moment_ : momentfm.MOMENTPipeline
         The MOMENT model
+
+    Warnings
+    --------
+    MOMENT only works for Python 3.11. Additionally, its requirements are very strict, and
+    must be installed seperately from dtaianomaly. This can be done via ``pip install momentfm``.
+
+    Notes
+    -----
+    MOMENTAnomalyDetector only handles univariate time series.
 
     Examples
     --------
@@ -65,16 +74,6 @@ class MOMENT(BaseDetector):
     >>> moment.decision_function(x)  # doctest: +SKIP
     array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
            0.00010728]...)
-
-    Warnings
-    --------
-    MOMENT only works for Python 3.11. Additionally, its requirements are very strict, and
-    must be installed seperately from dtaianomaly. This can be done via ``pip install momentfm``.
-
-
-    Notes
-    -----
-    MOMENTAnomalyDetector only handles univariate time series.
     """
 
     window_size: WINDOW_SIZE_TYPE

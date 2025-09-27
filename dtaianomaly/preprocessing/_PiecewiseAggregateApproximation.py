@@ -8,7 +8,7 @@ __all__ = ["PiecewiseAggregateApproximation"]
 
 class PiecewiseAggregateApproximation(Preprocessor):
     """
-    Performs piecewise aggregate approximation :cite:`keogh2001dimensionality`.
+    Perform piecewise aggregate approximation :cite:`keogh2001dimensionality`.
 
     Piecewise Aggregate Approximation (PAA) is a
     form of dimensionality reduction of time series, originally proposed for
@@ -27,7 +27,7 @@ class PiecewiseAggregateApproximation(Preprocessor):
 
     Parameters
     ----------
-    n: int
+    n : int
         The number of equi-sized frames to generate.
 
     Examples

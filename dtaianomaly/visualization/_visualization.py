@@ -24,36 +24,38 @@ def plot_time_series_colored_by_score(
     **kwargs,
 ) -> plt.Figure:
     """
-    Plots the given time series, and color it according to the given scores.
+    Plot the time series colored according to the anomaly scores.
+
+    Plot the given time series, and color it according to the given scores.
     Higher scores will be colored red, and lower scores will be colored green.
     Thus, if the ground truth anomaly scores are passed, red corresponds to
     anomalies and green to normal observations.
 
     Parameters
     ----------
-    X: np.ndarray of shape (n_samples, n_attributes)
-        The time series to plot
-    y: np.ndarray of shape (n_samples)
+    X : np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot.
+    y : np.ndarray of shape (n_samples)
         The scores, according to which the plotted data should be colored.
-    time_steps: np.array of shape (n_samples), default=None
+    time_steps : np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
-    feature_names: list of str of shape (n_attributes), default=None
+    feature_names : list of str of shape (n_attributes), default=None
         The names of each feature in the given time series ``X``. Because the
         color of each attribute varies over time (to indicate ``y``), the labels
         are not shown for simplicity. The parameter is available for compatability
         reasons.
-    ax: plt.Axes, default=None
+    ax : plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
-    nb_colors: int, default=100
+    nb_colors : int, default=100
         The number of colors to use for plotting the time series.
-    **kwargs:
+    **kwargs
         Arguments to be passed to plt.Figure(), in case ``ax=None``.
 
     Returns
     -------
-    fig: plt.Figure
+    plt.Figure
         The figure containing the plotted data.
 
     Notes
@@ -95,31 +97,33 @@ def plot_time_series_anomalies(
     **kwargs,
 ) -> plt.Figure:
     """
-    Visualizes time series data with true and predicted anomalies, highlighting true positives (TP),
+    Plot the time series along with the TPs, FPs, and FNs.
+
+    Visualize time series data with true and predicted anomalies, highlighting true positives (TP),
     false positives (FP), and false negatives (FN).
 
     Parameters
     ----------
-    X: np.ndarray of shape (n_samples, n_attributes)
-        The time series to plot
-    y: np.ndarray of shape (n_samples,)
+    X : np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot.
+    y : np.ndarray of shape (n_samples,)
         Ground truth anomaly labels (binary values: 0 or 1).
-    y_pred: np.ndarray of shape (n_samples,)
+    y_pred : np.ndarray of shape (n_samples,)
         Predicted anomaly labels (binary values: 0 or 1).
-    time_steps: np.array of shape (n_samples), default=None
+    time_steps : np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
-    feature_names: list of str of shape (n_attributes), default=None
+    feature_names : list of str of shape (n_attributes), default=None
         The names of each feature in the given time series ``X``.
-    ax: plt.Axes, default=None
+    ax : plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
-    **kwargs:
+    **kwargs
         Arguments to be passed to plt.Figure(), in case ``ax=None``.
 
     Returns
     -------
-    fig: plt.Figure
+    plt.Figure
         The figure containing the plotted data.
     """
 
@@ -178,33 +182,35 @@ def plot_demarcated_anomalies(
     **kwargs,
 ) -> plt.Figure:
     """
+    Plot the time series and demarcate the anomaly.
+
     Plot the given time series and binary anomaly labels. Each anomalous
     interval is marked by a colored area, depending on the provided parameters.
 
     Parameters
     ----------
-    X: np.ndarray of shape (n_samples, n_attributes)
-        The time series to plot
-    y: np.array of shape (n_samples)
+    X : np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot.
+    y : np.array of shape (n_samples)
         The binary anomaly scores.
-    ax: plt.Axes, default=None
+    ax : plt.Axes, default=None
         The axes onto which the plot should be made. If None, then a new
         figure and axis will be created.
-    time_steps: np.array of shape (n_samples), default=None
+    time_steps : np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
-    feature_names: list of str of shape (n_attributes), default=None
+    feature_names : list of str of shape (n_attributes), default=None
         The names of each feature in the given time series ``X``.
-    color_anomaly: str, default='red'
+    color_anomaly : str, default='red'
         The color in which the anomaly should be marked.
-    alpha_anomaly: float, default=0.2
+    alpha_anomaly : float, default=0.2
         The alpha value for marking the anomaly, to adjust transparency.
-    **kwargs:
+    **kwargs
         Arguments to be passed to plt.Figure(), in case ``ax=None``.
 
     Returns
     -------
-    fig: plt.Figure
+    plt.Figure
         The figure containing the plotted data.
     """
     # Check if y is binary
@@ -269,47 +275,49 @@ def plot_with_zoom(
     **kwargs,
 ) -> plt.Figure:
     """
+    Plot the time series and zoom in on it.
+
     Plot the given data in two axes, one showing the entire time
     series and one zooming in on a specific area of the time series.
 
     Parameters
     ----------
-    X: np.ndarray of shape (n_samples, n_attributes)
-        The time series to plot
-    start_zoom: int
+    X : np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot.
+    start_zoom : int
         The index in the data at which the zoom starts.
-    end_zoom: int
+    end_zoom : int
         The index in the data at which the zoom ends.
-    y: np.array of shape (n_samples), default=None
+    y : np.array of shape (n_samples), default=None
         The anomaly ground truth anomaly scores, to be passed to
         the ``method_to_plot`` function.
-    y_pred: np.array of shape (n_samples), default=None
+    y_pred : np.array of shape (n_samples), default=None
         The predicted anomaly scores to plot. Is necessary if the
         ``method_to_plot`` requires predicted anomaly scores.
-    time_steps: np.array of shape (n_samples), default=None
+    time_steps : np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
-    feature_names: list of str of shape (n_attributes), default=None
+    feature_names : list of str of shape (n_attributes), default=None
         The names of each feature in the given time series ``X``.
-    method_to_plot: callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
+    method_to_plot : callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
         Method used for plotting the data. Should take as inputs
         the values ``X`` (the time series data), ``y`` (the anomaly
         labels``), ``time_steps`` (the time steps at which there was
         an observation) and ``ax`` (the axis on which the plot should
         be made). Optionally, the method takes as input a value ``y_pred``
         for the predicted anomaly scores.
-    color: string, default='blue'
+    color : str, default='blue'
         The color of the lines to demarcate the area of zooming.
-    linewidth: float, default=3
+    linewidth : float, default=3
         The width of the lines to demarcate the area of zooming.
-    linestyle: str, default='--'
+    linestyle : str, default='--'
         The style of the lines to demarcate the area of zooming.
-    **kwargs:
+    **kwargs
         Arguments to be passed to plt.subplots().
 
     Returns
     -------
-    fig: plt.Figure
+    plt.Figure
         The figure containing the plotted data.
     """
     # Create the main figure and two subplots (axes)
@@ -383,42 +391,44 @@ def plot_anomaly_scores(
     **kwargs,
 ) -> plt.Figure:
     """
+    Plot the time series and the predicted anomaly scores.
+
     Plot the given data with the ground truth anomalies, and compare the
     predicted anomaly scores.
 
     Parameters
     ----------
-    X: np.ndarray of shape (n_samples, n_attributes)
-        The time series to plot
-    y: np.ndarray of shape (n_samples)
+    X : np.ndarray of shape (n_samples, n_attributes)
+        The time series to plot.
+    y : np.ndarray of shape (n_samples)
         The binary anomaly scores.
-    y_pred: np.ndarray of shape (n_samples) or dict mapping strings on np.ndarray of shape (n_samples)
+    y_pred : np.ndarray of shape (n_samples) or dict mapping strings on np.ndarray of shape (n_samples)
         The predicted anomaly scores to plot. If an array is given, then only
         one prediction will be plotted. If a dictionary is given, then all
         values in the dictionary are predicted anomaly scores, which will
         all be plotted. In this case, the corresponding key will be added
         in the legend.
-    time_steps: np.array of shape (n_samples), default=None
+    time_steps : np.array of shape (n_samples), default=None
         The time steps to plot. If no time steps are provided, then the
         default range ``[0, ..., n_samples-1]`` will be used.
-    feature_names: list of str of shape (n_attributes), default=None
+    feature_names : list of str of shape (n_attributes), default=None
         The names of each feature in the given time series ``X``.
-    method_to_plot: callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
+    method_to_plot : callable, default=:py:autofunc:`~dtaianomaly.visualization.plot_demarcated_anomalies`
         Method used for plotting the data along with the ground truth
         anomaly scores. Should take as inputs the values ``X`` (the
         time series data), ``y`` (the anomaly labels``), ``time_steps``
         (the time steps at which there was an observation) and ``ax``
         (the axis on which the plot should be made).
-    confidence: np.array of shape (n_samples), default=None
+    confidence : np.array of shape (n_samples), default=None
         The confidence of the anomaly scores. If the predictions ``y_pred`` is
         a dictionary, then the confidence must be ``None`` to ensure that the
         figure remains clear.
-    **kwargs:
+    **kwargs :
         Arguments to be passed to plt.subplots().
 
     Returns
     -------
-    fig: plt.Figure
+    plt.Figure
         The figure containing the plotted data.
     """
     if confidence is not None and isinstance(y_pred, dict):
@@ -466,20 +476,22 @@ def plot_anomaly_scores(
 
 def format_time_steps(time_steps: np.ndarray | None, n_samples: int) -> np.array:
     """
+    Format the time steps.
+
     Format the given time steps, to ensure that fixed time steps are
     provided in case they are ``None``. These fixed time steps will
     equal the range ``[0, ..., n_samples-1]``
 
     Parameters
     ----------
-    time_steps: np.array of shape (n_samples) or None
+    time_steps : np.array of shape (n_samples) or None
         The time seps to format.
-    n_samples: int
+    n_samples : int
         The number of samples for which there should be a time step.
 
     Returns
     -------
-    formatted_time_steps: np.array of shape (n_samples)
+    np.array of shape (n_samples)
         If the given ``time_steps`` did not equal ``None``, then these
         values are returned. Otherwise, an array with values ``[0, ...,
         n_samples-1]`` is returned.

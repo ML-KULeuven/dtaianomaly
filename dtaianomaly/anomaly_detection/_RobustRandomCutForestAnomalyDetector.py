@@ -39,32 +39,34 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    online_learning: bool, default=True
+    stride : int, default=1
+        The stride, i.e., the step size for extracting sliding windows from the time series.
+    online_learning : bool, default=True
         Whether to perform online learning, i.e., update the trees when detecting anomalies.
-    n_estimators: int, default=100
+    n_estimators : int, default=100
         The number of base trees in the ensemble.
-    max_samples: int or float, default='auto'
+    max_samples : int or float, default='auto'
         The number of samples to draw for training each base estimator:
 
         - if ``int``: Draw at most ``max_samples`` samples.
         - if ``float``: Draw at most ``max_samples`` percentage of the samples.
         - if ``'auto'``: Set ``max_samples=min(256, n_windows)``.
 
-    precision: int, default=9
+    precision : int, default=9
         Floating-point precision for distinguishing duplicate points.
-    random_state: int, default=None
+    random_state : int, default=None
         The seed used to create a random number generator from numpy.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
-    max_samples_: int
+    max_samples_ : int
         The effectively used maximum number of samples.
-    forest_: list of RCTree
+    forest_ : list of RCTree
         The trees which is used to isolate the observations.
 
     Examples

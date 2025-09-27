@@ -35,13 +35,22 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
+    'sphinxcontrib.bibtex',
     'numpydoc',
     'matplotlib.sphinxext.plot_directive',
-    'sphinxcontrib.bibtex',
 ]
 
 numpydoc_show_class_members = False
+numpydoc_validation_checks = {
+    "all",
+    "SA01",  # no see also section
+    "EX01",  # no examples
+}
+numpydoc_validation_exclude = {
+    r'dtaianomaly\.anomaly_detection\.Supervision',  # skip the enum
+}
+
+numpydoc_class_members_toctree = False
 
 # Default settings for matplotlib.sphinxext.plot_directive
 plot_include_source = True

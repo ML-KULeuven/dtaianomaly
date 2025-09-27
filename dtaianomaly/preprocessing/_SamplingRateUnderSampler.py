@@ -17,7 +17,7 @@ class SamplingRateUnderSampler(Preprocessor):
 
     Parameters
     ----------
-    sampling_rate: int
+    sampling_rate : int
         The rate at which should be sampled.
 
     Examples

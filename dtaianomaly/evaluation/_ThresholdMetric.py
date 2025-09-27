@@ -20,10 +20,10 @@ class ThresholdMetric(ProbaMetric):
 
     Parameters
     ----------
-    thresholder: Thresholding
-        Instance of the desired `Thresholding` class
-    metric: BinaryMetric
-        Instance of the desired `Metric` class
+    thresholder : Thresholding
+        Instance of the desired `Thresholding` class.
+    metric : BinaryMetric
+        Instance of the desired `Metric` class.
 
     Examples
     --------

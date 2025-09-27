@@ -5,7 +5,14 @@ __all__ = ["ObjectAttribute"]
 
 class ObjectAttribute(BaseAttributeValidation):
     """
+    Validator for objects.
+
     Validate if a given value has a specific type.
+
+    Parameters
+    ----------
+    object_type : type
+        The type to check for.
 
     Examples
     --------

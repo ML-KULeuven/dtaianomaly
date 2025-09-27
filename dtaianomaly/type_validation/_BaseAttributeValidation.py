@@ -24,18 +24,18 @@ class BaseAttributeValidation(abc.ABC):
 
         Parameters
         ----------
-        value:
+        value : any
             The value to verify.
-        name: str
+        name : str
             The name of the attribute that is being checked. Used for generating clear error messages, if needed.
-        class_name
+        class_name : str
             The name of the class to which the attribute belongs. Used for generating clear error messages, if needed.
 
         Raises
         ------
-        TypeError:
+        TypeError
             If the type of the given value is invalid according to the rules of this BaseAttributeValidation.
-        ValueError:
+        ValueError
             If the value of the given value is invalid according to the rules of this BaseAttributeValidation.
         """
         if not self._is_valid_type(value):
@@ -84,7 +84,7 @@ class UnionAttribute(BaseAttributeValidation):
 
     Parameters
     ----------
-    *attribute_validators: two or more :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation` objects
+    *attribute_validators : two or more :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation` objects
         The attribute validators that are combined through an OR-operation for validation.
         The validators must be passes as separate parameters to the constructor. There should
         be at least two validators. If any of the given validators is a :py:class:`~dtaianomaly.type_validation.UnionAttribute`,

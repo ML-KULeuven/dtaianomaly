@@ -28,7 +28,7 @@ class AttributeValidationMixin(abc.ABC):
 
     Attributes
     ----------
-    attribute_validation: dict of (str, BaseAttributeValidation)
+    attribute_validation : dict of (str, BaseAttributeValidation)
         The validation for each attribute. The key is the name of the attribute
         to check, and the value is the related BaseAttributeValidation that will
         verify the correct state of the property.

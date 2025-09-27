@@ -26,22 +26,22 @@ class KMeansAnomalyDetector(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_clusters: int, default=8
+    n_clusters : int, default=8
         The number of clusters to use for K-means clustering.
-    **kwargs:
-        Arguments to be passed to KMeans clustering of scikit-learn anomaly detector
+    **kwargs
+        Arguments to be passed to KMeans clustering of scikit-learn anomaly detector.
 
     Attributes
     ----------
-    window_size_: int
-        The effectively used window size for this anomaly detector
+    window_size_ : int
+        The effectively used window size for this anomaly detector.
     k_means_ : KMeans
-        The KMeans clustering algorithm from scikit-learn
+        The KMeans clustering algorithm from scikit-learn.
 
     Examples
     --------

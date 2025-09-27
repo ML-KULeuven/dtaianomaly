@@ -31,16 +31,16 @@ class RobustScaler(Preprocessor):
 
     Parameters
     ----------
-    lower_quantile: float, default=25.0
+    lower_quantile : float, default=25.0
         The lower quantile used to compute the scale. Must be in range [0.0, 100.0].
-    upper_quantile: float, default=75.0
+    upper_quantile : float, default=75.0
         The upper quantile used to compute the scale. Must be in range [0.0, 100.0].
 
     Attributes
     ----------
-    center_: array-like of shape (n_attributes)
+    center_ : array-like of shape (n_attributes)
         The median value in each attribute of the training data.
-    scale_: array-like of shape (n_attributes)
+    scale_ : array-like of shape (n_attributes)
         The quantile range for each attribute of the training data.
 
     Raises

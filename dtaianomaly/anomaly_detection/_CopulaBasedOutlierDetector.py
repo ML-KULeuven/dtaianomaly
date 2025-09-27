@@ -23,17 +23,17 @@ class CopulaBasedOutlierDetector(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
     **kwargs
         Arguments to be passed to the PyOD COPOD detector.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : COPOD
         A COPOD detector of PyOD

@@ -15,7 +15,7 @@ class FixedCutoffThreshold(Thresholding):
 
     Parameters
     ----------
-    cutoff: float
+    cutoff : float
         The cutoff above which the given anomaly scores indicate an anomaly.
 
     Examples

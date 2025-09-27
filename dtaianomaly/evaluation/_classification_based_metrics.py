@@ -9,7 +9,7 @@ __all__ = ["Precision", "Recall", "FBeta"]
 
 class Precision(BinaryMetric):
     """
-    Computes the Precision score.
+    Compute the Precision score.
 
     Precision measures how accurately the model identifies anomalies.
     It reflects the proportion of detected anomalies that are truly
@@ -24,7 +24,6 @@ class Precision(BinaryMetric):
     .. math::
 
        \\text{Precision} = \\frac{\\text{True Anomalies}}{\\text{True Anomalies} + \\text{False Positives}}
-
 
     A high precision in anomaly detection indicates that the model
     generates few false alarms, ensuring that most flagged anomalies
@@ -119,7 +118,7 @@ class FBeta(BinaryMetric, FBetaMixin):
 
     Parameters
     ----------
-    beta: int, float, default=1
+    beta : int, float, default=1
         Desired beta parameter.
 
     See Also

@@ -25,22 +25,22 @@ class LocalOutlierFactor(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_neighbors: int, default=20
+    n_neighbors : int, default=20
         The number of neighbors to use for the nearest neighbor queries.
-    metric: str, default='minkowski'
+    metric : str, default='minkowski'
         Distance metric for distance computations. any metric of scikit-learn and
         scipy.spatial.distance can be used.
-    **kwargs:
-        Arguments to be passed to the PyOD local outlier factor
+    **kwargs
+        Arguments to be passed to the PyOD local outlier factor.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : LOF
         A LOF-detector of PyOD

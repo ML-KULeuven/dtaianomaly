@@ -22,7 +22,7 @@ class ExponentialMovingAverage(Preprocessor):
 
     Parameters
     ----------
-    alpha: float
+    alpha : float
         The decaying factor to be used in the exponential moving average.
 
     Examples

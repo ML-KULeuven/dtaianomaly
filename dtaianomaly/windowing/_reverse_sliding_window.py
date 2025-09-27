@@ -10,7 +10,7 @@ def reverse_sliding_window(
     length_time_series: int,
 ) -> np.ndarray:
     """
-    Reverses the sliding window.
+    Reverse the sliding window.
 
     For non-overlapping sliding windows, it is trivial to convert
     the per-window anomaly scores to per-observation scores, because
@@ -24,22 +24,23 @@ def reverse_sliding_window(
 
     Parameters
     ----------
-    per_window_anomaly_scores: array-like of shape (n_windows)
-    window_size: int
-        The window size used for creating windows
-    stride: int
-        The stride, i.e., the step size used for creating windows
-    length_time_series: int
+    per_window_anomaly_scores : array-like of shape (n_windows)
+        The anomaly scores computed for the individual windows.
+    window_size : int
+        The window size used for creating windows.
+    stride : int
+        The stride, i.e., the step size used for creating windows.
+    length_time_series : int
         The original length of the time series.
 
     Returns
     -------
-    anomaly_scores: np.ndarray of shape (length_time_series)
+    np.ndarray of shape (length_time_series)
         The per-observation anomaly scores.
 
     Examples
     --------
-    >>> from windowing import reverse_sliding_window
+    >>> from dtaianomaly.windowing import reverse_sliding_window
     >>> per_window_anomaly_scores = [0.2, 0.3, 0.5, 0.8, 0.9, 0.6, 0.2, 0.1]
     >>> reverse_sliding_window(per_window_anomaly_scores, 3, 1, 10)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.2     , 0.25    , 0.333..., 0.533..., 0.733...,

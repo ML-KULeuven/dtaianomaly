@@ -9,7 +9,7 @@ __all__ = ["ListAttribute"]
 
 class ListAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a list.
+    Validator for lists.
 
     Check whethr a given value is a valid list. Each elemnt in the list
     is also subjected to a specific type, which is also defined as a
@@ -17,11 +17,11 @@ class ListAttribute(BaseAttributeValidation):
 
     Parameters
     ----------
-    validator: :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation`
+    validator : :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation`
         The validator used to validate the individual elements within the list.
-    minimum_length: int, default=None
+    minimum_length : int, default=None
         The minimum length a list may have. If None, then there is no minimum.
-    maximum_length: int, default=None
+    maximum_length : int, default=None
         The maximum length a list may have. If None, then there is no maximum.
 
     Examples

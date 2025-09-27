@@ -55,40 +55,30 @@ class Chronos(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    model_path: {'tiny', 'mini', 'small', 'base', 'large', 'bolt_tiny', 'bolt_mini', 'bolt_small', 'bolt_large'}, default='bolt_small'
+    model_path : {'tiny', 'mini', 'small', 'base', 'large', 'bolt_tiny', 'bolt_mini', 'bolt_small', 'bolt_large'}, default='bolt_small'
         The Chronos-model to use for forecasting.
-    batch_size: int, default=16
+    batch_size : int, default=16
         The number of windows to feed simultaneously to Chronos, within a batch.
-    forecast_horizon: int, default=1
+    forecast_horizon : int, default=1
         The number of samples to forecast for each window.
-    do_fine_tuning: bool, default=False
+    do_fine_tuning : bool, default=False
         Whether to fine tune the model during fitting. If False, then the model will
         perform zero-shot forecasting.
-    fine_tune_kwargs: dict, default=None
+    fine_tune_kwargs : dict, default=None
         Additional arguments for finetuning Chronos. Check out https://auto.gluon.ai/dev/tutorials/timeseries/forecasting-model-zoo.html#autogluon.timeseries.models.ChronosModel
         for more information on the options.
-    device: str, default='cpu'
+    device : str, default='cpu'
         The device to use for running Chronos.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     chronos_ : autogluon.timeseries.TimeSeriesPredictor
         The Chronos model used for forecasting the time series
-
-    Examples
-    --------
-    >>> from dtaianomaly.anomaly_detection import Chronos
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> chronos = Chronos(10).fit(x)
-    >>> chronos.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
-           0.00010728]...)
 
     Warnings
     --------
@@ -101,6 +91,16 @@ class Chronos(BaseDetector):
     Notes
     -----
     Chronos only handles univariate time series.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import Chronos
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> x, y = demonstration_time_series()
+    >>> chronos = Chronos(10).fit(x)
+    >>> chronos.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
+           0.00010728]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

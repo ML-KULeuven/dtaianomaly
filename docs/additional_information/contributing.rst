@@ -239,146 +239,33 @@ It is highly recommended to follow below checklist if you are implementing a new
 :py:class:`~dtaianomaly.evaluation.Metric`.
 This ensures a flawless integration of the new component into ``dtaianomaly``.
 
-BaseDetector
-^^^^^^^^^^^^
+Implementation
+^^^^^^^^^^^^^^
 
-.. rubric:: Implement the anomaly detector
+| |check_box| Have you added a ``_<Component>.py`` in the correct module, with ``<Component>`` the name of your component?
+| |check_box| Does the file contain a single class with the name ``<Component>``, which inherits from the correct base object?
+| |check_box| Did you include type validation for the attributes through :py:class:`~dtaianomaly.type_validation.BaseAttributeValidation`?
+| |check_box| Are all parameters of the constructor set as an attribute of the object (necessary for :py:class:`~dtaianomaly.utils.PrintConstructionCallMixin`)?
+| |check_box| Did you implement the abstract methods of the component?
+| |check_box| Did you add ``__all__ = ["<Component>"]`` in the file ``_<Component>.py``?
+| |check_box| Did you add the component in ``__all__`` of the corresponding ``__init__.py`` file?
 
-| |check_box| Have you added a ``.py`` in ``dtaianomaly/anomaly_detection`` named identical to the anomaly detector?
-| |check_box| Does the file contain a class named as the anomaly detector, which inherits :py:class:`~dtaianomaly.anomaly_detection.BaseDetector`?
-| |check_box| Does the constructor call ``super().__init__(Supervision)`` with the correct supervision type?
-| |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
-| |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._fit()` method?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.anomaly_detection.BaseDetector._decision_function()` method?
-| |check_box| Did you add the anomaly detector in ``__all__`` of the ``dtaianomaly/anomaly_detection/__init__.py`` file?
-| |check_box| Can you load the anomaly detector via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``detector_entry()`` function)?
+Testing
+^^^^^^^
 
-.. rubric:: Test the anomaly detector
-
-| |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/anomaly_detection``?
-| |check_box| Did you add the detector in ``tests/utils/test_discovery.py``?
+| |check_box| Have you added a new file ``test_<Component>.py`` in the correct folder within ``tests/``?
+| |check_box| Did you add the Component in ``tests/utils/test_discovery.py``?
 | |check_box| Do all the tests still succeed?
 | |check_box| Is a test coverage of at least 95% reached?
 
-.. rubric:: Document the anomaly detector
+Documentation
+^^^^^^^^^^^^^
 
-| |check_box| Have you added class documentation to your implementation?
-| |check_box| Does the class documentation contain an explanation of the anomaly detector?
+| |check_box| Have you added class documentation to the class?
+| |check_box| Does the class documentation contain an explanation of the Component?
 | |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
 | |check_box| Does the class documentation contain a code-example?
 | |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
-| |check_box| Is a separate file for the anomaly detector created in ``docs/api/anomaly_detection_algorithms/`` with the same name as the anomaly detector?
+| |check_box| Did you add the component in tha API-documentation in ``docs/api/``?
+| |check_box| If you added a :py:class:`~dtaianomaly.data.LazyDataLoader`, did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
 
-LazyDataLoader
-^^^^^^^^^^^^^^
-
-.. rubric:: Implement the data loader
-
-| |check_box| Have you added a ``.py`` in ``dtaianomaly/data`` named identical to the data loader?
-| |check_box| Does the file contain a class named as the data loader, which inherits :py:class:`~dtaianomaly.data.LazyDataLoader`?
-| |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
-| |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.data.LazyDataLoader._load()` method?
-| |check_box| Did you add the data loader in ``__all__`` of the ``dtaianomaly/data/__init__.py`` file?
-| |check_box| Can you load the data loader via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``data_entry()`` function)?
-
-.. rubric:: Test the data loader
-
-| |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/data``?
-| |check_box| Did you add the data loader in ``tests/utils/test_discovery.py``?
-| |check_box| Do all the tests still succeed?
-| |check_box| Is a test coverage of at least 95% reached?
-
-.. rubric:: Document the data loader
-
-| |check_box| Have you added class documentation to your implementation?
-| |check_box| Does the class documentation contain an explanation of expected format of the data?
-| |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
-| |check_box| Have you added the data loader to ``docs/api/data.rst``?
-| |check_box| Did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
-
-Preprocessor
-^^^^^^^^^^^^
-
-.. rubric:: Implement the preprocessor
-
-| |check_box| Have you added a ``.py`` in ``dtaianomaly/preprocessing`` named identical to the preprocessor?
-| |check_box| Does the file contain a class named as the preprocessor, which inherits :py:class:`~dtaianomaly.preprocessing.Preprocessor`?
-| |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
-| |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._fit()` method?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.preprocessing.Preprocessor._transform()` method?
-| |check_box| Did you add the preprocessor in ``__all__`` of the ``dtaianomaly/preprocessing/__init__.py`` file?
-| |check_box| Can you load the preprocessor via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the ``preprocessor_entry()`` function)?
-
-.. rubric:: Test the preprocessor
-
-| |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/preprocessing``?
-| |check_box| Did you add the preprocessor in ``tests/utils/test_discovery.py``?
-| |check_box| Is a test coverage of at least 95% reached?
-
-.. rubric:: Document the preprocessor
-
-| |check_box| Have you added class documentation to your implementation?
-| |check_box| Does the class documentation contain an explanation of the preprocessor?
-| |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
-| |check_box| Have you added the preprocessor to ``docs/api/preprocessing.rst``?
-
-Thresholding
-^^^^^^^^^^^^
-
-.. rubric:: Implement the thresholder
-
-| |check_box| Have you added a ``.py`` in ``dtaianomaly/thresholding`` named identical to the thresholder?
-| |check_box| Does the file contain a class named as the thresholder, which inherits :py:class:`~dtaianomaly.thresholding.Thresholder`?
-| |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
-| |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.thresholding.Thresholder.threshold()` method?
-| |check_box| Did you add the thresholder in ``__all__`` of the ``dtaianomaly/thresholding/__init__.py`` file?
-| |check_box| Can you load the thresholder via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the `threshold_entry()`` function)?
-
-.. rubric:: Test the thresholder
-
-| |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/thresholding``?
-| |check_box| Did you add the thresholder in ``tests/utils/test_discovery.py``?
-| |check_box| Do all the tests still succeed?
-| |check_box| Is a test coverage of at least 95% reached?
-
-.. rubric:: Document the thresholder
-
-| |check_box| Have you added class documentation to your implementation?
-| |check_box| Does the class documentation contain an explanation of the thresholder?
-| |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
-| |check_box| Have you added the thresholder to ``docs/api/thresholding.rst``?
-
-Evaluation Metric
-^^^^^^^^^^^^^^^^^
-
-.. rubric:: Implement the evaluation metric
-
-| |check_box| Have you added a ``.py`` in ``dtaianomaly/evaluation`` named identical to the evaluation metric?
-| |check_box| Does the file contain a class named as the evaluation metric, which inherits :py:class:`~dtaianomaly.evaluation.BinaryMetric` or :py:class:`~dtaianomaly.evaluation.ProbaMetric`, depending on if the metric accepts binary anomaly labels or continuous anomaly probabilities?
-| |check_box| Are all hyperparameters checked to be of the correct type and belong to the domain?
-| |check_box| Are all hyperparameters set as an attribute of the object (necessary for ``__str__()`` method)?
-| |check_box| Have you implemented the :py:func:`~dtaianomaly.evaluation.Metric._compute()` method?
-| |check_box| Did you add the metric in ``__all__`` of the ``dtaianomaly/evaluation/__init__.py`` file?
-| |check_box| Can you load the metric via :py:func:`~dtaianomaly.workflow.interpret_config` (specifically, in the `metric_entry()`` function)?
-
-.. rubric:: Test the evaluation metric
-
-| |check_box| Have you added a new file ``test_<class>.py`` in under ``tests/evaluation``?
-| |check_box| Did you add the metric in ``tests/utils/test_discovery.py``?
-| |check_box| Do all the tests still succeed?
-| |check_box| Is a test coverage of at least 95% reached?
-
-.. rubric:: Document the evaluation metric
-
-| |check_box| Have you added class documentation to your implementation?
-| |check_box| Does the class documentation contain an explanation of the evaluation metric?
-| |check_box| Are all hyperparameters and attributes discussed in the class documentation, including their meaning, type and default values?
-| |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
-| |check_box| Have you added the evaluation metric to ``docs/api/evaluation.rst``?

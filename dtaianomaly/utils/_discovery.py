@@ -16,25 +16,27 @@ def all_classes(
     return_names: bool = True,
 ) -> list[type] | list[(str, type)]:
     """
+    Find all classes with ``dtaianomaly``.
+
     Discover all the classes from ``dtaianomaly`` by crawling the package. This
     method will only return the ``BaseDetector``, ``LazyDataLoader``, ``Metric``,
     ``Preprocessor`` and ``Thresholding`` objects.
 
     Parameters
     ----------
-    type_filter: str, type, list of str or list of type, default=None
+    type_filter : str, type, list of str or list of type, default=None
         The names or types of the classes that should be returned. If ``None``,
         then no types will be filtered.
-    exclude_types: str, type, list of str or list of type, default=None
+    exclude_types : str, type, list of str or list of type, default=None
         The names or types of the classes that should be excluded from
          being returned. If ``None``, then no types will be excluded.
-    return_names: bool, default=True
+    return_names : bool, default=True
         Whether to return the names and the type of each class (as tuple),
         or only return the type of each class.
 
     Returns
     -------
-    classes: list of tuples (str, type) or list of type
+    classes : list of tuples (str, type) or list of type
         The discovered classes in dtaianomaly.
     """
 

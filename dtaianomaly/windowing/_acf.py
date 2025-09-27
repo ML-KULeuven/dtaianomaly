@@ -18,23 +18,23 @@ def highest_autocorrelation(
     version. Consequently, the window size can be computed as the number of lags for
     which the autocorrelation is maximized.
 
-    Warnings
-    --------
-    Automatically computing the windwow size only works for univariate time series!
-
     Parameters
     ----------
-    X: array-like of shape (n_samples,)
+    X : array-like of shape (n_samples,)
         Input time series.
-    lower_bound: int, default=10
+    lower_bound : int, default=10
         The lower bound on the automatically computed window size.
-    upper_bound: int, default=1000
+    upper_bound : int, default=1000
         The lower bound on the automatically computed window size.
 
     Returns
     -------
-    window_size: int
+    int
         The computed window size.
+
+    Warnings
+    --------
+    Automatically computing the windwow size only works for univariate time series!
 
     Examples
     --------

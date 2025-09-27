@@ -21,11 +21,11 @@ class Differencing(Preprocessor):
 
     Parameters
     ----------
-    order: int
+    order : int
         The number of times the differencing procedure should be applied. If the
         order is 0, then no differencing will be applied.
-    seasonality: int, default=1
-        The seasonality used for computing the difference
+    seasonality : int, default=1
+        The seasonality used for computing the difference.
 
     Examples
     --------

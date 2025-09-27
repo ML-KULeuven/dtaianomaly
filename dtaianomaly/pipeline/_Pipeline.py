@@ -9,7 +9,7 @@ __all__ = ["Pipeline"]
 
 class Pipeline(BaseDetector):
     """
-    Pipeline to combine preprocessing and anomaly detection
+    Pipeline to combine preprocessing and anomaly detection.
 
     The pipeline works with a single :py:class:`~dtaianomaly.preprocessing.Preprocessor` object or a
     list of :py:class:`~dtaianomaly.preprocessing.Preprocessor` objects. This list is converted into a
@@ -20,9 +20,9 @@ class Pipeline(BaseDetector):
 
     Parameters
     ----------
-    preprocessor: Preprocessor or list of Preprocessors
+    preprocessor : Preprocessor or list of Preprocessors
         The preprocessors to include in this pipeline.
-    detector: BaseDetector
+    detector : BaseDetector
         The anomaly detector to include in this pipeline.
 
     Examples
@@ -68,4 +68,15 @@ class Pipeline(BaseDetector):
         return self.detector.decision_function(X)
 
     def piped_str(self) -> str:
+        """
+        Return this pipeline as a pipe-representation.
+
+        Return the string representation of the preprocessor
+        and the detector, combined with a "->" symbol.
+
+        Returns
+        -------
+        str
+            The piped representation of this pipeline.
+        """
         return f"{self.preprocessor.piped_str()}->{self.detector}"

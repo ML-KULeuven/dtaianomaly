@@ -13,32 +13,34 @@ __all__ = ["DataSet"]
 
 class DataSet:
     """
+    Class for time series datasets.
+
     A class for time series anomaly detection data sets. These
     consist of the raw data for training and testing anomaly
     detectors, as well as the respective ground truth labels.
 
     Parameters
     ----------
-    X_test: array-like of shape (n_samples_test, n_attributes)
+    X_test : array-like of shape (n_samples_test, n_attributes)
         The test time series data.
-    y_test: array-like of shape (n_samples_test)
+    y_test : array-like of shape (n_samples_test)
         The ground truth anomaly labels of the test data.
-    X_train: array-like of shape (n_samples_train, n_attributes), default=None
+    X_train : array-like of shape (n_samples_train, n_attributes), default=None
         The train time series. If not given, then the test data will
         be used for training and the data is only compatible with
         unsupervised anomaly detectors.
-    y_train: array-like of shape (n_samples_train), default=None
+    y_train : array-like of shape (n_samples_train), default=None
         The ground truth anomaly labels of the training data. If not given,
         either the train data should not be given either, or the train
         data is assumed to consist of only normal data.
-    feature_names: list of str, default=None
+    feature_names : list of str, default=None
         The name of each feature in the data. The number of names must be
         identical to the number of actual features. If None, then the data
         is assumed to be unnamed.
-    time_steps_test: array-like of shape (n_samples_test), default=None
+    time_steps_test : array-like of shape (n_samples_test), default=None
         The time steps corresponding to the test data. If ``None``, then no
         time steps are known.
-    time_steps_train: array-like of shape (n_samples_train), default=None
+    time_steps_train : array-like of shape (n_samples_train), default=None
         The time steps corresponding to the train data. If ``None``, then no
         time steps are known. Can only be provided if there is actually some
         training data given (``X_train` != None``).
@@ -114,25 +116,26 @@ class DataSet:
         y_train: np.ndarray | None,
     ) -> None:
         """
-        Checks if the given elements refer o a valid ``DataSet``. If the elements
-        would not give a valid ``DataSet``, then a ``ValueError`` is raised.
+        Check if the given elements refer o a valid ``DataSet``.
+
+        Check if the elements would  give a valid ``DataSet``, and otherwise a ``ValueError`` is raised.
 
         Parameters
         ----------
-        X_test: array-like of shape (n_samples_test, n_attributes)
+        X_test : array-like of shape (n_samples_test, n_attributes)
             The test time series data.
-        y_test: array-like of shape (n_samples_test)
+        y_test : array-like of shape (n_samples_test)
             The ground truth anomaly labels of the test data.
-        X_train: array-like of shape (n_samples_train, n_attributes) or ``None``
+        X_train : array-like of shape (n_samples_train, n_attributes) or ``None``
             The train time series data. Note that, even though ``X_train`` can
             be ``None``, it must be provided.
-        y_train: array-like of shape (n_samples_train) or ``None``.
+        y_train : array-like of shape (n_samples_train) or ``None``
             The ground truth anomaly labels of the train data. Note that, even
             though ``y_train`` can be ``None``, it must be provided.
 
         Raises
         ------
-        ValueError:
+        ValueError
             If the given variables would not lead to a valid ``DataSet``. This is the
             case if:
 
@@ -197,11 +200,13 @@ class DataSet:
 
     def is_valid(self) -> bool:
         """
-        Checks whether this ``DataSet`` is valid or not.
+        Check whether this ``DataSet`` is valid.
+
+        Check if this dataset object is valid.
 
         Returns
         -------
-        is_valid: bool
+        bool
             True if and only if this instance is valid, i.e., if the attributes
             ``X_test``, ``y_test``, ``X_train`` and ``y_train`` of this instance
             pass all the checks of :py:meth:`~dtaianomaly.data.DataSet.check_is_valid`.
@@ -220,11 +225,13 @@ class DataSet:
 
     def compatible_supervision(self) -> list[Supervision]:
         """
+        Get the compatible supervisions.
+
         Get the compatible supervision types for this data set.
 
         Returns
         -------
-        compatible_types: list of Supervision
+        list of Supervision
             A list containing the compatible types for this dataset. The following
             suprvision types can be compatible:
 
@@ -250,16 +257,18 @@ class DataSet:
 
     def is_compatible(self, detector: BaseDetector) -> bool:
         """
-        Checks if the given anomaly detector is compatible with this ``DataSet``.
+        Check if the given detector is compatible.
+
+        Check if the given anomaly detector is compatible with this ``DataSet``.
 
         Parameters
         ----------
-        detector: BaseDetector
+        detector : BaseDetector
             The anomaly detector to check if it is compatible with this ``DataSet``.
 
         Returns
         -------
-        is_compatible: bool
+        bool
             True if and only if the given anomaly detector is compatible with
             this ``DataSet``. The detector is compatible if
 

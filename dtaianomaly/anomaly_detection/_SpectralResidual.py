@@ -22,11 +22,15 @@ class SpectralResidual(BaseDetector):
 
     Parameters
     ----------
-    moving_average_window_size: int
+    moving_average_window_size : int
         The size of the window that is used for applying a moving average over the
         logarithmic amplitudes in the fourrier domain.
-    epsilon: int, default=1e-8
+    epsilon : int, default=1e-8
         A threshold on the amplitude to avoid invalid values.
+
+    Notes
+    -----
+    SpectralResidual only handles univariate time series.
 
     Examples
     --------
@@ -37,10 +41,6 @@ class SpectralResidual(BaseDetector):
     >>> sr.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.28706631, 0.19033123, 0.15518059, ..., 0.17092832, 0.1530504 ,
            0.27486696]...)
-
-    Notes
-    -----
-    SpectralResidual only handles univariate time series.
     """
 
     moving_average_window_size: int

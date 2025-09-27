@@ -36,43 +36,43 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    supervision: Supervision, default=Supervision.SEMI_SUPERVISED
+    supervision : Supervision, default=Supervision.SEMI_SUPERVISED
         The type of supervision this anomaly detector requires.
-    error_metric: {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
+    error_metric : {"mean-absolute-error", "mean-squared-error"}, default="mean-absolute-error"
         The error measure between the forecasted value and the observed values.
-    forecast_length: int default=1
+    forecast_length : int default=1
         The number of time steps the neural network must forecast.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    standard_scaling: bool, default=True
+    standard_scaling : bool, default=True
         Whether to standard scale each window independently, before feeding it to the network.
-    batch_size: int, default=32
+    batch_size : int, default=32
         The size of the batches to feed to the network.
-    data_loader_kwargs: dictionary, default=None
+    data_loader_kwargs : dictionary, default=None
         Additional kwargs to be passed to the data loader.
-        For more information, see: https://docs.pytorch.org/docs/stable/data.html
-    optimizer: {"adam", "sgd"} or callable default="adam"
+        For more information, see: https://docs.pytorch.org/docs/stable/data.html.
+    optimizer : {"adam", "sgd"} or callable default="adam"
         The optimizer to use for learning the weights. If "adam" is given,
         then the torch.optim.Adam optimizer will be used. If "sgd" is given,
         then the torch.optim.SGD optimizer will be used. Otherwise, a callable
         should be given, which takes as input the network parameters, and then
         creates an optimizer.
-    learning_rate: float, default=1e-3
+    learning_rate : float, default=1e-3
         The learning rate to use for training the network. Has no effect
         if optimize is a callable.
-    compile_model: bool, default=False
+    compile_model : bool, default=False
         Whether the network architecture should be compiled or not before
         training the weights.
-        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
-    compile_mode: {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html.
+    compile_mode : {"default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"}, default="default"
         Method to compile the architecture.
-        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html
-    n_epochs: int, default=10
+        For more information, see: https://docs.pytorch.org/docs/stable/generated/torch.compile.html.
+    n_epochs : int, default=10
         The number of epochs for which the neural network should be trained.
-    loss_function: {"mse", "l1", "huber} or torch.nn.Module, default="mse"
+    loss_function : {"mse", "l1", "huber} or torch.nn.Module, default="mse"
         The loss function to use for updating the weights. Valid options are:
 
         - ``'mse'``: Use the Mean Squared Error loss.
@@ -80,23 +80,23 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
         - ``'huber'``: Use the huber loss, which smoothly combines the MSE-loss with the L1-loss.
         - ``torch.nn.Module``: a custom torch module to use for the loss function.
 
-    device: str, default="cpu"
+    device : str, default="cpu"
         The device on which te neural network should be trained.
-        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device
-    seed: int, default=None
+        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device.
+    seed : int, default=None
         The seed used for training the model. This seed will update the torch
         and numpy seed at the beginning of the fit method.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector.
-    optimizer_: torch.optim.Optimizer
+    optimizer_ : torch.optim.Optimizer
         The optimizer used for learning the weights of the network.
-    neural_network_: torch.nn.Module
+    neural_network_ : torch.nn.Module
         The PyTorch network architecture.
 
-    See also
+    See Also
     --------
     MultilayerPerceptron: An implementation of this class using an feed-forward neural network.
     """

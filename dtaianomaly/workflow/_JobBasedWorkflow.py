@@ -40,13 +40,13 @@ class JobBasedWorkflow(AttributeValidationMixin):
 
     Parameters
     ----------
-    jobs: list of Job
+    jobs : list of Job
         The jobs to execute within this workflow.
 
-    metrics: Metric or list of Metric
+    metrics : Metric or list of Metric
         The metrics to evaluate within this workflow.
 
-    thresholds: Thresholding or list of Thresholding, default=None
+    thresholds : Thresholding or list of Thresholding, default=None
         The thresholds used for converting continuous anomaly scores to
         binary anomaly predictions. Each threshold will be combined with
         each :py:class:`~dtaianomaly.evaluation.BinaryMetric` given via
@@ -56,37 +56,37 @@ class JobBasedWorkflow(AttributeValidationMixin):
         argument must be of type :py:class:`~dtaianomaly.evaluation.ProbaMetric`.
         Otherwise, a ValueError will be raised.
 
-    n_jobs: int, default=1
+    n_jobs : int, default=1
         Number of processes to run in parallel while evaluating all
         combinations.
 
-    trace_memory: bool, default=False
+    trace_memory : bool, default=False
         Whether or not memory usage of each run is reported. While this
         might give additional insights into the models, their runtime
         will be higher due to additional internal bookkeeping.
 
-    anomaly_scores_path: str, default=None
+    anomaly_scores_path : str, default=None
         The path where the anomaly scores should be saved. If ``None``, the
         anomaly scores will not be saved.
 
-    error_log_path: str, default='./error_logs'
+    error_log_path : str, default='./error_logs'
         The path in which the error logs should be saved.
 
-    fit_unsupervised_on_test_data: bool, default=False
+    fit_unsupervised_on_test_data : bool, default=False
         Whether to fit the unsupervised anomaly detectors on the test data.
         If True, then the test data will be used to fit the detector and
         to evaluate the detector. This is no issue, since unsupervised
         detectors do not use labels and can deal with anomalies in the
         training data.
 
-    fit_semi_supervised_on_test_data: bool, default=False
+    fit_semi_supervised_on_test_data : bool, default=False
         Whether to fit the semi-supervised anomaly detectors on the test data.
         If True, then the test data will be used to fit the detector and
         to evaluate the detector. This is not really an issue, because it only
         breaks the assumption of semi-supervised methods of normal training data.
         However, these methods do not use the training labels themselves.
 
-    show_progress: bool, default=False
+    show_progress : bool, default=False
         Whether to show the progress using a TQDM progress bar or not.
 
         .. note::
@@ -179,12 +179,20 @@ class JobBasedWorkflow(AttributeValidationMixin):
 
     def run(self, **kwargs) -> pd.DataFrame:
         """
-        Run the experimental workflow. Evaluate each pipeline within this
-        workflow on each dataset within this workflow in a grid-like manner.
+        Run the experimental workflow.
+
+        Evaluate each pipeline within this workflow on each dataset within
+        this workflow in a grid-like manner.
+
+        Parameters
+        ----------
+        **kwargs
+            Additional parameters to be passed to the `fit` method of the
+            anomaly detector.
 
         Returns
         -------
-        results: pd.DataFrame
+        pd.DataFrame
             A pandas dataframe with the results of this workflow. Each row
             represents an execution of an anomaly detector on a given dataset
             with some preprocessing steps. The columns correspond to the

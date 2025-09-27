@@ -1,7 +1,25 @@
 import json
 
+__all__ = ["load_configuration", "load_default_configuration"]
+
 
 def load_configuration(path: str = None) -> dict:
+    """
+    Load a configuration.
+
+    Load the configuration file at the given path, if it is given.
+    If no path is given, the default configuration will be loaded.
+
+    Parameters
+    ----------
+    path : str, default=None
+        The path where the configuration to load is located.
+
+    Returns
+    -------
+    dict
+        The loaded configuration.
+    """
     if path is None:
         return load_default_configuration()
     else:
@@ -10,6 +28,16 @@ def load_configuration(path: str = None) -> dict:
 
 
 def load_default_configuration() -> dict:
+    """
+    Load the default configuration.
+
+    Load the default configuration file for running InTimeAD.
+
+    Returns
+    -------
+    dict
+        The default configuration.
+    """
     return {
         "data-loader": {"default": "DemonstrationTimeSeriesLoader", "exclude": []},
         "detector": {

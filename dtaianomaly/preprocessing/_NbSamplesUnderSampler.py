@@ -18,7 +18,7 @@ class NbSamplesUnderSampler(Preprocessor):
 
     Parameters
     ----------
-    nb_samples: int, default=None
+    nb_samples : int, default=None
         The number of samples remaining.
 
     Examples

@@ -32,17 +32,17 @@ class HistogramBasedOutlierScore(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_bins: int or 'auto', default=10
+    n_bins : int or 'auto', default=10
         The number of bins for each feature. If ``'auto'``, the birge-rozenblac method is used
         for automatically selecting the number of bins for each feature.
-    alpha: float in ]0, 1[, default=0.1
+    alpha : float in ]0, 1[, default=0.1
         The regularizer for preventing overflow.
-    tol: float in ]0, 1[, default=0.5
+    tol : float in ]0, 1[, default=0.5
         Parameter defining the flexibility for dealing with samples that fall
         outside the bins.
     **kwargs
@@ -50,7 +50,7 @@ class HistogramBasedOutlierScore(BasePyODAnomalyDetector):
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : HBOS
         An HBOS detector of PyOD

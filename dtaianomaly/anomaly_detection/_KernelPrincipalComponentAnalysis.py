@@ -28,21 +28,21 @@ class KernelPrincipalComponentAnalysis(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_components: int, default=None
+    n_components : int, default=None
         The number of components to use. If None, all non-zero components are kept.
-    kernel: {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}, default='rbf'
+    kernel : {'linear', 'poly', 'rbf', 'sigmoid', 'cosine'}, default='rbf'
         The kernel to use for PCA.
-    **kwargs:
+    **kwargs
         Arguments to be passed to the PyOD PCA.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : KPCA
         A KPCA-detector of PyOD

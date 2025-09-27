@@ -8,7 +8,7 @@ __all__ = ["MovingAverage"]
 
 class MovingAverage(Preprocessor):
     """
-    Computes the moving average of a time series.
+    Compute the moving average of a time series.
 
     To compute the moving average at time :math:`t`, i.e., the unweighted
     average of the observations within a window. The window is centered at
@@ -20,7 +20,7 @@ class MovingAverage(Preprocessor):
 
     Parameters
     ----------
-    window_size: int
+    window_size : int
         Length of the window in which the average should be computed.
 
     Examples

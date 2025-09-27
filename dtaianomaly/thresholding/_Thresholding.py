@@ -11,22 +11,28 @@ __all__ = ["Thresholding"]
 class Thresholding(PrintConstructionCallMixin, AttributeValidationMixin):
     """
     Base thresholding class.
+
+    A base class for converting continuous anomaly scores to discrete anomaly
+    labels. This is useful for actually detecting anomalies, rather than just
+    knowing how anomalous an instance is realtive to the other instances.
     """
 
     def threshold(self, scores: np.ndarray) -> np.ndarray:
         """
+        Threshold the given anomaly scores.
+
         Apply the thresholding operation to the given anomaly scores. This function
         will perform the necessary checks and formatting on the anomaly scores,
         before effectively applying the thresholding.
 
         Parameters
         ----------
-        scores: array-like of shape (n_samples)
+        scores : array-like of shape (n_samples)
             The continuous anomaly scores to convert to binary anomaly labels.
 
         Returns
         -------
-        anomaly_labels: array-like of shape (n_samples)
+        array-like of shape (n_samples)
             The discrete anomaly labels, in which a 0 indicates normal and a
             1 indicates anomalous.
 

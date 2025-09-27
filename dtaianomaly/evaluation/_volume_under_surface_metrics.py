@@ -177,33 +177,18 @@ class RangeAreaUnderPR(RangeAucMetric):
 
     Parameters
     ----------
-    buffer_size: int, default=None
+    buffer_size : int, default=None
         Size of the buffer region around an anomaly. We add an increasing slope of size ``buffer_size//2`` to the
         beginning of anomalies and a decreasing slope of size ``buffer_size//2`` to the end of anomalies. Per default
         (when ``buffer_size==None``), ``buffer_size`` is the median length of the anomalies within the time series.
         However, you can also set it to the period size of the dominant frequency or any other desired value.
-    compatibility_mode: bool, default=False
+    compatibility_mode : bool, default=False
         When set to ``True``, produces exactly the same output as the metric implementation by the original authors.
         Otherwise, TimeEval uses a slightly improved implementation that fixes some bugs and uses linear slopes.
-    max_samples: int, default=250
+    max_samples : int, default=250
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
-
-    See Also
-    --------
-    AreaUnderROC: Compute the area under the range-based ROC-curve.
-    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
-    VolumeUnderPR: Compute the volume under the range-based PR-surface.
-
-    Examples
-    --------
-    >>> from dtaianomaly.evaluation import RangeAreaUnderPR
-    >>> metric = RangeAreaUnderPR()
-    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
-    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
-    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
-    0.838...
 
     Warnings
     --------
@@ -227,6 +212,21 @@ class RangeAreaUnderPR(RangeAucMetric):
     In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
     precisions and false positive rates for every threshold), which leads to a more than 25x
     speedup on the demonstration time series.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeAreaUnderPR
+    >>> metric = RangeAreaUnderPR()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.838...
     """
 
     buffer_size: int | None
@@ -263,33 +263,18 @@ class RangeAreaUnderROC(RangeAucMetric):
 
     Parameters
     ----------
-    buffer_size: int, default=None
+    buffer_size : int, default=None
         Size of the buffer region around an anomaly. We add an increasing slope of size ``buffer_size//2`` to the
         beginning of anomalies and a decreasing slope of size ``buffer_size//2`` to the end of anomalies. Per default
         (when ``buffer_size==None``), ``buffer_size`` is the median length of the anomalies within the time series.
         However, you can also set it to the period size of the dominant frequency or any other desired value.
-    compatibility_mode: bool, default=False
+    compatibility_mode : bool, default=False
         When set to ``True``, produces exactly the same output as the metric implementation by the original authors.
         Otherwise, TimeEval uses a slightly improved implementation that fixes some bugs and uses linear slopes.
-    max_samples: int, default= 250
+    max_samples : int, default= 250
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
-
-    See Also
-    --------
-    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
-    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
-    VolumeUnderPR: Compute the volume under the range-based PR-surface.
-
-    Examples
-    --------
-    >>> from dtaianomaly.evaluation import RangeAreaUnderROC
-    >>> metric = RangeAreaUnderROC()
-    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
-    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
-    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
-    0.877...
 
     Warnings
     --------
@@ -313,6 +298,21 @@ class RangeAreaUnderROC(RangeAucMetric):
     In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
     precisions and false positive rates for every threshold), which leads to a more than 25x
     speedup on the demonstration time series.
+
+    See Also
+    --------
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import RangeAreaUnderROC
+    >>> metric = RangeAreaUnderROC()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.877...
     """
 
     buffer_size: int | None
@@ -348,31 +348,16 @@ class VolumeUnderPR(RangeAucMetric):
 
     Parameters
     ----------
-    max_buffer_size: int, default=500
+    max_buffer_size : int, default=500
         Maximum size of the buffer region around an anomaly. We iterate over all buffer sizes from 0 to
         ``may_buffer_size`` to create the surface.
-    compatibility_mode: bool, default=False
+    compatibility_mode : bool, default=False
         When set to ``True``, produces exactly the same output as the metric implementation by the original authors.
         Otherwise, TimeEval uses a slightly improved implementation that fixes some bugs and uses linear slopes.
-    max_samples: int, default=250
+    max_samples : int, default=250
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
-
-    See Also
-    --------
-    AreaUnderROC: Compute the area under the range-based ROC-curve.
-    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
-    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
-
-    Examples
-    --------
-    >>> from dtaianomaly.evaluation import VolumeUnderPR
-    >>> metric = VolumeUnderPR()
-    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
-    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
-    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
-    0.994...
 
     Warnings
     --------
@@ -396,6 +381,21 @@ class VolumeUnderPR(RangeAucMetric):
     In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
     precisions and false positive rates for every threshold), which leads to a more than 25x
     speedup on the demonstration time series.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderROC: Compute the volume under the range-based ROC-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import VolumeUnderPR
+    >>> metric = VolumeUnderPR()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.994...
     """
 
     max_buffer_size: int
@@ -431,31 +431,16 @@ class VolumeUnderROC(RangeAucMetric):
 
     Parameters
     ----------
-    max_buffer_size: int, default=500
+    max_buffer_size : int, default=500
         Maximum size of the buffer region around an anomaly. We iterate over all buffer sizes from 0 to
         ``may_buffer_size`` to create the surface.
-    compatibility_mode: bool, default=False
+    compatibility_mode : bool, default=False
         When set to ``True``, produces exactly the same output as the metric implementation by the original authors.
         Otherwise, TimeEval uses a slightly improved implementation that fixes some bugs and uses linear slopes.
-    max_samples: int, default=250
+    max_samples : int, default=250
         Calculating precision and recall for many thresholds is quite slow. We, therefore, uniformly sample thresholds
         from the available score space. This parameter controls the maximum number of thresholds; too low numbers
         degrade the metrics' quality.
-
-    See Also
-    --------
-    AreaUnderROC: Compute the area under the range-based ROC-curve.
-    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
-    VolumeUnderPR: Compute the volume under the range-based PR-surface.
-
-    Examples
-    --------
-    >>> from dtaianomaly.evaluation import VolumeUnderROC
-    >>> metric = VolumeUnderROC()
-    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
-    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
-    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
-    0.992...
 
     Warnings
     --------
@@ -479,6 +464,21 @@ class VolumeUnderROC(RangeAucMetric):
     In addition, we numbafied the most expensive part of the code (i.e., computing the recalls,
     precisions and false positive rates for every threshold), which leads to a more than 25x
     speedup on the demonstration time series.
+
+    See Also
+    --------
+    AreaUnderROC: Compute the area under the range-based ROC-curve.
+    RangeAreaUnderPR: Compute the area under the range-based PR-curve.
+    VolumeUnderPR: Compute the volume under the range-based PR-surface.
+
+    Examples
+    --------
+    >>> from dtaianomaly.evaluation import VolumeUnderROC
+    >>> metric = VolumeUnderROC()
+    >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
+    >>> y_pred = [1, 0, 0, 1, 1, 1, 0, 0]
+    >>> metric.compute(y_true, y_pred)  # doctest: +ELLIPSIS
+    0.992...
     """
 
     max_buffer_size: int

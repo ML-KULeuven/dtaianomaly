@@ -17,6 +17,11 @@ class DemonstrationTimeSeriesLoader(LazyDataLoader):
     valley around observation 950 is slightly deeper than the other
     valleys in the time series, leading to an anomaly.
 
+    Parameters
+    ----------
+    do_caching : bool, default=False
+        Whether to cache the loaded data or not.
+
     Examples
     --------
     >>> from dtaianomaly.data import DemonstrationTimeSeriesLoader
@@ -32,15 +37,17 @@ class DemonstrationTimeSeriesLoader(LazyDataLoader):
 
 def demonstration_time_series() -> (np.ndarray, np.ndarray):
     """
+    Generate the demonstration time series.
+
     Generate a time series for demonstration purposes. This is a noisy
     sine wave with one valley that is deeper than the other ones.
 
     Returns
     -------
     x: np.ndarray of shape (nb_samples)
-        The raw time series data
+        The raw time series data.
     y: np.ndarray of shape (nb_samples)
-        The ground truth labels
+        The ground truth labels.
 
     Examples
     --------

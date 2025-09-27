@@ -21,19 +21,26 @@ class LocalPolynomialApproximation(BaseDetector):
 
     Parameters
     ----------
-    neighborhood: int
+    neighborhood : int
         The size of the neighborhood for estimating the polynomials.
         The window size, the length of the subsequences that will be detected as anomalies. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    power: int, default=1
+    power : int, default=1
         The power of the polynomial to fit. While any strictly positive value is valid, :cite:`li2007unifying`
         indicate that the local polynomial fit with odd order is better than that with an even order.
-    normalize_variance: bool, default=false
+    normalize_variance : bool, default=false
         Wether to normalize the forward and backward estimates based on the variance of the forward
         and backward neighborhood, respectively.
-    buffer: int, default=16
+    buffer : int, default=16
         A buffer at the start and end of the time series, used to ensure that sufficient data is available
         for fitting each polynomial. The buffer must be at least 3 to ensure that the .
+
+    Notes
+    -----
+    - LocalPolynomialApproximation only handles univariate time series.
+    - The original version of :cite:t:`li2007unifying` normalizes the forward and backward scores. Their
+      approach requires two additional parameters. Therefore, we did not implement this and leave normalizatin
+      of the (aggregate) scores to post-processing.
 
     Examples
     --------
@@ -43,13 +50,6 @@ class LocalPolynomialApproximation(BaseDetector):
     >>> poly = LocalPolynomialApproximation(neighborhood=50).fit(x)
     >>> poly.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0., 0., 0., ..., 0., 0., 0.]...)
-
-    Notes
-    -----
-    - LocalPolynomialApproximation only handles univariate time series.
-    - The original version of :cite:t:`li2007unifying` normalizes the forward and backward scores. Their
-      approach requires two additional parameters. Therefore, we did not implement this and leave normalizatin
-      of the (aggregate) scores to post-processing.
     """
 
     neighborhood: int | str

@@ -39,17 +39,17 @@ class ClusterBasedLocalOutlierFactor(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_clusters: int, default=8
+    n_clusters : int, default=8
         The number of clusters to form and the number of centroids to generate.
-    alpha: float in [0.5, 1.0], default=0.9
+    alpha : float in [0.5, 1.0], default=0.9
         The ratio for deciding small and large clusters. :math:`\\alpha` equals the ratio of number
         of samlples in large clusters to the number of samples in small clusters.
-    beta: float, default=5.0
+    beta : float, default=5.0
         The ratio for deciding small and large clusters. :math:`\\beta` equals a cutoff for
         the small and large clusters, such that for clusters ordered by size, we have that
         :math:`\\lvert C_k \\rvert / \\lvert C_{k+1} \\rvert = \\beta`.
@@ -58,7 +58,7 @@ class ClusterBasedLocalOutlierFactor(BasePyODAnomalyDetector):
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : CBLOF
         A CBLOF detector of PyOD

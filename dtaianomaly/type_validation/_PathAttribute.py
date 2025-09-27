@@ -7,18 +7,19 @@ __all__ = ["PathAttribute"]
 
 class PathAttribute(BaseAttributeValidation):
     """
-    Validate if a given value is a valid path.
+    Validator for paths.
 
     A valid path can be either a string or a pathlib.Path object, and the
     path must exist in the file system.
 
     Parameters
     ----------
-    must_exist: bool, default=True
+    must_exist : bool, default=True
         Whether the path must exist.
 
     Examples
     --------
+    >>> from pathlib import Path
     >>> from dtaianomaly.type_validation import PathAttribute
     >>> a_path = PathAttribute()
     >>> a_path.raise_error_if_invalid(".", "my_attribute", "MyClass")  # No error

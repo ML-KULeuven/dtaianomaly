@@ -9,7 +9,7 @@ __all__ = ["LazyDataLoader"]
 
 class LazyDataLoader(PrintConstructionCallMixin, AttributeValidationMixin):
     """
-    A lazy dataloader for anomaly detection workflows
+    A lazy dataloader for anomaly detection workflows.
 
     This is a data loading utility to point towards a specific data set
     and to load it at a later point in time during execution of a workflow.
@@ -19,8 +19,8 @@ class LazyDataLoader(PrintConstructionCallMixin, AttributeValidationMixin):
 
     Parameters
     ----------
-    do_caching: bool, default=False
-        Whether to cache the loaded data or not
+    do_caching : bool, default=False
+        Whether to cache the loaded data or not.
 
     Attributes
     ----------
@@ -39,12 +39,14 @@ class LazyDataLoader(PrintConstructionCallMixin, AttributeValidationMixin):
 
     def load(self) -> DataSet:
         """
+        Load the time series.
+
         Load the dataset. If ``do_caching==True``, the loaded will be saved in the
         cache if no cache is available yet, and the cached data will be returned.
 
         Returns
         -------
-        data_set: DataSet
+        DataSet
             The loaded dataset.
         """
         if self.do_caching:

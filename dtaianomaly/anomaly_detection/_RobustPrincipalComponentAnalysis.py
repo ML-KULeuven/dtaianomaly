@@ -28,31 +28,22 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    max_iter: int, default=1000
+    max_iter : int, default=1000
         The maximum number of iterations allowed to optimize the low rank approximation.
-    kwargs:
+    **kwargs
         Additional parameters to be passed PCA of Sklearn.
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pca_ : PCA
         The PCA-object used to project the data in a lower dimension.
-
-    Examples
-    --------
-    >>> from dtaianomaly.anomaly_detection import RobustPrincipalComponentAnalysis
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> rpca = RobustPrincipalComponentAnalysis(2).fit(x)
-    >>> rpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662, 1.2923824 ]...)
 
     Warnings
     --------
@@ -71,6 +62,15 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     Therefore, we added a parameter ``window_size`` to apply Robust PCA in windows
     of a univariate time series, to make it applicable. Common behavior on multivariate
     time series can be obtained by setting ``window_size = 1``.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import RobustPrincipalComponentAnalysis
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> x, y = demonstration_time_series()
+    >>> rpca = RobustPrincipalComponentAnalysis(2).fit(x)
+    >>> rpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662, 1.2923824 ]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

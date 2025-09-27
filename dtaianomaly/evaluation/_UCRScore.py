@@ -28,7 +28,7 @@ class UCRScore(ProbaMetric):
 
     Parameters
     ----------
-    tolerance: int, default=None
+    tolerance : int, default=None
         The minimum tolerance around the ground truth anomalous event to avoid
         bias towards short anomalies. If None, no tolerance is included.
 

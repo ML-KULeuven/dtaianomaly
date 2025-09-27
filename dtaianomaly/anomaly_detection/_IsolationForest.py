@@ -27,21 +27,21 @@ class IsolationForest(BasePyODAnomalyDetector):
 
     Parameters
     ----------
-    window_size: int or str
+    window_size : int or str
         The window size to use for extracting sliding windows from the time series. This
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
-    stride: int, default=1
+    stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    n_estimators: int, default=100
+    n_estimators : int, default=100
         The number of base trees in the ensemble.
-    max_samples: int or float, default='auto'
+    max_samples : int or float, default='auto'
         The number of samples to draw for training each base estimator:
 
         - if ``int``: Draw at most ``max_samples`` samples.
         - if ``float``: Draw at most ``max_samples`` percentage of the samples.
         - if ``'auto'``: Set ``max_samples=min(256, n_windows)``.
 
-    max_features: int or float, default=1.0
+    max_features : int or float, default=1.0
         The number of features to use for training each base estimator:
 
         - if ``int``: Use at most ``max_features`` features.
@@ -52,7 +52,7 @@ class IsolationForest(BasePyODAnomalyDetector):
 
     Attributes
     ----------
-    window_size_: int
+    window_size_ : int
         The effectively used window size for this anomaly detector
     pyod_detector_ : IForest
         An Isolation Forest detector of PyOD

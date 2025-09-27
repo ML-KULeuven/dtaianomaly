@@ -14,13 +14,16 @@ __all__ = ["Preprocessor"]
 
 def _check_preprocessing_inputs(X: np.ndarray, y: np.ndarray = None) -> None:
     """
-    Check if the given `X` and `y` arrays are valid.
+    Check the inputs for preprocessing.
+
+    Check if the given `X` and `y` arrays are valid, i.e., if they
+    are valid array-likes and have the same length.
 
     Parameters
     ----------
-    X: array-like of shape (n_samples, n_attributes)
+    X : array-like of shape (n_samples, n_attributes)
         Raw time series
-    y: array-like, default=None
+    y : array-like, default=None
         Ground-truth information
 
     Raises
@@ -46,23 +49,29 @@ class Preprocessor(
 ):
     """
     Base preprocessor class.
+
+    Class to preprocess data. This is useful for applying transformations on
+    the data such that anomalies are more clearly visible or such that the
+    data has a standard form (e.g., scaling).
     """
 
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> "Preprocessor":
         """
+        Fit this preprocessor.
+
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then fits this preprocessor.
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Raw time series
-        y: array-like, default=None
-            Ground-truth information
+        X : array-like of shape (n_samples, n_attributes)
+            Raw time series.
+        y : array-like, default=None
+            Ground-truth information.
 
         Returns
         -------
-        self: Preprocessor
+        Preprocessor
             Returns the fitted instance self.
         """
         _check_preprocessing_inputs(X, y)
@@ -76,21 +85,23 @@ class Preprocessor(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
         """
+        Transform the given time series.
+
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then transforms (i.e., preprocesses) the given time series.
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Raw time series
-        y: array-like of shape (n_samples), default=None
-            Ground-truth information
+        X : array-like of shape (n_samples, n_attributes)
+            Raw time series.
+        y : array-like of shape (n_samples), default=None
+            Ground-truth information.
 
         Returns
         -------
-        X_transformed: np.ndarray of shape (n_samples, n_attributes)
-            Preprocessed raw time series
-        y_transformed: np.ndarray of shape (n_samples)
+        X_transformed : np.ndarray of shape (n_samples, n_attributes)
+            Preprocessed raw time series.
+        y_transformed : np.ndarray of shape (n_samples)
             The transformed ground truth. If no ground truth was provided (`y=None`),
             then None will be returned as well.
         """
@@ -108,6 +119,8 @@ class Preprocessor(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
         """
+        Fit this preprocessor and transform the given time series.
+
         First checks the inputs with :py:meth:`~dtaianomaly.preprocessing.Preprocessor.check_preprocessing_inputs`,
         and then chains the fit and transform methods on the given data, i.e.,
         first fit this preprocessor on the given `X` and `y`, after which the
@@ -115,16 +128,16 @@ class Preprocessor(
 
         Parameters
         ----------
-        X: array-like of shape (n_samples, n_attributes)
-            Raw time series
-        y: array-like of shape (n_samples), default=None
-            Ground-truth information
+        X : array-like of shape (n_samples, n_attributes)
+            Raw time series.
+        y : array-like of shape (n_samples), default=None
+            Ground-truth information.
 
         Returns
         -------
-        X_transformed: np.ndarray of shape (n_samples, n_attributes)
-            Preprocessed raw time series
-        y_transformed: np.ndarray of shape (n_samples)
+        X_transformed : np.ndarray of shape (n_samples, n_attributes)
+            Preprocessed raw time series.
+        y_transformed : np.ndarray of shape (n_samples)
             The transformed ground truth. If no ground truth was provided (`y=None`),
             then None will be returned as well.
         """
