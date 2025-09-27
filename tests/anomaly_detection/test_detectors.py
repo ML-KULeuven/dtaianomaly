@@ -19,6 +19,8 @@ DETECTORS_NOT_MULTIVARIATE = [
 ]
 DETECTORS_TO_EXCLUDE = [
     anomaly_detection.MOMENT,  # Due to dependency conflicts
+    anomaly_detection.TimeMoE,  # To limit time
+    anomaly_detection.Chronos,  # To limit time
 ]
 
 
