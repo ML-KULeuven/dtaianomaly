@@ -6,20 +6,35 @@ All notable changes to this project will be documented in this file.
 Latest
 ------
 
+.. warning::
+   This integrated a lot of quality-of-life changes and general updates to
+   the structure of the project to better manage the access. In doing so,
+   several minor updates may have occurred, which could prevent backwards
+   compatibility. However, we do not see any reason to not upgrade your
+   current installation to this one as it includes major updates and
+   numerous additional features.
+
 Added
 ^^^^^
 
 - Option to save the anomaly scores within a workflow.
 - Implement ``LocalPolynomialApproximation`` anomaly detector.
 - Implement ``UCRScore`` evaluation metric.
-- Implement ``ChronosAnomalyDetector`` model, with optional dependency ``chronos``
-- Implement ``MOMENTAnomalyDetector`` model, with optional dependency ``moment``
-- Implement ``TimeMoEAnomalyDetector`` model, with optional dependency ``time_moe``
+- Implement ``Chronos`` model, with optional dependency ``chronos``
+- Implement ``MOMENT`` model, with optional dependency ``moment``
+- Implement ``TimeMoE`` model, with optional dependency ``time_moe``
 - Implement ``RobustRandomCutForestAnomalyDetector`` model
+- Implement and integrate type validation into ``dtaianomaly``.
+- Added marks to the test: ``slow`` and ``numba``.
+- Integrated numpydocs documentation formatting rules.
 
 Changed
 ^^^^^^^
 - Added option to pass a literal ('mse', 'l1', 'huber') as loss function to the neural networks.
+- Moved sliding window related code to separate module.
+- In the neural methods, simplified the options for passing losses and activation functions to
+  only include predefined types.
+- The documentation is restructured (although it still follows the same style).
 
 Fixed
 ^^^^^
