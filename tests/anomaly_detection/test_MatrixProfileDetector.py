@@ -69,6 +69,10 @@ class TestMatrixProfileDetector:
     @pytest.mark.slow
     def test_novelty_univariate(self, univariate_time_series):
         detector = MatrixProfileDetector(window_size=15, novelty=True)
+
+        detector.fit(univariate_time_series)
+        print(detector.X_reference_)
+        print(detector.is_fitted())
         y_pred = detector.fit(univariate_time_series).decision_function(
             univariate_time_series
         )

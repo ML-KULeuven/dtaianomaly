@@ -179,10 +179,33 @@ class MatrixProfileDetector(BaseDetector):
             with '_' are initialized.
         """
         if self.novelty:
-            super().is_fitted()
+            return super().is_fitted()
         else:
             return all(
                 hasattr(self, attr)
                 for attr in self.__annotations__
                 if attr.endswith("_") and attr != "X_reference_"
+            )
+
+    def requires_fitting(self) -> bool:
+        """
+        Check whether this object requires fitting.
+
+        Check whether any of the attributes of this object ends with an
+        underscore ('_'), which indicates that the attribute is set when
+        the object is fitted. Note that this method does not check whether
+        the object is fitted, i.e., whether the attributes have been set.
+
+        Returns
+        -------
+        bool
+            True if and only if this object has attributes that end with '_'.
+        """
+        if self.novelty:
+            return super().requires_fitting()
+        else:
+            return any(
+                attr.endswith("_")
+                for attr in self._all_annotations()
+                if attr != "X_reference_"
             )
