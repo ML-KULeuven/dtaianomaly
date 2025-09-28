@@ -1,93 +1,64 @@
-import pytest
 import math
 
 import numpy as np
+import pytest
 
-from dtaianomaly.evaluation.affiliation_metrics import (
-        AffiliationPrecision,
-        AffiliationRecall,
-        AffiliationFBeta,
-        _compute_affiliation_metrics,
-        _E_gt_func,
-        _get_all_E_gt_func,
-        _affiliation_partition,
-        _interval_length,
-        _sum_interval_lengths,
-        _interval_intersection,
-        _interval_subset,
-        _cut_into_three_func,
-        _get_pivot_j,
-        _integral_mini_interval,
-        _integral_interval_distance,
-        _integral_mini_interval_P_CDFmethod__min_piece,
-        _integral_mini_interval_Pprecision_CDFmethod,
-        _integral_mini_interval_Precall_CDFmethod,
-        _integral_interval_probaCDF_precision,
-        _cut_J_based_on_mean_func,
-        _integral_interval_probaCDF_recall,
-        _affiliation_precision_proba,
-        _affiliation_recall_proba,
-        _sum_wo_nan,
-        _len_wo_nan,
-        _convert_vector_to_events,
-        _test_events
+from dtaianomaly.evaluation import (
+    AffiliationFBeta,
+    AffiliationPrecision,
+    AffiliationRecall,
+)
+from dtaianomaly.evaluation._affiliation_metrics import (
+    _affiliation_partition,
+    _affiliation_precision_proba,
+    _affiliation_recall_proba,
+    _compute_affiliation_metrics,
+    _cut_into_three_func,
+    _cut_J_based_on_mean_func,
+    _E_gt_func,
+    _get_all_E_gt_func,
+    _get_pivot_j,
+    _integral_interval_distance,
+    _integral_interval_probaCDF_precision,
+    _integral_interval_probaCDF_recall,
+    _integral_mini_interval,
+    _integral_mini_interval_P_CDFmethod__min_piece,
+    _integral_mini_interval_Pprecision_CDFmethod,
+    _interval_intersection,
+    _interval_length,
+    _interval_subset,
+    _len_wo_nan,
+    _sum_interval_lengths,
+    _sum_wo_nan,
+    _test_events,
 )
 
-
-class TestAffiliationPrecision:
-
-    def test_str(self):
-        assert str(AffiliationPrecision()) == "AffiliationPrecision()"
-
-
-class TestAffiliationRecall:
-
-    def test_str(self):
-        assert str(AffiliationRecall()) == "AffiliationRecall()"
-
-
-class TestAffiliationFBeta:
-
-    def test_default_beta(self):
-        assert AffiliationFBeta().beta == 1.0
-
-    def test_string_beta(self):
-        with pytest.raises(TypeError):
-            AffiliationFBeta("1.0")
-
-    def test_bool_beta(self):
-        with pytest.raises(TypeError):
-            AffiliationFBeta(True)
-
-    def test_zero_beta(self):
-        with pytest.raises(ValueError):
-            AffiliationFBeta(0.0)
-
-    def test_negative_beta(self):
-        with pytest.raises(ValueError):
-            AffiliationFBeta(-1.0)
-
-    @pytest.mark.parametrize('beta', [0.5, 1, 2])
-    def test(self, beta):
-        y_true = np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1])
-        y_pred = np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0])
-        precision, recall = 0.8181818181818181, 0.8442760942760943
-        numerator = (1 + beta**2) * precision * recall
-        denominator = beta**2 * precision + recall
-        assert pytest.approx(numerator / denominator) == AffiliationFBeta(beta).compute(y_true, y_pred)
-
-    def test_str(self):
-        assert str(AffiliationFBeta()) == "AffiliationFBeta()"
-        assert str(AffiliationFBeta(beta=0.5)) == "AffiliationFBeta(beta=0.5)"
-        assert str(AffiliationFBeta(beta=2)) == "AffiliationFBeta(beta=2)"
+"""
+Due to checks, two lines in the code are not reachable:
+- "raise ValueError("The i_pivot should be outside J")" in _integral_mini_interval_Precall_CDFmethod
+- "raise ValueError("unexpected unconsidered case")" in _cut_into_three_func
+"""
 
 
 class TestComputeAffiliationMetrics:
 
-    @pytest.mark.parametrize('y_true,y_pred,precision,recall', [
-        (np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), math.nan, 0),
-        (np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1]), np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0]), 0.8181818181818181, 0.8442760942760943),
-    ])
+    @pytest.mark.parametrize(
+        "y_true,y_pred,precision,recall",
+        [
+            (
+                np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                math.nan,
+                0,
+            ),
+            (
+                np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1]),
+                np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0]),
+                0.8181818181818181,
+                0.8442760942760943,
+            ),
+        ],
+    )
     def test(self, y_true, y_pred, precision, recall):
         p, r = _compute_affiliation_metrics(y_true, y_pred)
         p_cls = AffiliationPrecision().compute(y_true, y_pred)
@@ -101,6 +72,17 @@ class TestComputeAffiliationMetrics:
             assert pytest.approx(p_cls) == precision
         assert pytest.approx(r) == recall
         assert pytest.approx(r_cls) == recall
+
+    @pytest.mark.parametrize("beta", [0.5, 1, 2])
+    def test_fbeta(self, beta):
+        y_true = np.array([0, 0, 0, 1, 0, 0, 0, 1, 1, 1])
+        y_pred = np.array([0, 0, 0, 0, 1, 0, 0, 0, 1, 0])
+        precision, recall = 0.8181818181818181, 0.8442760942760943
+        numerator = (1 + beta**2) * precision * recall
+        denominator = beta**2 * precision + recall
+        assert pytest.approx(numerator / denominator) == AffiliationFBeta(beta).compute(
+            y_true, y_pred
+        )
 
     def test_no_ground_truth(self):
         with pytest.raises(ValueError):
@@ -171,8 +153,8 @@ class TestAffiliationZone:
         assert M[3][1] is None  # zone4, 2nd prediction
         assert M[3][2] is None  # zone4, 3rd prediction
 
-    @pytest.mark.parametrize('nb_gt', [1, 2, 3])
-    @pytest.mark.parametrize('nb_pred', [0, 1, 2, 3])
+    @pytest.mark.parametrize("nb_gt", [1, 2, 3])
+    @pytest.mark.parametrize("nb_pred", [0, 1, 2, 3])
     def test_affiliation_partition_size(self, nb_gt, nb_pred):
         """
         Test of shape of the output of the function with only
@@ -181,7 +163,9 @@ class TestAffiliationZone:
         events_gt = [((i + 3) * 6, (i + 2) * 6 + 2) for i in range(nb_gt)]
         events_pred = [((i + 2) * 5, (i + 2) * 5 + 3) for i in range(nb_pred)]
 
-        E_gt = _get_all_E_gt_func(events_gt, (0, max((nb_gt + 2) * 6 + 2, (nb_pred + 2) * 5 + 3) + 10))
+        E_gt = _get_all_E_gt_func(
+            events_gt, (0, max((nb_gt + 2) * 6 + 2, (nb_pred + 2) * 5 + 3) + 10)
+        )
         M = _affiliation_partition(events_pred, E_gt)
 
         assert len(M) == nb_gt
@@ -190,66 +174,86 @@ class TestAffiliationZone:
 
 class TestIntegral:
 
-    @pytest.mark.parametrize('interval,expected', [
-        (None, 0),
-        ((1, 2), 1),
-        ((-1, 3.5), 4.5),
-    ])
+    @pytest.mark.parametrize(
+        "interval,expected",
+        [
+            (None, 0),
+            ((1, 2), 1),
+            ((-1, 3.5), 4.5),
+        ],
+    )
     def test_interval_length(self, interval, expected):
         assert _interval_length(interval) == expected
 
-    @pytest.mark.parametrize('intervals,expected', [
-        ([], 0),
-        ([(1, 2)], 1),
-        ([(1, 2), (3.5, 4)], 1.5),
-        ([(1, 2), (-1, 3.5)], 5.5),
-    ])
+    @pytest.mark.parametrize(
+        "intervals,expected",
+        [
+            ([], 0),
+            ([(1, 2)], 1),
+            ([(1, 2), (3.5, 4)], 1.5),
+            ([(1, 2), (-1, 3.5)], 5.5),
+        ],
+    )
     def test_sum_interval_lengths(self, intervals, expected):
         assert _sum_interval_lengths(intervals) == expected
 
-    @pytest.mark.parametrize('interval1,interval2,expected', [
-        (None, None, None),
-        (None, (1, 2), None),
-        ((1, 2), None, None),
-        ((1, 2), (1, 2), (1, 2)),
-        ((1, 2), (2, 3), None),
-        ((1, 2), (3, 4), None),
-        ((1, 3), (2, 4), (2, 3)),
-        ((1, 3), (-1, 5), (1, 3)),
-        ((1, 10), (0, 5), (1, 5)),
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected",
+        [
+            (None, None, None),
+            (None, (1, 2), None),
+            ((1, 2), None, None),
+            ((1, 2), (1, 2), (1, 2)),
+            ((1, 2), (2, 3), None),
+            ((1, 2), (3, 4), None),
+            ((1, 3), (2, 4), (2, 3)),
+            ((1, 3), (-1, 5), (1, 3)),
+            ((1, 10), (0, 5), (1, 5)),
+        ],
+    )
     def test_interval_intersection(self, interval1, interval2, expected):
         assert _interval_intersection(interval1, interval2) == expected
         assert _interval_intersection(interval2, interval1) == expected  # Symmetric
 
-    @pytest.mark.parametrize('interval1,interval2', [
-        (None, None),
-        (None, (1, 2)),
-        ((1, 2), None),
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2",
+        [
+            (None, None),
+            (None, (1, 2)),
+            ((1, 2), None),
+        ],
+    )
     def test_interval_subset_invalid(self, interval1, interval2):
         with pytest.raises(TypeError):
             _interval_subset(interval1, interval2)
 
-    @pytest.mark.parametrize('interval1,interval2,expected', [
-        ((1, 2), (1, 2), True),
-        ((1, 2), (1, 3), True),
-        ((1, 2), (0, 3), True),
-        ((1, 3), (2, 3), False),
-        ((1, 3), (-1, 2), False),
-        ((1, 3), (-1, 0), False),
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected",
+        [
+            ((1, 2), (1, 2), True),
+            ((1, 2), (1, 3), True),
+            ((1, 2), (0, 3), True),
+            ((1, 3), (2, 3), False),
+            ((1, 3), (-1, 2), False),
+            ((1, 3), (-1, 0), False),
+        ],
+    )
     def test_interval_subset(self, interval1, interval2, expected):
         assert _interval_subset(interval1, interval2) == expected
 
-    @pytest.mark.parametrize('interval1,interval2,expected_cut1,expected_cut2,expected_cut3', [
-        ((0, 1.5), (1, 2), (0, 1), (1, 1.5), None),
-        ((-1, 10), (1.4, 2.4), (-1, 1.4), (1.4, 2.4), (2.4, 10)),
-        ((-1, 1), (1.4, 2.4), (-1, 1), None, None),
-        ((1.6, 2), (1.4, 2.4), None, (1.6, 2), None),
-        ((4, 5), (1.4, 2.4), None, None, (4, 5)),
-    ])
-    def test_cut_into_three(self, interval1, interval2, expected_cut1, expected_cut2, expected_cut3):
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected_cut1,expected_cut2,expected_cut3",
+        [
+            ((0, 1.5), (1, 2), (0, 1), (1, 1.5), None),
+            ((-1, 10), (1.4, 2.4), (-1, 1.4), (1.4, 2.4), (2.4, 10)),
+            ((-1, 1), (1.4, 2.4), (-1, 1), None, None),
+            ((1.6, 2), (1.4, 2.4), None, (1.6, 2), None),
+            ((4, 5), (1.4, 2.4), None, None, (4, 5)),
+        ],
+    )
+    def test_cut_into_three(
+        self, interval1, interval2, expected_cut1, expected_cut2, expected_cut3
+    ):
         cuts = _cut_into_three_func(interval1, interval2)
         assert len(cuts) == 3
         assert cuts[0] == expected_cut1
@@ -260,10 +264,13 @@ class TestIntegral:
         with pytest.raises(ValueError):
             _get_pivot_j((0, 1.5), (1.4, 2.4))  # Overlap
 
-    @pytest.mark.parametrize('interval1,interval2,expected', [
-        ((4, 5), (1.4, 2.4), 2.4),
-        ((0, 1), (1.4, 2.4), 1.4),
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected",
+        [
+            ((4, 5), (1.4, 2.4), 2.4),
+            ((0, 1), (1.4, 2.4), 1.4),
+        ],
+    )
     def test_get_pivot_j(self, interval1, interval2, expected):
         assert _get_pivot_j(interval1, interval2) == expected
 
@@ -271,44 +278,79 @@ class TestIntegral:
         with pytest.raises(ValueError):
             _integral_mini_interval((0, 1.5), (1.4, 2.4))  # None-empty intersection
 
-    @pytest.mark.parametrize('interval1,interval2,expected', [
-        # We look at sum distance between every element of [4,5] to 2.4 the closest element of J
-        # Distance is going from 4-2.4 to 5-2.4 i.e. 1.6 to 2.6, and increases linearly
-        # There is 1.6 with a time duration of 1, and in addition the triangle 1/2 (integral from 0 to 1 of tdt)
-        # Globally 1.6+1/2
-        ((4, 5), (1.4, 2.4), 1.6 + 0.5),
-        # We look at sum distance between every element of [0.1,1.2] to 1.4 the closest element of J
-        # Distance is going from 1.3 to 0.2 and decreases linearly
-        # There is 0.2 with a time duration of deltaI=1.1, and in addition
-        # a decreases from 1.1 to 0 during 1.1 (integral from 0 to 1.1 of tdt) which is 1.1^2/2
-        # Globally 0.2*1.1+1.1^2/2
-        ((0.1, 1.2), (1.4, 2.4), 0.2*1.1+1.1**2/2),
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected",
+        [
+            # We look at sum distance between every element of [4,5] to 2.4 the closest element of J
+            # Distance is going from 4-2.4 to 5-2.4 i.e. 1.6 to 2.6, and increases linearly
+            # There is 1.6 with a time duration of 1, and in addition the triangle 1/2 (integral from 0 to 1 of tdt)
+            # Globally 1.6+1/2
+            ((4, 5), (1.4, 2.4), 1.6 + 0.5),
+            # We look at sum distance between every element of [0.1,1.2] to 1.4 the closest element of J
+            # Distance is going from 1.3 to 0.2 and decreases linearly
+            # There is 0.2 with a time duration of deltaI=1.1, and in addition
+            # a decreases from 1.1 to 0 during 1.1 (integral from 0 to 1.1 of tdt) which is 1.1^2/2
+            # Globally 0.2*1.1+1.1^2/2
+            ((0.1, 1.2), (1.4, 2.4), 0.2 * 1.1 + 1.1**2 / 2),
+        ],
+    )
     def test_integral_mini_interval(self, interval1, interval2, expected):
         assert pytest.approx(_integral_mini_interval(interval1, interval2)) == expected
 
-    @pytest.mark.parametrize('interval1,interval2,expected', [
-        ((0, 1.5), (-1, 2.4), 0),
-        ((-1, 2.4), (-1, 2.4), 0),
-        ((-10, 20), (-1, 2.4), 195.38),
-        ((-10, 1.5), (-1, 2.4), _integral_interval_distance((-10, -1), (-1, 2.4))),  # The integral is same from I or I\J
-    ])
+    @pytest.mark.parametrize(
+        "interval1,interval2,expected",
+        [
+            ((0, 1.5), (-1, 2.4), 0),
+            ((-1, 2.4), (-1, 2.4), 0),
+            ((-10, 20), (-1, 2.4), 195.38),
+            (
+                (-10, 1.5),
+                (-1, 2.4),
+                _integral_interval_distance((-10, -1), (-1, 2.4)),
+            ),  # The integral is same from I or I\J
+        ],
+    )
     def test_integral_interval(self, interval1, interval2, expected):
-        assert pytest.approx(_integral_interval_distance(interval1, interval2)) == expected
+        assert (
+            pytest.approx(_integral_interval_distance(interval1, interval2)) == expected
+        )
 
-    @pytest.mark.parametrize('i_min,i_max,j_min,j_max,e_min,e_max,expected,case', [
-        # Case 1: $d_max <= m$:
-        # C = \int_{d_min}^{d_max} x dx = (1/2)*(d_max^2 - d_min^2)
-        (0.924204, 1.376826,  1.570739, 1.903998, 0.7176185, 2.722883, 0.1902024, 1),
-        # Case 2: $d_min < m < d_max$:
-        # C = \int_{d_min}^{m} x dx + \int_{m}^{d_max} m dx
-        #   = (1/2)*(m^2 - d_min^2) + m (d_max - m)
-        (0.8751017, 1.116294, 0.5569796, 0.8238064, 0.3253522, 1.403741, 0.03960695, 2),
-        # Case 3: $m <= d_min$:
-        # C = \int_{d_min}^{d_max} m dx = m (d_max - d_min)
-        (0.767282, 0.7753016, 1.523338, 1.958426, 0.6516738, 2.435003, 0.003821954, 3),
-    ])
-    def test_integral_mini_interval_P_CDFmethod__min_piece(self, i_min, i_max, j_min, j_max, e_min, e_max, expected, case):
+    @pytest.mark.parametrize(
+        "i_min,i_max,j_min,j_max,e_min,e_max,expected,case",
+        [
+            # Case 1: $d_max <= m$:
+            # C = \int_{d_min}^{d_max} x dx = (1/2)*(d_max^2 - d_min^2)
+            (0.924204, 1.376826, 1.570739, 1.903998, 0.7176185, 2.722883, 0.1902024, 1),
+            # Case 2: $d_min < m < d_max$:
+            # C = \int_{d_min}^{m} x dx + \int_{m}^{d_max} m dx
+            #   = (1/2)*(m^2 - d_min^2) + m (d_max - m)
+            (
+                0.8751017,
+                1.116294,
+                0.5569796,
+                0.8238064,
+                0.3253522,
+                1.403741,
+                0.03960695,
+                2,
+            ),
+            # Case 3: $m <= d_min$:
+            # C = \int_{d_min}^{d_max} m dx = m (d_max - d_min)
+            (
+                0.767282,
+                0.7753016,
+                1.523338,
+                1.958426,
+                0.6516738,
+                2.435003,
+                0.003821954,
+                3,
+            ),
+        ],
+    )
+    def test_integral_mini_interval_P_CDFmethod__min_piece(
+        self, i_min, i_max, j_min, j_max, e_min, e_max, expected, case
+    ):
         d_min = max(i_min - j_max, j_min - i_max)
         d_max = max(i_max - j_max, j_min - i_min)
         m = min(j_min - e_min, e_max - j_max)
@@ -319,16 +361,21 @@ class TestIntegral:
         elif case == 3:
             assert m <= d_min
 
-        A = min(d_max, m)**2 - min(d_min, m)**2  # 0.3804049
+        A = min(d_max, m) ** 2 - min(d_min, m) ** 2  # 0.3804049
         B = max(d_max, m) - max(d_min, m)  # 0
-        C = (1/2)*A + m*B  # 0.1902024
+        C = (1 / 2) * A + m * B  # 0.1902024
         assert pytest.approx(expected, rel=1e-5) == C
 
         # Actual test
         I = (i_min, i_max)
         J = (j_min, j_max)
         E = (e_min, e_max)
-        assert pytest.approx(_integral_mini_interval_P_CDFmethod__min_piece(I, J, E), rel=1e-5) == C
+        assert (
+            pytest.approx(
+                _integral_mini_interval_P_CDFmethod__min_piece(I, J, E), rel=1e-5
+            )
+            == C
+        )
 
     def test_integral_mini_interval_P_CDFmethod__min_piece_non_empty_intersection(self):
         with pytest.raises(ValueError):
@@ -342,12 +389,17 @@ class TestIntegral:
         with pytest.raises(ValueError):
             _integral_mini_interval_P_CDFmethod__min_piece((5, 10), (15, 20), (0, 12.5))
 
-    @pytest.mark.parametrize('j_min,j_max,e_min,e_max', [
-        (0.9202326, 1.187741, 0.2655087, 1.842465),
-        (0.7253212, 0.9439665, 0.3721239, 1.297164),
-        (0.8431135, 1.35991, 0.5728534, 1.63017),
-    ])
-    def test_integral_mini_interval_Pprecision_CDFmethod_symmetric(self, j_min, j_max, e_min, e_max):
+    @pytest.mark.parametrize(
+        "j_min,j_max,e_min,e_max",
+        [
+            (0.9202326, 1.187741, 0.2655087, 1.842465),
+            (0.7253212, 0.9439665, 0.3721239, 1.297164),
+            (0.8431135, 1.35991, 0.5728534, 1.63017),
+        ],
+    )
+    def test_integral_mini_interval_Pprecision_CDFmethod_symmetric(
+        self, j_min, j_max, e_min, e_max
+    ):
         # Explanation:
         # In case of symmetry the value is 1 for elements in J,
         # outside, it goes from (1 - DeltaJ/DeltaE) the closer to J,
@@ -365,7 +417,9 @@ class TestIntegral:
         # on the right
         i_min_right = j_max
         i_max_right = e_max
-        assert pytest.approx(min(j_min - e_min, e_max - j_max), rel=1e-5) == max(j_min - e_min, e_max - j_max)
+        assert pytest.approx(min(j_min - e_min, e_max - j_max), rel=1e-5) == max(
+            j_min - e_min, e_max - j_max
+        )
 
         # Actual test
         I_left = (i_min_left, i_max_left)
@@ -384,12 +438,17 @@ class TestIntegral:
         assert pytest.approx(DeltaJ, rel=1e-5) == integral_middle
         assert pytest.approx((1 - DeltaJ / DeltaE) * M / 2, rel=1e-5) == integral_right
 
-    @pytest.mark.parametrize('j_min,e_min,e_max', [
-        (0.9202326, 0.2655087, 1.842465),
-        (0.7253212, 0.3721239, 1.297164),
-        (0.8431135, 0.5728534, 1.63017),
-    ])
-    def test_integral_mini_interval_Pprecision_CDFmethod_almost_point(self, j_min, e_min, e_max):
+    @pytest.mark.parametrize(
+        "j_min,e_min,e_max",
+        [
+            (0.9202326, 0.2655087, 1.842465),
+            (0.7253212, 0.3721239, 1.297164),
+            (0.8431135, 0.5728534, 1.63017),
+        ],
+    )
+    def test_integral_mini_interval_Pprecision_CDFmethod_almost_point(
+        self, j_min, e_min, e_max
+    ):
         # Explanation: for point anomaly, the mean value should be 1/2
         j_max = j_min + 1e-9  # almost point case
 
@@ -410,11 +469,14 @@ class TestIntegral:
         integral_right = _integral_mini_interval_Pprecision_CDFmethod(I_right, J, E)
         DeltaE = max(E) - min(E)
 
-        assert pytest.approx((integral_left + integral_right) / DeltaE) == 1/2
+        assert pytest.approx((integral_left + integral_right) / DeltaE) == 1 / 2
 
-    @pytest.mark.parametrize('E,J', [
-        ((-3, 3), (-1, 2.4)),
-    ])
+    @pytest.mark.parametrize(
+        "E,J",
+        [
+            ((-3, 3), (-1, 2.4)),
+        ],
+    )
     def test_integral_interval_probaCDF_precision_basics(self, E, J):
         ## For I close to the border of E, it's close to 0%
         # (after taking the mean i.e. dividing by |I|)
@@ -428,13 +490,22 @@ class TestIntegral:
         DeltaI3 = I3[1] - I3[0]
 
         assert _integral_interval_probaCDF_precision(I1, J, E) / DeltaI1 < 0.05
-        assert _integral_interval_probaCDF_precision(I2, J, E) / DeltaI2 < _integral_interval_probaCDF_precision(I1, J, E) / DeltaI1
-        assert _integral_interval_probaCDF_precision(I3, J, E) / DeltaI3 < _integral_interval_probaCDF_precision(I2, J, E) / DeltaI2
+        assert (
+            _integral_interval_probaCDF_precision(I2, J, E) / DeltaI2
+            < _integral_interval_probaCDF_precision(I1, J, E) / DeltaI1
+        )
+        assert (
+            _integral_interval_probaCDF_precision(I3, J, E) / DeltaI3
+            < _integral_interval_probaCDF_precision(I2, J, E) / DeltaI2
+        )
 
-    @pytest.mark.parametrize('E,J', [
-        ((-3, 3), (-1, 2.4)),
-        ((-10, 3), (0, 2.9)),
-    ])
+    @pytest.mark.parametrize(
+        "E,J",
+        [
+            ((-3, 3), (-1, 2.4)),
+            ((-10, 3), (0, 2.9)),
+        ],
+    )
     def test_integral_interval_probaCDF_precision_closed(self, E, J):
         # The total integral (when I is the whole interval E) is given by the sum:
         # I = (1-DeltaJ/DeltaE)*m/2 + (1-DeltaJ/DeltaE)*M/2 + DeltaJ
@@ -444,107 +515,148 @@ class TestIntegral:
         #   = (DeltaE + DeltaJ^2/DeltaE)/2
         DeltaE = max(E) - min(E)
         DeltaJ = max(J) - min(J)
-        closed_form = (DeltaE + DeltaJ**2/DeltaE)/2
-        assert pytest.approx(_integral_interval_probaCDF_precision(E, J, E)) == closed_form
+        closed_form = (DeltaE + DeltaJ**2 / DeltaE) / 2
+        assert (
+            pytest.approx(_integral_interval_probaCDF_precision(E, J, E)) == closed_form
+        )
 
-    @pytest.mark.parametrize('interval,e_mean,expected', [
-        (None, 1.5, (None, None)),
-        ((2, 3), 1.5, (None, (2, 3))),
-        ((0, 1), 1.5, ((0, 1), None)),
-        ((0, 5), 1.5, ((0, 1.5), (1.5, 5))),
-        ((0, 1.5), 1.5, ((0, 1.5), None)),
-        ((1.5, 2), 1.5, (None, (1.5, 2))),
-    ])
+    @pytest.mark.parametrize(
+        "interval,e_mean,expected",
+        [
+            (None, 1.5, (None, None)),
+            ((2, 3), 1.5, (None, (2, 3))),
+            ((0, 1), 1.5, ((0, 1), None)),
+            ((0, 5), 1.5, ((0, 1.5), (1.5, 5))),
+            ((0, 1.5), 1.5, ((0, 1.5), None)),
+            ((1.5, 2), 1.5, (None, (1.5, 2))),
+        ],
+    )
     def test_cut_J_based_on_mean_func(self, interval, e_mean, expected):
         assert _cut_J_based_on_mean_func(interval, e_mean) == expected
 
-    @pytest.mark.parametrize('I,J,E,expected', [
-        ### Almost point
-        # I is at position J, so the recall should be 1
-        ((2, 2), (2, 2), (1, 3), 1),
-        # I is at middle between max(E) and min(J), so the recall should be 0.5
-        ((1.5, 1.5), (2, 2), (1, 3), 0.5),
-        ((2.5, 2.5), (2, 2), (1, 3), 0.5),
-        # I is at the edge of E, the recall should be 0
-        ((1, 1), (2, 2), (1, 3), 0),
-        ((3, 3), (2, 2), (1, 3), 0),
-        # I is outside E, the recall should be 0
-        ((-4, -4), (2, 2), (1, 3), 0),
-        ((10, 10), (2, 2), (1, 3), 0),
-        ### Partially almost point
-        # J is included in I, so the recall should be 1
-        ((1, 3), (2, 2), (1, 3), 1),
-        # I is at middle between max(E) and min(J), so the recall should be 0.5
-        ((1, 1.5), (2, 2), (1, 3), 0.5),
-        # Same for I at the other side
-        ((2.5, 3), (2, 2), (1, 3), 0.5),
-        # I is at the edge of E, the recall should be 0
-        ((0, 1), (2, 2), (1, 3), 0),
-        ((3, 5), (2, 2), (1, 3), 0),
-        ### Special cases
-        ((2, 2), (1, 3), (1, 3), 5/8),
-        ((1, 1), (1, 3), (1, 3), 0.25),
-        ((3, 3), (1, 3), (1, 3), 0.25),
-    ])
-    def test_integral_interval_probaCDF_recall_almost_equal(self, I, J, E, expected, size_event=1e-9):
+    @pytest.mark.parametrize(
+        "I,J,E,expected",
+        [
+            ### Almost point
+            # I is at position J, so the recall should be 1
+            ((2, 2), (2, 2), (1, 3), 1),
+            # I is at middle between max(E) and min(J), so the recall should be 0.5
+            ((1.5, 1.5), (2, 2), (1, 3), 0.5),
+            ((2.5, 2.5), (2, 2), (1, 3), 0.5),
+            # I is at the edge of E, the recall should be 0
+            ((1, 1), (2, 2), (1, 3), 0),
+            ((3, 3), (2, 2), (1, 3), 0),
+            # I is outside E, the recall should be 0
+            ((-4, -4), (2, 2), (1, 3), 0),
+            ((10, 10), (2, 2), (1, 3), 0),
+            ### Partially almost point
+            # J is included in I, so the recall should be 1
+            ((1, 3), (2, 2), (1, 3), 1),
+            # I is at middle between max(E) and min(J), so the recall should be 0.5
+            ((1, 1.5), (2, 2), (1, 3), 0.5),
+            # Same for I at the other side
+            ((2.5, 3), (2, 2), (1, 3), 0.5),
+            # I is at the edge of E, the recall should be 0
+            ((0, 1), (2, 2), (1, 3), 0),
+            ((3, 5), (2, 2), (1, 3), 0),
+            ### Special cases
+            ((2, 2), (1, 3), (1, 3), 5 / 8),
+            ((1, 1), (1, 3), (1, 3), 0.25),
+            ((3, 3), (1, 3), (1, 3), 0.25),
+        ],
+    )
+    def test_integral_interval_probaCDF_recall_almost_equal(
+        self, I, J, E, expected, size_event=1e-9
+    ):
         I = (I[0] - size_event, I[1] + size_event)
         J = (J[0] - size_event, J[1] + size_event)
         DeltaJ = max(J) - min(J)  # divide by J the size to obtain the mean
-        assert pytest.approx(_integral_interval_probaCDF_recall(I, J, E) / DeltaJ, abs=1e-5) == expected
+        assert (
+            pytest.approx(
+                _integral_interval_probaCDF_recall(I, J, E) / DeltaJ, abs=1e-5
+            )
+            == expected
+        )
 
-    @pytest.mark.parametrize('I,J,E,expected', [
-        # Almost point
-        ((1.98, 1.98), (2, 2), (1, 3), 0.95),
-        # Partially almost point
-        ((1, 1.98), (2, 2), (1, 3), 0.95),
-        # Increasing I
-        ((0, 0), (-3, 3), (-5, 5), 0.625),
-        ((-1, 1), (-3, 3), (-5, 5), 0.625),
-        ((-2, 2), (-3, 3), (-5, 5), 0.625),
-    ])
-    def test_integral_interval_probaCDF_recall_larger(self, I, J, E, expected, size_event=1e-9):
+    @pytest.mark.parametrize(
+        "I,J,E,expected",
+        [
+            # Almost point
+            ((1.98, 1.98), (2, 2), (1, 3), 0.95),
+            # Partially almost point
+            ((1, 1.98), (2, 2), (1, 3), 0.95),
+            # Increasing I
+            ((0, 0), (-3, 3), (-5, 5), 0.625),
+            ((-1, 1), (-3, 3), (-5, 5), 0.625),
+            ((-2, 2), (-3, 3), (-5, 5), 0.625),
+        ],
+    )
+    def test_integral_interval_probaCDF_recall_larger(
+        self, I, J, E, expected, size_event=1e-9
+    ):
         I = (I[0] - size_event, I[1] + size_event)
         J = (J[0] - size_event, J[1] + size_event)
         DeltaJ = max(J) - min(J)
         assert _integral_interval_probaCDF_recall(I, J, E) / DeltaJ > expected
 
-    @pytest.mark.parametrize('I,J,E,expected', [
-        # Almost point
-        ((1.01, 1.01), (2, 2), (1, 3), 0.1),
-        ((2.99, 2.99), (2, 2), (1, 3), 0.1),
-        # Partially almost point
-        ((1, 1.01), (2, 2), (1, 3), 0.1),
-        ((2.99, 3), (2, 2), (1, 3), 0.1),
-    ])
-    def test_integral_interval_probaCDF_recall_smaller(self, I, J, E, expected, size_event=1e-9):
+    @pytest.mark.parametrize(
+        "I,J,E,expected",
+        [
+            # Almost point
+            ((1.01, 1.01), (2, 2), (1, 3), 0.1),
+            ((2.99, 2.99), (2, 2), (1, 3), 0.1),
+            # Partially almost point
+            ((1, 1.01), (2, 2), (1, 3), 0.1),
+            ((2.99, 3), (2, 2), (1, 3), 0.1),
+        ],
+    )
+    def test_integral_interval_probaCDF_recall_smaller(
+        self, I, J, E, expected, size_event=1e-9
+    ):
         I = (I[0] - size_event, I[1] + size_event)
         J = (J[0] - size_event, J[1] + size_event)
         DeltaJ = max(J) - min(J)
         assert _integral_interval_probaCDF_recall(I, J, E) / DeltaJ < expected
 
-    @pytest.mark.parametrize('I1,I2,J,E', [
-        ((-2, 2), (-1, 1), (-3, 3), (-5, 5)),
-        ((-2.9, 2.9), (-2, 2), (-3, 3), (-5, 5)),
-    ])
-    def test_integral_interval_probaCDF_recall_better_recall_larger_I(self, I1, I2, J, E, size_event=1e-9):
+    @pytest.mark.parametrize(
+        "I1,I2,J,E",
+        [
+            ((-2, 2), (-1, 1), (-3, 3), (-5, 5)),
+            ((-2.9, 2.9), (-2, 2), (-3, 3), (-5, 5)),
+        ],
+    )
+    def test_integral_interval_probaCDF_recall_better_recall_larger_I(
+        self, I1, I2, J, E, size_event=1e-9
+    ):
         I1 = (I1[0] - size_event, I1[1] + size_event)
         I2 = (I2[0] - size_event, I2[1] + size_event)
         J = (J[0] - size_event, J[1] + size_event)
         DeltaJ = max(J) - min(J)
-        assert _integral_interval_probaCDF_recall(I1, J, E) / DeltaJ > _integral_interval_probaCDF_recall(I2, J, E) / DeltaJ
+        assert (
+            _integral_interval_probaCDF_recall(I1, J, E) / DeltaJ
+            > _integral_interval_probaCDF_recall(I2, J, E) / DeltaJ
+        )
 
-    @pytest.mark.parametrize('I,J,E1,E2', [
-        ((10, 10), (-3, 3), (-10, 10), (-10, 12)),
-        ((10, 10), (-3, 3), (-10, 12), (-10, 18)),
-        ((10, 10), (-3, 3), (-10, 18), (-10, 30)),
-        ((10, 10), (-3, 3), (-10, 30), (-10, 100)),
-        ((10, 10), (-3, 3), (-10, 100), (-10, 1000)),
-    ])
-    def test_integral_interval_probaCDF_recall_better_recall_larger_E(self, I, J, E1, E2, size_event=1e-9):
+    @pytest.mark.parametrize(
+        "I,J,E1,E2",
+        [
+            ((10, 10), (-3, 3), (-10, 10), (-10, 12)),
+            ((10, 10), (-3, 3), (-10, 12), (-10, 18)),
+            ((10, 10), (-3, 3), (-10, 18), (-10, 30)),
+            ((10, 10), (-3, 3), (-10, 30), (-10, 100)),
+            ((10, 10), (-3, 3), (-10, 100), (-10, 1000)),
+        ],
+    )
+    def test_integral_interval_probaCDF_recall_better_recall_larger_E(
+        self, I, J, E1, E2, size_event=1e-9
+    ):
         I = (I[0] - size_event, I[1] + size_event)
         J = (J[0] - size_event, J[1] + size_event)
         DeltaJ = max(J) - min(J)
-        assert _integral_interval_probaCDF_recall(I, J, E1) / DeltaJ < _integral_interval_probaCDF_recall(I, J, E2) / DeltaJ
+        assert (
+            _integral_interval_probaCDF_recall(I, J, E1) / DeltaJ
+            < _integral_interval_probaCDF_recall(I, J, E2) / DeltaJ
+        )
 
 
 class TestSingleGroundTruthEvent:
@@ -570,86 +682,72 @@ class TestSingleGroundTruthEvent:
         assert _affiliation_recall_proba([None, None], (1, 8), (1, 8)) == 0
 
     def test_affiliation_recall_proba_paper(self):
-        J = (50*60, 70*60)
-        Is = [(40*60, 60*60), (115*60, 120*60)]
-        E = (30*60, 120*60)
+        J = (50 * 60, 70 * 60)
+        Is = [(40 * 60, 60 * 60), (115 * 60, 120 * 60)]
+        E = (30 * 60, 120 * 60)
         assert pytest.approx(_affiliation_recall_proba(Is, J, E)) == 0.944444444
 
     def test_affiliation_recall_proba_paper_with_none(self):
-        J = (50*60, 70*60)
-        Is = [(40*60, 60*60), (115*60, 120*60), None]
-        E = (30*60, 120*60)
+        J = (50 * 60, 70 * 60)
+        Is = [(40 * 60, 60 * 60), (115 * 60, 120 * 60), None]
+        E = (30 * 60, 120 * 60)
         assert pytest.approx(_affiliation_recall_proba(Is, J, E)) == 0.944444444
 
 
 class TestGenerics:
 
-    @pytest.mark.parametrize('vector,expected', [
-        ([], 0),
-        ([1, 4, 3], 8),
-        ([1, math.nan, 3], 4),
-        ([math.nan, math.nan, 3], 3),
-        ([math.nan, math.nan, math.nan], 0),
-    ])
+    @pytest.mark.parametrize(
+        "vector,expected",
+        [
+            ([], 0),
+            ([1, 4, 3], 8),
+            ([1, math.nan, 3], 4),
+            ([math.nan, math.nan, 3], 3),
+            ([math.nan, math.nan, math.nan], 0),
+        ],
+    )
     def test_sum_wo_nan(self, vector, expected):
         assert _sum_wo_nan(vector) == expected
 
-    @pytest.mark.parametrize('vector,expected', [
-        ([], 0),
-        ([1, 4, 3], 3),
-        ([1, math.nan, 3], 2),
-        ([math.nan, math.nan, 3], 1),
-        ([math.nan, math.nan, math.nan], 0),
-    ])
+    @pytest.mark.parametrize(
+        "vector,expected",
+        [
+            ([], 0),
+            ([1, 4, 3], 3),
+            ([1, math.nan, 3], 2),
+            ([math.nan, math.nan, 3], 1),
+            ([math.nan, math.nan, math.nan], 0),
+        ],
+    )
     def test_len_wo_nan(self, vector, expected):
         assert _len_wo_nan(vector) == expected
-
-    @pytest.mark.parametrize('vector,expected', [
-        ([], []),
-        ([0], []),
-        ([0, 0, 0, 0, 0], []),
-        ([1], [(0, 1)]),
-        ([1, 1, 1, 1, 1], [(0, 5)]),
-        ([1, 1, 0, 0, 0], [(0, 2)]),
-        ([0, 0, 1, 1, 1], [(2, 5)]),
-        ([1, 0, 1, 1, 1], [(0, 1), (2, 5)]),
-        ([1, 1, 0, 1, 0, 1, 1, 1], [(0, 2), (3, 4), (5, 8)]),
-        (
-            [
-                0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-                1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                1, 1, 1, 0, 0, 0, 0, 0, 0, 0
-            ],
-            [(6, 12), (17, 20), (60, 63)]
-        )
-    ])
-    def test_convert_vector_to_events(self, vector, expected):
-        assert _convert_vector_to_events(vector) == expected
 
 
 class TestTestEvents:
 
-    @pytest.mark.parametrize('events,error', [
-        ((1, 3), TypeError),
-        ([[1, 3], [4, 5]], TypeError),
-        ([(1, 3), (4, 5, 6)], ValueError),
-        ([(1, 3), (5, 4)], ValueError),
-        ([(4, 6), (1, 2)], ValueError),
-        ([(4, 6), (6, 7)], ValueError),
-        ([(4, 5), (7, 7)], ValueError),
-    ])
+    @pytest.mark.parametrize(
+        "events,error",
+        [
+            ((1, 3), TypeError),
+            ([[1, 3], [4, 5]], TypeError),
+            ([(1, 3), (4, 5, 6)], ValueError),
+            ([(1, 3), (5, 4)], ValueError),
+            ([(4, 6), (1, 2)], ValueError),
+            ([(4, 6), (6, 7)], ValueError),
+            ([(4, 5), (7, 7)], ValueError),
+        ],
+    )
     def test_invalid(self, events, error):
         with pytest.raises(error):
             _test_events(events)
 
-    @pytest.mark.parametrize('events', [
-        [(1, 3)],
-        [(1, 3), (5, 7)],
-        [(1, 3), (5, 7), (100, 150)],
-    ])
+    @pytest.mark.parametrize(
+        "events",
+        [
+            [(1, 3)],
+            [(1, 3), (5, 7)],
+            [(1, 3), (5, 7), (100, 150)],
+        ],
+    )
     def test_valid(self, events):
         _test_events(events)

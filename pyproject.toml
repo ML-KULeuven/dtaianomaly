@@ -51,6 +51,13 @@ build-backend = "setuptools.build_meta"
 include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additional*"]`
 namespaces = false
 
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "slow: marks tests as slow",
+    "numba: marks tests that depend on numba-compiled code"
+]
+
 [project.optional-dependencies]
 all = [  # All the optional dependencies
     "sphinx",

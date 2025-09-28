@@ -3,20 +3,119 @@ Evaluation module
 
 .. automodule:: dtaianomaly.evaluation
 
-Implemented evaluation metrics
-------------------------------
 
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   evaluation/*
-
-Base classes
+Base Objects
 ------------
 
-.. autoclass:: dtaianomaly.evaluation.BinaryMetric
-   :members:
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
 
-.. autoclass:: dtaianomaly.evaluation.ProbaMetric
-   :inherited-members:
+    Metric
+    BinaryMetric
+    ProbaMetric
+    FBetaMixin
+
+Affiliation-based
+-----------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    AffiliationPrecision
+    AffiliationRecall
+    AffiliationFBeta
+
+
+Area Under the Curve (AUC)
+--------------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    AreaUnderPR
+    AreaUnderROC
+
+
+Classification-based
+--------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    Precision
+    Recall
+    FBeta
+
+
+Compound metrics
+----------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    ThresholdMetric
+    BestThresholdMetric
+
+
+Event-wise
+----------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    EventWisePrecision
+    EventWiseRecall
+    EventWiseFBeta
+
+
+Point-adjusted
+--------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    PointAdjustedPrecision
+    PointAdjustedRecall
+    PointAdjustedFBeta
+
+
+Range-based
+-----------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    RangeBasedPrecision
+    RangeBasedRecall
+    RangeBasedFBeta
+
+
+UCR Score
+---------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    UCRScore
+
+
+Volume Under the Surface (VUS)
+------------------------------
+
+.. autosummary::
+    :toctree: auto_generated/
+    :template: class.rst
+
+    RangeAreaUnderPR
+    RangeAreaUnderROC
+    VolumeUnderPR
+    VolumeUnderROC

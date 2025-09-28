@@ -11,7 +11,7 @@ from dtaianomaly.in_time_ad._visualization import (
     plot_detected_anomalies,
 )
 from dtaianomaly.preprocessing import MinMaxScaler
-from dtaianomaly.thresholding import FixedCutoff
+from dtaianomaly.thresholding import FixedCutoffThreshold
 
 
 class StQualitativeEvaluator:
@@ -105,7 +105,7 @@ class StQualitativeEvaluator:
             )
 
         # Compute the binary decisions
-        y_pred = FixedCutoff(cutoff=cutoff).threshold(
+        y_pred = FixedCutoffThreshold(cutoff=cutoff).threshold(
             decision_functions[selected_detector]
         )
 

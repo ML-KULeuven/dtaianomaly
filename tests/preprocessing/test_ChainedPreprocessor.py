@@ -1,32 +1,31 @@
-
-import pytest
-
-from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, MinMaxScaler, StandardScaler
+from dtaianomaly.preprocessing import (
+    ChainedPreprocessor,
+    Identity,
+    MinMaxScaler,
+    StandardScaler,
+)
 
 
 class TestChainedPreprocessor:
 
-    def test_wrong_input(self):
-        with pytest.raises(ValueError):
-            ChainedPreprocessor([Identity(), 'five'])
+    def test_input_list(self):
+        preprocessor = ChainedPreprocessor(
+            [Identity(), MinMaxScaler(), StandardScaler()]
+        )
+        assert len(preprocessor.base_preprocessors) == 3
+        assert isinstance(preprocessor.base_preprocessors[0], Identity)
+        assert isinstance(preprocessor.base_preprocessors[1], MinMaxScaler)
+        assert isinstance(preprocessor.base_preprocessors[2], StandardScaler)
 
-    def test_single_input(self):
-        ChainedPreprocessor(Identity())
-
-    def test_multiple_inputs(self):
-        ChainedPreprocessor(Identity(), Identity())
-
-    def test_list_input(self):
-        ChainedPreprocessor([Identity(), Identity()])
-
-    def test_multiple_inputs_and_list(self):
-        with pytest.raises(ValueError):
-            ChainedPreprocessor(Identity(), [Identity(), Identity()])
-
-    def test_zero_inputs(self):
-        with pytest.raises(ValueError):
-            ChainedPreprocessor()
-
-    def test_str(self):
+    def test_input_sequence(self):
         preprocessor = ChainedPreprocessor(Identity(), MinMaxScaler(), StandardScaler())
-        assert str(preprocessor) == 'Identity()->MinMaxScaler()->StandardScaler()'
+        assert len(preprocessor.base_preprocessors) == 3
+        assert isinstance(preprocessor.base_preprocessors[0], Identity)
+        assert isinstance(preprocessor.base_preprocessors[1], MinMaxScaler)
+        assert isinstance(preprocessor.base_preprocessors[2], StandardScaler)
+
+    def test_piped_str(self):
+        preprocessor = ChainedPreprocessor(Identity(), MinMaxScaler(), StandardScaler())
+        assert (
+            preprocessor.piped_str() == "Identity()->MinMaxScaler()->StandardScaler()"
+        )

@@ -1,13 +1,17 @@
-
 import os
 from typing import Optional
 
-import pytest
 import numpy as np
+import pytest
 from sklearn.exceptions import NotFittedError
 
-from dtaianomaly.anomaly_detection import BaseDetector, load_detector, baselines, Supervision
 from dtaianomaly import utils
+from dtaianomaly.anomaly_detection import (
+    BaseDetector,
+    Supervision,
+    baselines,
+    load_detector,
+)
 
 
 class InvalidConstantDecisionFunctionForPredictProba(BaseDetector):
@@ -33,14 +37,14 @@ class NoDefinedSupervisionDetector(BaseDetector):
 
 class TestBaseDetector:
 
-    @pytest.mark.parametrize('supervision', Supervision)
+    @pytest.mark.parametrize("supervision", Supervision)
     def test_valid_supervision(self, supervision: Supervision):
         detector = NoDefinedSupervisionDetector(supervision)
         assert detector.supervision == supervision
 
     def test_invalid_supervision(self):
         with pytest.raises(TypeError):
-            NoDefinedSupervisionDetector('supervision.SUPERVISED')
+            NoDefinedSupervisionDetector("supervision.SUPERVISED")
 
     def test_proba(self):
         data = np.random.standard_normal((50,))
@@ -75,17 +79,17 @@ class TestBaseDetector:
 
     def test_save_invalid_path(self, tmp_path):
         detector = baselines.RandomDetector()
-        detector.save(tmp_path / 'some' / 'invalid' / 'directory' / 'testing')
-        assert os.path.exists(tmp_path / 'some' / 'invalid' / 'directory')
+        detector.save(tmp_path / "some" / "invalid" / "directory" / "testing")
+        assert os.path.exists(tmp_path / "some" / "invalid" / "directory")
 
     def test_save_and_load(self, tmp_path):
 
         # Save the detector
         detector = baselines.RandomDetector()
-        detector.save(tmp_path / 'testing')
+        detector.save(tmp_path / "testing")
 
         # Load the detector
-        loaded_detector = load_detector(tmp_path / 'testing.dtai')
+        loaded_detector = load_detector(tmp_path / "testing.dtai")
 
         # Check if the original detector and the loaded detector have the same properties
         assert detector.__dict__ == loaded_detector.__dict__
@@ -95,15 +99,15 @@ class TestBaseDetector:
         _ = loaded_detector.predict_proba(data)
 
     def test_str(self):
-        assert str(baselines.RandomDetector()) == 'RandomDetector()'
-        assert str(baselines.AlwaysNormal()) == 'AlwaysNormal()'
+        assert str(baselines.RandomDetector()) == "RandomDetector()"
+        assert str(baselines.AlwaysNormal()) == "AlwaysNormal()"
 
 
 class TestConfidence:
 
     def test_predict_confidence(self, univariate_time_series):
-        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3)]
-        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):]
+        X_train = univariate_time_series[: int(univariate_time_series.shape[0] * 0.3)]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0] * 0.3) :]
 
         detector = baselines.RandomDetector().fit(X_train)
         confidence = detector.predict_confidence(X_test, X_train)
@@ -111,8 +115,12 @@ class TestConfidence:
         assert len(confidence.shape) == 1
 
     def test_predict_confidence_multivariate(self, multivariate_time_series):
-        X_train = multivariate_time_series[:int(multivariate_time_series.shape[0]*0.3), :]
-        X_test = multivariate_time_series[int(multivariate_time_series.shape[0]*0.3):, :]
+        X_train = multivariate_time_series[
+            : int(multivariate_time_series.shape[0] * 0.3), :
+        ]
+        X_test = multivariate_time_series[
+            int(multivariate_time_series.shape[0] * 0.3) :, :
+        ]
 
         detector = baselines.RandomDetector().fit(X_train)
         confidence = detector.predict_confidence(X_test, X_train)
@@ -128,46 +136,66 @@ class TestConfidence:
     def test_predict_confidence_decision_scores_given(self, univariate_time_series):
         detector = baselines.RandomDetector(seed=42).fit(univariate_time_series)
         decision_scores = detector.decision_function(univariate_time_series)
-        confidence = detector.predict_confidence(decision_scores, decision_scores_given=True)
+        confidence = detector.predict_confidence(
+            decision_scores, decision_scores_given=True
+        )
         assert confidence.shape[0] == univariate_time_series.shape[0]
         assert len(confidence.shape) == 1
 
         confidence_other = detector.predict_confidence(univariate_time_series)
         assert np.array_equal(confidence, confidence_other)
 
-    def test_predict_confidence_decision_scores_train_and_test_given(self, univariate_time_series):
-        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3)]
-        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):]
+    def test_predict_confidence_decision_scores_train_and_test_given(
+        self, univariate_time_series
+    ):
+        X_train = univariate_time_series[: int(univariate_time_series.shape[0] * 0.3)]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0] * 0.3) :]
         detector = baselines.RandomDetector(seed=42).fit(X_train)
         decision_scores = detector.decision_function(X_test)
         decision_scores_train = detector.decision_function(X_train)
-        confidence = detector.predict_confidence(decision_scores, decision_scores_train, decision_scores_given=True)
+        confidence = detector.predict_confidence(
+            decision_scores, decision_scores_train, decision_scores_given=True
+        )
         assert confidence.shape[0] == X_test.shape[0]
         assert len(confidence.shape) == 1
 
         confidence_other = detector.predict_confidence(X_test, X_train)
         assert np.array_equal(confidence, confidence_other)
 
-    def test_predict_confidence_invalid_decision_scores_given(self, univariate_time_series):
-        univariate_time_series = univariate_time_series.reshape(-1, 1)  # To make sure it has two dimensions
+    def test_predict_confidence_invalid_decision_scores_given(
+        self, univariate_time_series
+    ):
+        univariate_time_series = univariate_time_series.reshape(
+            -1, 1
+        )  # To make sure it has two dimensions
         assert len(univariate_time_series.shape) > 1
 
         detector = baselines.RandomDetector().fit(univariate_time_series)
         with pytest.raises(ValueError):
-            detector.predict_confidence(univariate_time_series, decision_scores_given=True)
+            detector.predict_confidence(
+                univariate_time_series, decision_scores_given=True
+            )
 
-    def test_predict_confidence_invalid_decision_scores_train_given(self, univariate_time_series):
-        univariate_time_series = univariate_time_series.reshape(-1, 1)  # To make sure it has two dimensions
+    def test_predict_confidence_invalid_decision_scores_train_given(
+        self, univariate_time_series
+    ):
+        univariate_time_series = univariate_time_series.reshape(
+            -1, 1
+        )  # To make sure it has two dimensions
         assert len(univariate_time_series.shape) > 1
 
-        X_train = univariate_time_series[:int(univariate_time_series.shape[0]*0.3), :]
-        X_test = univariate_time_series[int(univariate_time_series.shape[0]*0.3):, :]
+        X_train = univariate_time_series[
+            : int(univariate_time_series.shape[0] * 0.3), :
+        ]
+        X_test = univariate_time_series[int(univariate_time_series.shape[0] * 0.3) :, :]
 
         detector = baselines.RandomDetector().fit(X_train)
         decision_scores = detector.decision_function(X_test)
 
         with pytest.raises(ValueError):
-            detector.predict_confidence(decision_scores, X_train, decision_scores_given=True)
+            detector.predict_confidence(
+                decision_scores, X_train, decision_scores_given=True
+            )
 
     def test_repeatability(self, univariate_time_series):
         detector = baselines.RandomDetector(seed=42).fit(univariate_time_series)
@@ -220,15 +248,24 @@ class DetectorWithoutFitProperties(BaseDetector):
 
 class TestCheckIsFitted:
 
-    @pytest.mark.parametrize('detector', [DetectorWithoutFitProperties, DetectorWithSingleFitProperty, DetectorWithMultipleFitProperties])
+    @pytest.mark.parametrize(
+        "detector",
+        [
+            DetectorWithoutFitProperties,
+            DetectorWithSingleFitProperty,
+            DetectorWithMultipleFitProperties,
+        ],
+    )
     def test_fitted(self, detector, univariate_time_series):
         detector().fit(univariate_time_series).check_is_fitted()
 
-    @pytest.mark.parametrize('detector', [DetectorWithoutFitProperties])
+    @pytest.mark.parametrize("detector", [DetectorWithoutFitProperties])
     def test_not_fitted_no_properties(self, detector):
         detector().check_is_fitted()
 
-    @pytest.mark.parametrize('detector', [DetectorWithSingleFitProperty, DetectorWithMultipleFitProperties])
+    @pytest.mark.parametrize(
+        "detector", [DetectorWithSingleFitProperty, DetectorWithMultipleFitProperties]
+    )
     def test_not_fitted_properties(self, detector):
         with pytest.raises(NotFittedError):
             detector().check_is_fitted()

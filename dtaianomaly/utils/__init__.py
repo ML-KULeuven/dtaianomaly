@@ -4,15 +4,34 @@ This module contains all kinds of utility methods, and can be imported as follow
 >>> from dtaianomaly import utils
 """
 
-from .discovery import all_classes
-from .PrettyPrintable import PrettyPrintable
-from .utils import get_dimension, is_univariate, is_valid_array_like, is_valid_list
+from ._CheckIsFittedMixin import CheckIsFittedMixin
+from ._discovery import all_classes
+from ._PrintConstructionCallMixin import PrintConstructionCallMixin
+from ._utility_functions import (
+    convert_to_list,
+    get_dimension,
+    is_univariate,
+    is_valid_array_like,
+    is_valid_list,
+)
+from ._utility_functions_numba import (
+    make_intervals,
+    np_any_axis0,
+    np_any_axis1,
+    np_diff,
+)
 
 __all__ = [
     "is_valid_list",
     "is_valid_array_like",
     "is_univariate",
     "get_dimension",
-    "PrettyPrintable",
+    "PrintConstructionCallMixin",
     "all_classes",
+    "CheckIsFittedMixin",
+    "np_diff",
+    "np_any_axis0",
+    "np_any_axis1",
+    "make_intervals",
+    "convert_to_list",
 ]

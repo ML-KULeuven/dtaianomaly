@@ -16,7 +16,6 @@ The source is available on `GitHub <https://github.com/ML-KULeuven/dtaianomaly>`
 
    getting_started/installation
    getting_started/examples
-   getting_started/demonstrator
    getting_started/data
 
 .. toctree::
