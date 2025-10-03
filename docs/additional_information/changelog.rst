@@ -28,6 +28,8 @@ Added
 - Added marks to the test: ``slow`` and ``numba``.
 - Integrated numpydocs documentation formatting rules.
 - Implement ``HybridKNearestNeighbors`` anomaly detector.
+- Implement ``SquaredDifference`` baseline anomaly detector.
+- Implement ``MovingWindowVariance`` baseline anomaly detector.
 
 Changed
 ^^^^^^^

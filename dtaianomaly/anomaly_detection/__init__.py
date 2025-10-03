@@ -79,7 +79,13 @@ from ._TorchTimeSeriesDataSet import (
     TimeSeriesDataset,
 )
 from ._Transformer import Transformer
-from .baselines import AlwaysAnomalous, AlwaysNormal, RandomDetector
+from .baselines import (
+    AlwaysAnomalous,
+    AlwaysNormal,
+    MovingWindowVariance,
+    RandomDetector,
+    SquaredDifference,
+)
 
 __all__ = [
     # Base
@@ -90,6 +96,8 @@ __all__ = [
     "AlwaysNormal",
     "AlwaysAnomalous",
     "RandomDetector",
+    "MovingWindowVariance",
+    "SquaredDifference",
     # Detectors
     "ClusterBasedLocalOutlierFactor",
     "CopulaBasedOutlierDetector",

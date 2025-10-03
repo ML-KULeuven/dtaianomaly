@@ -98,4 +98,6 @@ Baselines
 
     AlwaysNormal
     AlwaysAnomalous
+    MovingWindowVariance
     RandomDetector
+    SquaredDifference
