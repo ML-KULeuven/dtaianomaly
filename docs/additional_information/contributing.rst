@@ -268,4 +268,4 @@ Documentation
 | |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Did you add the component in tha API-documentation in ``docs/api/``?
 | |check_box| If you added a :py:class:`~dtaianomaly.data.LazyDataLoader`, did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
-
+| |check_box| Have you updated the changelog?

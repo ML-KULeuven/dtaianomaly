@@ -46,7 +46,7 @@ class KNearestNeighbors(BasePyODAnomalyDetector):
         Distance metric for distance computations. Any metric of scikit-learn and
         scipy.spatial.distance can be used.
     **kwargs
-        Arguments to be passed to the PyOD isolation forest.
+        Arguments to be passed to the PyOD K-NN.
 
     Attributes
     ----------

@@ -27,6 +27,7 @@ Added
 - Implement and integrate type validation into ``dtaianomaly``.
 - Added marks to the test: ``slow`` and ``numba``.
 - Integrated numpydocs documentation formatting rules.
+- Implement ``HybridKNearestNeighbors`` anomaly detector.
 
 Changed
 ^^^^^^^
