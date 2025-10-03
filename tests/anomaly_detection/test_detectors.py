@@ -16,6 +16,8 @@ DETECTORS_NOT_MULTIVARIATE = [
     anomaly_detection.SpectralResidual,
     anomaly_detection.MOMENT,
     anomaly_detection.TimeMoE,
+    anomaly_detection.SquaredDifference,
+    anomaly_detection.MovingWindowVariance,
 ]
 DETECTORS_TO_EXCLUDE = [
     anomaly_detection.MOMENT,  # Due to dependency conflicts

@@ -36,6 +36,8 @@ anomaly_detectors = [
     anomaly_detection.TimeMoE,
     anomaly_detection.RobustRandomCutForestAnomalyDetector,
     anomaly_detection.HybridKNearestNeighbors,
+    anomaly_detection.MovingWindowVariance,
+    anomaly_detection.SquaredDifference,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,
