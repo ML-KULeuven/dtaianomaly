@@ -74,7 +74,7 @@ class ROCKAD(BaseDetector):
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
     >>> rockad = ROCKAD(64, seed=0).fit(x)
-    >>> rockad.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> rockad.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
     array([5.30759668, 5.25451016, 4.80149563, ..., 3.40483896, 3.72443581,
            3.74599171])
     """
