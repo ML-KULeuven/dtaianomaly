@@ -72,6 +72,7 @@ Neural methods
 
     AutoEncoder
     ConvolutionalNeuralNetwork
+    HybridKNearestNeighbors
     LongShortTermMemoryNetwork
     MultilayerPerceptron
     Transformer

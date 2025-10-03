@@ -53,6 +53,7 @@ from ._ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
 from ._CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
 from ._DWT_MLEAD import DWT_MLEAD
 from ._HistogramBasedOutlierScore import HistogramBasedOutlierScore
+from ._HybridKNearestNeighbors import HybridKNearestNeighbors
 from ._IsolationForest import IsolationForest
 from ._KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
 from ._KMeansAnomalyDetector import KMeansAnomalyDetector
@@ -124,4 +125,5 @@ __all__ = [
     "MOMENT",
     "TimeMoE",
     "RobustRandomCutForestAnomalyDetector",
+    "HybridKNearestNeighbors",
 ]

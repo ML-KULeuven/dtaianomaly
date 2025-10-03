@@ -6,6 +6,7 @@ from pyod.models.base import BaseDetector as PyODBaseDetector
 from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
 from dtaianomaly.type_validation import IntegerAttribute, WindowSizeAttribute
 from dtaianomaly.windowing import (
+    WINDOW_SIZE_TYPE,
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -42,7 +43,7 @@ class BasePyODAnomalyDetector(BaseDetector, abc.ABC):
         The PyOD anomaly detector
     """
 
-    window_size: int | str
+    window_size: WINDOW_SIZE_TYPE
     stride: int
     kwargs: dict
     window_size_: int
@@ -53,7 +54,7 @@ class BasePyODAnomalyDetector(BaseDetector, abc.ABC):
         "stride": IntegerAttribute(1),
     }
 
-    def __init__(self, window_size: int | str, stride: int = 1, **kwargs):
+    def __init__(self, window_size: WINDOW_SIZE_TYPE, stride: int = 1, **kwargs):
         super().__init__(self._supervision())
         self.window_size = window_size
         self.stride = stride
