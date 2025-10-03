@@ -30,6 +30,7 @@ Added
 - Implement ``HybridKNearestNeighbors`` anomaly detector.
 - Implement ``SquaredDifference`` baseline anomaly detector.
 - Implement ``MovingWindowVariance`` baseline anomaly detector.
+- Implement ``ROCKAD`` anomaly detector.
 
 Changed
 ^^^^^^^
@@ -38,6 +39,9 @@ Changed
 - In the neural methods, simplified the options for passing losses and activation functions to
   only include predefined types.
 - The documentation is restructured (although it still follows the same style).
+- Replaced dependency on ``tslearn>=0.6.3`` by ``sktime[clustering]``, which includes the ``tslearn``
+  dependency. Before, ``tslearn`` was only used for ``KShapeAnomalyDetector`` to do the clustering. This
+  capability is also offered by ``sktime`` through a direct interface to ``tslearn``.
 
 Fixed
 ^^^^^
