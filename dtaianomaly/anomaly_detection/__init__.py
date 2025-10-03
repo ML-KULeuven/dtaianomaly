@@ -71,6 +71,7 @@ from ._OneClassSupportVectorMachine import OneClassSupportVectorMachine
 from ._PrincipalComponentAnalysis import PrincipalComponentAnalysis
 from ._RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
 from ._RobustRandomCutForestAnomalyDetector import RobustRandomCutForestAnomalyDetector
+from ._ROCKAD import ROCKAD
 from ._SpectralResidual import SpectralResidual
 from ._TimeMoE import TimeMoE
 from ._TorchTimeSeriesDataSet import (
@@ -134,4 +135,5 @@ __all__ = [
     "TimeMoE",
     "RobustRandomCutForestAnomalyDetector",
     "HybridKNearestNeighbors",
+    "ROCKAD",
 ]

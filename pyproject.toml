@@ -25,7 +25,7 @@ dependencies = [
     "matplotlib>=3.7",
     "statsmodels>=0.6",
     "pyod>=2.0.0",
-    "tslearn>=0.6.3",
+    "sktime[clustering]",
     "toml",
     "torch>=1.8.0",
 ]

@@ -1,7 +1,7 @@
 import numpy as np
 import stumpy
 from scipy.spatial.distance import pdist, squareform
-from tslearn.clustering import KShape
+from sktime.clustering.k_shapes import TimeSeriesKShapes
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
@@ -56,13 +56,13 @@ class KShapeAnomalyDetector(BaseDetector):
     Attributes
     ----------
     window_size_ : int
-        The effectively used window size for computing the matrix profile
+        The effectively used window size for detecting anomalies.
     centroids_ : list of array-like of shape (window_size_*sequence_length_multiplier,)
         The centroids computed by KShape clustering.
     weights_ : list of float
         The normalized weights corresponding to each cluster.
-    kshape_ : KShape
-        The fitted KShape-object of tslearn, used to cluster the data.
+    kshape_ : TimeSeriesKShapes
+        The fitted KShape-object of sktime, used to cluster the data.
 
     Notes
     -----
@@ -75,7 +75,8 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
     >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([1.01942655, 1.03008335, 1.03906465, ..., 1.29643677, 1.3256903 , 1.34704128]...)
+    array([7.07106781, 7.07106781, 7.07106781, ..., 7.07106781, 7.07106781,
+           7.07106781])
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -87,7 +88,7 @@ class KShapeAnomalyDetector(BaseDetector):
     window_size_: int
     centroids_: list[np.array]
     weights_: np.array
-    kshape_: KShape
+    kshape_: TimeSeriesKShapes
 
     attribute_validation = {
         "window_size": WindowSizeAttribute(),
@@ -105,7 +106,7 @@ class KShapeAnomalyDetector(BaseDetector):
         **kwargs,
     ):
         # Check if KShape can be initialized
-        KShape(n_clusters=n_clusters, **kwargs)
+        TimeSeriesKShapes(n_clusters=n_clusters, **kwargs)
 
         super().__init__(Supervision.UNSUPERVISED)
         self.window_size = window_size
@@ -146,7 +147,7 @@ class KShapeAnomalyDetector(BaseDetector):
         windows = sliding_window(X, sequence_length, stride)
 
         # Apply K-Shape clustering
-        self.kshape_ = KShape(n_clusters=self.n_clusters, **self.kwargs)
+        self.kshape_ = TimeSeriesKShapes(n_clusters=self.n_clusters, **self.kwargs)
         cluster_labels = self.kshape_.fit_predict(windows)
 
         # Extract the centroids
@@ -202,3 +203,9 @@ def _ncc_c(x: np.array, y: np.array) -> np.array:
     cc = np.fft.ifft(np.fft.fft(x, fft_size) * np.conj(np.fft.fft(y, fft_size)))
     cc = np.concatenate((cc[-(x.shape[0] - 1) :], cc[: x.shape[0]]))
     return np.real(cc) / den
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()

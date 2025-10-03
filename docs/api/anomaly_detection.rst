@@ -61,6 +61,7 @@ Time series statistical methods
     MatrixProfileDetector
     MedianMethod
     RobustRandomCutForestAnomalyDetector
+    ROCKAD
     SpectralResidual
 
 Neural methods
