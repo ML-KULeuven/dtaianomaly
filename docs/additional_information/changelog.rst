@@ -3,6 +3,18 @@ Changelog
 
 All notable changes to this project will be documented in this file.
 
+Latest
+------
+
+Added
+^^^^^
+
+Changed
+^^^^^^^
+
+Fixed
+^^^^^
+
 [0.5.0] - 2025-10-06
 ------
 
