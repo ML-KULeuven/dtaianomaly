@@ -135,9 +135,13 @@ def make_intervals(x: np.array) -> (np.array, np.array):
     >>> ends
     array([3, 6])
     """
+    n = x.shape[0]
+    if n == 0:
+        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.int64)
+
     x = (x > 0).astype(np.int8)
 
-    change_points = np.empty(shape=(x.shape[0] + 1))
+    change_points = np.empty(shape=(n + 1))
     change_points[1:-1] = np_diff(x)
     change_points[0] = x[0]
     change_points[-1] = -x[-1]

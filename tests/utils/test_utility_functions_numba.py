@@ -43,7 +43,8 @@ class TestMakeIntervals:
     )
     def test_make_intervals(self, value, expected):
         start, end = make_intervals(np.array(value))
-        assert start.shape[0] == end.shape[0] == len(expected)
+        assert start.shape[0] == len(expected)
+        assert end.shape[0] == len(expected)
         for s, e, (s_expected, e_expected) in zip(start, end, expected):
             assert s == s_expected
             assert e == e_expected
