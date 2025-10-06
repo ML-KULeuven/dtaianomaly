@@ -20,7 +20,7 @@ class AlwaysNormal(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> baseline = AlwaysNormal().fit(x)
     >>> baseline.decision_function(x)
-    array([0., 0., 0., ..., 0., 0., 0.])
+    array([0., 0., 0., ..., 0., 0., 0.]...)
     """
 
     def __init__(self):

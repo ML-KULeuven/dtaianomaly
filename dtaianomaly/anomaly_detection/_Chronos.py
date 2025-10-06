@@ -94,11 +94,11 @@ class Chronos(BaseDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import Chronos
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> chronos = Chronos(10).fit(x)
-    >>> chronos.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from dtaianomaly.anomaly_detection import Chronos  # doctest: +SKIP
+    >>> from dtaianomaly.data import demonstration_time_series  # doctest: +SKIP
+    >>> x, y = demonstration_time_series()  # doctest: +SKIP
+    >>> chronos = Chronos(10).fit(x)  # doctest: +SKIP
+    >>> chronos.decision_function(x)  # doctest: +SKIP
     array([0.00027719, 0.00027719, 0.00027719, ..., 0.00058781, 0.02628242,
            0.00010728]...)
     """

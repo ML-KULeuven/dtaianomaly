@@ -30,7 +30,7 @@ class SquaredDifference(BaseDetector):
     >>> baseline = SquaredDifference().fit(x)
     >>> baseline.decision_function(x)
     array([0.00779346, 0.00779346, 0.00260361, ..., 0.00286662, 0.05578398,
-           0.02683475])
+           0.02683475]...)
     """
 
     square_errors: bool

@@ -42,7 +42,7 @@ Changed
 - Replaced dependency on ``tslearn>=0.6.3`` by ``sktime[clustering]``, which includes the ``tslearn``
   dependency. Before, ``tslearn`` was only used for ``KShapeAnomalyDetector`` to do the clustering. This
   capability is also offered by ``sktime`` through a direct interface to ``tslearn``.
-    - Added dependency ``tslearn>=0.6.3`` as it is not installed for Python >= 3.12 via ``sktime``.
+- Added dependency ``tslearn>=0.6.3`` as it is not installed for Python >= 3.12 via ``sktime``.
 
 Fixed
 ^^^^^

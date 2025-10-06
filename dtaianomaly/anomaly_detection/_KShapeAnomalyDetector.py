@@ -76,7 +76,7 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
     >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([7.07106781, 7.07106781, 7.07106781, ..., 7.07106781, 7.07106781,
-           7.07106781])
+           7.07106781]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

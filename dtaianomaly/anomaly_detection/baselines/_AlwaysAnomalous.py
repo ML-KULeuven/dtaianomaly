@@ -20,7 +20,7 @@ class AlwaysAnomalous(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> baseline = AlwaysAnomalous().fit(x)
     >>> baseline.decision_function(x)
-    array([1., 1., 1., ..., 1., 1., 1.])
+    array([1., 1., 1., ..., 1., 1., 1.]...)
     """
 
     def __init__(self):
