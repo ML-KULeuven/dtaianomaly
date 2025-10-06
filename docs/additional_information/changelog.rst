@@ -42,12 +42,14 @@ Changed
 - Replaced dependency on ``tslearn>=0.6.3`` by ``sktime[clustering]``, which includes the ``tslearn``
   dependency. Before, ``tslearn`` was only used for ``KShapeAnomalyDetector`` to do the clustering. This
   capability is also offered by ``sktime`` through a direct interface to ``tslearn``.
+    - Added dependency ``tslearn>=0.6.3`` as it is not installed for Python >= 3.12 via ``sktime``.
 
 Fixed
 ^^^^^
 
 - np.datetime64 are now also valid values in the ``utils.is_valid_array_like``.
   This was especially necessary for time indexes in a dataset.
+- Added missing tests and removed temporary code to test the doctests.
 
 [0.4.2] - 2025-07-03
 --------------------

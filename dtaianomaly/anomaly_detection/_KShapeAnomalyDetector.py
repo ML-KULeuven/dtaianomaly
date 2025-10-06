@@ -203,9 +203,3 @@ def _ncc_c(x: np.array, y: np.array) -> np.array:
     cc = np.fft.ifft(np.fft.fft(x, fft_size) * np.conj(np.fft.fft(y, fft_size)))
     cc = np.concatenate((cc[-(x.shape[0] - 1) :], cc[: x.shape[0]]))
     return np.real(cc) / den
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

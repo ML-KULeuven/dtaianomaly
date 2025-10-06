@@ -124,3 +124,19 @@ class TestHybridKNearestNeighbors:
         )
 
         assert np.array_equal(y_pred1, y_pred2)
+
+    @pytest.mark.parametrize(
+        "length,max_samples,expected",
+        [
+            (1000, 50, 50),
+            (1000, 250, 250),
+            (1000, 0.5, 500),
+            (1000, 0.1, 100),
+            (1000, "auto", 125),
+        ],
+    )
+    def test_create_subsets(self, length, max_samples, expected):
+        detector = HybridKNearestNeighbors(1, max_samples=max_samples, n_estimators=8)
+        subsets = detector._create_subsets(np.empty(shape=(length, 1)))
+        for subset in subsets:
+            assert subset.shape[0] == expected

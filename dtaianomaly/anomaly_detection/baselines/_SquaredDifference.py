@@ -54,19 +54,3 @@ class SquaredDifference(BaseDetector):
         if self.square_errors:
             decision_scores = np.square(decision_scores)
         return decision_scores
-
-
-def main():
-    from dtaianomaly.data import demonstration_time_series
-    from dtaianomaly.visualization import plot_anomaly_scores
-
-    x, y = demonstration_time_series()
-    x = x.reshape(-1, 1)
-
-    baseline = SquaredDifference().fit(x)
-    y_pred = baseline.decision_function(x)
-    plot_anomaly_scores(x, y, y_pred, figsize=(20, 5)).show()
-
-
-if __name__ == "__main__":
-    main()

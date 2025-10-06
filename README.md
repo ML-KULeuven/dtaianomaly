@@ -24,7 +24,7 @@ for more information.
 
 ## Installation
 
-The preferred way to install `dtaianomaly` is via PyPi. See the [documentation](https://dtaianomaly.readthedocs.io/en/stable/index.html) 
+The preferred way to install `dtaianomaly` is via PyPi. See the [documentation](https://dtaianomaly.readthedocs.io/en/stable/getting_started/installation.html) 
 for more options.
 ```
 pip install dtaianomaly

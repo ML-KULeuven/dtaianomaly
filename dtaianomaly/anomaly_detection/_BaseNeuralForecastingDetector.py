@@ -198,11 +198,6 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
                 torch.abs(forecast - future), dim=tuple(range(1, forecast.ndim))
             )
 
-        # Raise an error if invalid metric is given
-        raise ValueError(
-            f"Unknown error_metric '{self.error_metric}'. Valid options are ['mean-squared-error', 'mean-absolute-error']"
-        )
-
     def _evaluate(self, data_loader: torch.utils.data.DataLoader) -> np.array:
         decision_scores = super()._evaluate(data_loader)
         return np.concatenate(
