@@ -26,7 +26,7 @@ class RandomDetector(BaseDetector):
     >>> baseline = RandomDetector(seed=0).fit(x)
     >>> baseline.decision_function(x)
     array([0.63696169, 0.26978671, 0.04097352, ..., 0.70724404, 0.90315986,
-           0.8944909 ])
+           0.8944909 ]...)
     """
 
     seed: int | None

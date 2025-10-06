@@ -121,7 +121,7 @@ class HybridKNearestNeighbors(BaseDetector):
     >>> hybrid_knn = HybridKNearestNeighbors(64, seed=0).fit(x)
     >>> hybrid_knn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     array([0.12284644, 0.38202247, 0.43220974, ..., 0.83470662, 0.81722846,
-           0.85243446])
+           0.85243446]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

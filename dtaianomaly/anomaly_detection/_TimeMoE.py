@@ -74,11 +74,11 @@ class TimeMoE(BaseDetector):
 
     Examples
     --------
-    >>> from dtaianomaly.anomaly_detection import TimeMoE
-    >>> from dtaianomaly.data import demonstration_time_series
-    >>> x, y = demonstration_time_series()
-    >>> time_moe = TimeMoE(10).fit(x)
-    >>> time_moe.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE +SKIP
+    >>> from dtaianomaly.anomaly_detection import TimeMoE  # doctest: +SKIP
+    >>> from dtaianomaly.data import demonstration_time_series  # doctest: +SKIP
+    >>> x, y = demonstration_time_series()  # doctest: +SKIP
+    >>> time_moe = TimeMoE(10).fit(x)  # doctest: +SKIP
+    >>> time_moe.decision_function(x)  # doctest: +SKIP
     array([6.34949149e-05, 6.34949149e-05, 6.34949149e-05, ...,
            6.34949149e-05, 6.34949149e-05, 6.34949149e-05]...)
     """

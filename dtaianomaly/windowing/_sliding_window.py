@@ -59,9 +59,3 @@ def sliding_window(X: np.ndarray, window_size: int, stride: int) -> np.ndarray:
     ]
     windows.append(X[-window_size:].ravel())
     return np.array(windows)
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

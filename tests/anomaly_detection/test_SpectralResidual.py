@@ -49,3 +49,12 @@ class TestMedianMethod:
     def test_epsilon_invalid_value(self, epsilon):
         with pytest.raises(ValueError):
             SpectralResidual(3, epsilon)
+
+    def test_multivariate(self, univariate_time_series, multivariate_time_series):
+        detector = SpectralResidual(16)
+        with pytest.raises(ValueError):
+            detector.fit(multivariate_time_series)
+
+        detector.fit(univariate_time_series)
+        with pytest.raises(ValueError):
+            detector.decision_function(multivariate_time_series)

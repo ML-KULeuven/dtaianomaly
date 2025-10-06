@@ -249,11 +249,40 @@ class Test_InterpretConfig:
 
 class TestInterpretEntry:
 
+    @staticmethod
+    def setup(cls, mp):
+        if cls == anomaly_detection.MOMENT:
+            mp.setattr(sys, "version_info", (3, 11, 7, "final", 0))
+            sys.modules["momentfm"] = types.ModuleType("momentfm")
+
+        if cls == anomaly_detection.Chronos:
+            autogluon = types.ModuleType("autogluon")
+            timeseries = types.ModuleType("autogluon.timeseries")
+            autogluon.timeseries = timeseries
+            sys.modules["autogluon"] = autogluon
+            sys.modules["autogluon.timeseries"] = timeseries
+
+        if cls == anomaly_detection.TimeMoE:
+            sys.modules["transformers"] = types.ModuleType("transformers")
+
+    @staticmethod
+    def cleanup(cls):
+        if cls == anomaly_detection.MOMENT:
+            del sys.modules["momentfm"]
+
+        if cls == anomaly_detection.Chronos:
+            del sys.modules["autogluon"]
+            del sys.modules["autogluon.timeseries"]
+
+        if cls == anomaly_detection.TimeMoE:
+            del sys.modules["transformers"]
+
     @pytest.mark.parametrize(
         "infer_entry", [infer_minimal_entry, infer_extensive_entry]
     )
     @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test(self, cls, infer_entry, monkeypatch):
+        self.setup(cls, monkeypatch)
         if cls == anomaly_detection.MOMENT:
             monkeypatch.setattr(sys, "version_info", (3, 11, 7, "final", 0))
             sys.modules["momentfm"] = types.ModuleType("momentfm")
@@ -278,9 +307,7 @@ class TestInterpretEntry:
                 pytest.fail(
                     f"Object should either have '{key}' as attribute, or have 'kwargs' as attribute, which in turn has '{key}' as attribute!"
                 )
-
-        if cls == anomaly_detection.MOMENT:
-            del sys.modules["momentfm"]
+        self.cleanup(cls)
 
     @pytest.mark.parametrize("cls", ALL_CLASSES)
     def test_invalid_parameter(self, cls):

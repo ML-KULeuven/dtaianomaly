@@ -35,7 +35,7 @@ class Pipeline(BaseDetector):
     >>> pipeline = Pipeline(StandardScaler(), IsolationForest(16))
     >>> pipeline.fit(X).decision_function(X)
     array([-0.01080726, -0.01053199, -0.00883758, ..., -0.05298726,
-           -0.05898066, -0.05713733])
+           -0.05898066, -0.05713733]...)
     """
 
     preprocessor: Preprocessor

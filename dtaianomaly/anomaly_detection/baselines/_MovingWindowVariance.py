@@ -41,7 +41,7 @@ class MovingWindowVariance(BaseDetector):
     >>> baseline = MovingWindowVariance(16).fit(x)
     >>> baseline.decision_function(x)
     array([0.06820711, 0.07130246, 0.07286874, ..., 0.01125165, 0.00984333,
-           0.00986772])
+           0.00986772]...)
     """
 
     window_size: WINDOW_SIZE_TYPE

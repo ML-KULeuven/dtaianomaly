@@ -25,7 +25,8 @@ dependencies = [
     "matplotlib>=3.7",
     "statsmodels>=0.6",
     "pyod>=2.0.0",
-    "sktime[clustering]",
+    "tslearn>=0.6.3",
+    "sktime",
     "toml",
     "torch>=1.8.0",
 ]
@@ -73,8 +74,6 @@ all = [  # All the optional dependencies
     "isort",
     'tqdm',
     "sphinxcontrib-bibtex",
-    "autogluon.timeseries>=1.3.1",
-    "transformers==4.40.1",
     'tqdm',
     "streamlit",
     "plotly"

@@ -112,9 +112,3 @@ class SpectralResidual(BaseDetector):
         saliency_map = np.sqrt(inverse_fourier.real**2 + inverse_fourier.imag**2)
 
         return saliency_map
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
