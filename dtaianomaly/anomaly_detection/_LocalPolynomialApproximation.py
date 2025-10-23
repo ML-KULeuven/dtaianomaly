@@ -60,7 +60,7 @@ class LocalPolynomialApproximation(BaseDetector):
     buffer: int
 
     attribute_validation = {
-        "neighborhood": IntegerAttribute(1),
+        "neighborhood": IntegerAttribute(2),
         "power": IntegerAttribute(1),
         "normalize_variance": BoolAttribute(),
         "buffer": IntegerAttribute(3),
