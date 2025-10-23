@@ -4,6 +4,7 @@ import numpy as np
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
+from dtaianomaly.type_validation import BoolAttribute, IntegerAttribute
 
 __all__ = ["LocalPolynomialApproximation"]
 
@@ -33,7 +34,8 @@ class LocalPolynomialApproximation(BaseDetector):
         and backward neighborhood, respectively.
     buffer : int, default=16
         A buffer at the start and end of the time series, used to ensure that sufficient data is available
-        for fitting each polynomial. The buffer must be at least 3 to ensure that the .
+        for fitting each polynomial. The buffer must be at least 3 to ensure that there is at least a single
+        data point at the beginning and ending of the time series.
 
     Notes
     -----
@@ -52,10 +54,17 @@ class LocalPolynomialApproximation(BaseDetector):
     array([0., 0., 0., ..., 0., 0., 0.]...)
     """
 
-    neighborhood: int | str
+    neighborhood: int
     power: int
     normalize_variance: bool
     buffer: int
+
+    attribute_validation = {
+        "neighborhood": IntegerAttribute(2),
+        "power": IntegerAttribute(1),
+        "normalize_variance": BoolAttribute(),
+        "buffer": IntegerAttribute(3),
+    }
 
     def __init__(
         self,
@@ -65,25 +74,6 @@ class LocalPolynomialApproximation(BaseDetector):
         buffer: int = 16,
     ):
         super().__init__(Supervision.UNSUPERVISED)
-
-        if not isinstance(neighborhood, int) or isinstance(neighborhood, bool):
-            raise TypeError("`neighborhood` should be integer")
-        if neighborhood < 2:
-            raise ValueError("`neighborhood` should be at least 2")
-
-        if not isinstance(power, int) or isinstance(power, bool):
-            raise TypeError("`power` should be integer")
-        if power < 1:
-            raise ValueError("`power` should be strictly positive")
-
-        if not isinstance(normalize_variance, bool):
-            raise TypeError("'normalize_variance' should be a boolean")
-
-        if not isinstance(buffer, int) or isinstance(buffer, bool):
-            raise TypeError("`buffer` should be integer")
-        if buffer < 3:
-            raise ValueError("`buffer` must be at least 3")
-
         self.neighborhood = neighborhood
         self.power = power
         self.normalize_variance = normalize_variance
@@ -173,8 +163,12 @@ def _local_poly_nb_parallel(
 
         # Normalize the variance, if requested
         if normalize_variance:
-            forward_score /= np.var(forward_neighborhood) ** 2
-            backward_score /= np.var(backward_neighborhood) ** 2
+            forward_var = np.var(forward_neighborhood)
+            if forward_var != 0:
+                forward_score /= forward_var**2
+            backward_var = np.var(backward_neighborhood)
+            if backward_var != 0:
+                backward_score /= backward_var**2
 
         decision_scores[t] = max(forward_score, backward_score)
 
