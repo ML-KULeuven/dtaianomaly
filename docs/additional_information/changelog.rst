@@ -15,8 +15,8 @@ Changed
 Fixed
 ^^^^^
 - Fixed bug in ``LocalPolynomialApproximation`` when the variance of a neighborhood,
-  which would lead to nan values in the anomaly score if ``variance=True``. Simultaneously
-  integrated typing validation.
+  which would lead to nan values in the anomaly score if ``normalize_variance=True``.
+  Simultaneously integrated typing validation.
 
 [0.5.0] - 2025-10-06
 ------
