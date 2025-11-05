@@ -1,7 +1,6 @@
 import pytest
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
-from dtaianomaly.in_time_ad import CustomDetectorVisualizer, custom_visualizers
 from dtaianomaly.utils import all_classes
 
 anomaly_detectors = [
@@ -117,18 +116,7 @@ thresholders = [
     thresholding.ContaminationRateThreshold,
     thresholding.TopNThreshold,
 ]
-custom_demonstrator_visualizers = [
-    custom_visualizers.CentroidVisualizer,
-    custom_visualizers.NeuralNetVisualizer,
-]
-everything = (
-    anomaly_detectors
-    + data_loaders
-    + metrics
-    + preprocessors
-    + thresholders
-    + custom_demonstrator_visualizers
-)
+everything = anomaly_detectors + data_loaders + metrics + preprocessors + thresholders
 
 
 @pytest.mark.parametrize("return_names", [True, False])
@@ -143,7 +131,6 @@ everything = (
         (evaluation.BinaryMetric, binary_metrics),
         (preprocessing.Preprocessor, preprocessors),
         (thresholding.Thresholding, thresholders),
-        (CustomDetectorVisualizer, custom_demonstrator_visualizers),
     ],
 )
 class TestAllClasses:

@@ -11,7 +11,6 @@ from dtaianomaly import (
     anomaly_detection,
     data,
     evaluation,
-    in_time_ad,
     preprocessing,
     thresholding,
     utils,
@@ -24,9 +23,7 @@ from dtaianomaly.workflow._workflow_from_config import (
 )
 
 DATA_PATH = f"{pathlib.Path(__file__).parent.parent.parent}/data"
-ALL_CLASSES = utils.all_classes(
-    return_names=False, exclude_types=in_time_ad.CustomDetectorVisualizer
-)
+ALL_CLASSES = utils.all_classes(return_names=False)
 
 
 @pytest.fixture
