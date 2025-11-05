@@ -11,6 +11,7 @@ Added
 
 Changed
 ^^^^^^^
+- Moved ``InTimeAD`` to separate project at https://github.com/ML-KULeuven/InTimeAD.
 
 Fixed
 ^^^^^

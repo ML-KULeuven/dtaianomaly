@@ -35,7 +35,6 @@ Currently, following subsets are available:
   installing ``dtaianomaly[all]``!
 - ``time_moe``: Install transformers==4.40.1, necessary for running Time-MoE. **Warning:** Not
   included when  installing ``dtaianomaly[all]``!
-- ``in_time_ad``: Dependencies for running the demonstrator.
 
 To install version ``X.Y.Z``, use the following command:
 
