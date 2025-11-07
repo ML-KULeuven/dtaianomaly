@@ -1,6 +1,6 @@
 [project]
 name = "dtaianomaly"
-version = "0.5.0"
+version = "0.5.1"
 description = "A simple-to-use Python package for time series anomaly detection!"
 requires-python = ">=3.10,<3.14"
 authors = [
