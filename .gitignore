@@ -3,7 +3,11 @@ data/*
 !data/README.rst
 !data/UCR-time-series-anomaly-archive/001_UCR_Anomaly_DISTORTED1sddb40_35000_52000_52620.txt
 !data/UCR-time-series-anomaly-archive/002_UCR_Anomaly_DISTORTED2sddb40_35000_56600_56900.txt
-
+!data/TSB-AD-U/001_NAB_id_1_Facility_tr_1007_1st_2014.csv
+!data/TSB-AD-U/002_NAB_id_2_WebService_tr_1500_1st_4106.csv
+!data/TSB-AD-M/001_Genesis_id_1_Sensor_tr_4055_1st_15538.csv
+!data/TSB-AD-M/002_MSL_id_1_Sensor_tr_500_1st_900.csv
+!data/TSB-AD-U/009_NAB_id_9_Traffic_tr_500_1st_438.csv
 
 # Results
 *.csv

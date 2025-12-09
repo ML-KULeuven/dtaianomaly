@@ -8,6 +8,7 @@ Latest
 
 Added
 ^^^^^
+- Added ``TSBADLoader``, which can load time series according to the TSB-AD format (https://github.com/TheDatumOrg/TSB-AD).
 
 Changed
 ^^^^^^^
