@@ -12,6 +12,7 @@ Added
 Changed
 ^^^^^^^
 - Moved ``InTimeAD`` to separate project at https://github.com/ML-KULeuven/InTimeAD.
+- Added a parameter ``binning_strategy`` to ``BestThresholdMetric`` to define how the thresholds should be computed. The default behavior computes the thresholds in a uniform manner, but the old behavior can be achieved through ``binning_strategy = 'quantile'``.
 
 Fixed
 ^^^^^

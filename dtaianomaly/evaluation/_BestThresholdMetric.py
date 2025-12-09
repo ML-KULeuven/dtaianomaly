@@ -1,8 +1,15 @@
+from typing import Literal
+
 import numpy as np
 
 from dtaianomaly.evaluation._BinaryMetric import BinaryMetric
 from dtaianomaly.evaluation._ProbaMetric import ProbaMetric
-from dtaianomaly.type_validation import IntegerAttribute, NoneAttribute, ObjectAttribute
+from dtaianomaly.type_validation import (
+    IntegerAttribute,
+    LiteralAttribute,
+    NoneAttribute,
+    ObjectAttribute,
+)
 
 __all__ = ["BestThresholdMetric"]
 
@@ -28,6 +35,11 @@ class BestThresholdMetric(ProbaMetric):
         then selecting the threshold at regular intervals (i.e., the 3rd, 6th, 9th, ...).
         We recommend using the default value (use all thresholds), but can be used
         for reducing the resource requirements.
+    binning_strategy : {"uniform", "quantile"}, default="uniform"
+        How to set the thresholds if only a subset should be evaluated (`max_nb_thresholds is not None`):
+
+        - ``'uniform'``: There is an equal interval between consecutive thresholds (e.g., 0.1, 0.2, 0.3, ..., 0.9)
+        - ``'quantile'``: The number of anomaly scores between each pair of consecutive thresholds is equal.
 
     Attributes
     ----------
@@ -50,6 +62,7 @@ class BestThresholdMetric(ProbaMetric):
 
     metric: BinaryMetric
     max_nb_thresholds: int | None
+    binning_strategy: Literal["uniform", "quantile"]
     threshold_: float
     thresholds_: np.array
     scores_: np.array
@@ -57,11 +70,18 @@ class BestThresholdMetric(ProbaMetric):
     attribute_validation = {
         "metric": ObjectAttribute(BinaryMetric),
         "max_nb_thresholds": IntegerAttribute(minimum=1) | NoneAttribute(),
+        "binning_strategy": LiteralAttribute("uniform", "quantile"),
     }
 
-    def __init__(self, metric: BinaryMetric, max_nb_thresholds: int = None) -> None:
+    def __init__(
+        self,
+        metric: BinaryMetric,
+        max_nb_thresholds: int = None,
+        binning_strategy: Literal["uniform", "quantile"] = "uniform",
+    ) -> None:
         self.metric = metric
         self.max_nb_thresholds = max_nb_thresholds
+        self.binning_strategy = binning_strategy
 
     def _compute(
         self,
@@ -106,10 +126,15 @@ class BestThresholdMetric(ProbaMetric):
             self.max_nb_thresholds is not None
             and 0 < self.max_nb_thresholds < thresholds.shape[0]
         ):
-            selected_thresholds = np.linspace(
-                0, thresholds.shape[0], self.max_nb_thresholds + 2, dtype=int
-            )[1:-1]
-            thresholds = thresholds[selected_thresholds]
+            if self.binning_strategy == "uniform":
+                print()
+                thresholds = np.linspace(0, 1, num=self.max_nb_thresholds)
+
+            else:
+                selected_thresholds = np.linspace(
+                    0, thresholds.shape[0], self.max_nb_thresholds + 2, dtype=int
+                )[1:-1]
+                thresholds = thresholds[selected_thresholds]
 
         # Compute the score for each threshold
         self.thresholds_ = thresholds
