@@ -24,6 +24,7 @@ Available data loaders
 
     DemonstrationTimeSeriesLoader
     UCRLoader
+    TSBADLoader
     CustomDataLoader
 
 
