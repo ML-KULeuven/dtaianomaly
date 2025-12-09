@@ -52,6 +52,10 @@ class TestRangeBasedPrecision:
         y_true, y_pred, precision, _ = test_instance
         assert pytest.approx(RangeBasedPrecision().compute(y_true, y_pred)) == precision
 
+    def test_no_predicted_anomaly(self, test_instance):
+        y_true, y_pred, precision, _ = test_instance
+        assert RangeBasedPrecision().compute(y_true, np.zeros_like(y_pred)) == 0.0
+
 
 class TestRangeBasedRecall:
 
