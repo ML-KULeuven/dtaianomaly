@@ -149,7 +149,11 @@ class RangeBasedMetricBasePrecision(BinaryMetric, abc.ABC):
             for interval in zip(pred_starts, pred_ends + 1)
         ]
 
-        return sum(precision_T) / pred_starts.shape[0]
+        return (
+            (sum(precision_T) / pred_starts.shape[0])
+            if pred_starts.shape[0] > 0
+            else 0.0
+        )
 
 
 class RangeBasedMetricBasePrecisionRecall(RangeBasedMetricBasePrecision, abc.ABC):
@@ -194,6 +198,7 @@ class RangeBasedPrecision(RangeBasedMetricBasePrecision):
     and the ground truth ranges, and (2) whether the predicted range overlaps with
     only one or multiple ground truth ranges. These components can be computed
     independently, and are multiplied to get a final precision-score for the range.
+    The precision will be 0.0 if there are no predicted anomalies.
 
     Parameters
     ----------
