@@ -411,6 +411,7 @@ def _single_job(
             job.dataloader,
             job.pipeline,
             fit_on_X_train,
+            metrics,
             **kwargs,
         )
 
