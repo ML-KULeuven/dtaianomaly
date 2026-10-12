@@ -14,6 +14,9 @@ Changed
 
 Fixed
 ^^^^^
+- Fixed bug where the reproduction script generated in the workflow error logs
+  omitted the evaluation step, so an error occurring while computing a metric
+  could not be reproduced.
 
 [0.5.1] - 2025-11-07
 ------

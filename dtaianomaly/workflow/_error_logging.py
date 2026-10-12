@@ -4,6 +4,7 @@ import traceback
 
 import dtaianomaly
 from dtaianomaly.data import LazyDataLoader
+from dtaianomaly.evaluation import ProbaMetric
 from dtaianomaly.pipeline import Pipeline
 
 
@@ -13,6 +14,7 @@ def log_error(
     data_loader: LazyDataLoader,
     pipeline: Pipeline = None,
     fit_on_X_train: bool = True,
+    metrics: list[ProbaMetric] = None,
     **kwargs,
 ) -> str:
 
@@ -72,6 +74,9 @@ def log_error(
             error_file.write("from dtaianomaly.preprocessing import *\n")
             error_file.write("from dtaianomaly.anomaly_detection import *\n")
             error_file.write("from dtaianomaly.pipeline import Pipeline\n")
+            if metrics:
+                error_file.write("from dtaianomaly.evaluation import *\n")
+                error_file.write("from dtaianomaly.thresholding import *\n")
 
         # Ad an empty line
         error_file.write("\n")
@@ -105,5 +110,13 @@ def log_error(
                     f"kwargs = {kwargs}\n"
                     f"y_pred = pipeline.fit(data.{train_data}, data.y_train, **kwargs).predict_proba(data.X_test)\n\n"
                 )
+
+            if metrics:
+                error_file.write(
+                    "_, y_test_ = pipeline.preprocessor.transform(data.X_test, data.y_test)\n"
+                )
+                error_file.write(f"metrics = [{', '.join(map(str, metrics))}]\n")
+                error_file.write("for metric in metrics:\n")
+                error_file.write("    metric.compute(y_true=y_test_, y_pred=y_pred)\n")
 
     return os.path.abspath(file_path)
