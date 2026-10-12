@@ -38,7 +38,8 @@ class BestThresholdMetric(ProbaMetric):
     binning_strategy : {"uniform", "quantile"}, default="uniform"
         How to set the thresholds if only a subset should be evaluated (`max_nb_thresholds is not None`):
 
-        - ``'uniform'``: There is an equal interval between consecutive thresholds (e.g., 0.1, 0.2, 0.3, ..., 0.9)
+        - ``'uniform'``: The thresholds are equally spaced between the minimum and maximum
+          candidate threshold (e.g., 0.1, 0.2, 0.3, ..., 0.9).
         - ``'quantile'``: The number of anomaly scores between each pair of consecutive thresholds is equal.
 
     Attributes
@@ -118,8 +119,15 @@ class BestThresholdMetric(ProbaMetric):
                 sorted_predicted_scores[:-1] + sorted_predicted_scores[1:]
             ) / 2.0
 
+            # The range in which uniform thresholds are selected
+            min_threshold = sorted_predicted_scores[0]
+            max_threshold = sorted_predicted_scores[-1]
+
             # Add the minimum and maximum threshold
             thresholds = np.append(np.insert(thresholds, 0, 0), 1)
+        else:
+            min_threshold = np.min(thresholds)
+            max_threshold = np.max(thresholds)
 
         # Select a subset of the thresholds, if requested and useful
         if (
@@ -127,8 +135,9 @@ class BestThresholdMetric(ProbaMetric):
             and 0 < self.max_nb_thresholds < thresholds.shape[0]
         ):
             if self.binning_strategy == "uniform":
-                print()
-                thresholds = np.linspace(0, 1, num=self.max_nb_thresholds)
+                thresholds = np.linspace(
+                    min_threshold, max_threshold, num=self.max_nb_thresholds
+                )
 
             else:
                 selected_thresholds = np.linspace(

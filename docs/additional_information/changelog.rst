@@ -8,13 +8,18 @@ Latest
 
 Added
 ^^^^^
-- Added ``TSBADLoader``, which can load time series according to the TSB-AD format (https://github.com/TheDatumOrg/TSB-AD).
 
 Changed
 ^^^^^^^
+- Added a parameter ``binning_strategy`` to ``BestThresholdMetric`` to define how the thresholds should be computed
+  if ``max_nb_thresholds`` is set. The default ``'uniform'`` spaces the thresholds equally between the minimum and
+  maximum anomaly score. This changes the results compared to previous versions; the old behavior can be achieved
+  through ``binning_strategy='quantile'``.
 
 Fixed
 ^^^^^
+- Fixed issue in ``RangeBasedPrecision`` when there are no anomalies predicted. Before, a division by 0 error
+  was raised, which is changed to only returning the value 0.0.
 
 [0.5.1] - 2025-11-07
 ------
@@ -25,14 +30,12 @@ Added
 Changed
 ^^^^^^^
 - Moved ``InTimeAD`` to separate project at https://github.com/ML-KULeuven/InTimeAD.
-- Added a parameter ``binning_strategy`` to ``BestThresholdMetric`` to define how the thresholds should be computed. The default behavior computes the thresholds in a uniform manner, but the old behavior can be achieved through ``binning_strategy = 'quantile'``.
 
 Fixed
 ^^^^^
 - Fixed bug in ``LocalPolynomialApproximation`` when the variance of a neighborhood,
   which would lead to nan values in the anomaly score if ``normalize_variance=True``.
   Simultaneously integrated typing validation.
-- Fixed issue in ``RangeBasedPrecision`` when there are no anomalies predicted. Before, a division by 0 error was raised, which is changed to only returning the value 0.0.
 
 [0.5.0] - 2025-10-06
 ------
