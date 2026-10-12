@@ -10,7 +10,7 @@ import pytest
 import dtaianomaly
 from dtaianomaly.anomaly_detection import BaseDetector, IsolationForest, Supervision
 from dtaianomaly.data import DataSet, DemonstrationTimeSeriesLoader, LazyDataLoader
-from dtaianomaly.evaluation import AreaUnderROC
+from dtaianomaly.evaluation import AreaUnderROC, ProbaMetric
 from dtaianomaly.pipeline import Pipeline
 from dtaianomaly.preprocessing import ChainedPreprocessor, Identity, Preprocessor
 from dtaianomaly.workflow import Workflow
@@ -49,6 +49,12 @@ class ErrorAnomalyDetector(BaseDetector):
 
     def _decision_function(self, X):
         raise Exception("An error occurred when detecting anomalies!")
+
+
+class ErrorMetric(ProbaMetric):
+
+    def _compute(self, y_true, y_pred, **kwargs):
+        raise Exception("An error occurred when computing the metric!")
 
 
 @pytest.mark.slow
@@ -161,6 +167,19 @@ class TestErrorLogging:
         assert error_file_contains_dtaianomaly_version(
             error_file, dtaianomaly.__version__
         )
+        assert error_file_contains_error(error_file, error)
+        assert error_file_results_in_error(error_file, error)
+
+    def test_error_computing_metric(self, tmp_path_factory):
+        results = Workflow(
+            dataloaders=DemonstrationTimeSeriesLoader(),
+            metrics=ErrorMetric(),
+            detectors=IsolationForest(15),
+            error_log_path=str(tmp_path_factory.mktemp("error-log")),
+        ).run()
+
+        error_file = results.loc[0, "Error file"]
+        error = Exception("An error occurred when computing the metric!")
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 

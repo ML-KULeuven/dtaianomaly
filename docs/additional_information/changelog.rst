@@ -18,6 +18,9 @@ Changed
 
 Fixed
 ^^^^^
+- Fixed bug where the reproduction script generated in the workflow error logs
+  omitted the evaluation step, so an error occurring while computing a metric
+  could not be reproduced.
 - Fixed issue in ``RangeBasedPrecision`` when there are no anomalies predicted. Before, a division by 0 error
   was raised, which is changed to only returning the value 0.0.
 
