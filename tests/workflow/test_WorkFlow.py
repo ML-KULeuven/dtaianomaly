@@ -1,5 +1,6 @@
 import os
 import sys
+import tracemalloc
 import warnings
 from unittest.mock import MagicMock
 
@@ -20,7 +21,13 @@ from dtaianomaly.data import (
     LazyDataLoader,
     UCRLoader,
 )
-from dtaianomaly.evaluation import AreaUnderROC, Precision, Recall, ThresholdMetric
+from dtaianomaly.evaluation import (
+    AreaUnderROC,
+    Precision,
+    ProbaMetric,
+    Recall,
+    ThresholdMetric,
+)
 from dtaianomaly.preprocessing import Identity, Preprocessor, StandardScaler
 from dtaianomaly.thresholding import (
     ContaminationRateThreshold,
@@ -414,6 +421,24 @@ class SupervisedDetector(BaseDetector):
         return np.zeros(X.shape[0])
 
 
+class DetectorFitError(BaseDetector):
+
+    def __init__(self):
+        super().__init__(Supervision.UNSUPERVISED)
+
+    def _fit(self, X, y=None, **kwargs):
+        raise Exception("Dummy exception")
+
+    def _decision_function(self, X):
+        return np.zeros(X.shape[0])
+
+
+class MetricError(ProbaMetric):
+
+    def _compute(self, y_true, y_pred, **kwargs):
+        raise Exception("Dummy exception")
+
+
 @pytest.mark.slow
 class TestWorkflowFail:
 
@@ -571,6 +596,72 @@ class TestWorkflowFail:
         assert "Error file" not in results.columns
 
 
+@pytest.mark.slow
+class TestWorkflowFailedMetric:
+
+    @staticmethod
+    def _run(tmp_path_factory, trace_memory=False):
+        error_log_path = str(tmp_path_factory.mktemp("error-log"))
+        results = Workflow(
+            dataloaders=[DemonstrationTimeSeriesLoader()],
+            metrics=[MetricError(), AreaUnderROC()],
+            detectors=[IsolationForest(15)],
+            n_jobs=1,
+            trace_memory=trace_memory,
+            error_log_path=error_log_path,
+        ).run()
+        return results, error_log_path
+
+    def test_failing_metric_is_error(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory)
+        assert results.loc[0, "MetricError()"] == "Error"
+
+    def test_other_metric_is_computed(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory)
+        assert isinstance(results.loc[0, "AreaUnderROC()"], float)
+
+    def test_runtime_is_computed(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory)
+        assert isinstance(results.loc[0, "Runtime [s]"], float)
+
+    def test_peak_memory_is_computed(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory, trace_memory=True)
+        assert isinstance(results.loc[0, "Peak Memory [MB]"], float)
+
+    def test_only_failing_metric_column_is_error(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory, trace_memory=True)
+        assert np.any(results == "Error", axis=0).sum() == 1
+
+    def test_error_file_exists(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory)
+        assert os.path.isfile(results.loc[0, "Error file"])
+
+    def test_single_error_file_logged(self, tmp_path_factory):
+        _, error_log_path = self._run(tmp_path_factory)
+        assert len(os.listdir(error_log_path)) == 1
+
+    def test_error_file_reproduces_only_failing_metric(self, tmp_path_factory):
+        results, _ = self._run(tmp_path_factory)
+        with open(results.loc[0, "Error file"]) as file:
+            metrics_lines = [line for line in file if line.startswith("metrics = [")]
+        assert metrics_lines == ["metrics = [MetricError()]\n"]
+
+
+@pytest.mark.parametrize("detector", [DetectorFitError(), DetectorError()])
+class TestTraceMemoryStoppedOnError:
+
+    def test(self, tmp_path_factory, detector):
+        Workflow(
+            dataloaders=[DemonstrationTimeSeriesLoader()],
+            metrics=[AreaUnderROC()],
+            detectors=[detector],
+            n_jobs=1,
+            trace_memory=True,
+            error_log_path=str(tmp_path_factory.mktemp("error-log")),
+        ).run()
+        assert not tracemalloc.is_tracing()
+
+
 class DummyDetector(BaseDetector):
 
     def __init__(self, supervision):
@@ -657,6 +748,83 @@ class TestGetTrainTestData:
 
         assert np.array_equal(data_set.X_test, X_test)
         assert fit_on_X_train
+
+
+def _data_set_with_train_data():
+    return DataSet(
+        X_test=np.array([1, 2, 3, 4, 5, 6]),
+        y_test=np.array([1, 0, 0, 0, 1, 0]),
+        X_train=np.array([10, 20, 30, 40, 50]),
+        y_train=np.array([0, 0, 0, 0, 0]),
+    )
+
+
+@pytest.mark.parametrize(
+    "supervision,fit_unsupervised_on_test_data,fit_semi_supervised_on_test_data",
+    [
+        (Supervision.UNSUPERVISED, True, False),
+        (Supervision.SEMI_SUPERVISED, False, True),
+    ],
+)
+class TestGetTrainTestDataFitOnTestData:
+
+    def test_y_train_is_none(
+        self,
+        supervision,
+        fit_unsupervised_on_test_data,
+        fit_semi_supervised_on_test_data,
+    ):
+        _, _, _, y_train, _ = _get_train_test_data(
+            _data_set_with_train_data(),
+            DummyDetector(supervision),
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data,
+        )
+        assert y_train is None
+
+    def test_X_train_is_X_test(
+        self,
+        supervision,
+        fit_unsupervised_on_test_data,
+        fit_semi_supervised_on_test_data,
+    ):
+        X_test, _, X_train, _, _ = _get_train_test_data(
+            _data_set_with_train_data(),
+            DummyDetector(supervision),
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data,
+        )
+        assert X_train is X_test
+
+    def test_not_fit_on_X_train(
+        self,
+        supervision,
+        fit_unsupervised_on_test_data,
+        fit_semi_supervised_on_test_data,
+    ):
+        *_, fit_on_X_train = _get_train_test_data(
+            _data_set_with_train_data(),
+            DummyDetector(supervision),
+            fit_unsupervised_on_test_data=fit_unsupervised_on_test_data,
+            fit_semi_supervised_on_test_data=fit_semi_supervised_on_test_data,
+        )
+        assert not fit_on_X_train
+
+
+@pytest.mark.parametrize(
+    "supervision", [Supervision.UNSUPERVISED, Supervision.SEMI_SUPERVISED]
+)
+class TestGetTrainTestDataFitOnTrainData:
+
+    def test_keeps_y_train(self, supervision):
+        data_set = _data_set_with_train_data()
+        _, _, _, y_train, _ = _get_train_test_data(
+            data_set,
+            DummyDetector(supervision),
+            fit_unsupervised_on_test_data=False,
+            fit_semi_supervised_on_test_data=False,
+        )
+        assert np.array_equal(data_set.y_train, y_train)
 
 
 @pytest.mark.parametrize("n_jobs", [1, 2])

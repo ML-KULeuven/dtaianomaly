@@ -1,6 +1,7 @@
 import os
 import pathlib
 import py_compile
+import re
 import subprocess
 import sys
 
@@ -218,6 +219,93 @@ class TestErrorLogging:
             error_file, dtaianomaly.__version__
         )
         assert error_file_contains_error(error_file, error)
+        assert error_file_results_in_error(error_file, error)
+
+
+def _log_dummy_error(error_log_path, **kwargs):
+    return log_error(
+        error_log_path=error_log_path,
+        exception=Exception("Dummy"),
+        data_loader=DemonstrationDataLoaderWithTrainData(),
+        pipeline=Pipeline(preprocessor=Identity(), detector=IsolationForest(15)),
+        **kwargs,
+    )
+
+
+def _read(error_file):
+    with open(error_file, "r") as file:
+        return file.read()
+
+
+class TestLogErrorFileName:
+
+    def test_matches_pattern(self, tmp_path_factory):
+        error_file = _log_dummy_error(str(tmp_path_factory.mktemp("error-log")))
+        assert re.fullmatch(
+            r"DemonstrationDataLoaderWithTrainData-IsolationForest-"
+            r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}-[0-9a-f]{8}\.err",
+            os.path.basename(error_file),
+        )
+
+    def test_quick_succession_gives_distinct_files(self, tmp_path_factory):
+        error_log_path = str(tmp_path_factory.mktemp("error-log"))
+        first = _log_dummy_error(error_log_path)
+        second = _log_dummy_error(error_log_path)
+        assert first != second
+        assert os.path.isfile(first) and os.path.isfile(second)
+
+
+class TestLogErrorContent:
+
+    def test_metric_error_header(self, tmp_path_factory):
+        error_file = _log_dummy_error(
+            str(tmp_path_factory.mktemp("error-log")),
+            metrics=[ErrorMetric()],
+            error_in_metric=True,
+        )
+        assert "# An error occurred while computing a metric!" in _read(error_file)
+
+    def test_detection_error_header(self, tmp_path_factory):
+        error_file = _log_dummy_error(str(tmp_path_factory.mktemp("error-log")))
+        assert "# An error occurred while detecting anomalies!" in _read(error_file)
+
+    def test_fit_on_X_train(self, tmp_path_factory):
+        error_file = _log_dummy_error(
+            str(tmp_path_factory.mktemp("error-log")), fit_on_X_train=True
+        )
+        assert "pipeline.fit(data.X_train, data.y_train" in _read(error_file)
+
+    def test_fit_on_X_test(self, tmp_path_factory):
+        error_file = _log_dummy_error(
+            str(tmp_path_factory.mktemp("error-log")), fit_on_X_train=False
+        )
+        assert "pipeline.fit(data.X_test, None" in _read(error_file)
+
+    def test_fit_on_X_test_with_kwargs(self, tmp_path_factory):
+        error_file = _log_dummy_error(
+            str(tmp_path_factory.mktemp("error-log")),
+            fit_on_X_train=False,
+            lower_bound=32,
+        )
+        assert "pipeline.fit(data.X_test, None, **kwargs)" in _read(error_file)
+
+
+@pytest.mark.slow
+class TestErrorLoggingFailedMetric:
+
+    def test_error_file(self, tmp_path_factory):
+        results = Workflow(
+            dataloaders=DemonstrationTimeSeriesLoader(),
+            metrics=[ErrorMetric(), AreaUnderROC()],
+            detectors=IsolationForest(15),
+            error_log_path=str(tmp_path_factory.mktemp("error-log")),
+        ).run()
+
+        error_file = results.loc[0, "Error file"]
+        error = Exception("An error occurred when computing the metric!")
+        assert error_file_has_correct_syntax(error_file)
+        assert "# An error occurred while computing a metric!" in _read(error_file)
+        assert "metrics = [ErrorMetric()]\n" in _read(error_file)
         assert error_file_results_in_error(error_file, error)
 
 

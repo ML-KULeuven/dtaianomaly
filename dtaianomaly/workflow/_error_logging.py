@@ -1,6 +1,7 @@
 import datetime
 import os
 import traceback
+import uuid
 
 import dtaianomaly
 from dtaianomaly.data import LazyDataLoader
@@ -15,6 +16,7 @@ def log_error(
     pipeline: Pipeline = None,
     fit_on_X_train: bool = True,
     metrics: list[ProbaMetric] = None,
+    error_in_metric: bool = False,
     **kwargs,
 ) -> str:
 
@@ -26,12 +28,9 @@ def log_error(
     if pipeline is not None:
         base_file_name += f"-{pipeline.detector.__class__.__name__}"
 
-    # Ensure that the file name is unique
-    while True:
-        now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        if not os.path.exists(f"{error_log_path}/{base_file_name}-{now}.err"):
-            break
-    file_path = f"{error_log_path}/{base_file_name}-{now}.err"
+    # Ensure that the file name is unique, also across processes
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    file_path = f"{error_log_path}/{base_file_name}-{now}-{uuid.uuid4().hex[:8]}.err"
 
     # Write away the logging
     with open(file_path, "w") as error_file:
@@ -39,6 +38,8 @@ def log_error(
         # Create an error message as a string
         if pipeline is None:  # Didn't reach anomaly detection when error occurred.
             error_message = "An error occurred while loading data!"
+        elif error_in_metric:
+            error_message = "An error occurred while computing a metric!"
         else:
             error_message = "An error occurred while detecting anomalies!"
         error_message += (
@@ -96,19 +97,19 @@ def log_error(
                 ")\n"
             )
             if fit_on_X_train:
-                train_data = "X_train"
+                train_data = "data.X_train, data.y_train"
             else:
-                train_data = "X_test"
+                train_data = "data.X_test, None"
 
             if len(kwargs) == 0:
                 error_file.write(
-                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train).predict_proba(data.X_test)\n\n"
+                    f"y_pred = pipeline.fit({train_data}).predict_proba(data.X_test)\n\n"
                 )
             else:
 
                 error_file.write(
                     f"kwargs = {kwargs}\n"
-                    f"y_pred = pipeline.fit(data.{train_data}, data.y_train, **kwargs).predict_proba(data.X_test)\n\n"
+                    f"y_pred = pipeline.fit({train_data}, **kwargs).predict_proba(data.X_test)\n\n"
                 )
 
             if metrics:
