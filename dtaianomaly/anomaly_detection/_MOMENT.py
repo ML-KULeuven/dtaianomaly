@@ -59,7 +59,8 @@ class MOMENT(BaseDetector):
     Warnings
     --------
     MOMENT only works for Python 3.11. Additionally, its requirements are very strict, and
-    must be installed seperately from dtaianomaly. This can be done via ``pip install momentfm``.
+    conflict with those of other foundation models such as Chronos and Time-MoE. Install it
+    in a separate environment via ``pip install dtaianomaly[moment]``.
 
     Notes
     -----

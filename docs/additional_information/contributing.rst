@@ -80,17 +80,33 @@ Setup the environment
 
 Next, you can set up your environment to start working on the issue.
 For this, we highly recommend to `virtual environment <https://docs.python.org/3/library/venv.html>`_
-to isolate the dependencies. To install the dependencies of
-``dtaianomaly``, including all optional dependencies,
-navigate to the directory where you downloaded the code and
-run the following command:
+to isolate the dependencies. The development tools (for testing,
+building the documentation, linting and running notebooks) are
+defined as `dependency groups <https://packaging.python.org/en/latest/specifications/dependency-groups/>`_
+in ``pyproject.toml``. If you use `uv <https://docs.astral.sh/uv/>`_,
+navigate to the directory where you downloaded the code and run the
+following command, which installs ``dtaianomaly`` in editable mode
+together with all dependency groups:
 
 .. code-block:: bash
 
-     pip install --editable .[all]
+     uv sync
+
+Alternatively, with pip (version 25.1 or higher), run:
+
+.. code-block:: bash
+
+     pip install --editable . --group tests --group docs --group lint --group notebooks
 
 You should include the ``--editable`` flag to ensure that your
 changes to the code are actually reflected in the installed version.
+You can also install only the groups you need, for example
+``--group tests``.
+
+The foundation-model extras (``chronos``, ``moment`` and ``time_moe``)
+are not installed by default, and ``moment`` conflicts with the other two. If you
+work on one of these models, add the corresponding extra, for example
+``uv sync --extra chronos`` or ``pip install --editable ".[chronos]"``.
 
 Next, make sure to install pre-commit to the project,
 using the following command:

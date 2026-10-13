@@ -26,7 +26,7 @@ dependencies = [
     "statsmodels>=0.6",
     "pyod>=2.0.0",
     "tslearn>=0.6.3",
-    "sktime",
+    "sktime>=0.24",
     "toml",
     "torch>=1.8.0",
 ]
@@ -62,44 +62,12 @@ markers = [
     "numba: marks tests that depend on numba-compiled code"
 ]
 
+# User-facing optional features, published on PyPI. The moment extra pins
+# old versions of transformers and numpy (momentfm 0.1.4), and can therefore
+# not be installed together with chronos or time_moe.
 [project.optional-dependencies]
-all = [  # All the optional dependencies
-    "sphinx",
-    "sphinx-rtd-theme",
-    "numpydoc",
-    "toml",
-    "pytest",
-    "pytest-cov",
-    "notebook",
-    "jupyterlab",
-    "pre-commit",
-    "black",
-    "isort",
-    'tqdm',
-    "sphinxcontrib-bibtex",
-    'tqdm'
-]
-tests = [  # For testing
-    "pytest",
-    "pytest-cov"
-]
 tqdm = [
-    'tqdm'
-]
-docs = [  # For generating the docs
-    "sphinx",
-    "sphinx-rtd-theme",
-    "numpydoc",
-    "sphinxcontrib-bibtex"
-]
-notebooks = [  # For using notebooks
-    "notebook",
-    "jupyterlab",
-]
-lint = [
-    "pre-commit",
-    "black",
-    "isort"
+    "tqdm"
 ]
 chronos = [
     "autogluon.timeseries>=1.3.1"
@@ -108,5 +76,22 @@ moment = [
     "momentfm"
 ]
 time_moe = [
-    "transformers==4.40.1"
+    # The Time-MoE model code on the Hugging Face Hub only runs on transformers 4.40.x
+    "transformers>=4.40.1,<4.41",
+    "accelerate",
+]
+
+# Development tools (PEP 735), not published on PyPI.
+# Install with `uv sync` (all groups) or `pip install . --group <name>` (pip>=25.1).
+[dependency-groups]
+tests = ["pytest", "pytest-cov"]
+docs = ["sphinx", "sphinx-rtd-theme", "numpydoc", "sphinxcontrib-bibtex"]
+lint = ["pre-commit", "black", "isort"]
+notebooks = ["notebook", "jupyterlab"]
+
+[tool.uv]
+default-groups = "all"
+conflicts = [
+    [{extra = "moment"}, {extra = "chronos"}],
+    [{extra = "moment"}, {extra = "time_moe"}],
 ]

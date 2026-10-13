@@ -22,8 +22,43 @@ jobs:
     - name: Install dtaianomaly
       run: |
         python -m pip install --upgrade pip
-        pip install .[all]
+        pip install ".[tqdm]" --group tests
         pip list
 
     - name: Test with pytest
       run: pytest --cov=dtaianomaly --cov-report term-missing
+
+  # The foundation-model extras conflict with each other, so each one is
+  # installed and tested in its own environment (the regular tests mock them).
+  optional-extras:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {extra: chronos, test: test_Chronos.py, module: autogluon.timeseries}
+          - {extra: moment, test: test_MOMENT.py, module: momentfm}
+          - {extra: time_moe, test: test_TimeMoE.py, module: "transformers, accelerate"}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+
+    - name: Install dtaianomaly[${{ matrix.extra }}]
+      run: |
+        python -m pip install --upgrade pip
+        pip install ".[${{ matrix.extra }}]" --group tests
+        pip list
+
+    - name: Check installed dependencies
+      run: |
+        pip check
+        python -c "import ${{ matrix.module }}"
+
+    - name: Test with pytest
+      run: pytest tests/anomaly_detection/${{ matrix.test }}
