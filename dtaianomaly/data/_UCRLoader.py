@@ -46,7 +46,7 @@ class UCRLoader(PathDataLoader):
     def _load(self) -> DataSet:
 
         # Extract the meta-information from the name of the file
-        [*_, train_test_split, start_anomaly, end_anomaly] = self.path.rstrip(
+        [*_, train_test_split, start_anomaly, end_anomaly] = self.path.removesuffix(
             ".txt"
         ).split("_")
         train_test_split = int(train_test_split)
