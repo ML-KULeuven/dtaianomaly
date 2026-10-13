@@ -41,52 +41,105 @@ detect anomalies:
       the probability of interest in many anomaly detection applications.
 """
 
-from ._AutoEncoder import AutoEncoder
-from ._BaseDetector import BaseDetector, Supervision, load_detector
-from ._BaseNeuralDetector import BaseNeuralDetector
-from ._BaseNeuralForecastingDetector import BaseNeuralForecastingDetector
-from ._BaseNeuralReconstructionDetector import BaseNeuralReconstructionDetector
-from ._BasePyODAnomalyDetector import BasePyODAnomalyDetector
-from ._Chronos import Chronos
-from ._ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
-from ._ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
-from ._CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
-from ._DWT_MLEAD import DWT_MLEAD
-from ._HistogramBasedOutlierScore import HistogramBasedOutlierScore
-from ._HybridKNearestNeighbors import HybridKNearestNeighbors
-from ._IsolationForest import IsolationForest
-from ._KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
-from ._KMeansAnomalyDetector import KMeansAnomalyDetector
-from ._KNearestNeighbors import KNearestNeighbors
-from ._KShapeAnomalyDetector import KShapeAnomalyDetector
-from ._LocalOutlierFactor import LocalOutlierFactor
-from ._LocalPolynomialApproximation import LocalPolynomialApproximation
-from ._LongShortTermMemoryNetwork import LongShortTermMemoryNetwork
-from ._MatrixProfileDetector import MatrixProfileDetector
-from ._MedianMethod import MedianMethod
-from ._MOMENT import MOMENT
-from ._MultilayerPerceptron import MultilayerPerceptron
-from ._MultivariateDetector import MultivariateDetector
-from ._OneClassSupportVectorMachine import OneClassSupportVectorMachine
-from ._PrincipalComponentAnalysis import PrincipalComponentAnalysis
-from ._RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
-from ._RobustRandomCutForestAnomalyDetector import RobustRandomCutForestAnomalyDetector
-from ._ROCKAD import ROCKAD
-from ._SpectralResidual import SpectralResidual
-from ._TimeMoE import TimeMoE
-from ._TorchTimeSeriesDataSet import (
-    ForecastDataset,
-    ReconstructionDataset,
-    TimeSeriesDataset,
-)
-from ._Transformer import Transformer
-from .baselines import (
-    AlwaysAnomalous,
-    AlwaysNormal,
-    MovingWindowVariance,
-    RandomDetector,
-    SquaredDifference,
-)
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ._AutoEncoder import AutoEncoder
+    from ._BaseDetector import BaseDetector, Supervision, load_detector
+    from ._BaseNeuralDetector import BaseNeuralDetector
+    from ._BaseNeuralForecastingDetector import BaseNeuralForecastingDetector
+    from ._BaseNeuralReconstructionDetector import BaseNeuralReconstructionDetector
+    from ._BasePyODAnomalyDetector import BasePyODAnomalyDetector
+    from ._Chronos import Chronos
+    from ._ClusterBasedLocalOutlierFactor import ClusterBasedLocalOutlierFactor
+    from ._ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
+    from ._CopulaBasedOutlierDetector import CopulaBasedOutlierDetector
+    from ._DWT_MLEAD import DWT_MLEAD
+    from ._HistogramBasedOutlierScore import HistogramBasedOutlierScore
+    from ._HybridKNearestNeighbors import HybridKNearestNeighbors
+    from ._IsolationForest import IsolationForest
+    from ._KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
+    from ._KMeansAnomalyDetector import KMeansAnomalyDetector
+    from ._KNearestNeighbors import KNearestNeighbors
+    from ._KShapeAnomalyDetector import KShapeAnomalyDetector
+    from ._LocalOutlierFactor import LocalOutlierFactor
+    from ._LocalPolynomialApproximation import LocalPolynomialApproximation
+    from ._LongShortTermMemoryNetwork import LongShortTermMemoryNetwork
+    from ._MatrixProfileDetector import MatrixProfileDetector
+    from ._MedianMethod import MedianMethod
+    from ._MOMENT import MOMENT
+    from ._MultilayerPerceptron import MultilayerPerceptron
+    from ._MultivariateDetector import MultivariateDetector
+    from ._OneClassSupportVectorMachine import OneClassSupportVectorMachine
+    from ._PrincipalComponentAnalysis import PrincipalComponentAnalysis
+    from ._RobustPrincipalComponentAnalysis import RobustPrincipalComponentAnalysis
+    from ._RobustRandomCutForestAnomalyDetector import (
+        RobustRandomCutForestAnomalyDetector,
+    )
+    from ._ROCKAD import ROCKAD
+    from ._SpectralResidual import SpectralResidual
+    from ._TimeMoE import TimeMoE
+    from ._TorchTimeSeriesDataSet import (
+        ForecastDataset,
+        ReconstructionDataset,
+        TimeSeriesDataset,
+    )
+    from ._Transformer import Transformer
+    from .baselines import (
+        AlwaysAnomalous,
+        AlwaysNormal,
+        MovingWindowVariance,
+        RandomDetector,
+        SquaredDifference,
+    )
+
+_LAZY_IMPORTS = {
+    "AutoEncoder": "._AutoEncoder",
+    "BaseDetector": "._BaseDetector",
+    "Supervision": "._BaseDetector",
+    "load_detector": "._BaseDetector",
+    "BaseNeuralDetector": "._BaseNeuralDetector",
+    "BaseNeuralForecastingDetector": "._BaseNeuralForecastingDetector",
+    "BaseNeuralReconstructionDetector": "._BaseNeuralReconstructionDetector",
+    "BasePyODAnomalyDetector": "._BasePyODAnomalyDetector",
+    "Chronos": "._Chronos",
+    "ClusterBasedLocalOutlierFactor": "._ClusterBasedLocalOutlierFactor",
+    "ConvolutionalNeuralNetwork": "._ConvolutionalNeuralNetwork",
+    "CopulaBasedOutlierDetector": "._CopulaBasedOutlierDetector",
+    "DWT_MLEAD": "._DWT_MLEAD",
+    "HistogramBasedOutlierScore": "._HistogramBasedOutlierScore",
+    "HybridKNearestNeighbors": "._HybridKNearestNeighbors",
+    "IsolationForest": "._IsolationForest",
+    "KernelPrincipalComponentAnalysis": "._KernelPrincipalComponentAnalysis",
+    "KMeansAnomalyDetector": "._KMeansAnomalyDetector",
+    "KNearestNeighbors": "._KNearestNeighbors",
+    "KShapeAnomalyDetector": "._KShapeAnomalyDetector",
+    "LocalOutlierFactor": "._LocalOutlierFactor",
+    "LocalPolynomialApproximation": "._LocalPolynomialApproximation",
+    "LongShortTermMemoryNetwork": "._LongShortTermMemoryNetwork",
+    "MatrixProfileDetector": "._MatrixProfileDetector",
+    "MedianMethod": "._MedianMethod",
+    "MOMENT": "._MOMENT",
+    "MultilayerPerceptron": "._MultilayerPerceptron",
+    "MultivariateDetector": "._MultivariateDetector",
+    "OneClassSupportVectorMachine": "._OneClassSupportVectorMachine",
+    "PrincipalComponentAnalysis": "._PrincipalComponentAnalysis",
+    "RobustPrincipalComponentAnalysis": "._RobustPrincipalComponentAnalysis",
+    "RobustRandomCutForestAnomalyDetector": "._RobustRandomCutForestAnomalyDetector",
+    "ROCKAD": "._ROCKAD",
+    "SpectralResidual": "._SpectralResidual",
+    "TimeMoE": "._TimeMoE",
+    "ForecastDataset": "._TorchTimeSeriesDataSet",
+    "ReconstructionDataset": "._TorchTimeSeriesDataSet",
+    "TimeSeriesDataset": "._TorchTimeSeriesDataSet",
+    "Transformer": "._Transformer",
+    "AlwaysAnomalous": ".baselines",
+    "AlwaysNormal": ".baselines",
+    "MovingWindowVariance": ".baselines",
+    "RandomDetector": ".baselines",
+    "SquaredDifference": ".baselines",
+}
 
 __all__ = [
     # Base
@@ -137,3 +190,18 @@ __all__ = [
     "HybridKNearestNeighbors",
     "ROCKAD",
 ]
+
+
+def __getattr__(name):
+    # Load public objects on first access (PEP 562), so importing this module
+    # does not import heavy dependencies of objects that are never used.
+    if name in _LAZY_IMPORTS:
+        module = importlib.import_module(_LAZY_IMPORTS[name], __name__)
+        value = getattr(module, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))
