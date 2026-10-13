@@ -1,20 +1,14 @@
 [project]
 name = "dtaianomaly"
-version = "0.5.1"
+dynamic = ["version"]
 description = "A simple-to-use Python package for time series anomaly detection!"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     {name = "Louis Carpentier", email = "louis.carpentier@kuleuven.be"}
 ]
 keywords = ["machine-learning", "time-series", "anomaly-detection", "data-mining"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-]
 dependencies = [
     "numpy>=1.22",
     "scipy>=1.10",
@@ -26,8 +20,7 @@ dependencies = [
     "statsmodels>=0.6",
     "pyod>=2.0.0",
     "tslearn>=0.6.3",
-    "sktime",
-    "toml",
+    "sktime>=0.24",
     "torch>=1.8.0",
 ]
 
@@ -35,18 +28,18 @@ dependencies = [
 file = "README.md"
 content-type = "text/markdown"
 
-[project.license]
-file = "LICENSE"
-
 [project.urls]
 homepage = "https://pypi.org/project/dtaianomaly/"
 repository = "https://github.com/ML-KULeuven/dtaianomaly"
-changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
+changelog = "https://github.com/ML-KULeuven/dtaianomaly/releases"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
 [build-system]
-requires = ["setuptools", "wheel", "build"]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"  # builds without git metadata (e.g. source zip)
 
 [tool.setuptools.packages.find]
 include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additional*"]`
@@ -59,44 +52,12 @@ markers = [
     "numba: marks tests that depend on numba-compiled code"
 ]
 
+# User-facing optional features, published on PyPI. The moment extra pins
+# old versions of transformers and numpy (momentfm 0.1.4), and can therefore
+# not be installed together with chronos or time_moe.
 [project.optional-dependencies]
-all = [  # All the optional dependencies
-    "sphinx",
-    "sphinx-rtd-theme",
-    "numpydoc",
-    "toml",
-    "pytest",
-    "pytest-cov",
-    "notebook",
-    "jupyterlab",
-    "pre-commit",
-    "black",
-    "isort",
-    'tqdm',
-    "sphinxcontrib-bibtex",
-    'tqdm'
-]
-tests = [  # For testing
-    "pytest",
-    "pytest-cov"
-]
 tqdm = [
-    'tqdm'
-]
-docs = [  # For generating the docs
-    "sphinx",
-    "sphinx-rtd-theme",
-    "numpydoc",
-    "sphinxcontrib-bibtex"
-]
-notebooks = [  # For using notebooks
-    "notebook",
-    "jupyterlab",
-]
-lint = [
-    "pre-commit",
-    "black",
-    "isort"
+    "tqdm"
 ]
 chronos = [
     "autogluon.timeseries>=1.3.1"
@@ -105,5 +66,25 @@ moment = [
     "momentfm"
 ]
 time_moe = [
-    "transformers==4.40.1"
+    # The Time-MoE model code on the Hugging Face Hub only runs on transformers 4.40.x
+    "transformers>=4.40.1,<4.41",
+    "accelerate",
+]
+
+# Development tools (PEP 735), not published on PyPI.
+# Install with `uv sync` (all groups) or `pip install . --group <name>` (pip>=25.1).
+[dependency-groups]
+tests = ["pytest", "pytest-cov"]
+docs = ["sphinx", "sphinx-rtd-theme", "numpydoc", "sphinxcontrib-bibtex"]
+lint = ["pre-commit", "black", "isort"]
+notebooks = ["notebook", "jupyterlab"]
+
+[tool.uv]
+default-groups = "all"
+# All three model extras are declared mutually exclusive. Only moment strictly
+# conflicts with the others (chronos and time_moe can be combined with pip), but
+# pairwise conflicts make uv resolve the default environment with momentfm's old
+# numpy pin, which breaks `uv sync` on Python 3.12+.
+conflicts = [
+    [{extra = "chronos"}, {extra = "moment"}, {extra = "time_moe"}],
 ]

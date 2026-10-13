@@ -1,28 +1,9 @@
 Changelog
 =========
 
-All notable changes to this project will be documented in this file.
-
-Latest
-------
-
-Added
-^^^^^
-
-Changed
-^^^^^^^
-- Added a parameter ``binning_strategy`` to ``BestThresholdMetric`` to define how the thresholds should be computed
-  if ``max_nb_thresholds`` is set. The default ``'uniform'`` spaces the thresholds equally between the minimum and
-  maximum anomaly score. This changes the results compared to previous versions; the old behavior can be achieved
-  through ``binning_strategy='quantile'``.
-
-Fixed
-^^^^^
-- Fixed bug where the reproduction script generated in the workflow error logs
-  omitted the evaluation step, so an error occurring while computing a metric
-  could not be reproduced.
-- Fixed issue in ``RangeBasedPrecision`` when there are no anomalies predicted. Before, a division by 0 error
-  was raised, which is changed to only returning the value 0.0.
+From version 0.6.0 onwards, the changes of each release are listed in the
+`release notes on GitHub <https://github.com/ML-KULeuven/dtaianomaly/releases>`_.
+The changes of the earlier versions are listed below.
 
 [0.5.1] - 2025-11-07
 ------

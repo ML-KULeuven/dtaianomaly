@@ -6,34 +6,59 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      python-version:
-        description: 'Python version to use'
-        required: true
-        type: string
-      os:
-        description: 'OS to use (i.e., the docker image)'
-        required: true
-        type: string
 
 jobs:
   unit-test:
-    runs-on: ${{ inputs.image || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ inputs.python-version || vars.DEFAULT_PYTHON_VERSION }}
-      uses: actions/setup-python@v3
+    - name: Set up Python ${{ vars.DEFAULT_PYTHON_VERSION }}
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ inputs.python-version || vars.DEFAULT_PYTHON_VERSION }}
+        python-version: ${{ vars.DEFAULT_PYTHON_VERSION }}
 
     - name: Install dtaianomaly
       run: |
         python -m pip install --upgrade pip
-        pip install .[all]
+        pip install ".[tqdm]" --group tests
         pip list
 
     - name: Test with pytest
       run: pytest --cov=dtaianomaly --cov-report term-missing
+
+  # The foundation-model extras conflict with each other, so each one is
+  # installed and tested in its own environment (the regular tests mock them).
+  optional-extras:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {extra: chronos, test: test_Chronos.py, module: autogluon.timeseries}
+          - {extra: moment, test: test_MOMENT.py, module: momentfm}
+          - {extra: time_moe, test: test_TimeMoE.py, module: "transformers, accelerate"}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dtaianomaly[${{ matrix.extra }}]
+      run: |
+        python -m pip install --upgrade pip
+        pip install ".[${{ matrix.extra }}]" --group tests
+        pip list
+
+    - name: Check installed dependencies
+      run: |
+        pip check
+        python -c "import ${{ matrix.module }}"
+
+    - name: Test with pytest
+      run: pytest tests/anomaly_detection/${{ matrix.test }}

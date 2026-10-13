@@ -5,7 +5,6 @@ import sys
 import types
 
 import pytest
-import toml
 
 from dtaianomaly import (
     anomaly_detection,
@@ -60,6 +59,44 @@ def valid_config():
         "n_jobs": 4,
         "trace_memory": True,
     }
+
+
+def _toml_value(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, str):
+        return json.dumps(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml_value(v) for v in value) + "]"
+    if isinstance(value, dict):
+        return (
+            "{" + ", ".join(f"{k} = {_toml_value(v)}" for k, v in value.items()) + "}"
+        )
+    raise TypeError(f"Cannot serialise {type(value).__name__} to TOML")
+
+
+def _is_array_of_tables(value):
+    return (
+        isinstance(value, list)
+        and len(value) > 0
+        and all(isinstance(v, dict) for v in value)
+    )
+
+
+def _to_toml(config):
+    lines = [
+        f"{key} = {_toml_value(value)}"
+        for key, value in config.items()
+        if not _is_array_of_tables(value)
+    ]
+    for key, value in config.items():
+        if _is_array_of_tables(value):
+            for table in value:
+                lines.append(f"\n[[{key}]]")
+                lines.extend(f"{k} = {_toml_value(v)}" for k, v in table.items())
+    return "\n".join(lines) + "\n"
 
 
 def infer_minimal_entry(cls):
@@ -144,7 +181,7 @@ class TestWorkflowFromConfig:
 
     def test_success_toml(self, tmp_path, valid_config):
         with open(tmp_path / "config.toml", "w") as file:
-            toml.dump(valid_config, file)
+            file.write(_to_toml(valid_config))
         workflow = workflow_from_config(str(tmp_path / "config.toml"))
         assert isinstance(workflow, Workflow)
 

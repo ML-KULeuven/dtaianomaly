@@ -12,29 +12,36 @@ Use the following command to install the latest version:
     pip install dtaianomaly
 
 Some dependencies are optional to ensure that ``dtaianomaly`` remains
-lightweight. Use the following command to install all optional
-dependencies:
+lightweight. These can be installed as extras, by adding the name of the
+extra between square brackets:
 
 .. code-block:: bash
 
-    pip install dtaianomaly[all]
+    pip install "dtaianomaly[tqdm]"
 
-It is also possible to only install a subset of the optional dependencies.
-You can install these by replacing 'all' with the corresponding name in the
-command above. To install multiple subsets, separate the names with a comma.
-Currently, following subsets are available:
+The following extras are available:
 
-- ``tests``: Dependencies for running the tests.
-- ``tqdm``: Install TQDM (for showing ``WorkFlow``-progress)
-- ``docs``: Dependencies for generating the documentation.
-- ``notebooks``: Dependencies for using jupyter notebooks.
-- ``lint``: Dependencies for linting the code.
-- ``chronos``: Install autogluon.timeseries, necessary for running Chronos. **Warning:** Not
-  included when installing ``dtaianomaly[all]``!
-- ``moment``: Install momentfm, necessary for running MOMENT. **Warning:** Not included when
-  installing ``dtaianomaly[all]``!
-- ``time_moe``: Install transformers==4.40.1, necessary for running Time-MoE. **Warning:** Not
-  included when  installing ``dtaianomaly[all]``!
+- ``tqdm``: Install TQDM (for showing ``WorkFlow``-progress).
+- ``chronos``: Install autogluon.timeseries, necessary for running Chronos.
+- ``moment``: Install momentfm, necessary for running MOMENT (only Python 3.11).
+- ``time_moe``: Install transformers 4.40.x and accelerate, necessary for running Time-MoE.
+
+.. warning::
+
+    The extra ``moment`` cannot be installed together with ``chronos`` or ``time_moe``,
+    because momentfm requires an older, incompatible version of ``transformers``.
+    Use a separate virtual environment for MOMENT. With pip, the extras ``chronos``
+    and ``time_moe`` can be combined, but this installs an older version of
+    autogluon.timeseries (because Time-MoE requires ``transformers`` 4.40.x). With
+    uv, the three extras are declared mutually exclusive, so use one of them per
+    environment.
+
+If you use `uv <https://docs.astral.sh/uv/>`_, the extras can be added to
+your project in the same way:
+
+.. code-block:: bash
+
+    uv add "dtaianomaly[chronos]"
 
 To install version ``X.Y.Z``, use the following command:
 

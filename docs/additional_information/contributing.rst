@@ -80,17 +80,33 @@ Setup the environment
 
 Next, you can set up your environment to start working on the issue.
 For this, we highly recommend to `virtual environment <https://docs.python.org/3/library/venv.html>`_
-to isolate the dependencies. To install the dependencies of
-``dtaianomaly``, including all optional dependencies,
-navigate to the directory where you downloaded the code and
-run the following command:
+to isolate the dependencies. The development tools (for testing,
+building the documentation, linting and running notebooks) are
+defined as `dependency groups <https://packaging.python.org/en/latest/specifications/dependency-groups/>`_
+in ``pyproject.toml``. If you use `uv <https://docs.astral.sh/uv/>`_,
+navigate to the directory where you downloaded the code and run the
+following command, which installs ``dtaianomaly`` in editable mode
+together with all dependency groups:
 
 .. code-block:: bash
 
-     pip install --editable .[all]
+     uv sync
+
+Alternatively, with pip (version 25.1 or higher), run:
+
+.. code-block:: bash
+
+     pip install --editable . --group tests --group docs --group lint --group notebooks
 
 You should include the ``--editable`` flag to ensure that your
 changes to the code are actually reflected in the installed version.
+You can also install only the groups you need, for example
+``--group tests``.
+
+The foundation-model extras (``chronos``, ``moment`` and ``time_moe``)
+are not installed by default, and conflict with each other. If you
+work on one of these models, add the corresponding extra, for example
+``uv sync --extra chronos`` or ``pip install --editable ".[chronos]"``.
 
 Next, make sure to install pre-commit to the project,
 using the following command:
@@ -129,9 +145,8 @@ Once everything has been set up, it is time to resolve the issue.
 This can include writing code, fixing bugs, writing documentation, ...
 depending on the issue you selected.
 
-If this is your first contribution, also make sure you added your
-name to `CONTRIBUTORS <https://github.com/ML-KULeuven/dtaianomaly/blob/main/CONTRIBUTORS>`_.
-
+All contributors are listed on the
+`GitHub contributors page <https://github.com/ML-KULeuven/dtaianomaly/graphs/contributors>`_.
 
 Be sure to go through the :ref:`checklist below <new_component_checklist>`
 if your issue involves implementing a new
@@ -153,7 +168,6 @@ remote fork via:
 .. rubric:: Checklist
 
 | |check_box| Add the resolution to the issue.
-| |check_box| Add your update to the changelog
 | |check_box| Check if all tests still run successfully.
 | |check_box| Check if the documentation still generates successfully.
 | |check_box| Commit your changes to your fork.
@@ -185,10 +199,10 @@ For this, you can go to the GitHub page of your fork, on which
 there should be a button to automatically create a pull request.
 Otherwise, you will have to manually create a pull request.
 
-Make sure to add a descriptive title to your pull request. Also
-add a description of the issue you tackled and how exactly you
-solved it. Also add a reference to the issue you solved in the
-body of the pull request.
+Make sure to add a descriptive title to your pull request, as it will
+appear in the release notes. Also add a description of the issue you
+tackled and how exactly you solved it. Also add a reference to the issue
+you solved in the body of the pull request.
 
 Creating a pull request will automatically run various checks,
 such as running the unit tests, doctests, and checking if
@@ -268,4 +282,3 @@ Documentation
 | |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Did you add the component in tha API-documentation in ``docs/api/``?
 | |check_box| If you added a :py:class:`~dtaianomaly.data.LazyDataLoader`, did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
-| |check_box| Have you updated the changelog?

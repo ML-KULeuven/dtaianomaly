@@ -24,7 +24,8 @@ MODEL_PATH_TYPE = Literal[
     "small",
     "base",
     "large",
-    "bolt_tiny, bolt_mini",
+    "bolt_tiny",
+    "bolt_mini",
     "bolt_small",
     "bolt_large",
 ]
