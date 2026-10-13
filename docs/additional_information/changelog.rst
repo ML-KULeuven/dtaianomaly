@@ -11,12 +11,18 @@ Added
 
 Changed
 ^^^^^^^
+- Added a parameter ``binning_strategy`` to ``BestThresholdMetric`` to define how the thresholds should be computed
+  if ``max_nb_thresholds`` is set. The default ``'uniform'`` spaces the thresholds equally between the minimum and
+  maximum anomaly score. This changes the results compared to previous versions; the old behavior can be achieved
+  through ``binning_strategy='quantile'``.
 
 Fixed
 ^^^^^
 - Fixed bug where the reproduction script generated in the workflow error logs
   omitted the evaluation step, so an error occurring while computing a metric
   could not be reproduced.
+- Fixed issue in ``RangeBasedPrecision`` when there are no anomalies predicted. Before, a division by 0 error
+  was raised, which is changed to only returning the value 0.0.
 
 [0.5.1] - 2025-11-07
 ------
