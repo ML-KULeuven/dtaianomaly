@@ -57,4 +57,4 @@ class BinaryMetric(Metric, abc.ABC):
         """
         if not np.all(np.isin(y_pred, [0, 1])):
             raise ValueError("The predicted anomaly scores must be binary!")
-        return super().compute(y_true, y_pred)
+        return super().compute(y_true, y_pred, **kwargs)

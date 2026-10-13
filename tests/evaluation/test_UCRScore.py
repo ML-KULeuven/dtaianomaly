@@ -75,3 +75,12 @@ class TestUCRScore:
             assert expected_tolerance[i] == UCRScore(tolerance=5).compute(
                 y_true, y_pred
             )
+
+    @pytest.mark.parametrize("anomaly_index,expected", [(6, 1.0), (13, 0.0)])
+    def test_returns_float(self, anomaly_index, expected):
+        y_true = [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+        y_pred = [0.1] * len(y_true)
+        y_pred[anomaly_index] = 0.9
+        score = UCRScore().compute(y_true, y_pred)
+        assert isinstance(score, float)
+        assert score == expected

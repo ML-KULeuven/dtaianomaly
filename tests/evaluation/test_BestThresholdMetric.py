@@ -1,7 +1,23 @@
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation import BestThresholdMetric, FBeta, Precision, Recall
+from dtaianomaly.evaluation import (
+    BestThresholdMetric,
+    BinaryMetric,
+    FBeta,
+    Precision,
+    Recall,
+)
+
+
+class _KwargsRecordingMetric(BinaryMetric):
+
+    def __init__(self):
+        self.received_kwargs = []
+
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
+        self.received_kwargs.append(kwargs)
+        return 0.0
 
 
 class TestBestThresholdMetric:
@@ -20,7 +36,7 @@ class TestBestThresholdMetric:
         # Sorted scores: [0.2, 0.3, 0.6, 0.7, 0.8, 0.9]
         metric = BestThresholdMetric(Recall())
         assert metric.compute(y_true, y_pred) == pytest.approx(1.0)
-        assert metric.threshold_ == pytest.approx(0.0)
+        assert metric.threshold_ == pytest.approx(0.2)
         assert metric.thresholds_.shape == metric.scores_.shape
 
     def test_fbeta(self):
@@ -59,10 +75,11 @@ class TestBestThresholdMetric:
         metric = BestThresholdMetric(
             FBeta(), max_nb_thresholds=4, binning_strategy="quantile"
         )
-        assert metric.compute(y_true, y_pred) == pytest.approx(0.75)
-        assert metric.threshold_ == pytest.approx(0.65)
+        assert metric.compute(y_true, y_pred) == pytest.approx(0.8333333, abs=1e-5)
+        assert metric.threshold_ == pytest.approx(0.4)
         assert metric.thresholds_.shape == (4,)
         assert metric.thresholds_.shape == metric.scores_.shape
+        assert metric.thresholds_ == pytest.approx([0.25, 0.4, 0.65, 0.75])
 
     def test_fbeta_2_given_thresholds(self):
         y_true = np.array([0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0])
@@ -163,4 +180,76 @@ class TestBestThresholdMetric:
         metric.compute(
             np.array([0, 0, 1, 1, 0, 0]), np.array([0.1, 0.1, 0.9, 0.9, 0.1, 0.1])
         )
-        assert metric.thresholds_ == pytest.approx([0, 0.5, 1.0], abs=1e-3)
+        assert metric.thresholds_ == pytest.approx([0.1, 0.5], abs=1e-3)
+
+    @pytest.mark.parametrize(
+        "y_pred",
+        [
+            np.array([-3.0, -2.5, -0.5, -0.2, -2.0, -2.8]),
+            np.array([10.0, 12.0, 45.0, 50.0, 20.0, 11.0]),
+            np.array([-5.0, -1.0, 3.0, 7.5, 0.5, -4.0]),
+        ],
+    )
+    def test_first_threshold_is_minimum_score(self, y_pred):
+        metric = BestThresholdMetric(FBeta())
+        metric.compute(np.array([0, 0, 1, 1, 0, 0]), y_pred)
+        assert metric.thresholds_[0] == y_pred.min()
+
+    @pytest.mark.parametrize(
+        "y_pred",
+        [
+            np.array([-3.0, -2.5, -0.5, -0.2, -2.0, -2.8]),
+            np.array([10.0, 12.0, 45.0, 50.0, 20.0, 11.0]),
+            np.array([-5.0, -1.0, 3.0, 7.5, 0.5, -4.0]),
+        ],
+    )
+    def test_recall_reaches_one_outside_unit_interval(self, y_pred):
+        metric = BestThresholdMetric(Recall())
+        assert metric.compute(np.array([0, 0, 1, 1, 0, 0]), y_pred) == pytest.approx(
+            1.0
+        )
+
+    @pytest.mark.parametrize(
+        "y_pred",
+        [
+            np.array([-3.0, -2.5, -0.5, -0.2, -2.0, -2.8]),
+            np.array([10.0, 12.0, 45.0, 50.0, 20.0, 11.0]),
+        ],
+    )
+    def test_fbeta_separable_outside_unit_interval(self, y_pred):
+        metric = BestThresholdMetric(FBeta())
+        assert metric.compute(np.array([0, 0, 1, 1, 0, 0]), y_pred) == pytest.approx(
+            1.0
+        )
+        assert y_pred[[0, 1, 4, 5]].max() < metric.threshold_ <= y_pred[[2, 3]].min()
+
+    def test_forwards_kwargs_to_inner_metric_for_every_threshold(self):
+        inner = _KwargsRecordingMetric()
+        metric = BestThresholdMetric(inner)
+        metric.compute(
+            np.array([0, 0, 1, 1, 0, 0]),
+            np.array([0.1, 0.2, 0.8, 0.9, 0.3, 0.1]),
+            foo="bar",
+        )
+        assert len(inner.received_kwargs) == len(metric.thresholds_)
+        assert all(kwargs == {"foo": "bar"} for kwargs in inner.received_kwargs)
+
+    def test_does_not_forward_given_thresholds_to_inner_metric(self):
+        inner = _KwargsRecordingMetric()
+        metric = BestThresholdMetric(inner)
+        metric.compute(
+            np.array([0, 0, 1, 1, 0, 0]),
+            np.array([0.1, 0.2, 0.8, 0.9, 0.3, 0.1]),
+            thresholds=np.array([0.15, 0.5]),
+            foo="bar",
+        )
+        assert len(inner.received_kwargs) == 2
+        assert all(kwargs == {"foo": "bar"} for kwargs in inner.received_kwargs)
+
+    def test_no_kwargs_forwards_empty(self):
+        inner = _KwargsRecordingMetric()
+        metric = BestThresholdMetric(inner)
+        metric.compute(
+            np.array([0, 0, 1, 1, 0, 0]), np.array([0.1, 0.2, 0.8, 0.9, 0.3, 0.1])
+        )
+        assert all(kwargs == {} for kwargs in inner.received_kwargs)
