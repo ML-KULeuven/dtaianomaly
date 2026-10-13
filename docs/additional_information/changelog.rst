@@ -6,7 +6,7 @@ From version 0.6.0 onwards, the changes of each release are listed in the
 The changes of the earlier versions are listed below.
 
 [0.5.1] - 2025-11-07
-------
+--------------------
 
 Added
 ^^^^^
@@ -22,7 +22,7 @@ Fixed
   Simultaneously integrated typing validation.
 
 [0.5.0] - 2025-10-06
-------
+--------------------
 
 .. warning::
    This integrated a lot of quality-of-life changes and general updates to
