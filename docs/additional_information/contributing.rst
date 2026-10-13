@@ -129,9 +129,8 @@ Once everything has been set up, it is time to resolve the issue.
 This can include writing code, fixing bugs, writing documentation, ...
 depending on the issue you selected.
 
-If this is your first contribution, also make sure you added your
-name to `CONTRIBUTORS <https://github.com/ML-KULeuven/dtaianomaly/blob/main/CONTRIBUTORS>`_.
-
+All contributors are listed on the
+`GitHub contributors page <https://github.com/ML-KULeuven/dtaianomaly/graphs/contributors>`_.
 
 Be sure to go through the :ref:`checklist below <new_component_checklist>`
 if your issue involves implementing a new
