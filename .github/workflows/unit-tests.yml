@@ -6,28 +6,18 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      python-version:
-        description: 'Python version to use'
-        required: true
-        type: string
-      os:
-        description: 'OS to use (i.e., the docker image)'
-        required: true
-        type: string
 
 jobs:
   unit-test:
-    runs-on: ${{ inputs.image || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ inputs.python-version || vars.DEFAULT_PYTHON_VERSION }}
+    - name: Set up Python ${{ vars.DEFAULT_PYTHON_VERSION }}
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ inputs.python-version || vars.DEFAULT_PYTHON_VERSION }}
+        python-version: ${{ vars.DEFAULT_PYTHON_VERSION }}
 
     - name: Install dtaianomaly
       run: |
