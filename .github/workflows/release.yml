@@ -29,10 +29,42 @@ jobs:
           fi
 
   ###################################################################
+  # RUN THE UNIT TESTS ON THE OLDEST AND NEWEST SUPPORTED PYTHON
+  # VERSIONS BEFORE PUBLISHING
+  ###################################################################
+  test:
+    needs: check
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.14']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dtaianomaly
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[tqdm]" --group tests
+          pip list
+
+      - name: Test with pytest
+        run: pytest
+
+  ###################################################################
   # BUILD THE PROJECT
   ###################################################################
   build:
-    needs: check
+    needs: [check, test]
     runs-on: ubuntu-latest
 
     steps:
