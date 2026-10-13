@@ -153,7 +153,6 @@ remote fork via:
 .. rubric:: Checklist
 
 | |check_box| Add the resolution to the issue.
-| |check_box| Add your update to the changelog
 | |check_box| Check if all tests still run successfully.
 | |check_box| Check if the documentation still generates successfully.
 | |check_box| Commit your changes to your fork.
@@ -185,10 +184,10 @@ For this, you can go to the GitHub page of your fork, on which
 there should be a button to automatically create a pull request.
 Otherwise, you will have to manually create a pull request.
 
-Make sure to add a descriptive title to your pull request. Also
-add a description of the issue you tackled and how exactly you
-solved it. Also add a reference to the issue you solved in the
-body of the pull request.
+Make sure to add a descriptive title to your pull request, as it will
+appear in the release notes. Also add a description of the issue you
+tackled and how exactly you solved it. Also add a reference to the issue
+you solved in the body of the pull request.
 
 Creating a pull request will automatically run various checks,
 such as running the unit tests, doctests, and checking if
@@ -268,4 +267,3 @@ Documentation
 | |check_box| Has a citation to the relevant paper(s) been added in the class documentation, and the bibtex added to ``docs/bibliography.bib``?
 | |check_box| Did you add the component in tha API-documentation in ``docs/api/``?
 | |check_box| If you added a :py:class:`~dtaianomaly.data.LazyDataLoader`, did you update `data/README.rst <https://github.com/ML-KULeuven/dtaianomaly/blob/main/data/README.rst>`_?
-| |check_box| Have you updated the changelog?

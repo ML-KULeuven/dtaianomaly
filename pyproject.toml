@@ -41,7 +41,7 @@ file = "LICENSE"
 [project.urls]
 homepage = "https://pypi.org/project/dtaianomaly/"
 repository = "https://github.com/ML-KULeuven/dtaianomaly"
-changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
+changelog = "https://github.com/ML-KULeuven/dtaianomaly/releases"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
 [build-system]

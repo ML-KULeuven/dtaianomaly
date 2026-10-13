@@ -120,7 +120,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY"
-
-  ###################################################################
-  # CHANGELOG: added in plan 3
-  ###################################################################
