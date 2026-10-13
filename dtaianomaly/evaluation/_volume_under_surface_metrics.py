@@ -1,4 +1,3 @@
-import warnings
 from abc import ABC
 
 import numba as nb
@@ -26,16 +25,6 @@ class RangeAucMetric(ProbaMetric, ABC):
 
     def __init__(self, max_samples: int = _DEFAULT_MAX_SAMPLES):
         self.max_samples = max_samples
-
-    @staticmethod
-    def _has_anomalies(y_true: np.ndarray) -> bool:
-        if not y_true.any():
-            warnings.warn(
-                "Range-based AUC and VUS metrics require at least one anomaly in 'y_true', "
-                "but none are given. Returning NaN."
-            )
-            return False
-        return True
 
     @staticmethod
     def _anomaly_bounds(y_true: np.ndarray) -> (np.ndarray, np.ndarray):
@@ -223,8 +212,6 @@ class RangeAreaUnderPR(RangeAucMetric):
         self.buffer_size = buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        if not self._has_anomalies(y_true):
-            return np.nan
         thresholds, n_pred = self._uniform_threshold_sampling(y_pred)
         range_pr_auc, _ = self._range_pr_roc_auc_support(
             y_true, y_pred, self.buffer_size, thresholds, n_pred
@@ -285,8 +272,6 @@ class RangeAreaUnderROC(RangeAucMetric):
         self.buffer_size = buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        if not self._has_anomalies(y_true):
-            return np.nan
         thresholds, n_pred = self._uniform_threshold_sampling(y_pred)
         _, range_auc_roc = self._range_pr_roc_auc_support(
             y_true, y_pred, self.buffer_size, thresholds, n_pred
@@ -342,8 +327,6 @@ class VolumeUnderPR(RangeAucMetric):
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        if not self._has_anomalies(y_true):
-            return np.nan
         thresholds, n_pred = self._uniform_threshold_sampling(y_pred)
         prs = np.zeros(self.max_buffer_size + 1)
         for buffer_size in range(self.max_buffer_size + 1):
@@ -401,8 +384,6 @@ class VolumeUnderROC(RangeAucMetric):
         self.max_buffer_size = max_buffer_size
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
-        if not self._has_anomalies(y_true):
-            return np.nan
         thresholds, n_pred = self._uniform_threshold_sampling(y_pred)
         rocs = np.zeros(self.max_buffer_size + 1)
         for buffer_size in range(self.max_buffer_size + 1):

@@ -49,8 +49,15 @@ class TestComputeEventWiseMetrics:
         )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
-        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
-        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
+
+    @pytest.mark.parametrize(
+        "metric", [EventWisePrecision(), EventWiseRecall(), EventWiseFBeta()]
+    )
+    def test_all_zeros_compute_returns_nan(self, metric):
+        y_true = np.zeros(10)
+        y_pred = np.zeros(10)
+        with pytest.warns(UserWarning, match="requires at least one anomaly"):
+            assert np.isnan(metric.compute(y_true, y_pred))
 
     def test_all_ones(self):
         y_true = np.ones(10)
@@ -93,8 +100,15 @@ class TestComputeEventWiseMetrics:
         )
         assert pytest.approx(precision_event) == 0.0
         assert pytest.approx(recall_event) == 1.0
-        assert EventWisePrecision().compute(y_true, y_pred) == precision_event
-        assert EventWiseRecall().compute(y_true, y_pred) == recall_event
+
+    @pytest.mark.parametrize(
+        "metric", [EventWisePrecision(), EventWiseRecall(), EventWiseFBeta()]
+    )
+    def test_no_true_anomalies_fp_pred_compute_returns_nan(self, metric):
+        y_true = np.zeros(10)
+        y_pred = np.array([0, 0, 1, 1, 0, 0, 0, 1, 0, 0])
+        with pytest.warns(UserWarning, match="requires at least one anomaly"):
+            assert np.isnan(metric.compute(y_true, y_pred))
 
     def test_all_anomalies_missed(self):
         y_true = np.array([0, 0, 1, 1, 0, 0, 0, 1, 0, 0])
