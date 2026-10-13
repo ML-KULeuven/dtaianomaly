@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from dtaianomaly.data._DataSet import DataSet
@@ -28,7 +30,11 @@ class UCRLoader(PathDataLoader):
     -----
     This implementation expects the file names to contain the start and
     stop time stamps of the single anomaly in the time series as:
-    ``*_<train-test-split>_<start>_<stop>.txt``.
+    ``*_<train-test-split>_<start>_<stop>.txt``. The stop index is
+    exclusive. Some time series in the archive are mislabelled with
+    ``<start>`` equal to ``<stop>``, which would result in no anomaly.
+    In this case, a warning is raised and the anomaly is set to the
+    single observation at index ``<start>``.
 
     Examples
     --------
@@ -46,6 +52,15 @@ class UCRLoader(PathDataLoader):
         train_test_split = int(train_test_split)
         start_anomaly = int(start_anomaly)
         end_anomaly = int(end_anomaly)
+
+        # Some time series are mislabelled with an empty anomaly
+        if end_anomaly <= start_anomaly:
+            warnings.warn(
+                f"The UCR time series '{self.path}' has an invalid anomaly label "
+                f"(start={start_anomaly}, end={end_anomaly}). The anomaly is set to the "
+                f"single observation at index {start_anomaly}."
+            )
+            end_anomaly = start_anomaly + 1
 
         # Load time series
         X = np.loadtxt(self.path)
