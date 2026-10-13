@@ -17,7 +17,7 @@ class ContaminationRateThreshold(Thresholding):
     ----------
     contamination_rate : float
         The contamination_rate, i.e., the percentage of instances
-        that are anomalous.
+        that are anomalous. A rate of 0 flags no instance as anomalous.
 
     Examples
     --------
@@ -33,12 +33,6 @@ class ContaminationRateThreshold(Thresholding):
     }
 
     def __init__(self, contamination_rate: float):
-        # if not isinstance(contamination_rate, float):
-        #     raise TypeError("Rate should be a float")
-        # if contamination_rate < 0.0 or 1.0 < contamination_rate:
-        #     raise ValueError(
-        #         f"Rate should be between 0 and 1. Received {contamination_rate}"
-        #     )
         self.contamination_rate = contamination_rate
 
     def _threshold(self, scores: np.ndarray):
@@ -56,5 +50,7 @@ class ContaminationRateThreshold(Thresholding):
             Integer array of 1s and 0s, representing anomalous samples
             and normal samples respectively
         """
+        if self.contamination_rate == 0.0:
+            return np.zeros(scores.shape[0], dtype=np.int8)
         cutoff = np.quantile(scores, 1.0 - self.contamination_rate)
-        return np.asarray(cutoff <= scores)
+        return np.asarray(cutoff <= scores, dtype=np.int8)
