@@ -1,6 +1,6 @@
 [project]
 name = "dtaianomaly"
-version = "0.5.1"
+dynamic = ["version"]
 description = "A simple-to-use Python package for time series anomaly detection!"
 requires-python = ">=3.10,<3.14"
 authors = [
@@ -45,8 +45,11 @@ changelog = "https://github.com/ML-KULeuven/dtaianomaly/blob/main/CHANGELOG.md"
 documentation = "https://dtaianomaly.readthedocs.io/en/stable/index.html"
 
 [build-system]
-requires = ["setuptools", "wheel", "build"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"  # builds without git metadata (e.g. source zip)
 
 [tool.setuptools.packages.find]
 include = ["dtaianomaly", "dtaianomaly.*"]  # alternatively: `exclude = ["additional*"]`

@@ -2,7 +2,7 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-import toml
+import importlib.metadata
 import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -18,10 +18,7 @@ project = 'dtaianomaly'
 copyright = '2023-2025, DTAI'
 author = 'Louis Carpentier \\and Nick Seeuws'
 
-with open('../pyproject.toml', 'r') as f:
-    config = toml.load(f)
-release = config['project']['version']
-version = config['project']['version']
+release = version = importlib.metadata.version("dtaianomaly")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
