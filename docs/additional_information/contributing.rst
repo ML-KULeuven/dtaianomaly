@@ -104,7 +104,7 @@ You can also install only the groups you need, for example
 ``--group tests``.
 
 The foundation-model extras (``chronos``, ``moment`` and ``time_moe``)
-are not installed by default, and ``moment`` conflicts with the other two. If you
+are not installed by default, and conflict with each other. If you
 work on one of these models, add the corresponding extra, for example
 ``uv sync --extra chronos`` or ``pip install --editable ".[chronos]"``.
 

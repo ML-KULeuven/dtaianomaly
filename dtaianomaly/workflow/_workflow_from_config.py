@@ -1,8 +1,7 @@
 import inspect
 import json
 import os
-
-import toml
+import tomllib
 
 from dtaianomaly import anomaly_detection, data, evaluation, preprocessing, thresholding
 from dtaianomaly.utils import convert_to_list
@@ -57,8 +56,8 @@ def workflow_from_config(path: str, max_size: int = 1000000):
             parsed_config = json.load(file)
 
     elif path.endswith(".toml"):
-        with open(path, "r") as f:
-            parsed_config = toml.load(f)
+        with open(path, "rb") as f:
+            parsed_config = tomllib.load(f)
 
     else:
         raise ValueError("The given path should be a json or toml file!")

@@ -30,9 +30,11 @@ The following extras are available:
 
     The extra ``moment`` cannot be installed together with ``chronos`` or ``time_moe``,
     because momentfm requires an older, incompatible version of ``transformers``.
-    Use a separate virtual environment for MOMENT. The extras ``chronos`` and
-    ``time_moe`` can be combined, but this installs an older version of
-    autogluon.timeseries (because Time-MoE requires ``transformers`` 4.40.x).
+    Use a separate virtual environment for MOMENT. With pip, the extras ``chronos``
+    and ``time_moe`` can be combined, but this installs an older version of
+    autogluon.timeseries (because Time-MoE requires ``transformers`` 4.40.x). With
+    uv, the three extras are declared mutually exclusive, so use one of them per
+    environment.
 
 If you use `uv <https://docs.astral.sh/uv/>`_, the extras can be added to
 your project in the same way:
