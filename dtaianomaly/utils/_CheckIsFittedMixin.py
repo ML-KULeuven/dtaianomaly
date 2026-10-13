@@ -1,4 +1,5 @@
 import abc
+import inspect
 from collections import ChainMap
 
 __all__ = ["CheckIsFittedMixin"]
@@ -100,10 +101,6 @@ class CheckIsFittedMixin(abc.ABC):
         Returns a dictionary-like ChainMap that includes annotations for all
         attributes defined in cls or inherited from superclasses.
         """
-        return ChainMap(
-            *(
-                c.__annotations__
-                for c in type(self).__mro__
-                if "__annotations__" in c.__dict__
-            )
-        )
+        # inspect.get_annotations only returns the annotations defined on the
+        # class itself, and also works with the lazy annotations of Python 3.14
+        return ChainMap(*(inspect.get_annotations(c) for c in type(self).__mro__))
