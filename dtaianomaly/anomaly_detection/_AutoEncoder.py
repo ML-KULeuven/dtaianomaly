@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 
 from dtaianomaly.anomaly_detection._BaseDetector import Supervision
@@ -162,7 +164,7 @@ class AutoEncoder(BaseNeuralReconstructionDetector):
         stride: int = 1,
         standard_scaling: bool = True,
         batch_size: int = 32,
-        data_loader_kwargs: dict[str, any] = None,
+        data_loader_kwargs: dict[str, Any] = None,
         optimizer: OPTIMIZER_TYPE = "adam",
         learning_rate: float = 1e-3,
         compile_model: bool = False,

@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -109,11 +109,11 @@ class Chronos(BaseDetector):
     batch_size: int
     forecast_horizon: int
     do_fine_tuning: bool
-    fine_tune_kwargs: dict[str, any] | None
+    fine_tune_kwargs: dict[str, Any] | None
     device: str
 
     window_size_: int
-    chronos_: any
+    chronos_: Any
 
     attribute_validation = {
         "window_size": WindowSizeAttribute(),
@@ -130,7 +130,7 @@ class Chronos(BaseDetector):
         batch_size: int = 16,
         forecast_horizon: int = 1,
         do_fine_tuning: bool = False,
-        fine_tune_kwargs: dict[str, any] | None = None,
+        fine_tune_kwargs: dict[str, Any] | None = None,
         device: str = "cpu",
     ):
         try:
