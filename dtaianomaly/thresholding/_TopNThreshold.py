@@ -16,7 +16,8 @@ class TopNThreshold(Thresholding):
     Parameters
     ----------
     n : int
-        The number of instances that should be flagged as an anomaly.
+        The number of instances that should be flagged as an anomaly. Must
+        be at least 1.
 
     Examples
     --------
@@ -28,7 +29,7 @@ class TopNThreshold(Thresholding):
 
     n: int
 
-    attribute_validation = {"n": IntegerAttribute(minimum=0)}
+    attribute_validation = {"n": IntegerAttribute(minimum=1)}
 
     def __init__(self, n: int):
         self.n = n

@@ -89,6 +89,7 @@ class BestThresholdMetric(ProbaMetric):
         y_true: np.ndarray,
         y_pred: np.ndarray,
         thresholds: np.array = None,
+        **kwargs,
     ) -> float:
         """
         Effectively compute the score corresponding to the best threshold.
@@ -103,6 +104,8 @@ class BestThresholdMetric(ProbaMetric):
             The thresholds that should be used for computing the metric. If
             ``thresholds=None`` (default), then all possible thresholds will
             be used.
+        **kwargs
+            Additional arguments, which are passed to the wrapped metric.
 
         Returns
         -------
@@ -123,8 +126,8 @@ class BestThresholdMetric(ProbaMetric):
             min_threshold = sorted_predicted_scores[0]
             max_threshold = sorted_predicted_scores[-1]
 
-            # Add the minimum and maximum threshold
-            thresholds = np.append(np.insert(thresholds, 0, 0), 1)
+            # Add the minimum score as threshold, which flags every point
+            thresholds = np.insert(thresholds, 0, sorted_predicted_scores[0])
         else:
             min_threshold = np.min(thresholds)
             max_threshold = np.max(thresholds)
@@ -149,7 +152,7 @@ class BestThresholdMetric(ProbaMetric):
         self.thresholds_ = thresholds
         self.scores_ = np.array(
             [
-                self.metric._compute(y_true, y_pred >= threshold)
+                self.metric._compute(y_true, y_pred >= threshold, **kwargs)
                 for threshold in self.thresholds_
             ]
         )

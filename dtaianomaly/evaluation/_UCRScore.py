@@ -37,9 +37,9 @@ class UCRScore(ProbaMetric):
     >>> from dtaianomaly.evaluation import UCRScore
     >>> y_true = [0, 0, 0, 1, 1, 0, 0, 0]
     >>> UCRScore().compute(y_true, [0.3, 0.2, 0.5, 0.8, 1.0, 0.9, 0.3, 0.0])
-    1
+    1.0
     >>> UCRScore().compute(y_true, [0.3, 0.2, 0.5, 0.8, 0.9, 0.9, 0.3, 1.0])
-    0
+    0.0
     """
 
     tolerance: int | None
@@ -69,6 +69,6 @@ class UCRScore(ProbaMetric):
 
         # Check if the anomaly is detected
         if t_s - margin <= t_star <= t_e + margin:
-            return 1
+            return 1.0
         else:
-            return 0
+            return 0.0

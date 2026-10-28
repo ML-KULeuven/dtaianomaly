@@ -1,4 +1,5 @@
 import abc
+import warnings
 
 import numpy as np
 
@@ -37,7 +38,8 @@ class Metric(PrintConstructionCallMixin, AttributeValidationMixin):
         -------
         float
             The alignment score of the given ground truth and
-            prediction, according to this score.
+            prediction, according to this score. If `y_true`
+            contains no anomalies, then NaN is returned.
 
         Raises
         ------
@@ -47,6 +49,11 @@ class Metric(PrintConstructionCallMixin, AttributeValidationMixin):
             If shapes of `y_true` and `y_pred` are not of identical shape
         ValueError
             If `y_true` is non-binary.
+
+        Warns
+        -----
+        UserWarning
+            If `y_true` contains no anomalies.
         """
         if not is_valid_array_like(y_true):
             raise ValueError("Input 'y_true' should be numeric array-like")
@@ -58,6 +65,12 @@ class Metric(PrintConstructionCallMixin, AttributeValidationMixin):
             raise ValueError("Inputs should have identical shape")
         if not np.all(np.isin(y_true, [0, 1])):
             raise ValueError("The predicted anomaly scores must be binary!")
+        if not y_true.any():
+            warnings.warn(
+                f"The metric '{self}' requires at least one anomaly in 'y_true', "
+                "but none are given. Returning NaN."
+            )
+            return np.nan
         return self._compute(y_true, y_pred, **kwargs)
 
     @abc.abstractmethod

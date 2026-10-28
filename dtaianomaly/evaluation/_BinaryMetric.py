@@ -36,7 +36,8 @@ class BinaryMetric(Metric, abc.ABC):
         -------
         float
             The alignment score of the given ground truth and
-            prediction, according to this score.
+            prediction, according to this score. If `y_true`
+            contains no anomalies, then NaN is returned.
 
         Raises
         ------
@@ -48,7 +49,12 @@ class BinaryMetric(Metric, abc.ABC):
             If `y_true` is non-binary.
         ValueError
             If `y_pred` is non-binary.
+
+        Warns
+        -----
+        UserWarning
+            If `y_true` contains no anomalies.
         """
         if not np.all(np.isin(y_pred, [0, 1])):
             raise ValueError("The predicted anomaly scores must be binary!")
-        return super().compute(y_true, y_pred)
+        return super().compute(y_true, y_pred, **kwargs)

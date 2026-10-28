@@ -387,12 +387,25 @@ def _single_job(
 
         # Scoring
         _, y_test_ = job.pipeline.preprocessor.transform(X_test, y_test)
-        results.update(
-            {
-                str(metric): metric.compute(y_true=y_test_, y_pred=y_pred)
-                for metric in metrics
-            }
-        )
+        failed_metrics = []
+        for metric in metrics:
+            try:
+                results[str(metric)] = metric.compute(y_true=y_test_, y_pred=y_pred)
+            except Exception as exception:
+                failed_metrics.append((metric, exception))
+
+        # Log the first error, with code to reproduce all failing metrics
+        if len(failed_metrics) > 0:
+            results["Error file"] = log_error(
+                error_log_path,
+                failed_metrics[0][1],
+                job.dataloader,
+                job.pipeline,
+                fit_on_X_train,
+                [metric for metric, _ in failed_metrics],
+                error_in_metric=True,
+                **kwargs,
+            )
 
         # Aggregate the used resources
         results["Runtime [s]"] = (
@@ -414,6 +427,11 @@ def _single_job(
             metrics,
             **kwargs,
         )
+
+    finally:
+        # Make sure memory tracing is stopped, even if an error occurred
+        if trace_memory and tracemalloc.is_tracing():
+            tracemalloc.stop()
 
     # Return the results
     return results
@@ -493,6 +511,7 @@ def _get_train_test_data(
         and detector.supervision == Supervision.UNSUPERVISED
     ):
         X_train = X_test
+        y_train = None
         fit_on_X_train = False
 
     # If semi-supervised detectors should fit on the test data.
@@ -501,6 +520,7 @@ def _get_train_test_data(
         and detector.supervision == Supervision.SEMI_SUPERVISED
     ):
         X_train = X_test
+        y_train = None
         fit_on_X_train = False
 
     return X_test, y_test, X_train, y_train, fit_on_X_train

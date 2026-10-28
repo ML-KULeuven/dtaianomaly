@@ -50,7 +50,7 @@ class ThresholdMetric(ProbaMetric):
 
     def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
         y_pred_binary = self.thresholder.threshold(y_pred)
-        return self.metric._compute(y_true=y_true, y_pred=y_pred_binary)
+        return self.metric._compute(y_true=y_true, y_pred=y_pred_binary, **kwargs)
 
     def piped_str(self) -> str:
         return f"{self.thresholder}->{self.metric}"

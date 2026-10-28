@@ -1,9 +1,10 @@
 import inspect
+import warnings
 
 import numpy as np
 import pytest
 
-from dtaianomaly.evaluation import Metric, Precision
+from dtaianomaly.evaluation import AreaUnderROC, Metric, Precision
 from dtaianomaly.thresholding import FixedCutoffThreshold
 from dtaianomaly.utils import all_classes
 
@@ -59,3 +60,35 @@ class TestMetrics:
         y_pred = rng.choice([0, 1], size=1000, replace=True)
         score = metric.compute(y_true, y_pred)
         assert 0 <= score <= 1 or np.isnan(score)
+
+    def test_no_anomalies_returns_nan(self, cls):
+        metric = initialize(cls)
+        y_true = np.zeros(9)
+        y_pred = [0, 0, 1, 0, 1, 0, 1, 0, 1]
+        with pytest.warns(UserWarning, match="requires at least one anomaly"):
+            assert np.isnan(metric.compute(y_true, y_pred))
+
+    def test_no_anomalies_warns_exactly_once(self, cls):
+        metric = initialize(cls)
+        y_true = np.zeros(9)
+        y_pred = [0, 0, 1, 0, 1, 0, 1, 0, 1]
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            metric.compute(y_true, y_pred)
+        assert [w.category for w in record] == [UserWarning]
+
+
+# ---------------------------------------------------------------------------
+# Metric.compute with anomalies present
+# ---------------------------------------------------------------------------
+
+
+class TestMetricComputeWithAnomalies:
+
+    def test_does_not_warn(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            score = AreaUnderROC().compute(
+                np.array([0, 0, 1, 0, 0]), np.array([0.1, 0.2, 0.9, 0.1, 0.3])
+            )
+        assert score == 1.0

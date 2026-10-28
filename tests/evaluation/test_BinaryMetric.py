@@ -1,5 +1,6 @@
 import inspect
 
+import numpy as np
 import pytest
 
 from dtaianomaly.evaluation import BinaryMetric, ThresholdMetric
@@ -34,3 +35,23 @@ class TestBinaryMetric:
         assert metric.compute(y_true, y_pred_thresholded) == threshold_metric.compute(
             y_true, y_pred
         )
+
+
+class _KwargsRecordingMetric(BinaryMetric):
+
+    def _compute(self, y_true: np.ndarray, y_pred: np.ndarray, **kwargs) -> float:
+        self.received_kwargs = kwargs
+        return 0.0
+
+
+class TestBinaryMetricCompute:
+
+    def test_forwards_kwargs_to_compute(self):
+        metric = _KwargsRecordingMetric()
+        metric.compute([0, 1, 1, 0], [0, 1, 0, 0], foo="bar", alpha=0.5)
+        assert metric.received_kwargs == {"foo": "bar", "alpha": 0.5}
+
+    def test_no_kwargs_forwards_empty(self):
+        metric = _KwargsRecordingMetric()
+        metric.compute([0, 1, 1, 0], [0, 1, 0, 0])
+        assert metric.received_kwargs == {}

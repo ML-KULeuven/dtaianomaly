@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from dtaianomaly.evaluation import UCRScore
 
@@ -7,10 +8,11 @@ class TestUCRScore:
 
     def test_no_anomalies(self):
         metric = UCRScore()
-        score = metric.compute(
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0.1, 0.3, 0.1, 0.2, 0.4, 0.3, 0.3, 0.1, 0.2, 0.1, 0.0, 0.1, 0.1, 0.0],
-        )
+        with pytest.warns(UserWarning, match="requires at least one anomaly"):
+            score = metric.compute(
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0.1, 0.3, 0.1, 0.2, 0.4, 0.3, 0.3, 0.1, 0.2, 0.1, 0.0, 0.1, 0.1, 0.0],
+            )
         assert np.isnan(score)
 
     def test_multiple_anomalies(self):
@@ -73,3 +75,12 @@ class TestUCRScore:
             assert expected_tolerance[i] == UCRScore(tolerance=5).compute(
                 y_true, y_pred
             )
+
+    @pytest.mark.parametrize("anomaly_index,expected", [(6, 1.0), (13, 0.0)])
+    def test_returns_float(self, anomaly_index, expected):
+        y_true = [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+        y_pred = [0.1] * len(y_true)
+        y_pred[anomaly_index] = 0.9
+        score = UCRScore().compute(y_true, y_pred)
+        assert isinstance(score, float)
+        assert score == expected
