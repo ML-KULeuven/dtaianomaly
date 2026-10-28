@@ -120,7 +120,7 @@ class RangeAucMetric(ProbaMetric, ABC):
         return float(range_pr_auc), float(range_roc_auc)
 
 
-@nb.njit(fastmath=True, parallel=True)
+@nb.njit(fastmath=True, cache=True, parallel=True)
 def _range_curves(
     thresholds: np.ndarray,
     n_pred: np.ndarray,

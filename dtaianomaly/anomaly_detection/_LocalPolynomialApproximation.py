@@ -100,7 +100,7 @@ class LocalPolynomialApproximation(BaseDetector):
         )
 
 
-@nb.njit(fastmath=True)
+@nb.njit(fastmath=True, cache=True)
 def _coeff_mat(x, deg):
     mat_ = np.zeros(shape=(x.shape[0], deg + 1))
     const = np.ones_like(x)
@@ -112,12 +112,12 @@ def _coeff_mat(x, deg):
     return mat_
 
 
-@nb.njit(fastmath=True)
+@nb.njit(fastmath=True, cache=True)
 def _fit_x(a, b):
     return np.linalg.lstsq(a, b)[0]
 
 
-@nb.njit(fastmath=True)
+@nb.njit(fastmath=True, cache=True)
 def fit_poly(x, y, deg):
     a = _coeff_mat(x, deg)
     p = _fit_x(a, y)
@@ -125,7 +125,7 @@ def fit_poly(x, y, deg):
     return p[::-1]
 
 
-@nb.njit(fastmath=True)
+@nb.njit(fastmath=True, cache=True)
 def eval_polynomial(P, x):
     """
     Compute polynomial P(x) where P is a vector of coefficients, highest
@@ -137,7 +137,7 @@ def eval_polynomial(P, x):
     return result
 
 
-@nb.njit(parallel=True)
+@nb.njit(parallel=True, cache=True)
 def _local_poly_nb_parallel(
     X, neighborhood=64, power=1, buffer=16, normalize_variance=False
 ):
