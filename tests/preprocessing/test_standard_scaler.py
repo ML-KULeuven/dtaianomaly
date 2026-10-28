@@ -23,3 +23,13 @@ class TestStandardScaler:
         for i in range(1, multivariate_time_series.shape[1]):
             assert x_[:, i].mean() == pytest.approx(0.0)
             assert x_[:, i].std() == pytest.approx(1.0)
+
+    @pytest.mark.parametrize(
+        "fit_shape,transform_shape,n_attributes",
+        [((100, 3), (50, 2), 2), ((100, 3), (50,), 1), ((100,), (50, 2), 2)],
+    )
+    def test_attribute_mismatch(self, fit_shape, transform_shape, n_attributes):
+        rng = np.random.default_rng(42)
+        preprocessor = StandardScaler().fit(rng.standard_normal(fit_shape))
+        with pytest.raises(AttributeError, match=f"with {n_attributes} attributes"):
+            preprocessor.transform(rng.standard_normal(transform_shape))
