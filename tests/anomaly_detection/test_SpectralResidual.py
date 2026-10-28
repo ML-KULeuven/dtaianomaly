@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from dtaianomaly.anomaly_detection import SpectralResidual, Supervision
@@ -50,3 +51,16 @@ class TestMedianMethod:
         detector.fit(univariate_time_series)
         with pytest.raises(ValueError):
             detector.decision_function(multivariate_time_series)
+
+    @pytest.mark.parametrize(
+        "X",
+        [
+            np.ones(500),
+            np.sign(np.sin(np.arange(500) / 10)),
+        ],
+        ids=["constant", "square-wave"],
+    )
+    def test_amplitude_below_epsilon(self, X):
+        y_pred = SpectralResidual(16).fit(X).decision_function(X)
+        assert y_pred.shape == X.shape
+        assert np.all(np.isfinite(y_pred))

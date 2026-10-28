@@ -160,7 +160,7 @@ class ROCKAD(BaseDetector):
             )
 
             # Sample a subset to bootstrap
-            resample(
+            sample = resample(
                 features,
                 replace=True,
                 n_samples=None,
@@ -169,7 +169,7 @@ class ROCKAD(BaseDetector):
             )
 
             # Fit the nearest neighbor instance on the sample
-            nearest_neighbors.fit(features)
+            nearest_neighbors.fit(sample)
             self.nearest_neighbors_.append(nearest_neighbors)
 
     def _decision_function(self, X: np.ndarray) -> np.array:

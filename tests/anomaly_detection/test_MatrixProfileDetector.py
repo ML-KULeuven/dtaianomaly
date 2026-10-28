@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
@@ -136,3 +137,14 @@ class TestMatrixProfileDetector:
             str(MatrixProfileDetector(25, k=2))
             == "MatrixProfileDetector(window_size=25,k=2)"
         )
+
+    def test_novelty_multivariate_scores_per_sample(self):
+        rng = np.random.default_rng(0)
+        X = rng.standard_normal(size=(100, 3))
+        y_pred = (
+            MatrixProfileDetector(window_size=8, novelty=True)
+            .fit(X)
+            .decision_function(X)
+        )
+        assert y_pred.shape == (100,)
+        assert np.all(np.isfinite(y_pred))

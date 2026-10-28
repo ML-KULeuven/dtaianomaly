@@ -84,7 +84,7 @@ class SpectralResidual(BaseDetector):
 
         # Compute the logarithm of the amplitudes
         log_amplitude = np.log(amplitude)
-        index_smaller_than_epsilon[index_smaller_than_epsilon] = 0
+        log_amplitude[index_smaller_than_epsilon] = 0
 
         # Compute the moving average
         n = min(self.moving_average_window_size, X.shape[0])

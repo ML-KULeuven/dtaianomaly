@@ -132,9 +132,7 @@ class MatrixProfileDetector(BaseDetector):
                 p=self.p,
                 k=self.k,
                 ignore_trivial=ignore_trivial,
-            )[
-                :, self.k - 1
-            ]  # Needed if k>1?
+            )[:, self.k - 1]
         else:
             if self.novelty:
                 matrix_profiles = np.full(
@@ -151,6 +149,7 @@ class MatrixProfileDetector(BaseDetector):
                         k=self.k,
                         ignore_trivial=ignore_trivial,
                     )[:, self.k - 1]
+                matrix_profile = np.sum(matrix_profiles, axis=1)
             else:
                 matrix_profiles, _ = stumpy.mstump(
                     X.transpose(),
@@ -159,7 +158,7 @@ class MatrixProfileDetector(BaseDetector):
                     normalize=self.normalize,
                     p=self.p,
                 )
-            matrix_profile = np.sum(matrix_profiles, axis=0)
+                matrix_profile = np.sum(matrix_profiles, axis=0)
 
         return reverse_sliding_window(matrix_profile, self.window_size_, 1, X.shape[0])
 
