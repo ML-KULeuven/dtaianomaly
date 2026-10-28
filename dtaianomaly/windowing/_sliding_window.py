@@ -1,6 +1,6 @@
 import numpy as np
 
-__all__ = ["sliding_window"]
+__all__ = ["sliding_window", "check_stride"]
 
 
 def sliding_window(X: np.ndarray, window_size: int, stride: int) -> np.ndarray:
@@ -59,3 +59,40 @@ def sliding_window(X: np.ndarray, window_size: int, stride: int) -> np.ndarray:
     ]
     windows.append(X[-window_size:].ravel())
     return np.array(windows)
+
+
+def check_stride(window_size: int, stride: int) -> None:
+    """
+    Check if the given stride is compatible with the given window size.
+
+    If the stride is larger than the window size, then some observations
+    are not covered by any window. These observations can not receive
+    an anomaly score when reversing the sliding window. Therefore, an
+    error is raised if the stride exceeds the window size.
+
+    Parameters
+    ----------
+    window_size : int
+        The window size for the sliding windows.
+    stride : int
+        The stride, i.e., the step size for the windows.
+
+    Raises
+    ------
+    ValueError
+        If the stride is larger than the window size.
+
+    Examples
+    --------
+    >>> from dtaianomaly.windowing import check_stride
+    >>> check_stride(16, 8)
+    >>> check_stride(16, 32)
+    Traceback (most recent call last):
+        ...
+    ValueError: The stride (32) can not be larger than the window size (16), because otherwise some observations are not covered by any window.
+    """
+    if stride > window_size:
+        raise ValueError(
+            f"The stride ({stride}) can not be larger than the window size ({window_size}), "
+            "because otherwise some observations are not covered by any window."
+        )

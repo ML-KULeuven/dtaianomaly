@@ -19,3 +19,9 @@ class TestHighestAutocorrelation:
 
         window_size = highest_autocorrelation(X)
         assert window_size == period_size
+
+    def test_upper_bound_exclusive(self):
+        rng = np.random.default_rng(42)
+        X = np.tile(rng.uniform(size=25), 10)
+        assert highest_autocorrelation(X, upper_bound=26) == 25
+        assert highest_autocorrelation(X, upper_bound=25) < 25

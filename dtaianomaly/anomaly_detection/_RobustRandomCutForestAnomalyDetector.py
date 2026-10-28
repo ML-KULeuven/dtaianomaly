@@ -14,6 +14,7 @@ from dtaianomaly.type_validation import (
 )
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -125,6 +126,7 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
         if isinstance(self.max_samples, float):
             self.max_samples_ = int(X.shape[0] * self.max_samples)
         elif isinstance(self.max_samples, int):

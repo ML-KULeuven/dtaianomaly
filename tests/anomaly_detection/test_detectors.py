@@ -182,3 +182,28 @@ class TestAnomalyDetectors:
         detector.fit(univariate_time_series)
         confidence = detector.predict_confidence(univariate_time_series)
         assert confidence.shape[0] == univariate_time_series.shape[0]
+
+
+@pytest.mark.parametrize(
+    "cls",
+    [
+        anomaly_detection.IsolationForest,
+        anomaly_detection.MultilayerPerceptron,
+        anomaly_detection.HybridKNearestNeighbors,
+        anomaly_detection.KMeansAnomalyDetector,
+        anomaly_detection.RobustPrincipalComponentAnalysis,
+        anomaly_detection.RobustRandomCutForestAnomalyDetector,
+        anomaly_detection.ROCKAD,
+    ],
+)
+class TestStrideLargerThanWindowSize:
+
+    def test_integer_window_size(self, cls):
+        X = np.random.default_rng(42).standard_normal(100)
+        with pytest.raises(ValueError, match="can not be larger than the window size"):
+            cls(window_size=5, stride=20).fit(X)
+
+    def test_automatic_window_size(self, cls):
+        X = np.sin(2 * np.pi * np.arange(200) / 20)
+        with pytest.raises(ValueError, match="can not be larger than the window size"):
+            cls(window_size="fft", stride=50).fit(X)

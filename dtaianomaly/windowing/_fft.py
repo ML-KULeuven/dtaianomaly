@@ -25,7 +25,7 @@ def dominant_fourier_frequency(
     lower_bound : int, default=10
         The lower bound on the automatically computed window size.
     upper_bound : int, default=1000
-        The lower bound on the automatically computed window size.
+        The (exclusive) upper bound on the automatically computed window size.
 
     Returns
     -------
@@ -56,7 +56,7 @@ def dominant_fourier_frequency(
             window_size = int(1 / freq)
             mag = math.sqrt(coef.real * coef.real + coef.imag * coef.imag)
 
-            if lower_bound <= window_size <= upper_bound:
+            if lower_bound <= window_size < upper_bound:
                 window_sizes.append(window_size)
                 magnitudes.append(mag)
 

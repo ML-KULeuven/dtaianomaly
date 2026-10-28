@@ -14,6 +14,7 @@ from dtaianomaly.type_validation import (
 from dtaianomaly.utils import get_dimension
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
 )
@@ -130,6 +131,7 @@ class ROCKAD(BaseDetector):
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
         windows = self._sliding_window(X)
 
         # Apply ROCKET
