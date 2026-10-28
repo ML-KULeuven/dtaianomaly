@@ -263,6 +263,7 @@ Implementation
 | |check_box| Did you implement the abstract methods of the component?
 | |check_box| Did you add ``__all__ = ["<Component>"]`` in the file ``_<Component>.py``?
 | |check_box| Did you add the component in ``__all__`` of the corresponding ``__init__.py`` file?
+| |check_box| For ``anomaly_detection`` and ``evaluation``, which import their components lazily: did you also add the component to ``_LAZY_IMPORTS`` and to the ``if TYPE_CHECKING:`` block of the ``__init__.py`` file?
 
 Testing
 ^^^^^^^

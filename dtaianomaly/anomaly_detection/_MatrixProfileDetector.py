@@ -183,6 +183,6 @@ class MatrixProfileDetector(BaseDetector):
         else:
             return all(
                 hasattr(self, attr)
-                for attr in self.__annotations__
+                for attr in self._all_annotations()
                 if attr.endswith("_") and attr != "X_reference_"
             )

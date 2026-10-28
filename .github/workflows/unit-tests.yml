@@ -8,16 +8,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Test every supported Python version, so that version-specific changes
+  # (such as the lazy annotations of Python 3.14) are caught early. The
+  # versions are defined in the repository variable PYTHON_VERSIONS as a
+  # JSON list, for example: ["3.11", "3.12", "3.13", "3.14"]
   unit-test:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS) }}
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ vars.DEFAULT_PYTHON_VERSION }}
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ vars.DEFAULT_PYTHON_VERSION }}
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dtaianomaly
       run: |
