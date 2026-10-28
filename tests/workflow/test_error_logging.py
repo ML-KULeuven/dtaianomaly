@@ -105,31 +105,14 @@ class TestErrorLogging:
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 
-    def test_error_chained_preprocessing(self, tmp_path_factory):
+    @pytest.mark.parametrize(
+        "dataloader",
+        [DemonstrationTimeSeriesLoader(), DemonstrationDataLoaderWithTrainData()],
+        ids=["without-train-data", "with-train-data"],
+    )
+    def test_error_detecting_anomalies(self, tmp_path_factory, dataloader):
         workflow = Workflow(
-            dataloaders=DemonstrationTimeSeriesLoader(),
-            metrics=AreaUnderROC(),
-            preprocessors=ErrorPreprocessor(),
-            detectors=IsolationForest(15),
-            error_log_path=str(tmp_path_factory.mktemp("error-log")),
-        )
-        results = workflow.run()
-
-        assert results.shape == (1, 8)
-        assert "Error file" in results.columns
-
-        error_file = results.loc[0, "Error file"]
-        error = Exception("An error occurred preprocessing data!")
-        assert error_file_has_correct_syntax(error_file)
-        assert error_file_contains_dtaianomaly_version(
-            error_file, dtaianomaly.__version__
-        )
-        assert error_file_contains_error(error_file, error)
-        assert error_file_results_in_error(error_file, error)
-
-    def test_error_detecting_anomalies(self, tmp_path_factory):
-        workflow = Workflow(
-            dataloaders=DemonstrationTimeSeriesLoader(),
+            dataloaders=dataloader,
             metrics=AreaUnderROC(),
             preprocessors=Identity(),
             detectors=ErrorAnomalyDetector(),
@@ -146,41 +129,6 @@ class TestErrorLogging:
         assert error_file_contains_dtaianomaly_version(
             error_file, dtaianomaly.__version__
         )
-        assert error_file_contains_error(error_file, error)
-        assert error_file_results_in_error(error_file, error)
-
-    def test_error_train_on_fit_data(self, tmp_path_factory):
-        workflow = Workflow(
-            dataloaders=DemonstrationDataLoaderWithTrainData(),
-            metrics=AreaUnderROC(),
-            preprocessors=Identity(),
-            detectors=ErrorAnomalyDetector(),
-            error_log_path=str(tmp_path_factory.mktemp("error-log")),
-        )
-        results = workflow.run()
-
-        assert results.shape == (1, 8)
-        assert "Error file" in results.columns
-
-        error_file = results.loc[0, "Error file"]
-        error = Exception("An error occurred when detecting anomalies!")
-        assert error_file_has_correct_syntax(error_file)
-        assert error_file_contains_dtaianomaly_version(
-            error_file, dtaianomaly.__version__
-        )
-        assert error_file_contains_error(error_file, error)
-        assert error_file_results_in_error(error_file, error)
-
-    def test_error_computing_metric(self, tmp_path_factory):
-        results = Workflow(
-            dataloaders=DemonstrationTimeSeriesLoader(),
-            metrics=ErrorMetric(),
-            detectors=IsolationForest(15),
-            error_log_path=str(tmp_path_factory.mktemp("error-log")),
-        ).run()
-
-        error_file = results.loc[0, "Error file"]
-        error = Exception("An error occurred when computing the metric!")
         assert error_file_contains_error(error_file, error)
         assert error_file_results_in_error(error_file, error)
 

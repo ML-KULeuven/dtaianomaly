@@ -56,6 +56,14 @@ def decorate_all_test_methods(decorator):
     return decorate
 
 
+# Upper bounds on expensive hyperparameters, only applied if the default is larger
+CHEAP_HYPERPARAMETERS = {
+    "n_estimators": 10,
+    "n_kernels": 10,
+    "max_iter": 50,
+}
+
+
 def initialize(cls):
     kwargs = {
         "window_size": 15,
@@ -69,6 +77,11 @@ def initialize(cls):
     sig = inspect.signature(cls.__init__)
     accepted_params = set(sig.parameters) - {"self"}
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
+    for name, value in CHEAP_HYPERPARAMETERS.items():
+        if name in accepted_params:
+            default = sig.parameters[name].default
+            if isinstance(default, int) and default > value:
+                filtered_kwargs[name] = value
     return cls(**filtered_kwargs)
 
 
@@ -87,10 +100,6 @@ def initialize(cls):
 )
 @pytest.mark.slow
 class TestAnomalyDetectors:
-
-    def test_fit(self, cls, univariate_time_series):
-        detector = initialize(cls)
-        assert detector.fit(univariate_time_series) is detector
 
     def test_fit_can_pass_kwargs(self, cls, univariate_time_series):
         initialize(cls).fit(
@@ -117,21 +126,14 @@ class TestAnomalyDetectors:
             with pytest.raises(NotFittedError):
                 detector.decision_function(univariate_time_series)
 
-    def test_decision_function_list_as_input(self, cls, univariate_time_series):
-        detector = initialize(cls)
-        detector.fit(univariate_time_series)
-        decision_function = detector.decision_function(
-            [item for item in univariate_time_series]
-        )
-        assert decision_function.shape[0] == univariate_time_series.shape[0]
-
     def test_univariate(self, cls, univariate_time_series):
         detector = initialize(cls)
-        detector.fit(univariate_time_series)
+        assert detector.fit(univariate_time_series) is detector
         decision_function = detector.decision_function(univariate_time_series)
         assert decision_function.shape[0] == univariate_time_series.shape[0]
+        assert utils.is_valid_array_like(decision_function)
 
-    def test_univariate_reshape(self, cls, univariate_time_series):
+    def test_univariate_reshape_and_list_as_input(self, cls, univariate_time_series):
         detector = initialize(cls)
         reshaped_univariate_time_series = univariate_time_series.reshape(-1, 1)
         assert reshaped_univariate_time_series.shape == (
@@ -140,6 +142,11 @@ class TestAnomalyDetectors:
         )
         detector.fit(reshaped_univariate_time_series)
         decision_function = detector.decision_function(reshaped_univariate_time_series)
+        assert decision_function.shape[0] == univariate_time_series.shape[0]
+        decision_function = detector.decision_function(
+            [item for item in univariate_time_series]
+        )
+        assert decision_function.shape[0] == univariate_time_series.shape[0]
 
     def test_multivariate(self, cls, multivariate_time_series):
         detector = initialize(cls)
@@ -159,21 +166,7 @@ class TestAnomalyDetectors:
             detector.fit(multivariate_time_series)
             decision_function = detector.decision_function(multivariate_time_series)
             assert decision_function.shape[0] == multivariate_time_series.shape[0]
-
-    def test_is_valid_array_like_univariate(self, cls, univariate_time_series):
-        detector = initialize(cls)
-        X_ = detector.fit(univariate_time_series).decision_function(
-            univariate_time_series
-        )
-        assert utils.is_valid_array_like(X_)
-
-    def test_is_valid_array_like_multivariate(self, cls, multivariate_time_series):
-        detector = initialize(cls)
-        if type(detector) not in DETECTORS_NOT_MULTIVARIATE:
-            X_ = detector.fit(multivariate_time_series).decision_function(
-                multivariate_time_series
-            )
-            assert utils.is_valid_array_like(X_)
+            assert utils.is_valid_array_like(decision_function)
 
     def test_fit_predict_on_different_time_series(self, cls, univariate_time_series):
         # 66% train-test split

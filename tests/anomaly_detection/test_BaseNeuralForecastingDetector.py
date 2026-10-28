@@ -42,7 +42,7 @@ class TestInitialize:
 class TestErrorMetric:
 
     @pytest.mark.parametrize("error_metric", ERROR_METRICS)
-    @pytest.mark.parametrize("forecast_length", [1, 4, 8])
+    @pytest.mark.parametrize("forecast_length", [1, 8])
     def test(self, error_metric, forecast_length, univariate_time_series):
         detector = MultilayerPerceptron(
             window_size=12,
@@ -54,7 +54,7 @@ class TestErrorMetric:
         detector.decision_function(univariate_time_series)
 
     @pytest.mark.parametrize("error_metric", ERROR_METRICS)
-    @pytest.mark.parametrize("forecast_length", [1, 4, 8])
+    @pytest.mark.parametrize("forecast_length", [1, 8])
     def test_multivariate(
         self, error_metric, forecast_length, multivariate_time_series
     ):

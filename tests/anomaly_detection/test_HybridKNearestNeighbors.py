@@ -112,6 +112,7 @@ class TestHybridKNearestNeighbors:
         with pytest.raises(StopIteration):
             next(decoder_modules)
 
+    @pytest.mark.slow
     def test_seed(self, univariate_time_series):
         detector1 = HybridKNearestNeighbors(1, seed=0)
         y_pred1 = detector1.fit(univariate_time_series).decision_function(

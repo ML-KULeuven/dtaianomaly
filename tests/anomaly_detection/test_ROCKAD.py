@@ -9,12 +9,12 @@ class TestROCKAD:
         assert ROCKAD(128).supervision == Supervision.UNSUPERVISED
 
     def test_seed(self, univariate_time_series):
-        detector1 = ROCKAD(128, seed=0)
+        detector1 = ROCKAD(128, n_kernels=10, seed=0)
         y_pred1 = detector1.fit(univariate_time_series).decision_function(
             univariate_time_series
         )
 
-        detector2 = ROCKAD(128, seed=0)
+        detector2 = ROCKAD(128, n_kernels=10, seed=0)
         y_pred2 = detector2.fit(univariate_time_series).decision_function(
             univariate_time_series
         )
