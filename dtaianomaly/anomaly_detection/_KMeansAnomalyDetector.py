@@ -5,6 +5,7 @@ from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervisio
 from dtaianomaly.type_validation import IntegerAttribute, WindowSizeAttribute
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -82,6 +83,7 @@ class KMeansAnomalyDetector(BaseDetector):
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
         self.k_means_ = KMeans(n_clusters=self.n_clusters, **self.kwargs)
         self.k_means_.fit(sliding_window(X, self.window_size_, self.stride))
 

@@ -1,5 +1,5 @@
 import abc
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import torch
@@ -16,6 +16,7 @@ from dtaianomaly.type_validation import (
 from dtaianomaly.utils import get_dimension
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
 )
@@ -136,7 +137,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
     standard_scaling: bool
     # Data loading related parameters
     batch_size: int
-    data_loader_kwargs: dict[str, any] | None
+    data_loader_kwargs: dict[str, Any] | None
     # Optimizer related parameters
     optimizer: OPTIMIZER_TYPE
     learning_rate: float
@@ -176,7 +177,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         stride: int = 1,
         standard_scaling: bool = True,
         batch_size: int = 32,
-        data_loader_kwargs: dict[str, any] = None,
+        data_loader_kwargs: dict[str, Any] = None,
         optimizer: OPTIMIZER_TYPE = "adam",
         learning_rate: float = 1e-3,
         compile_model: bool = False,
@@ -341,6 +342,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
 
         # Compute the window size
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
 
         # Build the neural network
         data_loader = self._build_data_loader(self._build_dataset(X))

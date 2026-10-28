@@ -94,3 +94,41 @@ class TestComputeWindowSize:
                 relative_upper_bound=1.1,
                 default_window_size=None,
             )
+
+    def test_list_input(self):
+        assert compute_window_size([1.0] * 100, 10) == 10
+
+    def test_numpy_integer_returned_as_int(self):
+        window_size = compute_window_size(np.array([1, 2, 3]), np.int64(5))
+        assert window_size == 5
+        assert type(window_size) is int
+
+    @pytest.mark.parametrize("window_size", [True, 0, -1])
+    def test_invalid_integer(self, window_size):
+        with pytest.raises(ValueError, match="must be at least 1"):
+            compute_window_size(np.array([1, 2, 3]), window_size)
+
+    def test_suss_respects_upper_bound(self):
+        X = np.sin(np.arange(80) / 8)
+        with pytest.raises(ValueError):
+            compute_window_size(
+                X,
+                "suss",
+                lower_bound=2,
+                upper_bound=10,
+                relative_lower_bound=0,
+                relative_upper_bound=1,
+            )
+
+    def test_suss_respects_upper_bound_default_window_size(self):
+        X = np.sin(np.arange(80) / 8)
+        window_size_ = compute_window_size(
+            X,
+            "suss",
+            lower_bound=2,
+            upper_bound=10,
+            relative_lower_bound=0,
+            relative_upper_bound=1,
+            default_window_size=7,
+        )
+        assert window_size_ == 7

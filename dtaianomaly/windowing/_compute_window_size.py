@@ -50,13 +50,13 @@ def compute_window_size(
         ``'acf'``, ``'mwf'`` or ``'suss'``.
 
     upper_bound : int, default=1000
-        The lower bound on the automatically computed window size. Only used if ``window_size``
-        equals ``'fft'``, ``'acf'``, or ``'mwf'``.
+        The (exclusive) upper bound on the automatically computed window size. Only used
+        if ``window_size`` equals ``'fft'``, ``'acf'``, ``'mwf'`` or ``'suss'``.
 
     relative_upper_bound : float, default=1.0
-        The upper bound on the automatically computed window size, relative to the
-        length of the given time series. Only used if ``window_size`` equals ``'fft'``,
-        ``'acf'``, or ``'mwf'``.
+        The (exclusive) upper bound on the automatically computed window size, relative
+        to the length of the given time series. Only used if ``window_size`` equals
+        ``'fft'``, ``'acf'``, ``'mwf'`` or ``'suss'``.
 
     threshold : float, default=0.89
         The threshold for selecting the optimal window size using ``'suss'``.
@@ -100,6 +100,7 @@ def compute_window_size(
     # Check the input
     if not is_valid_array_like(X):
         raise ValueError("X must be a valid, numerical array-like")
+    X = np.asarray(X)
 
     # Initialize the variable
     window_size_ = -1
@@ -109,8 +110,12 @@ def compute_window_size(
     upper_bound = min(upper_bound, int(relative_upper_bound * X.shape[0]))
 
     # If an int is given, then we can simply return the given window size
-    if isinstance(window_size, int):
-        return window_size
+    if isinstance(window_size, (int, np.integer)):
+        if isinstance(window_size, bool) or window_size < 1:
+            raise ValueError(
+                f"An integer window size must be at least 1, but received '{window_size}'."
+            )
+        return int(window_size)
 
     # Check if the time series is univariate (error should not be raise if given window size is an integer)
     elif not is_univariate(X):
@@ -142,7 +147,7 @@ def compute_window_size(
     # Use SUSS to compute a window size
     elif window_size == "suss":
         window_size_ = summary_statistics_subsequences(
-            X, lower_bound=lower_bound, threshold=threshold
+            X, lower_bound=lower_bound, upper_bound=upper_bound, threshold=threshold
         )
 
     # Check if a valid window size was computed, and raise an error if necessary

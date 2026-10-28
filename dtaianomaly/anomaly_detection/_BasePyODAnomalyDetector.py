@@ -7,6 +7,7 @@ from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervisio
 from dtaianomaly.type_validation import IntegerAttribute, WindowSizeAttribute
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -92,6 +93,7 @@ class BasePyODAnomalyDetector(BaseDetector, abc.ABC):
 
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
         self.pyod_detector_ = self._initialize_detector(**self.kwargs)
         self.pyod_detector_.fit(sliding_window(X, self.window_size_, self.stride))
 

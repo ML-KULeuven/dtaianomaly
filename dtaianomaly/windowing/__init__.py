@@ -33,7 +33,7 @@ from ._compute_window_size import compute_window_size
 from ._fft import dominant_fourier_frequency
 from ._mwf import multi_window_finder
 from ._reverse_sliding_window import reverse_sliding_window
-from ._sliding_window import sliding_window
+from ._sliding_window import check_stride, sliding_window
 from ._suss import summary_statistics_subsequences
 
 AUTO_WINDOW_SIZE_COMPUTATION = ["fft", "acf", "mwf", "suss"]
@@ -47,6 +47,7 @@ __all__ = [
     "multi_window_finder",
     "reverse_sliding_window",
     "sliding_window",
+    "check_stride",
     "summary_statistics_subsequences",
     "AUTO_WINDOW_SIZE_COMPUTATION",
     "WINDOW_SIZE_TYPE",

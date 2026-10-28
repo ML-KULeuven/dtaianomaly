@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import torch
@@ -92,7 +92,7 @@ class TimeMoE(BaseDetector):
     device: str
 
     window_size_: int
-    time_moe_: any
+    time_moe_: Any
 
     attribute_validation = {
         "window_size": WindowSizeAttribute(),

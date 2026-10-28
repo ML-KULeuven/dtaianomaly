@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import torch
 
@@ -152,7 +154,7 @@ class ConvolutionalNeuralNetwork(BaseNeuralForecastingDetector):
         stride: int = 1,
         standard_scaling: bool = True,
         batch_size: int = 32,
-        data_loader_kwargs: dict[str, any] = None,
+        data_loader_kwargs: dict[str, Any] = None,
         optimizer: OPTIMIZER_TYPE = "adam",
         learning_rate: float = 1e-3,
         compile_model: bool = False,
