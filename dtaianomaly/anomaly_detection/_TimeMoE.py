@@ -207,9 +207,10 @@ class TimeMoE(BaseDetector):
 
         # Padding
         decision_scores[: self.window_size_] = decision_scores[self.window_size_]
-        decision_scores[-self.prediction_length + 1 :] = decision_scores[
-            -self.prediction_length
-        ]
+        if self.prediction_length > 1:
+            decision_scores[-self.prediction_length + 1 :] = decision_scores[
+                -self.prediction_length
+            ]
 
         return decision_scores
 
@@ -222,19 +223,3 @@ class TimeMoE(BaseDetector):
                 start_batches.append([])
             start_batches[-1].append(t)
         return start_batches
-
-
-def main():
-    from dtaianomaly.data import demonstration_time_series
-
-    X, y = demonstration_time_series()
-    TimeMoEAnomalyDetector(64).fit(X).decision_function(X)
-
-
-if __name__ == "__main__":
-
-    main()
-
-    import doctest
-
-    doctest.testmod()

@@ -2,7 +2,9 @@ import builtins
 import sys
 import types
 
+import numpy as np
 import pytest
+import torch
 
 from dtaianomaly.anomaly_detection import MOMENT, Supervision
 
@@ -146,3 +148,55 @@ class TestChronosAnomalyDetector:
 
         # cleanup (avoid side effects on other tests)
         del sys.modules["momentfm"]
+
+
+def _fake_moment(x_enc, input_mask):
+    return types.SimpleNamespace(reconstruction=torch.zeros_like(x_enc))
+
+
+def _series():
+    return np.random.default_rng(0).uniform(size=(50, 1))
+
+
+def _moment_scores(mp, window_size, batch_size=8):
+    setup(mp)
+    detector = MOMENT(window_size, batch_size=batch_size)
+    detector.window_size_ = window_size  # Only for testing purposed!
+    detector.moment_ = _fake_moment
+    scores = detector._decision_function(_series())
+    cleanup()
+    return scores
+
+
+WINDOW_SIZES = [1, 2, 7, 8, 13]
+
+
+class TestDecisionFunction:
+
+    @pytest.mark.parametrize("window_size", WINDOW_SIZES)
+    def test_no_nan(self, monkeypatch, window_size):
+        scores = _moment_scores(monkeypatch, window_size)
+        assert scores.shape == (50,)
+        assert not np.isnan(scores).any()
+
+    @pytest.mark.parametrize("window_size", WINDOW_SIZES)
+    def test_not_constant(self, monkeypatch, window_size):
+        scores = _moment_scores(monkeypatch, window_size)
+        assert np.unique(scores).shape[0] > 1
+
+    @pytest.mark.parametrize("window_size", WINDOW_SIZES)
+    def test_scores_at_window_center(self, monkeypatch, window_size):
+        scores = _moment_scores(monkeypatch, window_size)
+        X = _series().ravel()
+        expected = [
+            np.mean(X[t : t + window_size] ** 2) for t in range(51 - window_size)
+        ]
+        first = window_size // 2
+        assert np.allclose(scores[first : first + 51 - window_size], expected)
+
+    @pytest.mark.parametrize("window_size", WINDOW_SIZES)
+    def test_padding(self, monkeypatch, window_size):
+        scores = _moment_scores(monkeypatch, window_size)
+        first, last = window_size // 2, window_size // 2 + 50 - window_size
+        assert np.all(scores[:first] == scores[first])
+        assert np.all(scores[last + 1 :] == scores[last])

@@ -3,6 +3,7 @@ import pytest
 
 from dtaianomaly.anomaly_detection import ForecastDataset, MultilayerPerceptron
 from dtaianomaly.anomaly_detection._BaseNeuralForecastingDetector import ERROR_METRICS
+from dtaianomaly.windowing import reverse_sliding_window
 
 
 class TestInitialize:
@@ -95,3 +96,67 @@ class TestBuildDataset:
                     + detector.forecast_length
                 ],
             )
+
+
+STRIDE_FORECAST_LENGTH = [(1, 1), (2, 3), (3, 2), (4, 6), (5, 5), (10, 1), (10, 7)]
+
+
+def _detector_with_mocked_evaluate(monkeypatch, stride, forecast_length, scores):
+    detector = MultilayerPerceptron(
+        window_size=10, stride=stride, forecast_length=forecast_length
+    )
+    detector.window_size_ = 10
+    monkeypatch.setattr(detector, "_evaluate", lambda data_loader: scores(data_loader))
+    return detector
+
+
+class TestDecisionFunction:
+
+    @pytest.mark.slow
+    @pytest.mark.parametrize("stride,forecast_length", STRIDE_FORECAST_LENGTH)
+    def test_shape(self, stride, forecast_length):
+        X = np.random.default_rng(0).standard_normal(203)
+        detector = MultilayerPerceptron(
+            window_size=10,
+            stride=stride,
+            forecast_length=forecast_length,
+            n_epochs=1,
+            batch_size=256,
+        )
+        scores = detector.fit(X).decision_function(X)
+        assert scores.shape == X.shape
+        assert not np.isnan(scores).any()
+
+    @pytest.mark.parametrize("stride,forecast_length", STRIDE_FORECAST_LENGTH)
+    def test_alignment(self, monkeypatch, stride, forecast_length):
+        X = np.random.default_rng(0).standard_normal(103)
+        detector = _detector_with_mocked_evaluate(
+            monkeypatch,
+            stride,
+            forecast_length,
+            lambda data_loader: np.arange(len(data_loader.dataset), dtype=float),
+        )
+        n_windows = len(detector._build_dataset(X))
+        expected = reverse_sliding_window(
+            np.arange(n_windows, dtype=float), 10, stride, X.shape[0] - forecast_length
+        )
+        expected = np.concatenate((np.full(forecast_length, expected[0]), expected))
+        assert np.array_equal(detector._decision_function(X), expected)
+
+    @pytest.mark.parametrize("stride,forecast_length", STRIDE_FORECAST_LENGTH)
+    def test_single_high_window(self, monkeypatch, stride, forecast_length):
+        X = np.random.default_rng(0).standard_normal(103)
+
+        def scores(data_loader):
+            per_window = np.zeros(len(data_loader.dataset))
+            per_window[3] = 1.0
+            return per_window
+
+        detector = _detector_with_mocked_evaluate(
+            monkeypatch, stride, forecast_length, scores
+        )
+        start = 3 * stride + forecast_length
+        assert np.array_equal(
+            np.flatnonzero(detector._decision_function(X)),
+            np.arange(start, start + 10),
+        )
