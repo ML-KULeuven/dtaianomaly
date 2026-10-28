@@ -3,6 +3,7 @@ import pytest
 from sklearn.exceptions import NotFittedError
 
 from dtaianomaly.anomaly_detection import KShapeAnomalyDetector, Supervision
+from dtaianomaly.data import demonstration_time_series
 
 
 class TestKShapeAnomalyDetector:
@@ -82,7 +83,10 @@ class TestKShapeAnomalyDetector:
         with pytest.raises(ValueError):
             KShapeAnomalyDetector(window_size=15, overlap_rate=1.00001)
         with pytest.raises(ValueError):
-            KShapeAnomalyDetector(window_size=15, overlap_rate=0.0)
+            KShapeAnomalyDetector(window_size=15, overlap_rate=1.0)
+        with pytest.raises(ValueError):
+            KShapeAnomalyDetector(window_size=15, overlap_rate=-0.1)
+        KShapeAnomalyDetector(5, overlap_rate=0.0)  # Doesn't raise an error
         KShapeAnomalyDetector(5, overlap_rate=0.5)  # Doesn't raise an error
 
     def test_invalid_additional_arguments(self):
@@ -95,11 +99,24 @@ class TestKShapeAnomalyDetector:
         with pytest.raises(NotFittedError):
             detector.theta_()
 
-    @pytest.mark.slow
     def test_theta(self, univariate_time_series):
-        detector = KShapeAnomalyDetector(window_size=15)
+        detector = KShapeAnomalyDetector(window_size=15, random_state=0)
         detector.fit(univariate_time_series)
         theta = detector.theta_()
         for i in range(len(theta)):
             assert np.array_equal(detector.centroids_[i], theta[i][0])
             assert detector.weights_[i] == theta[i][1]
+
+    def test_scores_not_constant(self):
+        X, _ = demonstration_time_series()
+        detector = KShapeAnomalyDetector(window_size=50, random_state=0).fit(X)
+        assert np.ptp(detector.decision_function(X)) > 0
+
+    @pytest.mark.parametrize("overlap_rate", [0.0, 0.99])
+    def test_extreme_overlap_rate(self, overlap_rate):
+        X = np.sin(np.linspace(0, 20 * np.pi, 300))
+        detector = KShapeAnomalyDetector(
+            window_size=10, overlap_rate=overlap_rate, random_state=0
+        )
+        scores = detector.fit(X).decision_function(X)
+        assert scores.shape == X.shape

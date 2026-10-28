@@ -1,7 +1,7 @@
 import numpy as np
 import stumpy
 from scipy.spatial.distance import pdist, squareform
-from sktime.clustering.k_shapes import TimeSeriesKShapes
+from tslearn.clustering import KShape
 
 from dtaianomaly import utils
 from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
@@ -47,11 +47,12 @@ class KShapeAnomalyDetector(BaseDetector):
         at least 1, to make sure that the cluster-centroids are larger
         than the sequences to detect anomalies in.
     overlap_rate : float, default=0.5
-        The overlap of the sliding windows for clustering the data. Will
-        be used to compute a relative stride to avoid trivial matches
-        when clustering subsequences.
+        The overlap of the sliding windows for clustering the data, in the
+        range [0, 1). The stride equals ``(1 - overlap_rate)`` times the length
+        of the sliding windows (at least 1), to avoid trivial matches when
+        clustering subsequences.
     **kwargs
-        Arguments to be passed to KShape-clustering of tsslearn.
+        Arguments to be passed to KShape-clustering of tslearn.
 
     Attributes
     ----------
@@ -61,8 +62,8 @@ class KShapeAnomalyDetector(BaseDetector):
         The centroids computed by KShape clustering.
     weights_ : list of float
         The normalized weights corresponding to each cluster.
-    kshape_ : TimeSeriesKShapes
-        The fitted KShape-object of sktime, used to cluster the data.
+    kshape_ : KShape
+        The fitted KShape-object of tslearn, used to cluster the data.
 
     Notes
     -----
@@ -73,10 +74,10 @@ class KShapeAnomalyDetector(BaseDetector):
     >>> from dtaianomaly.anomaly_detection import KShapeAnomalyDetector
     >>> from dtaianomaly.data import demonstration_time_series
     >>> x, y = demonstration_time_series()
-    >>> kshape = KShapeAnomalyDetector(window_size=50).fit(x)
+    >>> kshape = KShapeAnomalyDetector(window_size=50, random_state=0).fit(x)
     >>> kshape.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([7.07106781, 7.07106781, 7.07106781, ..., 7.07106781, 7.07106781,
-           7.07106781]...)
+    array([1.09170682, 1.10062284, 1.10989614, ..., 1.36190126, 1.39209233,
+           1.40910948]...)
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -88,13 +89,13 @@ class KShapeAnomalyDetector(BaseDetector):
     window_size_: int
     centroids_: list[np.array]
     weights_: np.array
-    kshape_: TimeSeriesKShapes
+    kshape_: KShape
 
     attribute_validation = {
         "window_size": WindowSizeAttribute(),
         "n_clusters": IntegerAttribute(2),
         "sequence_length_multiplier": FloatAttribute(1.0),
-        "overlap_rate": FloatAttribute(0.0, 1.0, inclusive_minimum=False),
+        "overlap_rate": FloatAttribute(0.0, 1.0, inclusive_maximum=False),
     }
 
     def __init__(
@@ -106,7 +107,7 @@ class KShapeAnomalyDetector(BaseDetector):
         **kwargs,
     ):
         # Check if KShape can be initialized
-        TimeSeriesKShapes(n_clusters=n_clusters, **kwargs)
+        KShape(n_clusters=n_clusters, **kwargs)
 
         super().__init__(Supervision.UNSUPERVISED)
         self.window_size = window_size
@@ -143,12 +144,12 @@ class KShapeAnomalyDetector(BaseDetector):
 
         # Compute sliding windows
         sequence_length = int(self.window_size_ * self.sequence_length_multiplier)
-        stride = int(sequence_length * self.overlap_rate)
+        stride = max(1, int(sequence_length * (1 - self.overlap_rate)))
         windows = sliding_window(X, sequence_length, stride)
 
         # Apply K-Shape clustering
-        self.kshape_ = TimeSeriesKShapes(n_clusters=self.n_clusters, **self.kwargs)
-        cluster_labels = self.kshape_.fit_predict(windows)
+        self.kshape_ = KShape(n_clusters=self.n_clusters, **self.kwargs)
+        cluster_labels = self.kshape_.fit_predict(windows[:, :, None])
 
         # Extract the centroids
         self.centroids_ = list(map(np.squeeze, self.kshape_.cluster_centers_))
