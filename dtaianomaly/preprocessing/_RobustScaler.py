@@ -41,7 +41,8 @@ class RobustScaler(Preprocessor):
     center_ : array-like of shape (n_attributes)
         The median value in each attribute of the training data.
     scale_ : array-like of shape (n_attributes)
-        The quantile range for each attribute of the training data.
+        The quantile range for each attribute of the training data. Attributes
+        with a quantile range of 0 are not scaled.
 
     Raises
     ------
@@ -79,27 +80,27 @@ class RobustScaler(Preprocessor):
         if get_dimension(X) == 1:
             # univariate case
             self.center_ = np.array([np.nanmedian(X)])
-            q_min = np.percentile(X, q=self.lower_quantile)
-            q_max = np.percentile(X, q=self.upper_quantile)
+            q_min = np.nanpercentile(X, q=self.lower_quantile)
+            q_max = np.nanpercentile(X, q=self.upper_quantile)
             self.scale_ = np.array([q_max - q_min])
         else:
             # multivariate case
             self.center_ = np.nanmedian(X, axis=0)
-            q_min = np.percentile(X, q=self.lower_quantile, axis=0)
-            q_max = np.percentile(X, q=self.upper_quantile, axis=0)
+            q_min = np.nanpercentile(X, q=self.lower_quantile, axis=0)
+            q_max = np.nanpercentile(X, q=self.upper_quantile, axis=0)
             self.scale_ = q_max - q_min
         return self
 
     def _transform(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
-        if not (
-            (len(X.shape) == 1 and self.center_.shape[0] == 1)
-            or X.shape[1] == self.center_.shape[0]
-        ):
+        if get_dimension(X) != self.center_.shape[0]:
             raise AttributeError(
-                f"Trying to robust scale a time series with {X.shape[0]} attributes while it was fitted on {self.center_.shape[0]} attributes!"
+                f"Trying to robust scale a time series with {get_dimension(X)} attributes while it was fitted on {self.center_.shape[0]} attributes!"
             )
 
-        X_ = (X - self.center_) / self.scale_
+        # Attributes with a scale of 0 are not scaled
+        zero_scale = self.scale_ == 0
+        X_ = (X - self.center_) / np.where(zero_scale, 1, self.scale_)
+        X_ = np.where(zero_scale, X, X_)
         return np.where(np.isnan(X_), X, X_), y

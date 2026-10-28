@@ -2,6 +2,7 @@ import numpy as np
 
 from dtaianomaly.preprocessing._Preprocessor import Preprocessor
 from dtaianomaly.type_validation import FloatAttribute
+from dtaianomaly.utils import get_dimension
 
 __all__ = ["StandardScaler"]
 
@@ -72,12 +73,9 @@ class StandardScaler(Preprocessor):
     def _transform(
         self, X: np.ndarray, y: np.ndarray = None
     ) -> (np.ndarray, np.ndarray | None):
-        if not (
-            (len(X.shape) == 1 and self.mean_.shape[0] == 1)
-            or X.shape[1] == self.mean_.shape[0]
-        ):
+        if get_dimension(X) != self.mean_.shape[0]:
             raise AttributeError(
-                f"Trying to standard scale a time series with {X.shape[0]} attributes while it was fitted on {self.mean_.shape[0]} attributes!"
+                f"Trying to standard scale a time series with {get_dimension(X)} attributes while it was fitted on {self.mean_.shape[0]} attributes!"
             )
 
         # If the std of all attributes is 0, then no transformation happens
