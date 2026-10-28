@@ -74,7 +74,7 @@ time_moe = [
 # Development tools (PEP 735), not published on PyPI.
 # Install with `uv sync` (all groups) or `pip install . --group <name>` (pip>=25.1).
 [dependency-groups]
-tests = ["pytest", "pytest-cov"]
+tests = ["pytest", "pytest-cov", "pytest-xdist"]
 docs = ["sphinx", "sphinx-rtd-theme", "numpydoc", "sphinxcontrib-bibtex"]
 lint = ["pre-commit", "black", "isort"]
 notebooks = ["notebook", "jupyterlab"]

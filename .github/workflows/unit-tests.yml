@@ -34,8 +34,15 @@ jobs:
         pip install ".[tqdm]" --group tests
         pip list
 
+    # Coverage is only collected once, on the default Python version
+    # (repository variable DEFAULT_PYTHON_VERSION, for example "3.11").
+    - name: Test with pytest and coverage
+      if: matrix.python-version == vars.DEFAULT_PYTHON_VERSION
+      run: pytest -n auto --cov=dtaianomaly --cov-report term-missing
+
     - name: Test with pytest
-      run: pytest --cov=dtaianomaly --cov-report term-missing
+      if: matrix.python-version != vars.DEFAULT_PYTHON_VERSION
+      run: pytest -n auto
 
   # The foundation-model extras conflict with each other, so each one is
   # installed and tested in its own environment (the regular tests mock them).

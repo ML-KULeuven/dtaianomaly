@@ -121,7 +121,16 @@ coverage of the unit tests):
 
 .. code-block:: bash
 
-   pytest .\tests\ --cov=dtaianomaly --cov-report term-missing
+   pytest .\tests\ -n auto --cov=dtaianomaly --cov-report term-missing
+
+The ``-n auto`` flag runs the tests in parallel on all available
+CPU cores, using `pytest-xdist <https://pytest-xdist.readthedocs.io/>`_.
+While developing, you can get faster feedback by skipping the tests
+that are marked as slow:
+
+.. code-block:: bash
+
+   pytest .\tests\ -n auto -m "not slow"
 
 In addition, you should also check if the documentation generates
 without any errors or warnings. This can be done as follows:
