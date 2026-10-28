@@ -71,7 +71,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> rpca = RobustPrincipalComponentAnalysis(2).fit(x)
     >>> rpca.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([1.28436687, 1.29156655, 1.33793287, ..., 1.35563558, 1.25948662, 1.2923824 ]...)
+    array([0.08677902, 0.06963774, 0.05566025, ..., 0.14321937, 0.19996991, 0.16527886]...)
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -110,7 +110,8 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         # Apply robust PCA
         robust_pca = _RobustPCA(sliding_windows)
         L, S = robust_pca.fit(max_iter=self.max_iter)
-        self.pca_ = PCA(n_components=L.shape[1], **self.kwargs)
+        # Keep only the principal components spanning the low-rank component
+        self.pca_ = PCA(n_components=max(1, np.linalg.matrix_rank(L)), **self.kwargs)
         self.pca_.fit(L)
 
     def _decision_function(self, X: np.ndarray) -> np.array:
@@ -118,7 +119,7 @@ class RobustPrincipalComponentAnalysis(BaseDetector):
         windows = sliding_window(X, self.window_size_, self.stride)
 
         # DO RPCA
-        L = self.pca_.transform(windows)
+        L = self.pca_.inverse_transform(self.pca_.transform(windows))
         S = np.absolute(windows - L)
         per_window_decision_scores = S.sum(axis=1)
 

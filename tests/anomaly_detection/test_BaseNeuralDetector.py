@@ -1,9 +1,16 @@
+import copy
+
 import numpy as np
 import pytest
 import torch
 
 from dtaianomaly import utils
-from dtaianomaly.anomaly_detection import BaseNeuralDetector, MultilayerPerceptron
+from dtaianomaly.anomaly_detection import (
+    AutoEncoder,
+    BaseNeuralDetector,
+    ConvolutionalNeuralNetwork,
+    MultilayerPerceptron,
+)
 from dtaianomaly.anomaly_detection._BaseNeuralDetector import (
     ACTIVATION_FUNCTIONS,
     LOSSES,
@@ -300,6 +307,102 @@ class TestBuildDataLoader:
         is_shuffled = isinstance(data_loader.sampler, torch.utils.data.RandomSampler)
         assert is_shuffled == forced_shuffle
         assert detector.data_loader_kwargs["shuffle"] == given_shuffle
+
+
+class TestBuildDataLoaderDropLast:
+
+    @staticmethod
+    def _data_loader(n_samples, batch_size=32, train=True, data_loader_kwargs=None):
+        detector = MultilayerPerceptron(
+            window_size=1, batch_size=batch_size, data_loader_kwargs=data_loader_kwargs
+        )
+        dataset = torch.utils.data.TensorDataset(torch.zeros(n_samples, 1))
+        return detector._build_data_loader(dataset, train=train)
+
+    @pytest.mark.parametrize(
+        "n_samples,batch_size,expected",
+        [
+            (33, 32, True),
+            (65, 32, True),
+            (34, 32, False),
+            (64, 32, False),
+            (32, 32, False),
+            (1, 32, False),
+            (1, 1, False),
+            (5, 1, False),
+        ],
+    )
+    def test_train(self, n_samples, batch_size, expected):
+        data_loader = self._data_loader(n_samples, batch_size)
+        assert data_loader.drop_last == expected
+
+    @pytest.mark.parametrize("n_samples", [33, 34, 1])
+    def test_evaluation_never_drops(self, n_samples):
+        assert not self._data_loader(n_samples, train=False).drop_last
+
+    @pytest.mark.parametrize("n_samples", [33, 34])
+    @pytest.mark.parametrize("drop_last", [True, False])
+    def test_train_respects_user_kwargs(self, n_samples, drop_last):
+        data_loader = self._data_loader(
+            n_samples, data_loader_kwargs={"drop_last": drop_last}
+        )
+        assert data_loader.drop_last == drop_last
+
+
+class TestFitBatchNormalization:
+
+    @pytest.mark.parametrize(
+        "cls", [AutoEncoder, MultilayerPerceptron, ConvolutionalNeuralNetwork]
+    )
+    def test_last_batch_of_single_window(self, cls):
+        X = np.sin(np.arange(300) / 5)
+        y_pred = cls(window_size=12, n_epochs=1, seed=0).fit(X).decision_function(X)
+        assert y_pred.shape == (300,)
+
+    @pytest.mark.parametrize(
+        "cls,n_samples",
+        [
+            (AutoEncoder, 12),
+            (MultilayerPerceptron, 13),
+            (ConvolutionalNeuralNetwork, 13),
+        ],
+    )
+    def test_single_window(self, cls, n_samples):
+        X = np.sin(np.arange(n_samples) / 5)
+        with pytest.raises(ValueError, match="At least 2 windows are required"):
+            cls(window_size=12, n_epochs=1).fit(X)
+
+    def test_single_window_without_batch_normalization(self):
+        X = np.sin(np.arange(13) / 5)
+        detector = MultilayerPerceptron(
+            window_size=12, n_epochs=1, batch_normalization=False
+        )
+        detector.fit(X)
+        assert detector.decision_function(X).shape == (13,)
+
+
+class TestTrain:
+
+    def test_restores_best_epoch_weights(self, monkeypatch):
+        losses = [3.0, 1.0, 2.0, 5.0]
+        snapshots = []
+        detector = MultilayerPerceptron(
+            window_size=8, n_epochs=len(losses), batch_size=64, seed=0
+        )
+
+        def _train_batch(batch):
+            with torch.no_grad():
+                for parameter in detector.neural_network_.parameters():
+                    parameter.add_(1.0)
+            snapshots.append(copy.deepcopy(detector.neural_network_.state_dict()))
+            return losses[len(snapshots) - 1]
+
+        monkeypatch.setattr(detector, "_train_batch", _train_batch)
+        detector.fit(np.sin(np.arange(40) / 5))
+
+        state_dict = detector.neural_network_.state_dict()
+        assert all(torch.equal(state_dict[k], snapshots[1][k]) for k in state_dict)
+        assert not all(torch.equal(state_dict[k], snapshots[-1][k]) for k in state_dict)
 
 
 class TestBuildActivationFunction:
