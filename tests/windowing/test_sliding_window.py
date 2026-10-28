@@ -1,6 +1,7 @@
 import numpy as np
+import pytest
 
-from dtaianomaly.windowing import sliding_window
+from dtaianomaly.windowing import check_stride, sliding_window
 
 
 class TestSlidingWindow:
@@ -120,3 +121,14 @@ class TestSlidingWindow:
         assert np.array_equal(
             windows[4], [14, 140, 15, 150, 16, 160, 17, 170, 18, 180, 19, 190]
         )
+
+
+class TestCheckStride:
+
+    @pytest.mark.parametrize("stride", [1, 8, 16])
+    def test_valid(self, stride):
+        assert check_stride(16, stride) is None
+
+    def test_stride_larger_than_window_size(self):
+        with pytest.raises(ValueError, match="can not be larger than the window size"):
+            check_stride(16, 17)

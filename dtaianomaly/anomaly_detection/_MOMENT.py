@@ -1,5 +1,5 @@
 import sys
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import torch
@@ -86,7 +86,7 @@ class MOMENT(BaseDetector):
     device: str
 
     window_size_: int
-    moment_: any
+    moment_: Any
 
     attribute_validation = {
         "window_size": WindowSizeAttribute(),

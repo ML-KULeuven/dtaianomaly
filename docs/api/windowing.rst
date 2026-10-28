@@ -12,6 +12,7 @@ Base functions
 
     sliding_window
     reverse_sliding_window
+    check_stride
 
 
 Automatically computing the window size

@@ -21,6 +21,7 @@ from dtaianomaly.type_validation import (
 )
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
     sliding_window,
@@ -196,6 +197,7 @@ class HybridKNearestNeighbors(BaseDetector):
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         # Compute the window size
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
+        check_stride(self.window_size_, self.stride)
         windows = sliding_window(X, self.window_size_, self.stride)
 
         self.auto_encoder_ = self.build_auto_encoder(windows)

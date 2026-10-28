@@ -4,16 +4,19 @@ __all__ = ["summary_statistics_subsequences"]
 
 
 def summary_statistics_subsequences(
-    X: np.ndarray, lower_bound: int = 10, threshold: float = 0.89
+    X: np.ndarray,
+    lower_bound: int = 10,
+    upper_bound: int = 1000,
+    threshold: float = 0.89,
 ) -> int:
     """
     Compute the window size using the Summary Statistics Subsequence method :cite:`ermshaus2023clasp`.
 
-    Comapre a multiple summary statistics (mean, standard deviation, range of values)
+    Compare multiple summary statistics (mean, standard deviation, range of values)
     within subsequences to those of the complete time series. The assumption is that
     for a proper subsequence length, the local summary statistics within the subsequences
     will be highly similar to the global statistics across the complete time series.
-    Hence, the subsequence length such that the summarized statiscts within the subsequences
+    Hence, the subsequence length such that the summarized statistics within the subsequences
     is highly similar to the statistics of the time series is returned as computed
     window size.
 
@@ -23,13 +26,16 @@ def summary_statistics_subsequences(
         Input time series.
     lower_bound : int, default=10
         The lower bound on the automatically computed window size.
+    upper_bound : int, default=1000
+        The (exclusive) upper bound on the automatically computed window size.
     threshold : float, default=0.89
         The threshold for selecting the optimal window size.
 
     Returns
     -------
     int
-        The computed window size.
+        The computed window size, or -1 if no window size within the bounds
+        meets the threshold.
 
     Warnings
     --------
@@ -74,10 +80,15 @@ def summary_statistics_subsequences(
     if min_suss_score == max_suss_score:
         return -1
 
+    # The window sizes can not exceed the length of the time series
+    upper_bound = min(upper_bound, X.shape[0] - 1)
+    if lower_bound >= upper_bound:
+        return -1
+
     # exponential search (to find window size interval)
     exp = 0
     while True:
-        window_size = 2**exp
+        window_size = min(2**exp, upper_bound - 1)
 
         if window_size < lower_bound:
             exp += 1
@@ -90,9 +101,13 @@ def summary_statistics_subsequences(
         if score > threshold:
             break
 
+        # No window size within the bounds meets the threshold
+        if window_size == upper_bound - 1:
+            return -1
+
         exp += 1
 
-    lbound, ubound = max(lower_bound, 2 ** (exp - 1)), min(2**exp + 1, X.shape[0] - 1)
+    lbound, ubound = max(lower_bound, 2 ** (exp - 1)), min(2**exp + 1, upper_bound - 1)
 
     # binary search (to find window size in interval)
     while lbound <= ubound:
@@ -108,5 +123,9 @@ def summary_statistics_subsequences(
         else:
             lbound = window_size
             break
+
+    # Check if the window size remains within the bounds
+    if 2 * lbound >= upper_bound:
+        return -1
 
     return 2 * lbound
