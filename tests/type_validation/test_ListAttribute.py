@@ -10,6 +10,13 @@ from dtaianomaly.type_validation import (
     UnionAttribute,
 )
 
+# None and Union validators have a dedicated value description, tested separately
+_CONFIGS_WITH_SIMPLE_VALUE_DESCRIPTION = [
+    config
+    for config in ATTRIBUTE_VALIDATION_CONFIGS
+    if not isinstance(config["validator"], (NoneAttribute, UnionAttribute))
+]
+
 
 class TestListAttribute:
 
@@ -156,48 +163,31 @@ class TestListAttribute:
         one_invalid[3] = config["invalid_value"]
         assert not ListAttribute(config["validator"])._is_valid_value(one_invalid)
 
-    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize("minimum_length", [5, 10])
-    def test_is_valid_value_minimum_length(self, config, minimum_length):
-
-        validator = ListAttribute(config["validator"], minimum_length=minimum_length)
-        assert validator._is_valid_value(minimum_length * [config["valid"]])
-        assert validator._is_valid_value((minimum_length + 1) * [config["valid"]])
-        assert not validator._is_valid_value((minimum_length - 1) * [config["valid"]])
-
-    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize("maximum_length", [5, 10])
-    def test_is_valid_value_maximum_length(self, config, maximum_length):
-
-        validator = ListAttribute(config["validator"], maximum_length=maximum_length)
-        assert validator._is_valid_value(maximum_length * [config["valid"]])
-        assert not validator._is_valid_value((maximum_length + 1) * [config["valid"]])
-        assert validator._is_valid_value((maximum_length - 1) * [config["valid"]])
-
-    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize("minimum_length,maximum_length", [(5, 5), (5, 10)])
-    def test_is_valid_value_minimum_and_maximum_length(
-        self, config, minimum_length, maximum_length
+    @pytest.mark.parametrize(
+        "minimum_length,maximum_length,length,expected",
+        [
+            (5, None, 5, True),
+            (5, None, 4, False),
+            (None, 5, 5, True),
+            (None, 5, 6, False),
+            (5, 5, 5, True),
+            (5, 10, 7, True),
+            (5, 10, 4, False),
+            (5, 10, 11, False),
+        ],
+    )
+    def test_is_valid_value_length(
+        self, minimum_length, maximum_length, length, expected
     ):
-        if minimum_length > maximum_length:
-            return
         validator = ListAttribute(
-            config["validator"],
+            IntegerAttribute(minimum=1),
             minimum_length=minimum_length,
             maximum_length=maximum_length,
         )
-        assert validator._is_valid_value(minimum_length * [config["valid"]])
-        assert validator._is_valid_value(
-            int((minimum_length + maximum_length) / 2) * [config["valid"]]
-        )
-        assert validator._is_valid_value(maximum_length * [config["valid"]])
-        assert not validator._is_valid_value((minimum_length - 1) * [config["valid"]])
-        assert not validator._is_valid_value((maximum_length + 1) * [config["valid"]])
+        assert validator._is_valid_value(length * [1]) == expected
 
-    @pytest.mark.parametrize("config", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("config", _CONFIGS_WITH_SIMPLE_VALUE_DESCRIPTION)
     def test_get_valid_value_description(self, config):
-        if isinstance(config["validator"], (NoneAttribute, UnionAttribute)):
-            return
         assert (
             ListAttribute(config["validator"])._get_valid_value_description()
             == f"list of {config['validator']._get_valid_type_description()} {config['validator']._get_valid_value_description()}"

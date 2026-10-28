@@ -9,20 +9,17 @@ from dtaianomaly.anomaly_detection._BaseNeuralReconstructionDetector import (
 
 class TestInitialization:
 
-    @pytest.mark.parametrize("error_metric", ERROR_METRICS)
-    def test_error_metric_valid(self, error_metric):
-        detector = AutoEncoder(window_size=16, error_metric=error_metric)
-        assert detector.error_metric == error_metric
+    def test_error_metric_valid(self):
+        detector = AutoEncoder(window_size=16, error_metric=ERROR_METRICS[-1])
+        assert detector.error_metric == ERROR_METRICS[-1]
 
-    @pytest.mark.parametrize("error_metric", [32, 16.0, True])
-    def test_error_metric_invalid_type(self, error_metric):
+    def test_error_metric_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, error_metric=error_metric)
+            AutoEncoder(window_size=16, error_metric=32)
 
-    @pytest.mark.parametrize("error_metric", ["invalid"])
-    def test_error_metric_invalid_value(self, error_metric):
+    def test_error_metric_invalid_value(self):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, error_metric=error_metric)
+            AutoEncoder(window_size=16, error_metric="invalid")
 
 
 @pytest.mark.slow

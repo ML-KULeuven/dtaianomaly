@@ -22,6 +22,18 @@ kwarg_properties = [
     (float, {"x": 1.414, "y": 2.718, "z": 3.14}),
 ]
 
+# Each property paired with itself, plus a few mixed pairs
+_INT, _FLOAT, _BOOL, _LIST, _DICT = properties
+property_pairs = [
+    pytest.param(*p1, *p2, id=f"{p1[0].__name__}-{p2[0].__name__}")
+    for p1, p2 in [(p, p) for p in properties]
+    + [(_INT, _LIST), (_DICT, _FLOAT), (_BOOL, _INT)]
+]
+pair_argnames = (
+    "attribute_type1,attribute_default1,other_value1,"
+    "attribute_type2,attribute_default2,other_value2"
+)
+
 
 class TestNoParametersPrintConstructionCallMixin:
 
@@ -159,8 +171,7 @@ class TestBaseCasesPrintConstructionCallMixin:
         assert str(Child(other_value)) == f"Child(a={other_value})"
 
 
-@pytest.mark.parametrize("attribute_type1,attribute_default1,other_value1", properties)
-@pytest.mark.parametrize("attribute_type2,attribute_default2,other_value2", properties)
+@pytest.mark.parametrize(pair_argnames, property_pairs)
 class TestPairwisePrintConstructionCallMixin:
 
     def test(
@@ -266,12 +277,7 @@ class TestArgParameters:
         )
         assert str(MyObject(other_value)) == f"MyObject(other={other_value})"
 
-    @pytest.mark.parametrize(
-        "attribute_type1,attribute_default1,other_value1", properties
-    )
-    @pytest.mark.parametrize(
-        "attribute_type2,attribute_default2,other_value2", properties
-    )
+    @pytest.mark.parametrize(pair_argnames, property_pairs)
     def test_with_two_other_property(
         self,
         attribute_type1,
@@ -356,12 +362,7 @@ class TestKwargParameters:
             == f"MyObject({','.join(map(lambda k: f'{k}={values[k]}', values))})"
         )
 
-    @pytest.mark.parametrize(
-        "attribute_type1,attribute_default1,other_value1", properties
-    )
-    @pytest.mark.parametrize(
-        "attribute_type2,attribute_default2,other_value2", properties
-    )
+    @pytest.mark.parametrize(pair_argnames, property_pairs)
     def test_with_two_other_property(
         self,
         attribute_type1,

@@ -3,6 +3,13 @@ from conftest import ATTRIBUTE_VALIDATION_CONFIGS
 
 from dtaianomaly.type_validation import AttributeValidationMixin, IntegerAttribute
 
+_PARENT_CONFIG = {
+    "validator": IntegerAttribute(minimum=0, maximum=10),
+    "invalid_type": 5.0,
+    "invalid_value": 42,
+    "valid": 5,
+}
+
 
 class TestAttributeValidationMixin:
 
@@ -75,9 +82,9 @@ class TestAttributeValidationMixin:
             my_object.attribute = value
             assert my_object.attribute == value
 
-    @pytest.mark.parametrize("config_parent", ATTRIBUTE_VALIDATION_CONFIGS)
     @pytest.mark.parametrize("config_child", ATTRIBUTE_VALIDATION_CONFIGS)
-    def test_inheritance(self, config_parent, config_child):
+    def test_inheritance(self, config_child):
+        config_parent = _PARENT_CONFIG
 
         class Parent(AttributeValidationMixin):
             attribute_parent: any

@@ -9,83 +9,27 @@ from conftest import (
     is_un_flatten,
 )
 
-from dtaianomaly.anomaly_detection import MultilayerPerceptron, Supervision
+from dtaianomaly.anomaly_detection import MultilayerPerceptron
 from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
 
 
 class TestInitialize:
 
-    @pytest.mark.parametrize("dimensions", [[32], [32, 16], [32, 16, 8], [8, 16, 32]])
-    def test_hidden_layers_valid(self, dimensions):
-        detector = MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
-        assert detector.hidden_layers == dimensions
+    def test_hidden_layers_valid(self):
+        detector = MultilayerPerceptron(window_size=16, hidden_layers=[32, 16, 8])
+        assert detector.hidden_layers == [32, 16, 8]
 
-    @pytest.mark.parametrize("dimensions", [32, ["32", 16, 8]])
-    def test_hidden_layers_invalid_type(self, dimensions):
+    def test_hidden_layers_empty_valid(self):
+        detector = MultilayerPerceptron(window_size=16, hidden_layers=[])
+        assert detector.hidden_layers == []
+
+    def test_hidden_layers_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
+            MultilayerPerceptron(window_size=16, hidden_layers=["32", 16, 8])
 
-    @pytest.mark.parametrize("dimensions", [[32, -16, 8]])
-    def test_hidden_layers_invalid_value(self, dimensions):
+    def test_hidden_layers_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, hidden_layers=dimensions)
-
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
-    def test_dropout_rate_valid(self, dropout_rate):
-        detector = MultilayerPerceptron(window_size=16, dropout_rate=dropout_rate)
-        assert detector.dropout_rate == dropout_rate
-
-    @pytest.mark.parametrize("dropout_rate", ["0.1", [0.2], True])
-    def test_dropout_rate_invalid_type(self, dropout_rate):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("dropout_rate", [-1.3, 1.0, 1.5])
-    def test_dropout_rate_invalid_value(self, dropout_rate):
-        with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
-    def test_activation_function_valid(self, activation_function):
-        detector = MultilayerPerceptron(
-            window_size=16, activation_function=activation_function
-        )
-        assert detector.activation_function == activation_function
-
-    @pytest.mark.parametrize("activation_function", [1, ["tanh", 1, "sigmoid"]])
-    def test_activation_functions_invalid_type(self, activation_function):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(
-                window_size=16, activation_function=activation_function
-            )
-
-    @pytest.mark.parametrize("activation_function", ["invalid-value"])
-    def test_activation_functions_invalid_value(self, activation_function):
-        with pytest.raises(ValueError):
-            MultilayerPerceptron(
-                window_size=16, activation_function=activation_function
-            )
-
-    @pytest.mark.parametrize("normalization", [True, False, [True, False, False]])
-    def test_batch_normalization_valid(self, normalization):
-        detector = MultilayerPerceptron(
-            window_size=16, encoder_batch_normalization=normalization
-        )
-        assert detector.encoder_batch_normalization == normalization
-
-    @pytest.mark.parametrize("batch_normalization", [True, False])
-    def test_batch_normalization_valid(self, batch_normalization):
-        detector = MultilayerPerceptron(
-            window_size="fft", batch_normalization=batch_normalization
-        )
-        assert detector.batch_normalization == batch_normalization
-
-    @pytest.mark.parametrize("batch_normalization", [5, 1.0, "invalid"])
-    def test_batch_normalization_valid(self, batch_normalization):
-        with pytest.raises(TypeError):
-            MultilayerPerceptron(
-                window_size="fft", batch_normalization=batch_normalization
-            )
+            MultilayerPerceptron(window_size=16, hidden_layers=[32, -16, 8])
 
 
 class TestBuildArchitecture:

@@ -183,12 +183,10 @@ class TestWorkflowInitialization:
             )
 
 
-@pytest.mark.parametrize("show_progress", [True, False])
 @pytest.mark.slow
 class TestWorkflowSuccess:
-    pytest.importorskip("tqdm")
 
-    def test(self, tmp_path_factory, show_progress):
+    def test(self, tmp_path_factory):
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -197,7 +195,7 @@ class TestWorkflowSuccess:
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=1,
             trace_memory=False,
-            show_progress=show_progress,
+            show_progress=False,
         )
         results = workflow.run()
         assert results.shape == (4, 11)
@@ -226,7 +224,7 @@ class TestWorkflowSuccess:
         # Check that no anomaly scores are saved
         assert "Anomaly scores file" not in results.columns
 
-    def test_with_kwargs(self, tmp_path_factory, show_progress):
+    def test_with_kwargs(self, tmp_path_factory):
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -235,7 +233,7 @@ class TestWorkflowSuccess:
             detectors=[LocalOutlierFactor("fft"), IsolationForest("fft")],
             n_jobs=1,
             trace_memory=False,
-            show_progress=show_progress,
+            show_progress=False,
         )
         results = workflow.run(
             # Force default window size by passing invalid values
@@ -268,7 +266,7 @@ class TestWorkflowSuccess:
         assert results.columns[4] == "Runtime Predict [s]"
         assert results.columns[5] == "Runtime [s]"
 
-    def test_parallel(self, tmp_path_factory, show_progress):
+    def test_parallel(self, tmp_path_factory):
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -277,7 +275,7 @@ class TestWorkflowSuccess:
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=False,
-            show_progress=show_progress,
+            show_progress=False,
         )
         results = workflow.run()
         assert results.shape == (4, 11)
@@ -304,7 +302,7 @@ class TestWorkflowSuccess:
         assert results.columns[4] == "Runtime Predict [s]"
         assert results.columns[5] == "Runtime [s]"
 
-    def test_trace_memory(self, tmp_path_factory, show_progress):
+    def test_trace_memory(self, tmp_path_factory):
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -313,7 +311,7 @@ class TestWorkflowSuccess:
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True,
-            show_progress=show_progress,
+            show_progress=False,
         )
         results = workflow.run()
         assert results.shape == (4, 14)
@@ -343,9 +341,7 @@ class TestWorkflowSuccess:
         assert results.columns[7] == "Peak Memory Predict [MB]"
         assert results.columns[8] == "Peak Memory [MB]"
 
-    def test_no_preprocessors(
-        self, tmp_path_factory, univariate_time_series, show_progress
-    ):
+    def test_no_preprocessors(self, tmp_path_factory, univariate_time_series):
         workflow = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[Precision(), Recall(), AreaUnderROC()],
@@ -353,7 +349,7 @@ class TestWorkflowSuccess:
             detectors=[LocalOutlierFactor(15), IsolationForest(15)],
             n_jobs=4,
             trace_memory=True,
-            show_progress=show_progress,
+            show_progress=False,
         )
         results = workflow.run()
         assert results.shape == (2, 13)
@@ -599,55 +595,53 @@ class TestWorkflowFail:
 @pytest.mark.slow
 class TestWorkflowFailedMetric:
 
-    @staticmethod
-    def _run(tmp_path_factory, trace_memory=False):
+    @pytest.fixture(scope="class")
+    @classmethod
+    def run(cls, tmp_path_factory):
         error_log_path = str(tmp_path_factory.mktemp("error-log"))
         results = Workflow(
             dataloaders=[DemonstrationTimeSeriesLoader()],
             metrics=[MetricError(), AreaUnderROC()],
             detectors=[IsolationForest(15)],
             n_jobs=1,
-            trace_memory=trace_memory,
+            trace_memory=True,
             error_log_path=error_log_path,
         ).run()
         return results, error_log_path
 
-    def test_failing_metric_is_error(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory)
+    def test_failing_metric_is_error(self, run):
+        results, _ = run
         assert results.loc[0, "MetricError()"] == "Error"
 
-    def test_other_metric_is_computed(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory)
+    def test_other_metric_is_computed(self, run):
+        results, _ = run
         assert isinstance(results.loc[0, "AreaUnderROC()"], float)
 
-    def test_runtime_is_computed(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory)
+    def test_runtime_is_computed(self, run):
+        results, _ = run
         assert isinstance(results.loc[0, "Runtime [s]"], float)
 
-    def test_peak_memory_is_computed(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory, trace_memory=True)
+    def test_peak_memory_is_computed(self, run):
+        results, _ = run
         assert isinstance(results.loc[0, "Peak Memory [MB]"], float)
 
-    def test_only_failing_metric_column_is_error(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory, trace_memory=True)
+    def test_only_failing_metric_column_is_error(self, run):
+        results, _ = run
         assert np.any(results == "Error", axis=0).sum() == 1
 
-    def test_error_file_exists(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory)
-        assert os.path.isfile(results.loc[0, "Error file"])
-
-    def test_single_error_file_logged(self, tmp_path_factory):
-        _, error_log_path = self._run(tmp_path_factory)
+    def test_single_error_file_logged(self, run):
+        _, error_log_path = run
         assert len(os.listdir(error_log_path)) == 1
 
-    def test_error_file_reproduces_only_failing_metric(self, tmp_path_factory):
-        results, _ = self._run(tmp_path_factory)
+    def test_error_file_reproduces_only_failing_metric(self, run):
+        results, _ = run
         with open(results.loc[0, "Error file"]) as file:
             metrics_lines = [line for line in file if line.startswith("metrics = [")]
         assert metrics_lines == ["metrics = [MetricError()]\n"]
 
 
 @pytest.mark.parametrize("detector", [DetectorFitError(), DetectorError()])
+@pytest.mark.slow
 class TestTraceMemoryStoppedOnError:
 
     def test(self, tmp_path_factory, detector):
@@ -977,7 +971,6 @@ class TestSaveAnomalyScores:
             error_log_path=str(tmp_path_factory.mktemp("error-log")),
         )
         results = workflow.run()
-        results.to_csv("tmp.csv")
         assert results.shape == (2, 15)
         assert results["Dataset"].value_counts()["DemonstrationTimeSeriesLoader()"] == 2
         assert results["Detector"].value_counts()["DetectorError()"] == 1

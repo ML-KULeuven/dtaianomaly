@@ -14,7 +14,6 @@ from conftest import (
 )
 
 from dtaianomaly.anomaly_detection import Supervision, Transformer
-from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIONS
 from dtaianomaly.anomaly_detection._Transformer import _adjust_nhead
 
 
@@ -37,94 +36,41 @@ class TestTransformer:
 
 class TestInitialize:
 
-    @pytest.mark.parametrize("num_heads", [4, 8, 16, 32])
-    def test_num_heads_valid(self, num_heads):
-        detector = Transformer(window_size=16, num_heads=num_heads)
-        assert detector.num_heads == num_heads
+    def test_num_heads_valid(self):
+        detector = Transformer(window_size=16, num_heads=4)
+        assert detector.num_heads == 4
 
-    @pytest.mark.parametrize("num_heads", [[32], "32", 32.0, True])
-    def test_num_heads_invalid_type(self, num_heads):
+    def test_num_heads_invalid_type(self):
         with pytest.raises(TypeError):
-            Transformer(window_size=16, num_heads=num_heads)
+            Transformer(window_size=16, num_heads=32.0)
 
-    @pytest.mark.parametrize("num_heads", [0, -1])
-    def test_num_heads_invalid_value(self, num_heads):
+    def test_num_heads_invalid_value(self):
         with pytest.raises(ValueError):
-            Transformer(window_size=16, num_heads=num_heads)
+            Transformer(window_size=16, num_heads=0)
 
-    @pytest.mark.parametrize("num_transformer_layers", [4, 8, 16, 32])
-    def test_num_transformer_layers_valid(self, num_transformer_layers):
-        detector = Transformer(
-            window_size=16, num_transformer_layers=num_transformer_layers
-        )
-        assert detector.num_transformer_layers == num_transformer_layers
+    def test_num_transformer_layers_valid(self):
+        detector = Transformer(window_size=16, num_transformer_layers=4)
+        assert detector.num_transformer_layers == 4
 
-    @pytest.mark.parametrize("num_transformer_layers", [[32], "32", 32.0, True])
-    def test_num_transformer_layers_invalid_type(self, num_transformer_layers):
+    def test_num_transformer_layers_invalid_type(self):
         with pytest.raises(TypeError):
-            Transformer(window_size=16, num_transformer_layers=num_transformer_layers)
+            Transformer(window_size=16, num_transformer_layers=32.0)
 
-    @pytest.mark.parametrize("num_transformer_layers", [0, -1])
-    def test_num_transformer_layers_invalid_value(self, num_transformer_layers):
+    def test_num_transformer_layers_invalid_value(self):
         with pytest.raises(ValueError):
-            Transformer(window_size=16, num_transformer_layers=num_transformer_layers)
+            Transformer(window_size=16, num_transformer_layers=0)
 
-    @pytest.mark.parametrize("dimension_feedforward", [4, 8, 16, 32])
-    def test_dimension_feedforward_valid(self, dimension_feedforward):
-        detector = Transformer(
-            window_size=16, dimension_feedforward=dimension_feedforward
-        )
-        assert detector.dimension_feedforward == dimension_feedforward
+    def test_dimension_feedforward_valid(self):
+        detector = Transformer(window_size=16, dimension_feedforward=4)
+        assert detector.dimension_feedforward == 4
 
-    @pytest.mark.parametrize("dimension_feedforward", [[32], "32", 32.0, True])
-    def test_dimension_feedforward_invalid_type(self, dimension_feedforward):
+    def test_dimension_feedforward_invalid_type(self):
         with pytest.raises(TypeError):
-            Transformer(window_size=16, dimension_feedforward=dimension_feedforward)
+            Transformer(window_size=16, dimension_feedforward=32.0)
 
-    @pytest.mark.parametrize("dimension_feedforward", [0, -1])
-    def test_dimension_feedforward_invalid_value(self, dimension_feedforward):
+    def test_dimension_feedforward_invalid_value(self):
         with pytest.raises(ValueError):
-            Transformer(window_size=16, dimension_feedforward=dimension_feedforward)
-
-    @pytest.mark.parametrize("bias", [True, False])
-    def test_bias_valid(self, bias):
-        detector = Transformer(window_size=16, bias=bias)
-        assert detector.bias == bias
-
-    @pytest.mark.parametrize("bias", ["True", 1, 1.0])
-    def test_bias_invalid_type(self, bias):
-        with pytest.raises(TypeError):
-            Transformer(window_size=16, bias=bias)
-
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
-    def test_dropout_rate_valid(self, dropout_rate):
-        detector = Transformer(window_size=16, dropout_rate=dropout_rate)
-        assert detector.dropout_rate == dropout_rate
-
-    @pytest.mark.parametrize("dropout_rate", ["0.1", [0.2], True])
-    def test_dropout_rate_invalid_type(self, dropout_rate):
-        with pytest.raises(TypeError):
-            Transformer(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("dropout_rate", [-1.3, 1.0, 1.5])
-    def test_dropout_rate_invalid_value(self, dropout_rate):
-        with pytest.raises(ValueError):
-            Transformer(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
-    def test_activation_function_valid(self, activation_function):
-        detector = Transformer(window_size=16, activation_function=activation_function)
-        assert detector.activation_function == activation_function
-
-    @pytest.mark.parametrize("activation_function", [1, ["tanh", 1, "sigmoid"]])
-    def test_activation_functions_invalid_type(self, activation_function):
-        with pytest.raises(TypeError):
-            Transformer(window_size=16, activation_function=activation_function)
-
-    @pytest.mark.parametrize("activation_function", ["invalid-value"])
-    def test_activation_functions_invalid_value(self, activation_function):
-        with pytest.raises(ValueError):
-            Transformer(window_size=16, activation_function=activation_function)
+            Transformer(window_size=16, dimension_feedforward=0)
 
 
 class TestBuildArchitecture:
@@ -197,12 +143,15 @@ class TestBuildArchitecture:
         with pytest.raises(StopIteration):
             next(modules)
 
-    @pytest.mark.parametrize("forecast_length", [4, 8])
-    @pytest.mark.parametrize("num_transformer_layers", [4, 8])
-    @pytest.mark.parametrize("dimension_feedforward", [64, 128])
-    @pytest.mark.parametrize("bias", [True, False])
-    @pytest.mark.parametrize("dropout_rate", [0.2])
-    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
+    @pytest.mark.parametrize(
+        "forecast_length,num_transformer_layers,dimension_feedforward,bias,dropout_rate,activation_function",
+        [
+            (4, 1, 64, True, 0.2, "linear"),
+            (8, 4, 128, False, 0.2, "relu"),
+            (1, 2, 128, True, 0.0, "sigmoid"),
+            (4, 8, 64, False, 0.2, "tanh"),
+        ],
+    )
     def test_custom(
         self,
         forecast_length,

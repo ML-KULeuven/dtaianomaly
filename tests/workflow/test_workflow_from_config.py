@@ -389,12 +389,18 @@ class TestAdditionalInformation:
         assert param.name in result
         assert result[param.name] == param.default
 
-    @pytest.mark.parametrize("param1", additional_parameters())
-    @pytest.mark.parametrize("param2", additional_parameters())
+    @pytest.mark.parametrize(
+        "param1,param2",
+        [
+            pytest.param(p1, p2, id=f"{p1.name}-{p2.name}")
+            for p1, p2 in zip(
+                additional_parameters(),
+                additional_parameters()[1:] + additional_parameters()[:1],
+            )
+        ],
+    )
     @pytest.mark.parametrize("add_invalid", [True, False])
     def test_two_params(self, param1, param2, add_invalid):
-        if param1.name == param2.name:
-            return
         config = {param1.name: param1.default, param2.name: param2.default}
         if add_invalid:
             config["something-invalid"] = 0

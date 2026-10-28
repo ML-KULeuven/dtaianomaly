@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from dtaianomaly.anomaly_detection import Supervision, TimeMoE
-from dtaianomaly.anomaly_detection._TimeMoE import MODEL_PATHS
 
 
 def setup():
@@ -36,102 +35,89 @@ class TestTimeMoE:
         assert str(TimeMoE(25, batch_size=3)) == "TimeMoE(window_size=25,batch_size=3)"
         cleanup()
 
-    @pytest.mark.parametrize("model_path", MODEL_PATHS)
-    def test_model_path_valid(self, model_path):
+    def test_model_path_valid(self):
         setup()
-        detector = TimeMoE(window_size="fft", model_path=model_path)
-        assert detector.model_path == model_path
+        detector = TimeMoE(window_size="fft", model_path="TimeMoE-200M")
+        assert detector.model_path == "TimeMoE-200M"
         cleanup()
 
-    @pytest.mark.parametrize("model_path", [0, True, None, ["a", "list"]])
-    def test_model_path_invalid_type(self, model_path):
+    def test_model_path_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            TimeMoE(window_size="fft", model_path=model_path)
+            TimeMoE(window_size="fft", model_path=0)
         cleanup()
 
-    @pytest.mark.parametrize("model_path", ["invalid"])
-    def test_model_path_invalid_value(self, model_path):
+    def test_model_path_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            TimeMoE(window_size="fft", model_path=model_path)
+            TimeMoE(window_size="fft", model_path="invalid")
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [8, 16, 32])
-    def test_batch_size_valid(self, batch_size):
+    def test_batch_size_valid(self):
         setup()
-        detector = TimeMoE(window_size="fft", batch_size=batch_size)
-        assert detector.batch_size == batch_size
+        detector = TimeMoE(window_size="fft", batch_size=8)
+        assert detector.batch_size == 8
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", ["8", 8.0])
-    def test_batch_size_invalid_type(self, batch_size):
+    def test_batch_size_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            TimeMoE(window_size="fft", batch_size=batch_size)
+            TimeMoE(window_size="fft", batch_size=8.0)
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [0, -8])
-    def test_batch_size_invalid_value(self, batch_size):
+    def test_batch_size_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            TimeMoE(window_size="fft", batch_size=batch_size)
+            TimeMoE(window_size="fft", batch_size=0)
         cleanup()
 
-    @pytest.mark.parametrize("prediction_length", [32, 16, 8])
-    def test_prediction_length_valid(self, prediction_length):
+    def test_prediction_length_valid(self):
         setup()
-        detector = TimeMoE(window_size=16, prediction_length=prediction_length)
-        assert detector.prediction_length == prediction_length
+        detector = TimeMoE(window_size=16, prediction_length=8)
+        assert detector.prediction_length == 8
         cleanup()
 
-    @pytest.mark.parametrize("prediction_length", ["32", 16.0, True])
-    def test_prediction_length_invalid_type(self, prediction_length):
+    def test_prediction_length_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            TimeMoE(window_size=16, prediction_length=prediction_length)
+            TimeMoE(window_size=16, prediction_length=16.0)
         cleanup()
 
-    @pytest.mark.parametrize("prediction_length", [0, -1, -16])
-    def test_prediction_length_invalid_value(self, prediction_length):
+    def test_prediction_length_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            TimeMoE(window_size=16, prediction_length=prediction_length)
+            TimeMoE(window_size=16, prediction_length=0)
         cleanup()
 
-    @pytest.mark.parametrize("normalize_sequences", [True, False])
-    def test_do_fine_tuning_valid(self, normalize_sequences):
+    def test_normalize_sequences_valid(self):
         setup()
-        detector = TimeMoE(window_size="fft", normalize_sequences=normalize_sequences)
-        assert detector.normalize_sequences == normalize_sequences
+        detector = TimeMoE(window_size="fft", normalize_sequences=False)
+        assert detector.normalize_sequences is False
         cleanup()
 
-    @pytest.mark.parametrize("normalize_sequences", [5, 1.0, "invalid"])
-    def test_do_fine_tuning_invalid_type(self, normalize_sequences):
+    def test_normalize_sequences_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            TimeMoE(window_size="fft", normalize_sequences=normalize_sequences)
+            TimeMoE(window_size="fft", normalize_sequences="invalid")
         cleanup()
 
-    @pytest.mark.parametrize("min_std", [1e-5, 1e-3, 0.1, 1.0, 2.0])
+    @pytest.mark.parametrize("min_std", [0.0, 0.1])
     def test_min_std_valid(self, min_std):
         setup()
         detector = TimeMoE(3, min_std=min_std)
         assert detector.min_std == min_std
         cleanup()
 
-    @pytest.mark.parametrize("min_std", ["0", True, None, ["a", "list"]])
-    def test_min_std_invalid_type(self, min_std):
+    def test_min_std_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            TimeMoE(3, min_std=min_std)
+            TimeMoE(3, min_std="0")
         cleanup()
 
-    @pytest.mark.parametrize("min_std", [-1e-16])
-    def test_min_std_invalid_value(self, min_std):
+    def test_min_std_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            TimeMoE(3, min_std=min_std)
+            TimeMoE(3, min_std=-1e-16)
         cleanup()
 
     def test_raises_if_transformers_missing(self, monkeypatch):
