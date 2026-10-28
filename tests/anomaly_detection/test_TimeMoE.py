@@ -4,6 +4,7 @@ import types
 
 import numpy as np
 import pytest
+import torch
 
 from dtaianomaly.anomaly_detection import Supervision, TimeMoE
 
@@ -187,3 +188,57 @@ class TestGetBatchStarts:
             total_nb_samples == length_time_series - window_size - prediction_length + 1
         )
         cleanup()
+
+
+class _FakeTimeMoE:
+
+    def generate(self, batch, max_new_tokens):
+        return torch.cat((batch, torch.zeros(batch.shape[0], max_new_tokens)), dim=1)
+
+
+def _series():
+    return np.random.default_rng(0).uniform(size=100)
+
+
+def _time_moe_scores(prediction_length, normalize_sequences):
+    setup()
+    detector = TimeMoE(
+        window_size=8,
+        batch_size=16,
+        prediction_length=prediction_length,
+        normalize_sequences=normalize_sequences,
+    )
+    detector.window_size_ = 8  # Only for testing purposed!
+    detector.time_moe_ = _FakeTimeMoE()
+    scores = detector._decision_function(_series())
+    cleanup()
+    return scores
+
+
+class TestDecisionFunction:
+
+    @pytest.mark.parametrize("normalize_sequences", [True, False])
+    @pytest.mark.parametrize("prediction_length", [1, 2, 5])
+    def test_no_nan(self, prediction_length, normalize_sequences):
+        scores = _time_moe_scores(prediction_length, normalize_sequences)
+        assert scores.shape == (100,)
+        assert not np.isnan(scores).any()
+
+    @pytest.mark.parametrize("prediction_length", [1, 2, 5])
+    def test_not_constant(self, prediction_length):
+        scores = _time_moe_scores(prediction_length, False)
+        assert np.unique(scores).shape[0] > 1
+
+    @pytest.mark.parametrize("prediction_length", [1, 2, 5])
+    def test_head_padding(self, prediction_length):
+        scores = _time_moe_scores(prediction_length, False)
+        assert np.all(scores[:8] == scores[8])
+
+    @pytest.mark.parametrize("prediction_length", [2, 5])
+    def test_tail_padding(self, prediction_length):
+        scores = _time_moe_scores(prediction_length, False)
+        assert np.all(scores[-prediction_length + 1 :] == scores[-prediction_length])
+
+    def test_no_tail_padding_for_prediction_length_one(self):
+        scores = _time_moe_scores(1, False)
+        assert np.allclose(scores[8:], _series()[8:] ** 2)

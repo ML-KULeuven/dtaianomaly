@@ -199,13 +199,11 @@ class MOMENT(BaseDetector):
                 start = i * self.batch_size + (self.window_size_ // 2)
                 decision_scores[start : start + error.shape[0]] = error
 
-        # Padding
-        decision_scores[: (self.window_size_ // 2)] = decision_scores[
-            (self.window_size_ // 2)
-        ]
-        decision_scores[-(self.window_size_ // 2) :] = decision_scores[
-            -(self.window_size_ // 2)
-        ]
+        # Padding: the scores are placed at the center of each window
+        first = self.window_size_ // 2
+        last = first + X.shape[0] - self.window_size_
+        decision_scores[:first] = decision_scores[first]
+        decision_scores[last + 1 :] = decision_scores[last]
 
         return decision_scores
 

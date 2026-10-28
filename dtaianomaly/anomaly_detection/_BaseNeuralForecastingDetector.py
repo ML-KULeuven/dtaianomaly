@@ -13,7 +13,7 @@ from dtaianomaly.anomaly_detection._BaseNeuralDetector import (
 )
 from dtaianomaly.anomaly_detection._TorchTimeSeriesDataSet import ForecastDataset
 from dtaianomaly.type_validation import IntegerAttribute, LiteralAttribute
-from dtaianomaly.windowing import WINDOW_SIZE_TYPE
+from dtaianomaly.windowing import WINDOW_SIZE_TYPE, reverse_sliding_window
 
 __all__ = ["BaseNeuralForecastingDetector", "ERROR_METRIC_TYPE"]
 
@@ -198,8 +198,22 @@ class BaseNeuralForecastingDetector(BaseNeuralDetector, abc.ABC):
                 torch.abs(forecast - future), dim=tuple(range(1, forecast.ndim))
             )
 
-    def _evaluate(self, data_loader: torch.utils.data.DataLoader) -> np.array:
-        decision_scores = super()._evaluate(data_loader)
+    def _decision_function(self, X: np.ndarray) -> np.array:
+        # Build the data loader
+        data_loader = self._build_data_loader(self._build_dataset(X), shuffle=False)
+
+        # Evaluate the model
+        decision_scores = self._evaluate(data_loader)
+
+        # The history windows are sliding windows over the first n - forecast_length
+        # observations. Reverse them, and shift the scores by the forecast length
+        # such that each score ends at the last forecasted observation.
+        decision_scores = reverse_sliding_window(
+            decision_scores,
+            self.window_size_,
+            self.stride,
+            X.shape[0] - self.forecast_length,
+        )
         return np.concatenate(
-            ([decision_scores[0] for _ in range(self.forecast_length)], decision_scores)
+            (np.full(self.forecast_length, decision_scores[0]), decision_scores)
         )

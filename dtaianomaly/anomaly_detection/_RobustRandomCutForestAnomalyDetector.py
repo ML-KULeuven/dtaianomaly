@@ -27,8 +27,8 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
     """
     Detect anomalies using robust random cut forest :cite:`guha2016robust`.
 
-    A random cut tree is a binary tree similar to an isolation free. The main differerence
-    is how the dimension to split on is selected, and how the anomaly scores are comupted.
+    A random cut tree is a binary tree similar to an isolation tree. The main difference
+    is how the dimension to split on is selected, and how the anomaly scores are computed.
     For a random cut tree, the dimension is chosen based on the difference between the
     minimum and maximum value along that dimension, to prioritise dimensions with wider
     spread. The anomaly score is computed based on collusive displacement: a sample is
@@ -45,15 +45,15 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
         value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
     stride : int, default=1
         The stride, i.e., the step size for extracting sliding windows from the time series.
-    online_learning : bool, default=True
+    online_learning : bool, default=False
         Whether to perform online learning, i.e., update the trees when detecting anomalies.
     n_estimators : int, default=100
         The number of base trees in the ensemble.
     max_samples : int or float, default='auto'
         The number of samples to draw for training each base estimator:
 
-        - if ``int``: Draw at most ``max_samples`` samples.
-        - if ``float``: Draw at most ``max_samples`` percentage of the samples.
+        - if ``int``: Draw at most ``max_samples`` windows.
+        - if ``float``: Draw at most ``max_samples`` fraction of the windows.
         - if ``'auto'``: Set ``max_samples=min(256, n_windows)``.
 
     precision : int, default=9
@@ -77,8 +77,8 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> rrcf = RobustRandomCutForestAnomalyDetector(10, random_state=0).fit(x)
     >>> rrcf.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([3.72400345, 3.92008391, 4.05253107, ..., 3.74515887, 3.64998068,
-           3.26297901]...)
+    array([3.65292877, 3.82039596, 3.90580239, ..., 4.42804526, 4.20873833,
+           4.45022315]...)
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -127,34 +127,34 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         self.window_size_ = compute_window_size(X, self.window_size, **kwargs)
         check_stride(self.window_size_, self.stride)
-        if isinstance(self.max_samples, float):
-            self.max_samples_ = int(X.shape[0] * self.max_samples)
-        elif isinstance(self.max_samples, int):
-            self.max_samples_ = self.max_samples
-        else:  # self.max_samples == "auto"
-            self.max_samples_ = min(256, X.shape[0])
-
         windows = sliding_window(X, self.window_size_, self.stride)
+        n_windows = windows.shape[0]
+
+        if isinstance(self.max_samples, float):
+            self.max_samples_ = max(1, int(n_windows * self.max_samples))
+        elif isinstance(self.max_samples, int):
+            self.max_samples_ = min(self.max_samples, n_windows)
+        else:  # self.max_samples == "auto"
+            self.max_samples_ = min(256, n_windows)
+
         rng = np.random.default_rng(self.random_state)
 
         self.forest_ = []
         for _ in range(self.n_estimators):
-            indexes = rng.choice(
-                windows.shape[0], size=self.max_samples_, replace=False
-            )
+            indexes = rng.choice(n_windows, size=self.max_samples_, replace=False)
             indexes.sort()
             self.forest_.append(
                 RCTree(
                     X=windows[indexes],
                     index_labels=np.arange(self.max_samples_),
                     precision=self.precision,
-                    random_state=self.random_state,
+                    random_state=int(rng.integers(np.iinfo(np.uint32).max)),
                 )
             )
 
     def _decision_function(self, X: np.ndarray) -> np.array:
-        decision_scores = np.zeros(shape=X.shape[0] - self.window_size_ + 1)
         windows = sliding_window(X, self.window_size_, self.stride)
+        decision_scores = np.zeros(shape=windows.shape[0])
         for i, window in enumerate(windows):
             for tree in self.forest_:
                 # The next valid index for the window
@@ -176,7 +176,7 @@ class RobustRandomCutForestAnomalyDetector(BaseDetector):
         return reverse_sliding_window(
             per_window_anomaly_scores=decision_scores,
             window_size=self.window_size_,
-            stride=1,
+            stride=self.stride,
             length_time_series=X.shape[0],
         )
 
