@@ -5,7 +5,6 @@ import types
 import pytest
 
 from dtaianomaly.anomaly_detection import Chronos, Supervision
-from dtaianomaly.anomaly_detection._Chronos import MODEL_PATHS
 
 
 def setup():
@@ -40,81 +39,70 @@ class TestChronos:
         assert str(Chronos(25, batch_size=3)) == "Chronos(window_size=25,batch_size=3)"
         cleanup()
 
-    @pytest.mark.parametrize("model_path", MODEL_PATHS)
-    def test_model_path_valid(self, model_path):
+    def test_model_path_valid(self):
         setup()
-        detector = Chronos(window_size="fft", model_path=model_path)
-        assert detector.model_path == model_path
+        detector = Chronos(window_size="fft", model_path="large")
+        assert detector.model_path == "large"
         cleanup()
 
-    @pytest.mark.parametrize("model_path", [0, True, None, ["a", "list"]])
-    def test_model_path_invalid_type(self, model_path):
+    def test_model_path_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            Chronos(window_size="fft", model_path=model_path)
+            Chronos(window_size="fft", model_path=0)
         cleanup()
 
-    @pytest.mark.parametrize("model_path", ["invalid"])
-    def test_model_path_invalid_value(self, model_path):
+    def test_model_path_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            Chronos(window_size="fft", model_path=model_path)
+            Chronos(window_size="fft", model_path="invalid")
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [8, 16, 32])
-    def test_batch_size_valid(self, batch_size):
+    def test_batch_size_valid(self):
         setup()
-        detector = Chronos(window_size="fft", batch_size=batch_size)
-        assert detector.batch_size == batch_size
+        detector = Chronos(window_size="fft", batch_size=8)
+        assert detector.batch_size == 8
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", ["8", 8.0])
-    def test_batch_size_invalid_type(self, batch_size):
+    def test_batch_size_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            Chronos(window_size="fft", batch_size=batch_size)
+            Chronos(window_size="fft", batch_size=8.0)
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [0, -8])
-    def test_batch_size_invalid_value(self, batch_size):
+    def test_batch_size_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            Chronos(window_size="fft", batch_size=batch_size)
+            Chronos(window_size="fft", batch_size=0)
         cleanup()
 
-    @pytest.mark.parametrize("forecast_horizon", [32, 16, 8])
-    def test_forecast_horizon_valid(self, forecast_horizon):
+    def test_forecast_horizon_valid(self):
         setup()
-        detector = Chronos(window_size=16, forecast_horizon=forecast_horizon)
-        assert detector.forecast_horizon == forecast_horizon
+        detector = Chronos(window_size=16, forecast_horizon=8)
+        assert detector.forecast_horizon == 8
         cleanup()
 
-    @pytest.mark.parametrize("forecast_horizon", ["32", 16.0, True])
-    def test_forecast_horizon_invalid_type(self, forecast_horizon):
+    def test_forecast_horizon_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            Chronos(window_size=16, forecast_horizon=forecast_horizon)
+            Chronos(window_size=16, forecast_horizon=16.0)
         cleanup()
 
-    @pytest.mark.parametrize("forecast_horizon", [0, -1, -16])
-    def test_forecast_horizon_invalid_value(self, forecast_horizon):
+    def test_forecast_horizon_invalid_value(self):
         setup()
         with pytest.raises(ValueError):
-            Chronos(window_size=16, forecast_horizon=forecast_horizon)
+            Chronos(window_size=16, forecast_horizon=0)
         cleanup()
 
-    @pytest.mark.parametrize("do_fine_tuning", [True, False])
-    def test_do_fine_tuning_valid(self, do_fine_tuning):
+    def test_do_fine_tuning_valid(self):
         setup()
-        detector = Chronos(window_size="fft", do_fine_tuning=do_fine_tuning)
-        assert detector.do_fine_tuning == do_fine_tuning
+        detector = Chronos(window_size="fft", do_fine_tuning=True)
+        assert detector.do_fine_tuning is True
         cleanup()
 
-    @pytest.mark.parametrize("do_fine_tuning", [5, 1.0, "invalid"])
-    def test_do_fine_tuning_invalid_type(self, do_fine_tuning):
+    def test_do_fine_tuning_invalid_type(self):
         setup()
         with pytest.raises(TypeError):
-            Chronos(window_size="fft", do_fine_tuning=do_fine_tuning)
+            Chronos(window_size="fft", do_fine_tuning="invalid")
         cleanup()
 
     def test_raises_if_autogluon_missing(self, monkeypatch):

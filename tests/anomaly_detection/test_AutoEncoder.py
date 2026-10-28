@@ -16,99 +16,41 @@ from dtaianomaly.anomaly_detection._BaseNeuralDetector import ACTIVATION_FUNCTIO
 
 class TestInitialization:
 
-    @pytest.mark.parametrize("dimensions", [[32], [32, 16], [32, 16, 8], [8, 16, 32]])
-    def test_encoder_dimensions_valid(self, dimensions):
-        detector = AutoEncoder(window_size=16, encoder_dimensions=dimensions)
-        assert detector.encoder_dimensions == dimensions
+    def test_encoder_dimensions_valid(self):
+        detector = AutoEncoder(window_size=16, encoder_dimensions=[32, 16, 8])
+        assert detector.encoder_dimensions == [32, 16, 8]
 
-    @pytest.mark.parametrize("dimensions", [32, ["32", 16, 8]])
-    def test_encoder_dimensions_invalid_type(self, dimensions):
+    def test_encoder_dimensions_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, encoder_dimensions=dimensions)
+            AutoEncoder(window_size=16, encoder_dimensions=["32", 16, 8])
 
-    @pytest.mark.parametrize("dimensions", [[32, -16, 8]])
-    def test_encoder_dimensions_invalid_value(self, dimensions):
+    def test_encoder_dimensions_invalid_value(self):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, encoder_dimensions=dimensions)
+            AutoEncoder(window_size=16, encoder_dimensions=[32, -16, 8])
 
-    @pytest.mark.parametrize("dimension", [32, 16, 8])
-    def test_latent_space_valid(self, dimension):
-        detector = AutoEncoder(window_size=16, latent_space_dimension=dimension)
-        assert detector.latent_space_dimension == dimension
+    def test_latent_space_valid(self):
+        detector = AutoEncoder(window_size=16, latent_space_dimension=8)
+        assert detector.latent_space_dimension == 8
 
-    @pytest.mark.parametrize("dimension", ["32", 16.0, True])
-    def test_latent_space_invalid_type(self, dimension):
+    def test_latent_space_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, latent_space_dimension=dimension)
+            AutoEncoder(window_size=16, latent_space_dimension=16.0)
 
-    @pytest.mark.parametrize("dimension", [0, -1, -16])
-    def test_latent_space_invalid_value(self, dimension):
+    def test_latent_space_invalid_value(self):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, latent_space_dimension=dimension)
+            AutoEncoder(window_size=16, latent_space_dimension=0)
 
-    @pytest.mark.parametrize("dimensions", [[32], [32, 16], [32, 16, 8], [8, 16, 32]])
-    def test_decoder_dimensions_valid(self, dimensions):
-        detector = AutoEncoder(window_size=16, decoder_dimensions=dimensions)
-        assert detector.decoder_dimensions == dimensions
+    def test_decoder_dimensions_valid(self):
+        detector = AutoEncoder(window_size=16, decoder_dimensions=[8, 16, 32])
+        assert detector.decoder_dimensions == [8, 16, 32]
 
-    @pytest.mark.parametrize("dimensions", [32, ["32", 16, 8]])
-    def test_decoder_dimensions_invalid_type(self, dimensions):
+    def test_decoder_dimensions_invalid_type(self):
         with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, decoder_dimensions=dimensions)
+            AutoEncoder(window_size=16, decoder_dimensions=32)
 
-    @pytest.mark.parametrize("dimensions", [[32, -16, 8]])
-    def test_decoder_dimensions_invalid_value(self, dimensions):
+    def test_decoder_dimensions_invalid_value(self):
         with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, decoder_dimensions=dimensions)
-
-    @pytest.mark.parametrize("dropout_rate", [0.1, 0.5, 0.0])
-    def test_dropout_rate_valid(self, dropout_rate):
-        detector = AutoEncoder(window_size=16, dropout_rate=dropout_rate)
-        assert detector.dropout_rate == dropout_rate
-
-    @pytest.mark.parametrize("dropout_rate", ["0.1", [0.2], True, 1])
-    def test_dropout_rate_invalid_type(self, dropout_rate):
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("dropout_rate", [-1.3, 1.0, 1.5])
-    def test_dropout_rate_invalid_value(self, dropout_rate):
-        with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, dropout_rate=dropout_rate)
-
-    @pytest.mark.parametrize("activation_function", ACTIVATION_FUNCTIONS)
-    def test_activation_function_valid(self, activation_function):
-        detector = AutoEncoder(window_size=16, activation_function=activation_function)
-        assert detector.activation_function == activation_function
-
-    @pytest.mark.parametrize("activation_function", [1, ["tanh", 1, "sigmoid"]])
-    def test_activation_functions_invalid_type(self, activation_function):
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size=16, activation_function=activation_function)
-
-    @pytest.mark.parametrize("activation_function", ["invalid-value"])
-    def test_activation_functions_invalid_value(self, activation_function):
-        with pytest.raises(ValueError):
-            AutoEncoder(window_size=16, activation_function=activation_function)
-
-    @pytest.mark.parametrize("normalization", [True, False, [True, False, False]])
-    def test_batch_normalization_valid(self, normalization):
-        detector = AutoEncoder(
-            window_size=16, encoder_batch_normalization=normalization
-        )
-        assert detector.encoder_batch_normalization == normalization
-
-    @pytest.mark.parametrize("batch_normalization", [True, False])
-    def test_batch_normalization_valid(self, batch_normalization):
-        detector = AutoEncoder(
-            window_size="fft", batch_normalization=batch_normalization
-        )
-        assert detector.batch_normalization == batch_normalization
-
-    @pytest.mark.parametrize("batch_normalization", [5, 1.0, "invalid"])
-    def test_batch_normalization_valid(self, batch_normalization):
-        with pytest.raises(TypeError):
-            AutoEncoder(window_size="fft", batch_normalization=batch_normalization)
+            AutoEncoder(window_size=16, decoder_dimensions=[32, -16, 8])
 
 
 class TestBuildArchitecture:

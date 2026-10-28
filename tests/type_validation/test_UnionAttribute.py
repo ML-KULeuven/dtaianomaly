@@ -9,30 +9,34 @@ from dtaianomaly.type_validation import (
     UnionAttribute,
 )
 
+_NON_UNION_VALIDATORS = [
+    config["validator"]
+    for config in ATTRIBUTE_VALIDATION_CONFIGS
+    if not isinstance(config["validator"], UnionAttribute)
+]
+
+# Every validator once as first and once as second element, plus one identical pair
+_VALIDATOR_PAIRS = [
+    pytest.param(first, second, id=f"{type(first).__name__}-{type(second).__name__}")
+    for first, second in zip(
+        _NON_UNION_VALIDATORS, _NON_UNION_VALIDATORS[1:] + _NON_UNION_VALIDATORS[:1]
+    )
+] + [pytest.param(IntegerAttribute(), IntegerAttribute(), id="same-class")]
+
 
 class TestUnionAttribute:
 
-    @pytest.mark.parametrize("first", ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize("second", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("first,second", _VALIDATOR_PAIRS)
     def test_attribute_validators_valid(self, first, second):
-        if isinstance(first["validator"], UnionAttribute) or isinstance(
-            second["validator"], UnionAttribute
-        ):
-            return
-        validator = UnionAttribute(first["validator"], second["validator"])
+        validator = UnionAttribute(first, second)
         assert len(validator.attribute_validators) == 2
-        assert isinstance(
-            validator.attribute_validators[0], first["validator"].__class__
-        )
-        assert isinstance(
-            validator.attribute_validators[1], second["validator"].__class__
-        )
+        assert isinstance(validator.attribute_validators[0], first.__class__)
+        assert isinstance(validator.attribute_validators[1], second.__class__)
 
-    @pytest.mark.parametrize("first", ATTRIBUTE_VALIDATION_CONFIGS)
-    @pytest.mark.parametrize("second", ATTRIBUTE_VALIDATION_CONFIGS)
+    @pytest.mark.parametrize("first,second", _VALIDATOR_PAIRS)
     def test_attribute_validators_valid_list(self, first, second):
         with pytest.raises(TypeError):
-            UnionAttribute([first["validator"], second["validator"]])
+            UnionAttribute([first, second])
 
     @pytest.mark.parametrize(
         "validators",

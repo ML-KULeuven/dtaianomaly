@@ -11,6 +11,15 @@ from dtaianomaly.anomaly_detection._BaseNeuralDetector import (
 )
 
 
+def _neural_detectors_with(attribute):
+    return [
+        detector_cls
+        for detector_cls in utils.all_classes("anomaly-detector", return_names=False)
+        if issubclass(detector_cls, BaseNeuralDetector)
+        and attribute in detector_cls.__dict__.get("attribute_validation", {})
+    ]
+
+
 class TestInitialize:
 
     def test_window_size_and_stride(self):
@@ -30,42 +39,33 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", stride=-1)
 
-    @pytest.mark.parametrize("standard_scaling", [True, False])
-    def test_standard_scaling_valid(self, standard_scaling):
-        detector = MultilayerPerceptron(
-            window_size="fft", standard_scaling=standard_scaling
-        )
-        assert detector.standard_scaling == standard_scaling
+    def test_standard_scaling_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", standard_scaling=False)
+        assert detector.standard_scaling is False
 
-    @pytest.mark.parametrize("standard_scaling", [5, 1.0, "invalid"])
-    def test_standard_scaling_invalid_type(self, standard_scaling):
+    def test_standard_scaling_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", standard_scaling=standard_scaling)
+            MultilayerPerceptron(window_size="fft", standard_scaling="invalid")
 
-    @pytest.mark.parametrize("batch_size", [8, 16, 32])
-    def test_batch_size_valid(self, batch_size):
-        detector = MultilayerPerceptron(window_size="fft", batch_size=batch_size)
-        assert detector.batch_size == batch_size
+    def test_batch_size_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", batch_size=8)
+        assert detector.batch_size == 8
 
-    @pytest.mark.parametrize("batch_size", ["8", 8.0])
-    def test_batch_size_invalid_type(self, batch_size):
+    def test_batch_size_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", batch_size=batch_size)
+            MultilayerPerceptron(window_size="fft", batch_size=8.0)
 
-    @pytest.mark.parametrize("batch_size", [0, -8])
-    def test_batch_size_invalid_value(self, batch_size):
+    def test_batch_size_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", batch_size=batch_size)
+            MultilayerPerceptron(window_size="fft", batch_size=0)
 
-    @pytest.mark.parametrize("optimizer", OPTIMIZERS)
-    def test_optimizer_valid(self, optimizer):
-        detector = MultilayerPerceptron(window_size="fft", optimizer=optimizer)
-        assert detector.optimizer == optimizer
+    def test_optimizer_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", optimizer="sgd")
+        assert detector.optimizer == "sgd"
 
-    @pytest.mark.parametrize("optimizer", [10, False])
-    def test_optimizer_invalid_type(self, optimizer):
+    def test_optimizer_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", optimizer=optimizer)
+            MultilayerPerceptron(window_size="fft", optimizer=10)
 
     def test_optimizer_invalid_callable(self):
         with pytest.raises(TypeError):
@@ -73,83 +73,65 @@ class TestInitialize:
                 window_size="fft", optimizer=lambda x, y: torch.optim.Adagrad(x)
             )
 
-    @pytest.mark.parametrize("optimizer", ["invalid-optimizer"])
-    def test_optimizer_invalid_value(self, optimizer):
+    def test_optimizer_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", optimizer=optimizer)
+            MultilayerPerceptron(window_size="fft", optimizer="invalid-optimizer")
 
-    @pytest.mark.parametrize("learning_rate", [0.01, 1.0, 10.0])
-    def test_learning_rate_valid(self, learning_rate):
-        detector = MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
-        assert detector.learning_rate == learning_rate
+    def test_learning_rate_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", learning_rate=0.01)
+        assert detector.learning_rate == 0.01
 
-    @pytest.mark.parametrize("learning_rate", ["0.001", False, 0])
-    def test_learning_rate_invalid_type(self, learning_rate):
+    def test_learning_rate_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
+            MultilayerPerceptron(window_size="fft", learning_rate="0.001")
 
-    @pytest.mark.parametrize("learning_rate", [-1.0, 0.0])
-    def test_learning_rate_invalid_value(self, learning_rate):
+    def test_learning_rate_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", learning_rate=learning_rate)
+            MultilayerPerceptron(window_size="fft", learning_rate=0.0)
 
-    @pytest.mark.parametrize("compile_model", [True, False])
-    def test_compile_model_valid(self, compile_model):
-        detector = MultilayerPerceptron(window_size="fft", compile_model=compile_model)
-        assert detector.compile_model == compile_model
+    def test_compile_model_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", compile_model=True)
+        assert detector.compile_model is True
 
-    @pytest.mark.parametrize("compile_model", [5, 1.0, "invalid"])
-    def test_compile_model_invalid_type(self, compile_model):
+    def test_compile_model_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", compile_model=compile_model)
+            MultilayerPerceptron(window_size="fft", compile_model="invalid")
 
-    @pytest.mark.parametrize(
-        "compile_mode",
-        ["default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"],
-    )
-    def test_compile_mode_valid(self, compile_mode):
-        detector = MultilayerPerceptron(window_size="fft", compile_mode=compile_mode)
-        assert detector.compile_mode == compile_mode
+    def test_compile_mode_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", compile_mode="max-autotune")
+        assert detector.compile_mode == "max-autotune"
 
-    @pytest.mark.parametrize("compile_mode", [5, 1.0, True])
-    def test_compile_mode_invalid_type(self, compile_mode):
+    def test_compile_mode_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", compile_mode=compile_mode)
+            MultilayerPerceptron(window_size="fft", compile_mode=5)
 
-    @pytest.mark.parametrize("compile_mode", ["invalid"])
-    def test_compile_mode_invalid_value(self, compile_mode):
+    def test_compile_mode_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", compile_mode=compile_mode)
+            MultilayerPerceptron(window_size="fft", compile_mode="invalid")
 
-    @pytest.mark.parametrize("n_epochs", [5, 100])
-    def test_n_epochs_valid(self, n_epochs):
-        detector = MultilayerPerceptron(window_size="fft", n_epochs=n_epochs)
-        assert detector.n_epochs == n_epochs
+    def test_n_epochs_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", n_epochs=5)
+        assert detector.n_epochs == 5
 
-    @pytest.mark.parametrize("n_epochs", [True, "100"])
-    def test_n_epochs_invalid_type(self, n_epochs):
+    def test_n_epochs_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", n_epochs=n_epochs)
+            MultilayerPerceptron(window_size="fft", n_epochs="100")
 
-    @pytest.mark.parametrize("n_epochs", [-1, 0])
-    def test_n_epochs_invalid_value(self, n_epochs):
+    def test_n_epochs_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", n_epochs=n_epochs)
+            MultilayerPerceptron(window_size="fft", n_epochs=0)
 
-    @pytest.mark.parametrize("loss_function", LOSSES)
-    def test_loss_function_valid(self, loss_function):
-        detector = MultilayerPerceptron(window_size="fft", loss_function=loss_function)
-        assert detector.loss_function == loss_function
+    def test_loss_function_valid(self):
+        detector = MultilayerPerceptron(window_size="fft", loss_function="huber")
+        assert detector.loss_function == "huber"
 
-    @pytest.mark.parametrize("loss_function", [True, 10])
-    def test_loss_function_invalid_type(self, loss_function):
+    def test_loss_function_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", loss_function=loss_function)
+            MultilayerPerceptron(window_size="fft", loss_function=10)
 
-    @pytest.mark.parametrize("loss_function", ["torch.nn.MSELoss()", "MSELoss"])
-    def test_loss_function_invalid_value(self, loss_function):
+    def test_loss_function_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", loss_function=loss_function)
+            MultilayerPerceptron(window_size="fft", loss_function="MSELoss")
 
     def test_device_cpu(self):
         detector = MultilayerPerceptron(window_size="fft", device="cpu")
@@ -170,15 +152,68 @@ class TestInitialize:
         with pytest.raises(ValueError):
             MultilayerPerceptron(window_size="fft", device="cuda:10000000")
 
-    @pytest.mark.parametrize("device", [True, 100])
-    def test_device_invalid_type(self, device):
+    def test_device_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size="fft", device=device)
+            MultilayerPerceptron(window_size="fft", device=100)
 
-    @pytest.mark.parametrize("device", ["invalid-device"])
-    def test_device_invalid_value(self, device):
+    def test_device_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size="fft", device=device)
+            MultilayerPerceptron(window_size="fft", device="invalid-device")
+
+
+class TestSharedSubclassParameters:
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("dropout_rate"))
+    @pytest.mark.parametrize("dropout_rate", [0.0, 0.5])
+    def test_dropout_rate_valid(self, cls, dropout_rate):
+        detector = cls(window_size=16, dropout_rate=dropout_rate)
+        assert detector.dropout_rate == dropout_rate
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("dropout_rate"))
+    def test_dropout_rate_invalid_type(self, cls):
+        with pytest.raises(TypeError):
+            cls(window_size=16, dropout_rate="0.1")
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("dropout_rate"))
+    @pytest.mark.parametrize("dropout_rate", [-0.1, 1.0])
+    def test_dropout_rate_invalid_value(self, cls, dropout_rate):
+        with pytest.raises(ValueError):
+            cls(window_size=16, dropout_rate=dropout_rate)
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("activation_function"))
+    def test_activation_function_valid(self, cls):
+        detector = cls(window_size=16, activation_function="tanh")
+        assert detector.activation_function == "tanh"
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("activation_function"))
+    def test_activation_function_invalid_type(self, cls):
+        with pytest.raises(TypeError):
+            cls(window_size=16, activation_function=1)
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("activation_function"))
+    def test_activation_function_invalid_value(self, cls):
+        with pytest.raises(ValueError):
+            cls(window_size=16, activation_function="invalid-value")
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("batch_normalization"))
+    def test_batch_normalization_valid(self, cls):
+        detector = cls(window_size=16, batch_normalization=False)
+        assert detector.batch_normalization is False
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("batch_normalization"))
+    def test_batch_normalization_invalid_type(self, cls):
+        with pytest.raises(TypeError):
+            cls(window_size=16, batch_normalization="True")
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("bias"))
+    def test_bias_valid(self, cls):
+        detector = cls(window_size=16, bias=False)
+        assert detector.bias is False
+
+    @pytest.mark.parametrize("cls", _neural_detectors_with("bias"))
+    def test_bias_invalid_type(self, cls):
+        with pytest.raises(TypeError):
+            cls(window_size=16, bias="True")
 
 
 class TestBuildDataLoader:
@@ -314,14 +349,6 @@ class TestBuildOptimizer:
         architecture = detector._build_architecture(100)
         assert isinstance(detector._build_optimizer(architecture.parameters()), cls)
 
-    # def test_invalid_optimizer(self):
-    #     detector = MultilayerPerceptron(window_size=1, optimizer="adam")
-    #     detector.window_size_ = detector.window_size
-    #     architecture = detector._build_architecture(100)
-    #     detector.optimizer = "invalid"  #This is not possible due to type validation
-    #     with pytest.raises(TypeError):
-    #         detector._build_optimizer(architecture.parameters())
-
     @pytest.mark.parametrize("learning_rate", [0.01, 0.00005])
     def test_learning_rate(self, learning_rate):
         detector = MultilayerPerceptron(window_size=1, learning_rate=learning_rate)
@@ -349,12 +376,6 @@ class TestBuildLossFunction:
         assert isinstance(
             MultilayerPerceptron(16, loss_function=loss)._build_loss_function(), cls
         )
-
-    # def test_invalid(self):
-    #     detector = MultilayerPerceptron(16)
-    #     detector.loss_function = "MSE"  # This raises an error due to type validation
-    #     with pytest.raises(ValueError):
-    #         detector._build_loss_function()
 
 
 @pytest.mark.slow

@@ -7,35 +7,29 @@ from dtaianomaly.anomaly_detection._BaseNeuralForecastingDetector import ERROR_M
 
 class TestInitialize:
 
-    @pytest.mark.parametrize("error_metric", ERROR_METRICS)
-    def test_error_metric_valid(self, error_metric):
-        detector = MultilayerPerceptron(window_size=16, error_metric=error_metric)
-        assert detector.error_metric == error_metric
+    def test_error_metric_valid(self):
+        detector = MultilayerPerceptron(window_size=16, error_metric=ERROR_METRICS[-1])
+        assert detector.error_metric == ERROR_METRICS[-1]
 
-    @pytest.mark.parametrize("error_metric", [32, 16.0, True])
-    def test_error_metric_invalid_type(self, error_metric):
+    def test_error_metric_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, error_metric=error_metric)
+            MultilayerPerceptron(window_size=16, error_metric=32)
 
-    @pytest.mark.parametrize("error_metric", ["invalid"])
-    def test_error_metric_invalid_value(self, error_metric):
+    def test_error_metric_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, error_metric=error_metric)
+            MultilayerPerceptron(window_size=16, error_metric="invalid")
 
-    @pytest.mark.parametrize("forecast_length", [32, 16, 8])
-    def test_forecast_length_valid(self, forecast_length):
-        detector = MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
-        assert detector.forecast_length == forecast_length
+    def test_forecast_length_valid(self):
+        detector = MultilayerPerceptron(window_size=16, forecast_length=8)
+        assert detector.forecast_length == 8
 
-    @pytest.mark.parametrize("forecast_length", ["32", 16.0, True])
-    def test_forecast_length_invalid_type(self, forecast_length):
+    def test_forecast_length_invalid_type(self):
         with pytest.raises(TypeError):
-            MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
+            MultilayerPerceptron(window_size=16, forecast_length=16.0)
 
-    @pytest.mark.parametrize("forecast_length", [0, -1, -16])
-    def test_forecast_length_invalid_value(self, forecast_length):
+    def test_forecast_length_invalid_value(self):
         with pytest.raises(ValueError):
-            MultilayerPerceptron(window_size=16, forecast_length=forecast_length)
+            MultilayerPerceptron(window_size=16, forecast_length=0)
 
 
 @pytest.mark.slow

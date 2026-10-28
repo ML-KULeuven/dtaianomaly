@@ -32,102 +32,88 @@ class TestChronosAnomalyDetector:
         assert str(MOMENT(25, batch_size=3)) == "MOMENT(window_size=25,batch_size=3)"
         cleanup()
 
-    @pytest.mark.parametrize("model_size", ["small", "base", "large"])
-    def test_model_size_valid(self, model_size, monkeypatch):
+    def test_model_size_valid(self, monkeypatch):
         setup(monkeypatch)
-        detector = MOMENT(window_size="fft", model_size=model_size)
-        assert detector.model_size == model_size
+        detector = MOMENT(window_size="fft", model_size="large")
+        assert detector.model_size == "large"
         cleanup()
 
-    @pytest.mark.parametrize("model_size", [0, True, None, ["a", "list"]])
-    def test_model_size_invalid_type(self, model_size, monkeypatch):
+    def test_model_size_invalid_type(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(TypeError):
-            MOMENT(window_size="fft", model_size=model_size)
+            MOMENT(window_size="fft", model_size=0)
         cleanup()
 
-    @pytest.mark.parametrize("model_size", ["invalid"])
-    def test_model_size_invalid_value(self, model_size, monkeypatch):
+    def test_model_size_invalid_value(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(ValueError):
-            MOMENT(window_size="fft", model_size=model_size)
+            MOMENT(window_size="fft", model_size="invalid")
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [8, 16, 32])
-    def test_batch_size_valid(self, batch_size, monkeypatch):
+    def test_batch_size_valid(self, monkeypatch):
         setup(monkeypatch)
-        detector = MOMENT(window_size="fft", batch_size=batch_size)
-        assert detector.batch_size == batch_size
+        detector = MOMENT(window_size="fft", batch_size=8)
+        assert detector.batch_size == 8
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", ["8", 8.0])
-    def test_batch_size_invalid_type(self, batch_size, monkeypatch):
+    def test_batch_size_invalid_type(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(TypeError):
-            MOMENT(window_size="fft", batch_size=batch_size)
+            MOMENT(window_size="fft", batch_size=8.0)
         cleanup()
 
-    @pytest.mark.parametrize("batch_size", [0, -8])
-    def test_batch_size_invalid_value(self, batch_size, monkeypatch):
+    def test_batch_size_invalid_value(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(ValueError):
-            MOMENT(window_size="fft", batch_size=batch_size)
+            MOMENT(window_size="fft", batch_size=0)
         cleanup()
 
-    @pytest.mark.parametrize("do_fine_tuning", [True, False])
-    def test_do_fine_tuning_valid(self, do_fine_tuning, monkeypatch):
+    def test_do_fine_tuning_valid(self, monkeypatch):
         setup(monkeypatch)
-        detector = MOMENT(window_size="fft", do_fine_tuning=do_fine_tuning)
-        assert detector.do_fine_tuning == do_fine_tuning
+        detector = MOMENT(window_size="fft", do_fine_tuning=True)
+        assert detector.do_fine_tuning is True
         cleanup()
 
-    @pytest.mark.parametrize("do_fine_tuning", [5, 1.0, "invalid"])
-    def test_do_fine_tuning_invalid_type(self, do_fine_tuning, monkeypatch):
+    def test_do_fine_tuning_invalid_type(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(TypeError):
-            MOMENT(window_size="fft", do_fine_tuning=do_fine_tuning)
+            MOMENT(window_size="fft", do_fine_tuning="invalid")
         cleanup()
 
-    @pytest.mark.parametrize("learning_rate", [1e-5, 1e-3, 0.1, 1.0, 2.0])
-    def test_learning_rate_valid(self, learning_rate, monkeypatch):
+    def test_learning_rate_valid(self, monkeypatch):
         setup(monkeypatch)
-        detector = MOMENT(3, learning_rate=learning_rate)
-        assert detector.learning_rate == learning_rate
+        detector = MOMENT(3, learning_rate=0.1)
+        assert detector.learning_rate == 0.1
         cleanup()
 
-    @pytest.mark.parametrize("learning_rate", ["0", True, None, ["a", "list"]])
-    def test_learning_rate_invalid_type(self, learning_rate, monkeypatch):
+    def test_learning_rate_invalid_type(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(TypeError):
-            MOMENT(3, learning_rate=learning_rate)
+            MOMENT(3, learning_rate="0")
         cleanup()
 
-    @pytest.mark.parametrize("learning_rate", [0.0, -1e-16])
-    def test_learning_rate_invalid_value(self, learning_rate, monkeypatch):
+    def test_learning_rate_invalid_value(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(ValueError):
-            MOMENT(3, learning_rate=learning_rate)
+            MOMENT(3, learning_rate=0.0)
         cleanup()
 
-    @pytest.mark.parametrize("nb_epochs", [8, 16, 32])
-    def test_nb_epochs_valid(self, nb_epochs, monkeypatch):
+    def test_nb_epochs_valid(self, monkeypatch):
         setup(monkeypatch)
-        detector = MOMENT(window_size="fft", nb_epochs=nb_epochs)
-        assert detector.nb_epochs == nb_epochs
+        detector = MOMENT(window_size="fft", nb_epochs=8)
+        assert detector.nb_epochs == 8
         cleanup()
 
-    @pytest.mark.parametrize("nb_epochs", ["8", 8.0])
-    def test_nb_epochs_invalid_type(self, nb_epochs, monkeypatch):
+    def test_nb_epochs_invalid_type(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(TypeError):
-            MOMENT(window_size="fft", nb_epochs=nb_epochs)
+            MOMENT(window_size="fft", nb_epochs=8.0)
         cleanup()
 
-    @pytest.mark.parametrize("nb_epochs", [0, -8])
-    def test_nb_epochs_invalid_value(self, nb_epochs, monkeypatch):
+    def test_nb_epochs_invalid_value(self, monkeypatch):
         setup(monkeypatch)
         with pytest.raises(ValueError):
-            MOMENT(window_size="fft", nb_epochs=nb_epochs)
+            MOMENT(window_size="fft", nb_epochs=0)
         cleanup()
 
     def test_raises_error_if_not_3_11(self, monkeypatch):

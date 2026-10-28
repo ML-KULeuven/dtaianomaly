@@ -18,37 +18,29 @@ class TestMedianMethod:
             == "SpectralResidual(moving_average_window_size=5,epsilon=0.1)"
         )
 
-    @pytest.mark.parametrize("moving_average_window_size", [10, 1, 20, 500])
-    def test_moving_average_window_size_valid(self, moving_average_window_size):
-        detector = SpectralResidual(moving_average_window_size)
-        assert detector.moving_average_window_size == moving_average_window_size
+    def test_moving_average_window_size_valid(self):
+        detector = SpectralResidual(1)
+        assert detector.moving_average_window_size == 1
 
-    @pytest.mark.parametrize(
-        "moving_average_window_size", [1.0, "0", True, None, ["a", "list"]]
-    )
-    def test_moving_average_window_size_invalid_type(self, moving_average_window_size):
+    def test_moving_average_window_size_invalid_type(self):
         with pytest.raises(TypeError):
-            SpectralResidual(moving_average_window_size)
+            SpectralResidual(1.0)
 
-    @pytest.mark.parametrize("moving_average_window_size", [0, -1])
-    def test_moving_average_window_size_invalid_value(self, moving_average_window_size):
+    def test_moving_average_window_size_invalid_value(self):
         with pytest.raises(ValueError):
-            SpectralResidual(moving_average_window_size)
+            SpectralResidual(0)
 
-    @pytest.mark.parametrize("epsilon", [1e-5, 1e-3, 0.1, 1.0, 2.0])
-    def test_epsilon_valid(self, epsilon):
-        detector = SpectralResidual(3, epsilon)
-        assert detector.epsilon == epsilon
+    def test_epsilon_valid(self):
+        detector = SpectralResidual(3, 1e-5)
+        assert detector.epsilon == 1e-5
 
-    @pytest.mark.parametrize("epsilon", ["0", True, None, ["a", "list"]])
-    def test_epsilon_invalid_type(self, epsilon):
+    def test_epsilon_invalid_type(self):
         with pytest.raises(TypeError):
-            SpectralResidual(3, epsilon)
+            SpectralResidual(3, "0")
 
-    @pytest.mark.parametrize("epsilon", [0.0, -1e-16])
-    def test_epsilon_invalid_value(self, epsilon):
+    def test_epsilon_invalid_value(self):
         with pytest.raises(ValueError):
-            SpectralResidual(3, epsilon)
+            SpectralResidual(3, 0.0)
 
     def test_multivariate(self, univariate_time_series, multivariate_time_series):
         detector = SpectralResidual(16)

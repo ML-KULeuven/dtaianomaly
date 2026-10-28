@@ -22,7 +22,7 @@ class TestRobustRandomCutForestAnomalyDetector:
             == "RobustRandomCutForestAnomalyDetector(window_size=10,n_estimators=10)"
         )
 
-    def test_precision(self):
+    def test_stride(self):
         RobustRandomCutForestAnomalyDetector(15, stride=1)
         RobustRandomCutForestAnomalyDetector(15, stride=2)
         RobustRandomCutForestAnomalyDetector(15, stride=4)
@@ -112,8 +112,8 @@ class TestRobustRandomCutForestAnomalyDetector:
         RobustRandomCutForestAnomalyDetector(15, random_state=8)
         RobustRandomCutForestAnomalyDetector(15, random_state=None)
         with pytest.raises(TypeError):
-            RobustRandomCutForestAnomalyDetector(15, precision="6")
+            RobustRandomCutForestAnomalyDetector(15, random_state="6")
         with pytest.raises(TypeError):
-            RobustRandomCutForestAnomalyDetector(15, precision=True)
+            RobustRandomCutForestAnomalyDetector(15, random_state=True)
         with pytest.raises(TypeError):
-            RobustRandomCutForestAnomalyDetector(15, precision=0.0)
+            RobustRandomCutForestAnomalyDetector(15, random_state=0.0)
