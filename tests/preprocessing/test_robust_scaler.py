@@ -46,3 +46,33 @@ class TestRobustScaler:
         multivariate_time_series[:, 0] = 987.6
         X_, _ = robust_scaler.fit_transform(multivariate_time_series)
         assert np.array_equal(multivariate_time_series[:, 0], X_[:, 0])
+
+    def test_nan_univariate(self):
+        robust_scaler = RobustScaler().fit(np.r_[np.nan, np.arange(10.0)])
+        assert np.array_equal(robust_scaler.scale_, [4.5])
+
+    def test_nan_multivariate(self):
+        X = np.c_[np.r_[np.nan, np.arange(10.0)], np.arange(11.0)]
+        robust_scaler = RobustScaler().fit(X)
+        assert np.array_equal(robust_scaler.scale_, [4.5, 5.0])
+
+    def test_zero_iqr_univariate(self):
+        X = np.r_[np.ones(98), 5.0, 6.0]
+        X_, _ = RobustScaler().fit_transform(X)
+        assert np.array_equal(X_, X)
+
+    def test_zero_iqr_multivariate(self):
+        X = np.c_[np.r_[np.ones(98), 5.0, 6.0], np.arange(100.0)]
+        X_, _ = RobustScaler().fit_transform(X)
+        assert np.array_equal(X_[:, 0], X[:, 0])
+        assert np.allclose(X_[:, 1], (X[:, 1] - 49.5) / 49.5)
+
+    @pytest.mark.parametrize(
+        "fit_shape,transform_shape,n_attributes",
+        [((100, 3), (50, 2), 2), ((100, 3), (50,), 1), ((100,), (50, 2), 2)],
+    )
+    def test_attribute_mismatch(self, fit_shape, transform_shape, n_attributes):
+        rng = np.random.default_rng(42)
+        robust_scaler = RobustScaler().fit(rng.standard_normal(fit_shape))
+        with pytest.raises(AttributeError, match=f"with {n_attributes} attributes"):
+            robust_scaler.transform(rng.standard_normal(transform_shape))
