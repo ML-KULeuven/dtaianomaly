@@ -239,6 +239,50 @@ class TestPlotWithZoom:
         )
 
 
+class TestPlotWithZoomBounds:
+
+    def test_end_zoom_equals_length(self, univariate_time_series):
+        n = univariate_time_series.shape[0]
+        y = np.zeros(n, dtype=int)
+        fig = visualization.plot_with_zoom(
+            univariate_time_series, start_zoom=n - 50, end_zoom=n, y=y
+        )
+        assert isinstance(fig, plt.Figure)
+        plt.close(fig)
+
+    def test_end_zoom_equals_length_given_time_steps(self, univariate_time_series):
+        n = univariate_time_series.shape[0]
+        y = np.zeros(n, dtype=int)
+        time_steps = visualization.format_time_steps(None, n) * 2 + 10
+        fig = visualization.plot_with_zoom(
+            univariate_time_series,
+            y=y,
+            start_zoom=n - 50,
+            end_zoom=n,
+            time_steps=time_steps,
+        )
+        assert isinstance(fig, plt.Figure)
+        plt.close(fig)
+
+    @pytest.mark.parametrize(
+        "start_zoom,end_zoom",
+        [
+            (-1, 100),
+            (100, 100),
+            (200, 100),
+            (100, None),
+        ],
+    )
+    def test_invalid_bounds(self, univariate_time_series, start_zoom, end_zoom):
+        if end_zoom is None:
+            end_zoom = univariate_time_series.shape[0] + 1
+        with pytest.raises(ValueError, match="Invalid zoom bounds"):
+            visualization.plot_with_zoom(
+                univariate_time_series, start_zoom=start_zoom, end_zoom=end_zoom
+            )
+        plt.close("all")
+
+
 @pytest.mark.slow
 class TestPlotAnomalyScoresMultiplePredictions:
 

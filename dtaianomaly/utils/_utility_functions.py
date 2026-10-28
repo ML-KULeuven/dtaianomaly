@@ -13,6 +13,8 @@ __all__ = [
 
 T = TypeVar("T")
 
+_NUMERIC_TYPES = (int, float, np.integer, np.floating, np.datetime64)
+
 
 def is_valid_list(value, target_type) -> bool:
     """
@@ -84,6 +86,9 @@ def is_valid_array_like(array) -> bool:
     False
     >>> is_valid_array_like(["1", "2", "3", "4", "5"])
     False
+    >>> import numpy as np
+    >>> is_valid_array_like([np.int64(1), np.int64(2)])
+    True
     """
     # Check for valid numpy array
     if isinstance(array, np.ndarray):
@@ -108,14 +113,12 @@ def is_valid_array_like(array) -> bool:
                 isinstance(sample, Sequence)
                 and not isinstance(sample, str)
                 and len(sample) == n_attributes
-                and all(
-                    isinstance(item, (int, float, np.datetime64)) for item in sample
-                )
+                and all(isinstance(item, _NUMERIC_TYPES) for item in sample)
                 for sample in array
             )
         else:
             # Univariate case
-            return all(isinstance(item, (int, float, np.datetime64)) for item in array)
+            return all(isinstance(item, _NUMERIC_TYPES) for item in array)
 
     # Default case
     return False
@@ -194,12 +197,13 @@ def convert_to_list(value: T | list[T]) -> list[T]:
     Convert a given value to a list.
 
     Convert the given value in a list. If the value already is a list, then
-    it will simply be returned. Otherwise, a list is returned with a single
-    element as the given element.
+    it will simply be returned. If the value is a tuple, then a list with
+    the elements of the tuple is returned. Otherwise, a list is returned
+    with a single element as the given element.
 
     Parameters
     ----------
-    value : list or other
+    value : list, tuple or other
         The value to convert to a list.
 
     Returns
@@ -216,7 +220,11 @@ def convert_to_list(value: T | list[T]) -> list[T]:
     [3.14]
     >>> convert_to_list([1, 3.14])
     [1, 3.14]
+    >>> convert_to_list((1, 2))
+    [1, 2]
     """
+    if isinstance(value, tuple):
+        return list(value)
     if not isinstance(value, list):
         return [
             value,

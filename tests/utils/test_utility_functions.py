@@ -62,6 +62,10 @@ class TestIsValidArrayLike:
                 [np.datetime64("2005-02-26"), np.datetime64("2005-02-26")],
                 [np.datetime64("2005-02-27"), np.datetime64("2005-02-27")],
             ],
+            [np.int64(1), np.int64(2), np.int64(3)],
+            [np.float32(1.5), np.float32(2.5), np.float32(3.5)],
+            [[np.int64(1), np.int64(10)], [np.int64(2), np.int64(20)]],
+            [[np.float32(1.5), np.float32(2.5)], [np.float32(3.5), np.float32(4.5)]],
         ],
     )
     def test_valid(self, value):
@@ -147,3 +151,6 @@ class TestConvertToList:
         assert len(l) == len(value)
         for i in range(len(l)):
             assert l[i] == value[i]
+
+    def test_tuple(self):
+        assert convert_to_list((1, 2)) == [1, 2]

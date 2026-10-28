@@ -287,7 +287,8 @@ def plot_with_zoom(
     start_zoom : int
         The index in the data at which the zoom starts.
     end_zoom : int
-        The index in the data at which the zoom ends.
+        The index in the data at which the zoom ends (exclusive). Must
+        satisfy ``0 <= start_zoom < end_zoom <= n_samples``.
     y : np.array of shape (n_samples), default=None
         The anomaly ground truth anomaly scores, to be passed to
         the ``method_to_plot`` function.
@@ -320,6 +321,12 @@ def plot_with_zoom(
     plt.Figure
         The figure containing the plotted data.
     """
+    if not 0 <= start_zoom < end_zoom <= X.shape[0]:
+        raise ValueError(
+            f"Invalid zoom bounds: start_zoom={start_zoom}, end_zoom={end_zoom}. "
+            f"Must satisfy 0 <= start_zoom < end_zoom <= len(X)={X.shape[0]}."
+        )
+
     # Create the main figure and two subplots (axes)
     fig, (ax_main, ax_zoom) = plt.subplots(2, 1, **kwargs)
 
@@ -347,18 +354,18 @@ def plot_with_zoom(
     method_to_plot(ax=ax_zoom, **kwargs_zoom)
 
     # Draw vertical lines to demarcate the area in which is zoomed
+    start_line = time_steps[start_zoom]
+    end_line = time_steps[min(end_zoom, time_steps.shape[0] - 1)]
     for ax in [ax_main, ax_zoom]:
-        for x in [start_zoom, end_zoom]:
-            ax.axvline(
-                x=time_steps[x], color=color, linestyle=linestyle, linewidth=linewidth
-            )
+        for x in [start_line, end_line]:
+            ax.axvline(x=x, color=color, linestyle=linestyle, linewidth=linewidth)
 
     # Connect the demarcations across the subplots
     fig.add_artist(
         ConnectionPatch(
-            xyA=(time_steps[start_zoom], ax_main.get_ylim()[0]),
+            xyA=(start_line, ax_main.get_ylim()[0]),
             coordsA=ax_main.transData,
-            xyB=(time_steps[start_zoom], ax_zoom.get_ylim()[1]),
+            xyB=(start_line, ax_zoom.get_ylim()[1]),
             coordsB=ax_zoom.transData,
             color=color,
             linestyle=linestyle,
@@ -367,9 +374,9 @@ def plot_with_zoom(
     )
     fig.add_artist(
         ConnectionPatch(
-            xyA=(time_steps[end_zoom], ax_main.get_ylim()[0]),
+            xyA=(end_line, ax_main.get_ylim()[0]),
             coordsA=ax_main.transData,
-            xyB=(time_steps[end_zoom], ax_zoom.get_ylim()[1]),
+            xyB=(end_line, ax_zoom.get_ylim()[1]),
             coordsB=ax_zoom.transData,
             color=color,
             linestyle=linestyle,
