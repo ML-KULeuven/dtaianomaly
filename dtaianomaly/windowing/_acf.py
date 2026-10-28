@@ -1,6 +1,5 @@
 import numpy as np
 import scipy
-from statsmodels.tsa.stattools import acf
 
 __all__ = ["highest_autocorrelation"]
 
@@ -44,6 +43,8 @@ def highest_autocorrelation(
     >>> highest_autocorrelation(X)
     112
     """
+    from statsmodels.tsa.stattools import acf
+
     # https://github.com/ermshaua/window-size-selection/blob/main/src/window_size/period.py#L29
     acf_values = acf(X, fft=True, nlags=int(X.shape[0] / 2))
 
