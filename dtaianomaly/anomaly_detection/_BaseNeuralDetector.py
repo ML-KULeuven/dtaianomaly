@@ -1,4 +1,5 @@
 import abc
+import copy
 from typing import Any, Literal
 
 import numpy as np
@@ -251,7 +252,10 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         np.random.seed(self.seed)
 
     def _build_data_loader(
-        self, dataset: torch.utils.data.Dataset, shuffle: bool = None
+        self,
+        dataset: torch.utils.data.Dataset,
+        shuffle: bool = None,
+        train: bool = False,
     ) -> torch.utils.data.DataLoader:
         kwargs = (
             {} if self.data_loader_kwargs is None else self.data_loader_kwargs.copy()
@@ -259,6 +263,11 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         kwargs["batch_size"] = self.batch_size
         if shuffle is not None:
             kwargs["shuffle"] = shuffle
+        # Avoid a last training batch with a single sample, which crashes batch normalization
+        if train and "drop_last" not in kwargs:
+            kwargs["drop_last"] = (
+                len(dataset) > self.batch_size and len(dataset) % self.batch_size == 1
+            )
         return torch.utils.data.DataLoader(dataset, **kwargs)
 
     @staticmethod
@@ -311,7 +320,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
             # Update the best model so far
             if epoch_loss <= best_epoch_loss:
                 best_epoch_loss = epoch_loss
-                best_state_dict = self.neural_network_.state_dict()
+                best_state_dict = copy.deepcopy(self.neural_network_.state_dict())
 
         # Load the best model again
         self.neural_network_.load_state_dict(best_state_dict)
@@ -345,10 +354,18 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         check_stride(self.window_size_, self.stride)
 
         # Build the neural network
-        data_loader = self._build_data_loader(self._build_dataset(X))
+        data_loader = self._build_data_loader(self._build_dataset(X), train=True)
         self.neural_network_ = self._build_architecture(
             n_attributes=get_dimension(X)
         ).to(self.device)
+        if len(data_loader.dataset) == 1 and any(
+            isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
+            for module in self.neural_network_.modules()
+        ):
+            raise ValueError(
+                "At least 2 windows are required to train a neural network with batch normalization, "
+                "but the given time series contains only 1 window."
+            )
         self.optimizer_ = self._build_optimizer(
             model_parameters=self.neural_network_.parameters()
         )
