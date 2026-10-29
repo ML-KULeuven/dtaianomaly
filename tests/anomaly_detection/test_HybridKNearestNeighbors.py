@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import torch
 from conftest import is_activation, is_linear, is_sequential
 
 from dtaianomaly.anomaly_detection import HybridKNearestNeighbors, Supervision
@@ -141,3 +142,49 @@ class TestHybridKNearestNeighbors:
         subsets = detector._create_subsets(np.empty(shape=(length, 1)))
         for subset in subsets:
             assert subset.shape[0] == expected
+
+    def test_metric_invalid_value(self):
+        with pytest.raises(ValueError):
+            HybridKNearestNeighbors(1, metric="invalid-metric")
+
+    def test_metric_precomputed(self):
+        with pytest.raises(ValueError):
+            HybridKNearestNeighbors(1, metric="precomputed")
+
+    def test_metric_invalid_type(self):
+        with pytest.raises(TypeError):
+            HybridKNearestNeighbors(1, metric=5)
+
+    @pytest.mark.parametrize("metric", ["euclidean", "manhattan", "cosine"])
+    def test_metric_valid(self, metric):
+        assert HybridKNearestNeighbors(1, metric=metric).metric == metric
+
+    def test_device_invalid_type(self):
+        with pytest.raises(TypeError):
+            HybridKNearestNeighbors(1, device=100)
+
+    def test_device_invalid_value(self):
+        with pytest.raises(ValueError):
+            HybridKNearestNeighbors(1, device="bar")
+
+    def test_device_cuda_not_available(self, monkeypatch):
+        monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+        with pytest.raises(ValueError):
+            HybridKNearestNeighbors(1, device="cuda")
+
+    def test_batch_size_zero(self):
+        with pytest.raises(ValueError):
+            HybridKNearestNeighbors(1, batch_size=0)
+
+    def test_batch_size_bool(self):
+        with pytest.raises(TypeError):
+            HybridKNearestNeighbors(1, batch_size=True)
+
+    @pytest.mark.parametrize("n_neighbors", [1, 3])
+    def test_g_excludes_self_matches(self, n_neighbors):
+        X = np.random.default_rng(0).normal(size=120)
+        detector = HybridKNearestNeighbors(
+            8, n_neighbors=n_neighbors, n_estimators=2, n_epochs=1, seed=0
+        ).fit(X)
+        for g in detector.g_:
+            assert np.all(g > 0)

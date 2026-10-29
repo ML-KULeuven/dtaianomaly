@@ -119,3 +119,9 @@ class TestMedianMethod:
         X = np.array([1, 1, 1, 1, 1])
         y_pred = detector.decision_function(X)
         assert np.all(y_pred == 0)
+
+    @pytest.mark.parametrize("value", [0.0, 0.1, 1e6])
+    def test_constant_series_scores_zero(self, value):
+        y_pred = MedianMethod(5, 5).decision_function(np.full(50, value))
+        assert np.all(np.isfinite(y_pred))
+        assert np.all(y_pred == 0.0)

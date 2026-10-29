@@ -35,7 +35,7 @@ class DWT_MLEAD(BaseDetector):
     Parameters
     ----------
     start_level : int, default=3
-        The first level for computing the Discrete Wavelet Transform.
+        The first level for computing the Discrete Wavelet Transform. Must be at least 1.
     quantile_boundary_type : {'percentile'}, default='percentile'
         Method for putting a boundary on the likelihood estimates within each DWT-level.
         ``'percentile'`` will consider a ``quantile_epsilon`` of the windows as anomalous.
@@ -93,7 +93,7 @@ class DWT_MLEAD(BaseDetector):
     ]
 
     attribute_validation = {
-        "start_level": IntegerAttribute(minimum=0),
+        "start_level": IntegerAttribute(minimum=1),
         "quantile_boundary_type": LiteralAttribute("percentile"),
         "quantile_epsilon": FloatAttribute(minimum=0.0, maximum=1.0),
         "padding_mode": LiteralAttribute(

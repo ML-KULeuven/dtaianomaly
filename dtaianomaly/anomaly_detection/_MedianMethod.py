@@ -60,22 +60,6 @@ class MedianMethod(BaseDetector):
         neighborhood_size_after: int = None,
     ):
         super().__init__(Supervision.UNSUPERVISED)
-
-        if not isinstance(neighborhood_size_before, int) or isinstance(
-            neighborhood_size_before, bool
-        ):
-            raise TypeError("`neighborhood_size_before` should be an integer")
-        if neighborhood_size_before < 1:
-            raise ValueError("`neighborhood_size_before` should be strictly positive")
-
-        if neighborhood_size_after is not None:
-            if not isinstance(neighborhood_size_after, int) or isinstance(
-                neighborhood_size_after, bool
-            ):
-                raise TypeError("`neighborhood_size_after` should be an integer")
-            if neighborhood_size_after < 0:
-                raise ValueError("`neighborhood_size_after` can not be negative!")
-
         self.neighborhood_size_before = neighborhood_size_before
         self.neighborhood_size_after = neighborhood_size_after
 
@@ -103,8 +87,11 @@ class MedianMethod(BaseDetector):
             X_padded,
             window_shape=(self.neighborhood_size_before + neighborhood_size_after + 1),
         )
-        return np.nan_to_num(
-            np.abs(X - np.nanmean(neighborhoods, axis=1))
-            / np.nanstd(neighborhoods, axis=1),
-            nan=0.0,
+        deviation = np.abs(X - np.nanmean(neighborhoods, axis=1))
+        std = np.nanstd(neighborhoods, axis=1)
+        # A (numerically) zero std means the neighborhood is constant, so the observation does not deviate
+        tolerance = 16 * np.finfo(float).eps * np.nanmax(np.abs(neighborhoods), axis=1)
+        scores = np.divide(
+            deviation, std, out=np.zeros_like(deviation), where=std > tolerance
         )
+        return np.nan_to_num(scores, nan=0.0)

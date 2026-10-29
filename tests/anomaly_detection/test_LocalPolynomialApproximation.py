@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from dtaianomaly.anomaly_detection import LocalPolynomialApproximation, Supervision
@@ -84,3 +85,12 @@ class TestLocalPolynomialApproximation:
             LocalPolynomialApproximation(15, buffer=1)
         with pytest.raises(ValueError):
             LocalPolynomialApproximation(15, buffer=2)
+
+    @pytest.mark.numba
+    @pytest.mark.parametrize("scale", [0.01, 10.0])
+    def test_normalize_variance_scale_invariant(self, scale):
+        X = np.random.default_rng(0).normal(size=100)
+        detector = LocalPolynomialApproximation(8, normalize_variance=True, buffer=8)
+        assert np.allclose(
+            detector.decision_function(X), detector.decision_function(scale * X)
+        )

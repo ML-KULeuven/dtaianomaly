@@ -165,10 +165,10 @@ def _local_poly_nb_parallel(
         if normalize_variance:
             forward_var = np.var(forward_neighborhood)
             if forward_var != 0:
-                forward_score /= forward_var**2
+                forward_score /= forward_var
             backward_var = np.var(backward_neighborhood)
             if backward_var != 0:
-                backward_score /= backward_var**2
+                backward_score /= backward_var
 
         decision_scores[t] = max(forward_score, backward_score)
 
