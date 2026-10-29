@@ -22,8 +22,10 @@ class TestDWTMLEAD:
     def test_initialize_too_small_start_level(self):
         with pytest.raises(ValueError):
             DWT_MLEAD(start_level=-1)
+        with pytest.raises(ValueError):
+            DWT_MLEAD(start_level=0)
+        DWT_MLEAD(start_level=1)  # Doesn't raise an error
         DWT_MLEAD(start_level=5)  # Doesn't raise an error
-        DWT_MLEAD(start_level=0)  # Doesn't raise an error
 
     def test_valid_start_level(self):
         DWT_MLEAD(start_level=1)

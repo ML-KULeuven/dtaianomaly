@@ -3,13 +3,14 @@ from typing import Literal
 
 import numpy as np
 import torch
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import VALID_METRICS, NearestNeighbors
 
 from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
 from dtaianomaly.anomaly_detection._BaseNeuralDetector import (
     ACTIVATION_FUNCTION_TYPE,
     ACTIVATION_FUNCTIONS,
     BaseNeuralDetector,
+    check_device,
 )
 from dtaianomaly.type_validation import (
     FloatAttribute,
@@ -121,8 +122,8 @@ class HybridKNearestNeighbors(BaseDetector):
     >>> x, y = demonstration_time_series()
     >>> hybrid_knn = HybridKNearestNeighbors(64, seed=0).fit(x)
     >>> hybrid_knn.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    array([0.12284644, 0.38202247, 0.43220974, ..., 0.83470662, 0.81722846,
-           0.85243446]...)
+    array([0.05168539, 0.28202247, 0.32009988, ..., 0.77752809, 0.7505618 ,
+           0.80374532]...)
     """
 
     window_size: WINDOW_SIZE_TYPE
@@ -134,6 +135,7 @@ class HybridKNearestNeighbors(BaseDetector):
     hidden_layer_dimensions: list[int]
     latent_space_dimension: int
     activation_function: ACTIVATION_FUNCTION_TYPE
+    batch_size: int
     n_epochs: int
     learning_rate: float
     device: str
@@ -152,6 +154,9 @@ class HybridKNearestNeighbors(BaseDetector):
         "max_samples": IntegerAttribute(minimum=1)
         | FloatAttribute(0.0, 1.0, inclusive_minimum=False)
         | LiteralAttribute("auto"),
+        "metric": LiteralAttribute(
+            [metric for metric in VALID_METRICS["brute"] if metric != "precomputed"]
+        ),
         "hidden_layer_dimensions": ListAttribute(IntegerAttribute(minimum=1)),
         "latent_space_dimension": IntegerAttribute(minimum=1),
         "activation_function": LiteralAttribute(ACTIVATION_FUNCTIONS),
@@ -179,6 +184,7 @@ class HybridKNearestNeighbors(BaseDetector):
         seed: int = None,
     ):
         super().__init__(Supervision.SEMI_SUPERVISED)
+        check_device(device)
         self.window_size = window_size
         self.stride = stride
         self.n_neighbors = n_neighbors
@@ -205,18 +211,21 @@ class HybridKNearestNeighbors(BaseDetector):
         X_ = self.auto_encoder_.encode(windows)
 
         # Create the subsets
-        subsets = self._create_subsets(X_)
+        subset_indices = self._create_subsets(X_)
 
         # Fit the nearest neighbor instances
         self.nearest_neighbors_ = [
             NearestNeighbors(n_neighbors=self.n_neighbors, metric=self.metric).fit(
-                subset
+                X_[indices]
             )
-            for subset in subsets
+            for indices in subset_indices
         ]
 
-        # Compute the g-array
-        self.g_ = [self._compute_g(subset).reshape(1, -1) for subset in subsets]
+        # Compute the g-array, without matching samples with themselves
+        self.g_ = [
+            self._compute_g_train(X_, indices, subset_indices).reshape(1, -1)
+            for indices in subset_indices
+        ]
 
     def _decision_function(self, X: np.ndarray) -> np.array:
         # Compute the windows
@@ -242,6 +251,7 @@ class HybridKNearestNeighbors(BaseDetector):
         )
 
     def _create_subsets(self, X: np.ndarray) -> list[np.ndarray]:
+        """Sample the indices of the samples in each subset."""
         rng = np.random.default_rng(self.seed)
         if self.max_samples == "auto":
             nb_samples = X.shape[0] / self.n_estimators
@@ -251,7 +261,7 @@ class HybridKNearestNeighbors(BaseDetector):
             nb_samples = self.max_samples
 
         return [
-            X[rng.choice(X.shape[0], size=int(nb_samples), replace=False)]
+            rng.choice(X.shape[0], size=int(nb_samples), replace=False)
             for _ in range(self.n_estimators)
         ]
 
@@ -263,6 +273,29 @@ class HybridKNearestNeighbors(BaseDetector):
                 for nearest_neighbors in self.nearest_neighbors_
             ]
         ).mean(axis=0)
+
+    def _compute_g_train(
+        self,
+        X: np.ndarray,
+        query_indices: np.ndarray,
+        subset_indices: list[np.ndarray],
+    ) -> np.array:
+        # Equation 8, but a sample is not its own neighbor
+        g = []
+        for nearest_neighbors, fit_indices in zip(
+            self.nearest_neighbors_, subset_indices
+        ):
+            n_query = min(self.n_neighbors + 1, fit_indices.shape[0])
+            distances, neighbors = nearest_neighbors.kneighbors(
+                X[query_indices], n_neighbors=n_query
+            )
+            is_self = fit_indices[neighbors] == query_indices.reshape(-1, 1)
+            distances = np.sort(np.where(is_self, np.inf, distances), axis=1)
+            # Use the last available neighbor if the subset is too small
+            n_finite = np.isfinite(distances).sum(axis=1)
+            kth = np.minimum(self.n_neighbors, n_finite) - 1
+            g.append(distances[np.arange(distances.shape[0]), kth])
+        return np.array(g).mean(axis=0)
 
     def build_auto_encoder(self, windows: np.ndarray) -> torch.nn.Module:
         """

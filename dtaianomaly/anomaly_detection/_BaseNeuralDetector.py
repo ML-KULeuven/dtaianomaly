@@ -32,6 +32,7 @@ __all__ = [
     "OPTIMIZER_TYPE",
     "COMPILE_MODES",
     "COMPILE_MODE_TYPE",
+    "check_device",
 ]
 
 ACTIVATION_FUNCTIONS = ["linear", "relu", "sigmoid", "tanh"]
@@ -52,6 +53,42 @@ COMPILE_MODES = [
 COMPILE_MODE_TYPE = Literal[
     "default", "reduce-overhead", "max-autotune", "max-autotune-no-cudagraphs"
 ]
+
+
+def check_device(device: str) -> None:
+    """
+    Check whether the given device is a valid torch device.
+
+    Parameters
+    ----------
+    device : str
+        The device to check.
+
+    Raises
+    ------
+    TypeError
+        If the given device is not a string.
+    ValueError
+        If the given device is not a valid torch device, or if a cuda device
+        is given which is not available.
+    """
+    if not isinstance(device, str):
+        raise TypeError("`device` should be a string")
+    # Check CUDA availability if it's a CUDA device
+    if device.startswith("cuda"):
+        if not torch.cuda.is_available():
+            raise ValueError(
+                f"Cuda-device given ('{device}'), but no cuda is available!"
+            )
+        device_index = int(device.split(":")[1]) if ":" in device else None
+        if device_index is not None and device_index >= torch.cuda.device_count():
+            raise ValueError(
+                f"Cuda-index given ('{device_index}'), but only {torch.cuda.device_count()} are available!"
+            )
+    try:
+        torch.device(device)  # Try to initialize a device
+    except RuntimeError:  # Raise Value error instead for consistency
+        raise ValueError(f"Invalid input device: {device}")
 
 
 class BaseNeuralDetector(BaseDetector, abc.ABC):
@@ -189,25 +226,7 @@ class BaseNeuralDetector(BaseDetector, abc.ABC):
         seed: int = None,
     ):
         super().__init__(supervision)
-
-        # Check the device
-        if not isinstance(device, str):
-            raise TypeError("`device` should be a string")
-        # Check CUDA availability if it's a CUDA device
-        if device.startswith("cuda"):
-            if not torch.cuda.is_available():
-                raise ValueError(
-                    f"Cuda-device given ('{device}'), but no cuda is available!"
-                )
-            device_index = int(device.split(":")[1]) if ":" in device else None
-            if device_index is not None and device_index >= torch.cuda.device_count():
-                raise ValueError(
-                    f"Cuda-index given ('{device_index}'), but only {torch.cuda.device_count()} are available!"
-                )
-        try:
-            torch.device(device)  # Try to initialize a device
-        except RuntimeError:  # Raise Value error instead for consistency
-            raise ValueError(f"Invalid input device: {device}")
+        check_device(device)
 
         # Initialize the variables
         self.window_size = window_size
