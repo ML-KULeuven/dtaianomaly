@@ -15,6 +15,8 @@ from ._DemonstrationTimeSeriesLoader import (
 )
 from ._LazyDataLoader import LazyDataLoader
 from ._PathDataLoader import PathDataLoader, from_directory
+from ._SMDLoader import SMDLoader
+from ._TSBADLoader import TSBADLoader
 from ._UCRLoader import UCRLoader
 
 __all__ = [
@@ -25,5 +27,7 @@ __all__ = [
     "demonstration_time_series",
     "DemonstrationTimeSeriesLoader",
     "UCRLoader",
+    "TSBADLoader",
+    "SMDLoader",
     "CustomDataLoader",
 ]
