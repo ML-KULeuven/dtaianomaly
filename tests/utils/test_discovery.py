@@ -43,6 +43,9 @@ data_loaders = [
     data.DemonstrationTimeSeriesLoader,
     data.UCRLoader,
     data.CustomDataLoader,
+    data.TSBADLoader,
+    data.SMDLoader,
+    data.ASDLoader,
 ]
 metrics = [
     evaluation.ThresholdMetric,

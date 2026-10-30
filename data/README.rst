@@ -15,10 +15,30 @@ described on this page.
      - Download
 
    * - UCR
-     - 500MB
+     - <500MB
      - `UCR Time Series Anomaly Archive <UCR_>`_
 
+   * - TSB-AD-U
+     - <500MB
+     - `TSB-AD-U <TSB-AD-U_>`_
+
+   * - TSB-AD-M
+     - <2.5GB
+     - `TSB-AD-M <TSB-AD-M_>`_
+
+   * - SMD
+     - <500MB
+     - `Server Machine Dataset <SMD_>`_
+
+   * - ASD
+     - <15MB
+     - `Application Server Dataset <ASD_>`_
+
 .. _UCR: https://www.cs.ucr.edu/~eamonn/time_series_data_2018/UCR_TimeSeriesAnomalyDatasets2021.zip
+.. _TSB-AD-U: https://www.thedatum.org/datasets/TSB-AD-U.zip
+.. _TSB-AD-M: https://www.thedatum.org/datasets/TSB-AD-M.zip
+.. _SMD: https://github.com/NetManAIOps/OmniAnomaly/tree/master/ServerMachineDataset
+.. _ASD: https://github.com/zhhlee/InterFusion/tree/main/data
 
 .. note::
     You can also create a new data loader by implementing a custom :py:class:`~dtaianomaly.data.LazyDataLoader`,
@@ -54,3 +74,29 @@ to `mitigate` common issues in existing time series anomaly detection benchmarks
 2. **Unrealistic anomaly density**: the number of ground truth anomalies is relatively high, even though anomalies should be rare observations;
 3. **Mislabeling**: the ground truth labels might not be perfectly aligned with the actual anomalies in the data;
 4. **Run-to-failure bias**: most anomalies are located near the end of the time series.
+
+TSB-AD benchmark
+----------------
+
+The TSB-AD benchmark comprises 870 univariate time series (TSB-AD-U) and 200 multivariate time series (TSB-AD-M) :cite:`liu2024elephant`,
+as well as predefined tune and evaluation sets. The benchmark has been constructed through the following steps:
+
+1. **Dataset construction**: collect 13 univariate and 20 multivariate publicly available datasets. The multivariate time series are also transformed to multiple univariate time series by assuming channel independence, in which channels with low correlation to the anomaly scores are ignored;
+2. **Flaw identification**: a human annotator excludes several time series that have some common flaws and could induce a bias and inaccurate evaluation;
+3. **Label quality assessment**: the quality of the anomaly labels is assessed through an algorithmic test, in which at least one anomaly detector should be able to locate the anomalies.
+
+Server Machine Dataset
+----------------------
+
+The Server Machine Dataset (SMD) is a 5-week-long dataset collected from a large internet company :cite:`su2019robust`.
+It consists of the data of 28 machines, each with 38 attributes. The data of each machine is split into a train and test
+set of equal size, and only the test set is labeled. The data can be loaded with :py:class:`~dtaianomaly.data.SMDLoader`
+by giving the root of the dataset and the name of the machine (e.g., ``machine-1-1``).
+
+Application Server Dataset
+--------------------------
+
+The Application Server Dataset (ASD) is collected from a large internet company :cite:`li2021multivariate`.
+It consists of the data of 12 servers, each with 19 metrics characterizing the status of the server. The data
+of each server is split into a train and test set, and only the test set is labeled. The data can be loaded with
+:py:class:`~dtaianomaly.data.ASDLoader` by giving the root of the dataset and the name of the server (e.g., ``omi-1``).

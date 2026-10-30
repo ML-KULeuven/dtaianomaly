@@ -7,6 +7,7 @@ executing a pipeline or workflow. It can be imported as follows:
 Custom data loaders can be implemented by extending :py:class:`~dtaianomaly.data.LazyDataLoader`.
 """
 
+from ._ASDLoader import ASDLoader
 from ._CustomDataLoader import CustomDataLoader
 from ._DataSet import DataSet
 from ._DemonstrationTimeSeriesLoader import (
@@ -15,6 +16,8 @@ from ._DemonstrationTimeSeriesLoader import (
 )
 from ._LazyDataLoader import LazyDataLoader
 from ._PathDataLoader import PathDataLoader, from_directory
+from ._SMDLoader import SMDLoader
+from ._TSBADLoader import TSBADLoader
 from ._UCRLoader import UCRLoader
 
 __all__ = [
@@ -25,5 +28,8 @@ __all__ = [
     "demonstration_time_series",
     "DemonstrationTimeSeriesLoader",
     "UCRLoader",
+    "TSBADLoader",
+    "SMDLoader",
+    "ASDLoader",
     "CustomDataLoader",
 ]

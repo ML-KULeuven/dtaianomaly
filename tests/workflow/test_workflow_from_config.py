@@ -99,6 +99,15 @@ def _to_toml(config):
     return "\n".join(lines) + "\n"
 
 
+CLASS_SPECIFIC_KWARGS = {
+    "TSBADLoader": {
+        "path": f"{DATA_PATH}/TSB-AD/TSB-AD-U/001_NAB_id_1_Facility_tr_1007_1st_2014.csv"
+    },
+    "SMDLoader": {"path": f"{DATA_PATH}/SMD", "machine": "machine-1-1"},
+    "ASDLoader": {"path": f"{DATA_PATH}/ASD", "machine": "omi-1"},
+}
+
+
 def infer_minimal_entry(cls):
     kwargs = {
         "window_size": 15,
@@ -131,7 +140,11 @@ def infer_minimal_entry(cls):
         ]
     )
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in accepted_params}
-    return {"type": cls.__name__} | filtered_kwargs
+    return (
+        {"type": cls.__name__}
+        | filtered_kwargs
+        | CLASS_SPECIFIC_KWARGS.get(cls.__name__, {})
+    )
 
 
 def infer_extensive_entry(cls):
