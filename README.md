@@ -41,32 +41,34 @@ The three key features of `dtaianomaly` are as follows:
 
 ## Example
 
-Below code shows a simple example of `dtaianomaly`, which is part of the 
-[anomaly detection notebook](notebooks/Anomaly-detection.ipynb). More examples 
-are provided in the [other notebooks](notebooks) and in the 
+Below code shows a simple example of `dtaianomaly`, in which we detect anomalies 
+in a time series of the [UCR time series anomaly archive](https://www.cs.ucr.edu/~eamonn/time_series_data_2018/UCR_TimeSeriesAnomalyDatasets2021.zip) 
+using [HydraAD](https://dtaianomaly.readthedocs.io/en/stable/api/auto_generated/dtaianomaly.anomaly_detection.HydraAD.html). 
+This time series is included in the [data folder](data) of this repository. The 
+example is part of the [anomaly detection notebook](notebooks/Anomaly-detection.ipynb), 
+which also generates the figure below. More examples are provided in the 
+[other notebooks](notebooks) and in the 
 [documentation](https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples.html).
 
 ```python
-from dtaianomaly.data import demonstration_time_series
-from dtaianomaly.preprocessing import MovingAverage
-from dtaianomaly.anomaly_detection import MatrixProfileDetector
+from dtaianomaly.data import UCRLoader
+from dtaianomaly.anomaly_detection import HydraAD
+from dtaianomaly.visualization import plot_anomaly_scores
 
 # Load the data
-X, y = demonstration_time_series()
+data = UCRLoader("data/UCR-time-series-anomaly-archive/002_UCR_Anomaly_DISTORTED2sddb40_35000_56600_56900.txt").load()
 
-# Preprocess the data using a moving average
-preprocessor = MovingAverage(window_size=10)
-X_, _ = preprocessor.fit_transform(X)
+# Fit HydraAD on the training data, with an automatically computed window size
+detector = HydraAD(window_size="fft")
+detector.fit(data.X_train)
 
-# Fit the matrix profile detector on the processed data
-detector = MatrixProfileDetector(window_size=100)
-detector.fit(X_)
+# Compute the anomaly scores of the test data
+anomaly_scores = detector.predict_proba(data.X_test)
 
-# Compute either the decision scores, specific to the detector, or the anomaly probabilities
-decision_scores = detector.decision_function(X_)
-anomaly_probabilities = detector.predict_proba(X_)
+# Visualize the anomaly scores
+plot_anomaly_scores(data.X_test, data.y_test, anomaly_scores, figsize=(10, 3))
 ```
-![Demonstration-time-series-detected-anomalies.svg](https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Demonstration-time-series-detected-anomalies.svg?raw=true)
+![example-README.svg](https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/example-README.svg?raw=true)
 
 ## Acknowledgments
 
