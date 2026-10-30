@@ -131,9 +131,10 @@ Some dataloaders are provided within ``dtaianomaly``, but often we want to detec
 in our own data. Typically, for such custom data, there is no dataloader available within
 ``dtaianomaly``. To address this, you can implement a new dataloader by extending the
 :py:class:`~dtaianomaly.data.LazyDataLoader`, along with the :py:func:`~dtaianomaly.data.LazyDataLoader._load`
-method. Upon initialization of the custom data loader, a ``path`` parameter is required,
-which points to the location of the data. Optionally, you can pass a ``do_caching`` parameter
-to prevent reading big files multiple times. The :py:func:`~dtaianomaly.data.LazyDataLoader._load`
+method. Optionally, you can pass a ``do_caching`` parameter upon initialization to prevent reading
+big files multiple times. If your data is stored on disk, you can instead extend the
+:py:class:`~dtaianomaly.data.PathDataLoader`, which additionally requires a ``path`` parameter
+pointing to the location of the data. The :py:func:`~dtaianomaly.data.LazyDataLoader._load`
 function will effectively load this dataset and return a :py:class:`~dtaianomaly.data.DataSet`
 object, which combines the data ``X`` and ground truth labels ``y``. The :py:func:`~dtaianomaly.data.LazyDataLoader.load`
 function will either load the data or return a cached version of the data, depending on the
@@ -177,9 +178,8 @@ Notice that we implement the :py:func:`~dtaianomaly.preprocessing.Preprocessor._
 while we can call the :py:func:`~dtaianomaly.preprocessing.Preprocessor.fit` and
 :py:func:`~dtaianomaly.preprocessing.Preprocessor.transform` methods (without the underscore) on
 an instance of our ``Imputer``. This is because the public methods will first check if the input
-is valid using the :py:func:`~dtaianomaly.preprocessing.check_preprocessing_inputs` method, and
-only then call the protected methods with starting underscores, ensuring that valid data is passed
-to these methods.
+is valid, and only then call the protected methods with starting underscores, ensuring that valid
+data is passed to these methods.
 
 .. doctest::
 

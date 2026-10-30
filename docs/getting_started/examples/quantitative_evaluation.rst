@@ -14,7 +14,7 @@ There are two ways to run a :py:class:`~dtaianomaly.workflow.Workflow`: from :re
 or from a :ref:`configuration file <with-config>`.
 
 .. note::
-    You can also evaluate `custom components <https://dtaianomaly.readthedocs.io/en/stable/getting_started/custom_models.html>`_
+    You can also evaluate :doc:`custom components <extensibility>`
     in ``dtaianomaly`` via a :py:class:`~dtaianomaly.workflow.Workflow` in :ref:`Python <with-code>`. However,
     this is not possible via a :ref:`configuration file <with-config>` without extending the functionality of
     the :py:func:`~dtaianomaly.workflow.workflow_from_config` function!
@@ -74,7 +74,7 @@ strategy is combined with each thresholding metric. The thresholds have no effec
 
 .. code-block:: python
 
-    thresholds = [TopN(20), FixedCutoff(0.1)]
+    thresholds = [TopNThreshold(20), FixedCutoffThreshold(0.5)]
     metrics = [Precision(), AreaUnderPR(), AreaUnderROC()]
 
 

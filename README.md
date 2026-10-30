@@ -33,9 +33,9 @@ pip install dtaianomaly
 
 The three key features of `dtaianomaly` are as follows:
 1. State-of-the-art time series anomaly detection via a simple API.
-   [Learn more!](https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/anomaly_detection.html)
+   [Learn more!](notebooks/Anomaly-detection.ipynb)
 2. Develop custom models for anomaly detection.
-   [Learn more!](https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/custom_models.html)
+   [Learn more!](https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/extensibility.html)
 3. Quantitative evaluation of time series anomaly detection.
    [Learn more!](https://dtaianomaly.readthedocs.io/en/stable/getting_started/examples/quantitative_evaluation.html)
 

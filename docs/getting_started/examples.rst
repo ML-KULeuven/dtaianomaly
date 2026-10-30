@@ -39,7 +39,9 @@ information regarding the anomaly detection API, we refer to the
 :doc:`anomaly detection module<../api/anomaly_detection>`.
 
 .. seealso::
-    Check out the :doc:`anomaly detection example<examples/anomaly_detection>` for more information!
+    Check out the `anomaly detection notebook <https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Anomaly-detection.ipynb>`_
+    for more information! It is also possible to use ``dtaianomaly`` in industrial datasets, as is shown in the
+    `industrial anomaly detection notebook <https://github.com/ML-KULeuven/dtaianomaly/blob/main/notebooks/Industrial-anomaly-detection.ipynb>`_.
 
 
 .. rubric:: Custom models
