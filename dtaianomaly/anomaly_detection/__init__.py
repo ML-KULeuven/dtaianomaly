@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from ._DWT_MLEAD import DWT_MLEAD
     from ._HistogramBasedOutlierScore import HistogramBasedOutlierScore
     from ._HybridKNearestNeighbors import HybridKNearestNeighbors
+    from ._HydraAD import HydraAD
     from ._IsolationForest import IsolationForest
     from ._KernelPrincipalComponentAnalysis import KernelPrincipalComponentAnalysis
     from ._KMeansAnomalyDetector import KMeansAnomalyDetector
@@ -110,6 +111,7 @@ _LAZY_IMPORTS = {
     "DWT_MLEAD": "._DWT_MLEAD",
     "HistogramBasedOutlierScore": "._HistogramBasedOutlierScore",
     "HybridKNearestNeighbors": "._HybridKNearestNeighbors",
+    "HydraAD": "._HydraAD",
     "IsolationForest": "._IsolationForest",
     "KernelPrincipalComponentAnalysis": "._KernelPrincipalComponentAnalysis",
     "KMeansAnomalyDetector": "._KMeansAnomalyDetector",
@@ -189,6 +191,7 @@ __all__ = [
     "RobustRandomCutForestAnomalyDetector",
     "HybridKNearestNeighbors",
     "ROCKAD",
+    "HydraAD",
 ]
 
 

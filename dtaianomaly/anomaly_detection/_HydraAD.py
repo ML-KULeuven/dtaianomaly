@@ -3,10 +3,21 @@ from typing import Literal
 import numpy as np
 import torch
 
-from dtaianomaly.anomaly_detection import BaseDetector, Supervision
+from dtaianomaly.anomaly_detection._BaseDetector import BaseDetector, Supervision
+from dtaianomaly.anomaly_detection._BaseNeuralDetector import check_device
+from dtaianomaly.type_validation import (
+    BoolAttribute,
+    FloatAttribute,
+    IntegerAttribute,
+    ListAttribute,
+    LiteralAttribute,
+    NoneAttribute,
+    WindowSizeAttribute,
+)
 from dtaianomaly.utils import get_dimension, is_univariate
 from dtaianomaly.windowing import (
     WINDOW_SIZE_TYPE,
+    check_stride,
     compute_window_size,
     reverse_sliding_window,
 )
@@ -15,12 +26,91 @@ __all__ = ["HydraAD"]
 
 
 class HydraAD(BaseDetector):
+    """
+    Detect anomalies with competing random kernels using HydraAD :cite:`carpentier2026hydraad`.
+
+    HydraAD adapts the Hydra transform :cite:`dempster2023hydra` for time series
+    classification to anomaly detection. The time series is convolved with random
+    kernels, which are organised into groups. At each time step, the kernels within
+    a group compete with each other: only the kernel with the largest activation
+    keeps it, while all other activations are set to zero. These activations are
+    summed within sliding windows to obtain an embedding of each window. After
+    scaling the embedding, the anomaly score of a window equals a quantile of the
+    absolute values in its embedding. Hence, a window is anomalous if it strongly
+    activates the kernels in comparison with the other windows.
+
+    Parameters
+    ----------
+    window_size : int or str
+        The window size, the length of the subsequences that will be detected as anomalies. This
+        value will be passed to :py:meth:`~dtaianomaly.anomaly_detection.compute_window_size`.
+        For multivariate time series, the window size is computed for each attribute separately,
+        after which the average window size is used.
+    periodicity : float, default=1.0
+        The factor with which the computed window size is multiplied. The window size is
+        at least ``kernel_size``.
+    stride : int or float, default=0.25
+        The stride, i.e., the step size for extracting sliding windows from the time series.
+        If a float is given, the stride equals this fraction of the window size.
+    quantile : float, default=0.9
+        The quantile of the absolute embedding values used as anomaly score of a window.
+    scaling : {'sparse', 'standard', 'none'}, default='sparse'
+        How the embedding is scaled before computing the anomaly scores. Valid options are:
+
+        - ``'sparse'``: Sparse scaling as proposed by :cite:t:`dempster2023hydra`, which
+          scales the square root of the features while taking their sparsity into account.
+        - ``'standard'``: Standardize each feature to zero mean and unit variance.
+        - ``'none'``: Do not scale the embedding.
+
+    n_kernels : int, default=4
+        The number of kernels in each group.
+    n_groups : int, default=32
+        The number of groups of competing kernels for each dilation.
+    dilations : list of int or 'auto', default='auto'
+        The dilations of the kernels. If ``'auto'``, the dilations are the powers of 2
+        for which the receptive field of the kernel does not exceed the window size.
+    first_order_difference : bool, default=True
+        Whether half of the groups convolve the first order difference of the time
+        series instead of the raw time series.
+    kernel_size : int, default=9
+        The length of each kernel.
+    relative_n_channels : float, default=0.3
+        The fraction of the channels of a multivariate time series that each group
+        convolves. The selected channels are summed before the convolution.
+    max_n_channels : int, default=None
+        The maximum number of channels that each group convolves. If ``None``, the
+        number of channels is not bounded.
+    device : str, default="cpu"
+        The device on which the convolutions are computed.
+        For more information, see: https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch-device.
+    seed : int, default=None
+        The random seed used to initialise the kernels and select the channels.
+
+    Attributes
+    ----------
+    window_size_ : int
+        The effectively used window size for detecting anomalies.
+    stride_ : int
+        The effectively used stride for detecting anomalies.
+    hydra_ : torch.nn.Module
+        The random convolutional kernels of the Hydra transform.
+
+    Examples
+    --------
+    >>> from dtaianomaly.anomaly_detection import HydraAD
+    >>> from dtaianomaly.data import demonstration_time_series
+    >>> x, y = demonstration_time_series()
+    >>> hydra_ad = HydraAD(64, seed=0).fit(x)
+    >>> hydra_ad.decision_function(x)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE, +SKIP
+    array([1.45365405, 1.45365405, 1.45365405, ..., 1.58905673, 1.58905673,
+           1.58905673])
+    """
+
     window_size: WINDOW_SIZE_TYPE
     periodicity: float
     stride: int | float
     quantile: float
     scaling: Literal["sparse", "standard", "none"]
-    # Hydra-related parameters
     n_kernels: int
     n_groups: int
     dilations: list[int] | Literal["auto"]
@@ -28,10 +118,29 @@ class HydraAD(BaseDetector):
     kernel_size: int
     relative_n_channels: float
     max_n_channels: int | None
-    device: torch.device | None
+    device: str
     seed: int | None
 
-    hydra_: _Hydra
+    window_size_: int
+    hydra_: "_Hydra"
+
+    attribute_validation = {
+        "window_size": WindowSizeAttribute(),
+        "periodicity": FloatAttribute(minimum=0.0, inclusive_minimum=False),
+        "stride": IntegerAttribute(1)
+        | FloatAttribute(0.0, 1.0, inclusive_minimum=False),
+        "quantile": FloatAttribute(0.0, 1.0),
+        "scaling": LiteralAttribute(["sparse", "standard", "none"]),
+        "n_kernels": IntegerAttribute(1),
+        "n_groups": IntegerAttribute(1),
+        "dilations": ListAttribute(IntegerAttribute(1), minimum_length=1)
+        | LiteralAttribute("auto"),
+        "first_order_difference": BoolAttribute(),
+        "kernel_size": IntegerAttribute(2),
+        "relative_n_channels": FloatAttribute(0.0, 1.0, inclusive_minimum=False),
+        "max_n_channels": IntegerAttribute(1) | NoneAttribute(),
+        "seed": IntegerAttribute() | NoneAttribute(),
+    }
 
     def __init__(
         self,
@@ -47,21 +156,16 @@ class HydraAD(BaseDetector):
         kernel_size: int = 9,
         relative_n_channels: float = 0.3,
         max_n_channels: int | None = None,
-        device: torch.device | None = None,
+        device: str = "cpu",
         seed: int | None = None,
     ):
         super().__init__(Supervision.UNSUPERVISED)
+        check_device(device)
         self.window_size = window_size
         self.periodicity = periodicity
-        if isinstance(stride, float):
-            assert 0 <= stride <= 1, (
-                "When `stride` is a float it is the fraction of the window size "
-                "and must be between 0 and 1."
-            )
         self.stride = stride
         self.quantile = quantile
         self.scaling = scaling
-
         self.n_kernels = n_kernels
         self.n_groups = n_groups
         self.dilations = dilations
@@ -79,6 +183,23 @@ class HydraAD(BaseDetector):
         return max(1, int(self.window_size_ * self.stride))
 
     def embed(self, X: np.ndarray) -> torch.Tensor:
+        """
+        Embed the sliding windows of the given time series.
+
+        The time series is convolved with the random kernels, after which the
+        activations of the winning kernels are summed within each sliding window.
+        The resulting embedding is scaled as specified by ``scaling``.
+
+        Parameters
+        ----------
+        X : np.ndarray of shape (n_samples, n_attributes)
+            The time series to embed.
+
+        Returns
+        -------
+        torch.Tensor of shape (n_windows, n_features)
+            The scaled embedding of each sliding window.
+        """
         X_tensor = torch.as_tensor(X, dtype=torch.float32).to(self.device)
 
         # Shape required by Hydra.forward: (n_channels, T)
@@ -137,6 +258,7 @@ class HydraAD(BaseDetector):
     def _fit(self, X: np.ndarray, y: np.ndarray = None, **kwargs) -> None:
         window_size_ = int(self._compute_window_size(X, **kwargs) * self.periodicity)
         self.window_size_ = max(self.kernel_size, window_size_)
+        check_stride(self.window_size_, self.stride_)
 
         if self.dilations == "auto":
             max_exponent = np.log2((self.window_size_ - 1) / (self.kernel_size - 1))
@@ -176,31 +298,26 @@ class HydraAD(BaseDetector):
         )
 
     def _compute_window_size(self, X: np.ndarray, **kwargs) -> int:
-        # Compute the window size
         if is_univariate(X):
             return int(compute_window_size(X, self.window_size, **kwargs))
-        else:
-            default_widow_size = (
-                kwargs["default_window_size"] if "default_window_size" in kwargs else -1
-            )
-            kwargs["default_window_size"] = -1
-            window_sizes = list(
-                filter(
-                    lambda i: i > 0,
-                    [
-                        compute_window_size(X[:, i], self.window_size, **kwargs)
-                        for i in range(X.shape[1])
-                    ],
-                )
-            )
-            if len(window_sizes) == 0:
-                assert (
-                    default_widow_size != -1
-                ), "Could not compute window size from the data."
-                return kwargs["default_window_size"]
 
-            else:
-                return int(np.mean(window_sizes))
+        # For multivariate time series, use the mean window size of the attributes
+        default_window_size = kwargs.pop("default_window_size", None)
+        window_sizes = [
+            compute_window_size(
+                X[:, i], self.window_size, default_window_size=-1, **kwargs
+            )
+            for i in range(X.shape[1])
+        ]
+        window_sizes = [window_size for window_size in window_sizes if window_size > 0]
+        if len(window_sizes) > 0:
+            return int(np.mean(window_sizes))
+        if default_window_size is None:
+            raise ValueError(
+                f"Could not compute the window size using '{self.window_size}' for "
+                f"any attribute of the multivariate time series!"
+            )
+        return default_window_size
 
 
 class _Hydra(torch.nn.Module):
@@ -261,8 +378,12 @@ class _Hydra(torch.nn.Module):
             if not hasattr(self, attr):
                 self.register_buffer(attr, None)
 
-        if self.seed is not None:
-            torch.manual_seed(self.seed)
+        # Use a local generator to not change the global random state of torch
+        generator = torch.Generator()
+        if self.seed is None:
+            generator.seed()
+        else:
+            generator.manual_seed(self.seed)
 
         if isinstance(self.dilations, int):
             self.dilations_ = torch.IntTensor([self.dilations])
@@ -278,7 +399,11 @@ class _Hydra(torch.nn.Module):
         # in_channels/groups dimension required by conv1d is added on the fly in
         # forward() rather than stored here.
         self.W_ = torch.randn(
-            self.n_dilations_, self.n_groups, self.n_kernels, self.kernel_size
+            self.n_dilations_,
+            self.n_groups,
+            self.n_kernels,
+            self.kernel_size,
+            generator=generator,
         )
         self.W_ = self.W_ - self.W_.mean(-1, keepdim=True)
         self.W_ = self.W_ / self.W_.abs().sum(-1, keepdim=True)
@@ -288,7 +413,10 @@ class _Hydra(torch.nn.Module):
             np.clip(int(n_channels * self.relative_n_channels), 1, self.max_n_channels)
         )
         self.I_ = torch.randint(
-            0, n_channels, (self.n_dilations_, self.n_groups, self.num_channels_per_)
+            0,
+            n_channels,
+            (self.n_dilations_, self.n_groups, self.num_channels_per_),
+            generator=generator,
         )
 
         # The last n_groups // 2 groups convolve the diff series; the rest the

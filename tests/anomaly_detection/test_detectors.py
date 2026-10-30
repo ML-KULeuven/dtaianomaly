@@ -194,6 +194,7 @@ class TestAnomalyDetectors:
         anomaly_detection.RobustPrincipalComponentAnalysis,
         anomaly_detection.RobustRandomCutForestAnomalyDetector,
         anomaly_detection.ROCKAD,
+        anomaly_detection.HydraAD,
     ],
 )
 class TestStrideLargerThanWindowSize:
