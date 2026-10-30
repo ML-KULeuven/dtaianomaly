@@ -15,8 +15,8 @@
 		{"type": "AreaUnderROC"}
 	],
 	"thresholds": [
-		{"type": "TopN", "n": 20},
-		{"type": "FixedCutoff", "cutoff": 0.5}
+		{"type": "TopNThreshold", "n": 20},
+		{"type": "FixedCutoffThreshold", "cutoff": 0.5}
 	],
 	"preprocessors": [
 		{"type": "Identity"},
