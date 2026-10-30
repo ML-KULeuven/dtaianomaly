@@ -38,6 +38,7 @@ anomaly_detectors = [
     anomaly_detection.MovingWindowVariance,
     anomaly_detection.SquaredDifference,
     anomaly_detection.ROCKAD,
+    anomaly_detection.HydraAD,
 ]
 data_loaders = [
     data.DemonstrationTimeSeriesLoader,

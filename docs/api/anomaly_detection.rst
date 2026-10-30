@@ -56,6 +56,7 @@ Time series statistical methods
     :template: class.rst
 
     DWT_MLEAD
+    HydraAD
     KShapeAnomalyDetector
     LocalPolynomialApproximation
     MatrixProfileDetector
