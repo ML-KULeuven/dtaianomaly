@@ -26,6 +26,7 @@ Available data loaders
     UCRLoader
     TSBADLoader
     SMDLoader
+    ASDLoader
     CustomDataLoader
 
 

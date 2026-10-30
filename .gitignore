@@ -8,6 +8,8 @@ data/*
 !data/TSB-AD/TSB-AD-M/001_Genesis_id_1_Sensor_tr_4055_1st_15538.csv
 !data/TSB-AD/TSB-AD-M/002_MSL_id_1_Sensor_tr_500_1st_900.csv
 !data/SMD/*/machine-1-1.txt
+!data/ASD/processed/omi-1_*.pkl
+!data/ASD/interpretation_label/omi-1.pkl
 
 # Temporary files
 temp*

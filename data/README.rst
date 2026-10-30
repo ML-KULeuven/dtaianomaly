@@ -30,10 +30,15 @@ described on this page.
      - <500MB
      - `Server Machine Dataset <SMD_>`_
 
+   * - ASD
+     - <15MB
+     - `Application Server Dataset <ASD_>`_
+
 .. _UCR: https://www.cs.ucr.edu/~eamonn/time_series_data_2018/UCR_TimeSeriesAnomalyDatasets2021.zip
 .. _TSB-AD-U: https://www.thedatum.org/datasets/TSB-AD-U.zip
 .. _TSB-AD-M: https://www.thedatum.org/datasets/TSB-AD-M.zip
 .. _SMD: https://github.com/NetManAIOps/OmniAnomaly/tree/master/ServerMachineDataset
+.. _ASD: https://github.com/zhhlee/InterFusion/tree/main/data
 
 .. note::
     You can also create a new data loader by implementing a custom :py:class:`~dtaianomaly.data.LazyDataLoader`,
@@ -87,3 +92,11 @@ The Server Machine Dataset (SMD) is a 5-week-long dataset collected from a large
 It consists of the data of 28 machines, each with 38 attributes. The data of each machine is split into a train and test
 set of equal size, and only the test set is labeled. The data can be loaded with :py:class:`~dtaianomaly.data.SMDLoader`
 by giving the root of the dataset and the name of the machine (e.g., ``machine-1-1``).
+
+Application Server Dataset
+--------------------------
+
+The Application Server Dataset (ASD) is collected from a large internet company :cite:`li2021multivariate`.
+It consists of the data of 12 servers, each with 19 metrics characterizing the status of the server. The data
+of each server is split into a train and test set, and only the test set is labeled. The data can be loaded with
+:py:class:`~dtaianomaly.data.ASDLoader` by giving the root of the dataset and the name of the server (e.g., ``omi-1``).
