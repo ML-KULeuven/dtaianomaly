@@ -101,6 +101,8 @@ def compute_window_size(
     if not is_valid_array_like(X):
         raise ValueError("X must be a valid, numerical array-like")
     X = np.asarray(X)
+    if is_univariate(X):
+        X = X.ravel()  # Univariate data of shape (n_samples, 1)
 
     # Initialize the variable
     window_size_ = -1
