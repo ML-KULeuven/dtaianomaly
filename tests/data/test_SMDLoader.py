@@ -46,11 +46,11 @@ class TestSMDLoader:
 
     @data_available
     def test_train_shape(self, loaded):
-        assert loaded.X_train.shape == (500, 38)
+        assert loaded.X_train.shape == (28479, 38)
 
     @data_available
     def test_test_shape(self, loaded):
-        assert loaded.X_test.shape == (600, 38)
+        assert loaded.X_test.shape == (28479, 38)
 
     @data_available
     def test_samples_match(self, loaded):

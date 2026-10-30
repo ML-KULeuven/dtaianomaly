@@ -6,7 +6,7 @@ import pytest
 
 from dtaianomaly.data import TSBADLoader, from_directory
 
-BASE_TSB_AD_DATA_PATH = "data/TSB-AD-"
+BASE_TSB_AD_DATA_PATH = "data/TSB-AD/TSB-AD-"
 TSB_AD_DATA_SET_UNIVARIATE = "001_NAB_id_1_Facility_tr_1007_1st_2014.csv"
 TSB_AD_DATA_SET_MULTIVARIATE = "002_MSL_id_1_Sensor_tr_500_1st_900.csv"
 TSB_AD_DATA_SET_WITH_TRAIN_LABELS = "009_NAB_id_9_Traffic_tr_500_1st_438.csv"
