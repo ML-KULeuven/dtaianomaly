@@ -200,7 +200,7 @@ class HydraAD(BaseDetector):
         torch.Tensor of shape (n_windows, n_features)
             The scaled embedding of each sliding window.
         """
-        X_tensor = torch.as_tensor(X, dtype=torch.float32).to(self.device)
+        X_tensor = torch.tensor(X, dtype=torch.float32, device=self.device)
 
         # Shape required by Hydra.forward: (n_channels, T)
         if X.ndim == 1:
