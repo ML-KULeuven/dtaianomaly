@@ -1,6 +1,5 @@
 from typing import Literal
 
-import numba as nb
 import numpy as np
 import torch
 from hydraad._Hydra import Hydra
@@ -9,7 +8,11 @@ from sklearn.preprocessing import StandardScaler
 
 from dtaianomaly.anomaly_detection import BaseDetector, Supervision
 from dtaianomaly.utils import get_dimension, is_univariate
-from dtaianomaly.windowing import WINDOW_SIZE_TYPE, compute_window_size
+from dtaianomaly.windowing import (
+    WINDOW_SIZE_TYPE,
+    compute_window_size,
+    reverse_sliding_window,
+)
 
 __all__ = ["HydraAD"]
 
@@ -168,7 +171,7 @@ class HydraAD(BaseDetector):
         if decision_scores.min() == decision_scores.max():
             decision_scores -= decision_scores.min()
 
-        return _reverse_sliding_window(
+        return reverse_sliding_window(
             decision_scores, self.window_size_, self.stride_, X.shape[0]
         )
 
@@ -198,40 +201,3 @@ class HydraAD(BaseDetector):
 
             else:
                 return int(np.mean(window_sizes))
-
-
-@nb.njit(fastmath=True)
-def _reverse_sliding_window(
-    per_window_anomaly_scores: np.ndarray,
-    window_size: int,
-    stride: int,
-    length_time_series: int,
-) -> np.ndarray:
-    # Convert to array
-    scores_time = np.empty(length_time_series)
-
-    start_window_index = 0
-    min_start_window = 0
-    end_window_index = 0
-    min_end_window = 0
-    for t in range(length_time_series - window_size):
-        while min_start_window + window_size <= t:
-            start_window_index += 1
-            min_start_window += stride
-        while t >= min_end_window:
-            end_window_index += 1
-            min_end_window += stride
-        scores_time[t] = np.mean(
-            per_window_anomaly_scores[start_window_index:end_window_index]
-        )
-
-    for t in range(length_time_series - window_size, length_time_series):
-        while min_start_window + window_size <= t:
-            start_window_index += 1
-            min_start_window += stride
-        if start_window_index < per_window_anomaly_scores.shape[0]:
-            scores_time[t] = np.mean(per_window_anomaly_scores[start_window_index:])
-        else:
-            scores_time[t] = 0.0
-
-    return scores_time

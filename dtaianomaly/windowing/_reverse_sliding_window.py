@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 
 __all__ = ["reverse_sliding_window"]
@@ -46,7 +47,22 @@ def reverse_sliding_window(
     array([0.2     , 0.25    , 0.333..., 0.533..., 0.733...,
            0.766..., 0.566..., 0.3     , 0.15    , 0.1     ])
     """
-    # Convert to array
+    return _reverse_sliding_window(
+        np.asarray(per_window_anomaly_scores, dtype=np.float64),
+        int(window_size),
+        int(stride),
+        int(length_time_series),
+    )
+
+
+@nb.njit(fastmath=True, cache=True)
+def _reverse_sliding_window(
+    per_window_anomaly_scores: np.ndarray,
+    window_size: int,
+    stride: int,
+    length_time_series: int,
+) -> np.ndarray:
+    # Initialize the per-observation scores
     scores_time = np.empty(length_time_series)
 
     start_window_index = 0
