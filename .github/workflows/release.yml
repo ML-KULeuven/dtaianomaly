@@ -147,8 +147,5 @@ jobs:
           inputs: >-
             ./dist/*.tar.gz
             ./dist/*.whl
-
-      - name: Upload artifact signatures to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY"
+          # Uploads the dists, their signatures, and the signed source archives to the release
+          release-signing-artifacts: true
